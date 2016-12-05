@@ -17,7 +17,3 @@ Hooks sources :
     prepare-commit-msg
     https://gist.github.com/bartoszmajsak/1396344
     http://codeinthehole.com/writing/enhancing-your-git-commit-editor/
-
-Dot files :
-
-    https://gist.github.com/ethyde/6d83001b566dee612eda1cf3bcdd7944
