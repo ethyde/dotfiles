@@ -58,54 +58,58 @@
 	# Use abbrev SHAs whenever possible/relevant instead of full 40 chars
 	abbrevCommit = true
 [alias] # use tag to indent
+	##### Tools #####
+	# Get the current branch name (not so useful in itself, but used in
+	# other aliases)
+	branch-name	=	"!git rev-parse --abbrev-ref HEAD"
+	set-upstream	=	"!git branch --set-upstream-to=origin/$(git branch-name)"
+	##### Add #####
 	a	=	add
 	aa	=	add --all
 	ai	=	add --interactive
-	###### test #######
+	##### Branch #####
 	b	=	branch
 	ba	=	branch --all
 	bd	=	branch --delete
 	bm	=	branch --move
-	#############
+	##### Commit #####
 	c	=	commit
 	ca	=	commit --amend
-	#############
+	##### Checkout #####
 	co	=	checkout
 	cob	=	checkout -b
-	#############
+	##### Diff #####
 	d	=	diff
 	dcw	=	diff --color-words
 	dwd	=	diff --word-diff
 	dt	=	difftool
-	#############
+	##### Fetch #####
 	f	=	fetch
 	fo	=	fetch origin
 	fu	=	fetch upstream
-	#############
-	la	=	! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
-	#############
-	lg	=	log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'
-	#############
+	##### List Alias #####
+	la	=	config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+	##### Pretty Log #####
+	lg	=	log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+	##### Merge #####
 	m	=	merge
 	ma	=	merge --abort
 	mc	=	merge --continue
 	ms	=	merge --skip
-	#############
+	##### Pull #####
 	pl	=	pull
 	plo	=	pull origin
 	plr	=	pull --rebase
-	#############
-	pr	=	prune -v
-	#############
+	##### Push #####
 	ps	=	push
 	pso	=	push origin
-	#############
+	##### Rebase #####
 	rb	=	rebase
 	rba	=	rebase --abort
 	rbc	=	rebase --continue
 	rbi	=	rebase --interactive
 	rbs	=	rebase --skip
-	#############
+	##### Reset #####
 	re	=	reset
 	rh	=	reset HEAD
 	reh	=	reset --hard
@@ -114,5 +118,5 @@
 	rehh	=	reset --hard HEAD
 	remh	=	reset --mixed HEAD
 	resh	=	reset --soft HEAD
-	#############
+	##### Status #####
 	s	=	status
