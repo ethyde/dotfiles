@@ -78,7 +78,9 @@
 	# List commits as above but also showing changed files.
 	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
 	# List Unpushed Commit 
-	unpushed	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
+	unpushed	= log --branches --not --remotes
+  --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset
+  %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
 	# Add =====
 	a	= add
 	aa	= add --all
