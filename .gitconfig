@@ -64,7 +64,7 @@
 	branch-name	= "!git rev-parse --abbrev-ref HEAD"
 	# Set Upstream
 	# Source : http://aaronbonner.io/post/80766268890/git-alias-to-simplify-setting-upstream-branch
-	su	= branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
+	su	= "!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`"
 	# List All .gitconfig Alias
 	# Source : http://stackoverflow.com/a/11613251/2435786
 	#          https://github.com/sjas/.dotfiles/blob/master/git/.gitconfig
