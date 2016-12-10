@@ -249,7 +249,9 @@ while true; do
 
   # Check if the reply is valid
   case "$REPLY" in
-    E*|e*) $EDITOR "$COMMIT_MSG_FILE" < $TTY; continue ;;
+    # if you use teminal editor chance code --wait by $EDITOR
+    # Source : http://stackoverflow.com/a/39044132
+    E*|e*) code --wait "$COMMIT_MSG_FILE" < $TTY; continue ;;
     Y*|y*) exit 0 ;;
     N*|n*) exit 1 ;;
     *)     SKIP_DISPLAY_WARNINGS=1; prompt_help; continue ;;
