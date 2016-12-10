@@ -63,6 +63,7 @@ if ! fgrep -q '/usr/local/bin/bash' /etc/shells; then
   chsh -s /usr/local/bin/bash;
 fi;
 
+
 # Install `wget` with IRI support.
 brew install wget --with-iri
 
