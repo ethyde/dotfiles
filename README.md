@@ -17,3 +17,6 @@ Hooks sources :
     prepare-commit-msg
     https://gist.github.com/bartoszmajsak/1396344
     http://codeinthehole.com/writing/enhancing-your-git-commit-editor/
+
+Use ```./bootstrap.sh```to install/update files
+Use ```./apps.sh```to install all needed apps (iterm2, zsh with Oh My Zsh, etc.)
