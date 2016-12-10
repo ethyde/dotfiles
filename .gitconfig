@@ -7,10 +7,10 @@
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
-	excludesfile = ./git/.gitignore_global
+	excludesfile = ~/Projects/Labs/dotfiles/git/.gitignore_global
 	# need Git 2.9
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
-	hooksPath = ./git/githooks
+	hooksPath = ~/Projects/Labs/dotfiles/git/githooks
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
@@ -24,7 +24,7 @@
 [difftool "default-difftool"]
 	cmd = code --wait --diff $LOCAL $REMOTE
 [commit]
-	template = ./git/.gitmessage
+	template = ~/Projects/Labs/dotfiles/git/.gitmessage
 	status = true # remove default commit msg
 [push]
 	# Default push should only push the current branch to its push target, regardless of its remote name
@@ -57,6 +57,11 @@
 [log]
 	# Use abbrev SHAs whenever possible/relevant instead of full 40 chars
 	abbrevCommit = true
+[url "https://github.com/"]
+	# use Shorcut for repo
+	# Usage : $ git clone gh:walesmd/walesmd.github.io
+	# Source : http://michaelwales.com/articles/make-gitconfig-work-for-you/
+    insteadOf = gh:
 [alias]
 	# Tools =====
 	# Get the current branch name =====
