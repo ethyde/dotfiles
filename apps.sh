@@ -77,8 +77,11 @@ brew install git
 ## ensure that you've installed cask (add-on for brew)
 brew install cask
 
-## then install iTerm2
+# Install iTerm2
 brew cask install iterm2
+
+# Install VS Code
+brew cask install visual-studio-code
 
 # Rename iterm config file
 mv ~/Library/Preferences/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist.old
