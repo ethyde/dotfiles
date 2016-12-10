@@ -69,7 +69,7 @@
 	# List All .gitconfig Alias
 	# Source : http://stackoverflow.com/a/11613251/2435786
 	#          https://github.com/sjas/.dotfiles/blob/master/git/.gitconfig
-	# FIXME : wait for reply https://github.com/sjas/.dotfiles/issues/2
+	# FIXME: wait for reply https://github.com/sjas/.dotfiles/issues/2
 	# Basic 
 	# la	= "!grep '\t=' ~/.gitconfig | less"
 	# Advenced with color
