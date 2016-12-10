@@ -68,10 +68,11 @@
 	# List All .gitconfig Alias
 	# Source : http://stackoverflow.com/a/11613251/2435786
 	#          https://github.com/sjas/.dotfiles/blob/master/git/.gitconfig
+	# FIXME : wait for reply https://github.com/sjas/.dotfiles/issues/2
 	# Basic 
-	la	= "!grep '\t=' ~/.gitconfig | less"
+	# la	= "!grep '\t=' ~/.gitconfig | less"
 	# Advenced with color
-	laa	= "!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
+	# laa	= "!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
 	# Pretty Log
 	lg	= log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
@@ -79,9 +80,13 @@
 	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
 	# List Unpushed Commit 
 	ups	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
-	save	= aac -m "SAVEPOINT"
 	# Add All And Commit
 	aac	= !git aa && git c
+	# Same as above but make a quick commit after
+	save	= aac -m "SAVEPOINT"
+	# Find alias and list all who match
+	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
+	fa = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
 	# Add =====
 	a	= add
 	aa	= add --all
