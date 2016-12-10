@@ -35,3 +35,6 @@
 #   Reopen #issue_id (for reopen an issue)
 #   Refs/See #issue_id (for reference an issue)
 # In case of multiple issues : Closes #issue_id, #issue_id, #issue_id
+
+# Natif Commit Message Start here
+
