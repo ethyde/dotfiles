@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-#
 # git-good-commit(1) - Git hook to help you write good commit messages.
 # Released under the MIT License.
 #
@@ -8,6 +7,8 @@
 #
 # https://github.com/tommarshall/git-good-commit
 #
+# FIXME : doesnt work without -m option
+# Issue : https://github.com/tommarshall/git-good-commit/issues/8
 
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG_LINES=
