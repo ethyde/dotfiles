@@ -61,7 +61,8 @@ echo `ssh-add -l | wc -l` SSH keys registered.
 unset env
 
 # load bash alias
-source I:\\wamp\\www\\LABS\\githooks\\.bash_alias
+# FIXME : need for windows
+# source I:\\wamp\\www\\LABS\\githooks\\.bash_alias
 
 # Only for MacOSX #
 

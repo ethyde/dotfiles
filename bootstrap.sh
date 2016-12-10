@@ -31,16 +31,15 @@ echo "...done"
 #          https://www.cyberciti.biz/faq/bash-loop-over-file/
 # Excludes somes files like bootstrap.sh
 # http://riaschissl.bestsolution.at/2014/03/repost-howto-exclude-files-from-wildcard-matches-in-bash/
-ALLFILESEXCEPT=!(.DS_Store|.git|bootstrap.sh|README.md|git)
+ALLFILESEXCEPT=!(.DS_Store|.git|bootstrap.sh|apps.sh|README.md|git|iterm)
 for file in $ALLFILESEXCEPT
 do
     echo "Moving existing $file to ~ to $olddir"
-    echo "${file}"
-    # mv ~/$file ~/dotfiles_old/
+    # echo "${file}"
+    mv ~/$file ~/dotfiles_old/
     echo "Creating symlink to $file in this directory."
-    echo "${dir}/${file}"
-    # ln -s $dir/$file ~/$file
+    # echo "${dir}/${file}"
+    ln -s $dir/$file ~/$file
 done
 
-# source ~/.bashrc
-# source ~/.vimrc
+source ~/.bashrc
