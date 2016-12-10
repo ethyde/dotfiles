@@ -7,8 +7,7 @@
 #
 # https://github.com/tommarshall/git-good-commit
 #
-# FIXME : doesnt work without -m option
-# Issue : https://github.com/tommarshall/git-good-commit/issues/8
+# Custom for VSCode by ethyde
 
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG_LINES=
