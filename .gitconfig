@@ -59,10 +59,11 @@
 	abbrevCommit = true
 [alias]
 	# Tools =====
-	# Get the current branch name (not so useful in itself, but can be used in other aliases)
+	# Get the current branch name =====
+	# (not so useful in itself, but can be used in other aliases)
 	# Source : https://gist.github.com/robmiller/6018582
 	branch-name	= "!git rev-parse --abbrev-ref HEAD"
-	# Set Upstream
+	# Set Upstream =====
 	# Source : http://aaronbonner.io/post/80766268890/git-alias-to-simplify-setting-upstream-branch
 	su	= "!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`"
 	# List All .gitconfig Alias
@@ -73,18 +74,18 @@
 	# la	= "!grep '\t=' ~/.gitconfig | less"
 	# Advenced with color
 	# laa	= "!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
-	# Pretty Log
+	# Pretty Log =====
 	lg	= log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
-	# List commits as above but also showing changed files.
+	# List commits as above but also showing changed files. =====
 	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
-	# List Unpushed Commit 
+	# List UnPuShed Commit =====
 	ups	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
-	# Add All And Commit
+	# Add All And Commit =====
 	aac	= !git aa && git c
-	# Same as above but make a quick commit after
+	# Same as above but make a quick commit after =====
 	save	= aac -m "SAVEPOINT"
-	# Find alias and list all who match
+	# Find alias and list all who match =====
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
 	fa = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
 	# Add =====
