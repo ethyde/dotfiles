@@ -19,7 +19,7 @@ fi
 
 # Display the last 5 commit messages when I'm editing a commit message.
 # Source : http://codeinthehole.com/writing/enhancing-your-git-commit-editor/
-# FIXME : 
+# FIXME : add garbage text when use with -m option
 # BRANCH_NAME=$(git branch | grep '*' | sed 's/* //')
 # if [ $BRANCH_NAME != "(no branch)" ]
 # then
