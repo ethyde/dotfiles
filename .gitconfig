@@ -4,6 +4,7 @@
 	name = Emmanuel Plouvier
 	email = eplouvie@prismamedia.com
 [core]
+
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
