@@ -79,8 +79,9 @@
 	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
 	# List Unpushed Commit 
 	ups	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
+	save	= aac -m "SAVEPOINT"
 	# Add All And Commit
-	aac	= !git aa && git c -m "SAVEPOINT"
+	aac	= !git aa && git c
 	# Add =====
 	a	= add
 	aa	= add --all
