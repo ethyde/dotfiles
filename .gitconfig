@@ -7,10 +7,10 @@
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
-	excludesfile = ~/Projects/Labs/githooks/.gitignore_global
+	excludesfile = ./git/.gitignore_global
 	# need Git 2.9
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
-	hooksPath = ~/Projects/Labs/githooks
+	hooksPath = ./git/githooks
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
@@ -24,8 +24,8 @@
 [difftool "default-difftool"]
 	cmd = code --wait --diff $LOCAL $REMOTE
 [commit]
-	template = ~/Projects/Labs/githooks/.gitmessage
-	status = false # remove default commit msg
+	template = ./git/.gitmessage
+	status = true # remove default commit msg
 [push]
 	# Default push should only push the current branch to its push target, regardless of its remote name
 	default = upstream
@@ -77,8 +77,10 @@
 	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
 	# List commits as above but also showing changed files.
 	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
-	# List UnPushed Commit
+	# List Unpushed Commit 
 	ups	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
+	# Add All And Commit
+	aac	= !git aa && git c -m "SAVEPOINT"
 	# Add =====
 	a	= add
 	aa	= add --all
