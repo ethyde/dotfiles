@@ -43,6 +43,7 @@ do
 done
 
 # Loop on each Line in a file:
+# FIXME: Make a loop for some VARS
 # Source : http://stackoverflow.com/a/11349899
 # while read VARS
 # do
