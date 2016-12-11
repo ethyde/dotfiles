@@ -1,8 +1,5 @@
 # https://gist.github.com/pksunkara/988716
 # http://www.git-attitude.fr/2013/04/03/configuration-git/
-[user]
-	name = Emmanuel Plouvier
-	email = eplouvie@prismamedia.com
 [core]
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
@@ -146,3 +143,6 @@
 	resh	= reset --soft HEAD
 	# Status =====
 	s	= status
+[user]
+	name = Emmanuel Plouvier
+	email = eplouvier@prismamedia.com

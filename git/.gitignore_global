@@ -40,3 +40,7 @@ Thumbs.db
 ######################
 node_modules/
 npm-debug.log
+
+# bash_profile.local #
+######################
+.bash_profile.local
