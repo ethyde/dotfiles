@@ -86,7 +86,7 @@
 	# Add All And Commit =====
 	aac	= !git aa && git c
 	# Same as above but make a quick commit after =====
-	save	= aac -m "SAVEPOINT"
+	save	= !git aac -m "SAVEPOINT"
 	# Find alias and list all who match =====
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
 	fa = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
