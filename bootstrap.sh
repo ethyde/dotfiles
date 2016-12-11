@@ -36,10 +36,86 @@ for file in $ALLFILESEXCEPT
 do
     echo "Moving existing $file to ~ to $olddir"
     # echo "${file}"
-    mv ~/$file ~/dotfiles_old/
+    mv ~/$file $olddir
     echo "Creating symlink to $file in this directory."
     # echo "${dir}/${file}"
     ln -s $dir/$file ~/$file
 done
+
+# Loop on each Line in a file:
+# Source : http://stackoverflow.com/a/11349899
+# while read VARS
+# do
+    # If VARS start with
+    # Source : http://stackoverflow.com/a/2172365
+#     if [[ "$VARS" =~ ^GIT_AUTHOR_* ]]; then
+#         echo "$VARS"
+#         # echo "${VARS%=*}"
+#         NEWVAR="${VARS%=*}"
+
+#         echo "INNER $NEWVAR"
+
+        # read -p "user prompt" USERPROMPT
+
+        # read -p "Please specify Git $NEWVAR: " USERINPUT
+
+        # if test "$USERINPUT" = ""; then
+        #     echo "$0: sorry, $NEWVAR cannot be blank" >&2
+        #     exit 1;
+        # fi
+
+        # sed -i -e"s/^$NEWVAR=.*/$NEWVAR=\"$USERINPUT\"/" .bash_profile.local
+
+        # if test $? -eq 0; then
+        #         echo 'Username Added' >&2
+        # else
+        #         echo 'change attempt failed' >&2
+        #         exit 1
+        # fi
+
+        # echo "done" >&2
+#     fi
+
+
+
+# done < .bash_profile.local
+
+# Prompt user for some info needed to update bash_profile.local
+# Source : http://stackoverflow.com/a/19473905
+read -p "Please specify Git Username: " USERNAME
+
+if test "$USERNAME" = ""; then
+        echo "$0: sorry, password cannot be blank" >&2
+        exit 1;
+fi
+
+sed -i -e"s/^GIT_AUTHOR_NAME=.*/GIT_AUTHOR_NAME=\"$USERNAME\"/" .bash_profile.local
+
+if test $? -eq 0; then
+        echo 'Username Added' >&2
+else
+        echo 'change attempt failed' >&2
+        exit 1
+fi
+
+echo "done" >&2
+
+read -p "Please specify Git Email: " USERMAIL
+
+if test "$USERMAIL" = ""; then
+        echo "$0: sorry, password cannot be blank" >&2
+        exit 1;
+fi
+
+sed -i -e"s/^GIT_AUTHOR_EMAIL=.*/GIT_AUTHOR_EMAIL=\"$USERMAIL\"/" .bash_profile.local
+
+if test $? -eq 0; then
+        echo 'User Email Added' >&2
+else
+        echo 'change attempt failed' >&2
+        exit 1
+fi
+
+echo "done" >&2
 
 source ~/.bashrc

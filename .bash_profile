@@ -81,13 +81,11 @@ fi;
 #     function_exists $complete_fnc && __git_complete g$al $complete_func
 # done
 
-
-
 if [ -f ~/.bashrc ]; then
    source ~/.bashrc
 fi
 
 if [ -f ~/.bash_aliases ]; then
    source ~/.bash_aliases
-   source ~/Projects/Labs/githooks/.bash_alias
+   source ~/.bash_alias
 fi
