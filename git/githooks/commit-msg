@@ -118,7 +118,7 @@ validate_commit_message() {
   test -z "${COMMIT_MSG_STR[*]// }" && return;
 
   # if the commit subject starts with 'fixup! ' there's nothing to validate, we can return here
-  [[ $COMMIT_SUBJECT == 'fixup! '* ]] && return;
+  [[ $COMMIT_SUBJECT == 'SAVEPOINT' ]] && return;
 
   # 1. Separate subject from body with a blank line
   # ------------------------------------------------------------------------------
