@@ -45,12 +45,14 @@ done
 # Loop on each Line in a file:
 # FIXME: Make a loop for some VARS
 # Source : http://stackoverflow.com/a/11349899
+#          http://www.compciv.org/topics/bash/loops/
 # while read VARS
 # do
     # If VARS start with
     # Source : http://stackoverflow.com/a/2172365
 #     if [[ "$VARS" =~ ^GIT_AUTHOR_* ]]; then
 #         echo "$VARS"
+#       http://stackoverflow.com/a/20348190
 #         # echo "${VARS%=*}"
 #         NEWVAR="${VARS%=*}"
 

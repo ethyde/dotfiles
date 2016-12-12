@@ -18,8 +18,8 @@ Sample of my ```.bash_profile.local``` but file are not in VCS to prevent usage 
 
 ```
 # Not in the repository, to prevent people from accidentally committing under my name
-GIT_AUTHOR_NAME="Emmanuel Plouvier"
-GIT_AUTHOR_EMAIL="eplouvier@prismamedia.com"
+GIT_AUTHOR_NAME="____ ________"
+GIT_AUTHOR_EMAIL="____@____.__"
 GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
 GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 
