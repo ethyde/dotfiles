@@ -1,13 +1,13 @@
 # My DotFile
 
-Git Commit Message template are modified in .gitconfig :
+Git Commit Message template are modified in ```.gitconfig``` :
 
-[commit]
-	template = ~/path/to/gitmessage/template/.gitmessage
+```[commit]
+	template = ~/path/to/gitmessage/template/.gitmessage```
 
 
 On OSX Make file (hook, $.sh, etc.) executable :
-$ cd path/to/repository/githooks && chmod +x <file_name>
+```$ cd path/to/repository/githooks && chmod +x <file_name>```
 
 All sources are documented in file where are used
 
