@@ -7,7 +7,8 @@
 	excludesfile = ~/Projects/Labs/dotfiles/git/.gitignore_global
 	# need Git 2.9
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
-	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
+	# Overide local GitHook
+	hooksPath = ~/Projects/Labs/dotfiles/git/githooks
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
@@ -22,7 +23,8 @@
 	cmd = code --wait --diff $LOCAL $REMOTE
 [commit]
 	template = ~/Projects/Labs/dotfiles/git/.gitmessage
-	status = true # remove default commit msg
+	status = true # add/remove default commit msg
+	verbose = true # Git commit --verbose by default : https://github.com/git/git/blob/v2.9.0/Documentation/RelNotes/2.9.0.txt#L150
 [push]
 	# Default push should only push the current branch to its push target, regardless of its remote name
 	default = upstream
