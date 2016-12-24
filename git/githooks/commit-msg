@@ -118,7 +118,15 @@ validate_commit_message() {
   test -z "${COMMIT_MSG_STR[*]// }" && return;
 
   # if the commit subject starts with 'fixup! ' there's nothing to validate, we can return here
-  [[ $COMMIT_SUBJECT == 'SAVEPOINT' ]] && return;
+  [[ $COMMIT_SUBJECT == 'fixup! '* ]] && return;
+
+  # if commit subject start with branch name
+  BRANCH_NAME=$(git symbolic-ref --short HEAD)
+  BRANCH_NAME="${BRANCH_NAME##*/}"
+  [[ $COMMIT_SUBJECT == "[$BRANCH_NAME] "* ]] && return;
+
+  # if commit subject are SAVEPOINT
+  [[ $COMMIT_SUBJECT == "SAVEPOINT" ]] && return;
 
   # 1. Separate subject from body with a blank line
   # ------------------------------------------------------------------------------
@@ -248,7 +256,7 @@ while true; do
 
   # Check if the reply is valid
   case "$REPLY" in
-    # if you use teminal editor chance code --wait by $EDITOR
+    # if you use intégrated terminal editor like Vi or Vim change code --wait by $EDITOR
     # Source : http://stackoverflow.com/a/39044132
     E*|e*) code --wait "$COMMIT_MSG_FILE" < $TTY; continue ;;
     Y*|y*) exit 0 ;;
