@@ -4,7 +4,7 @@
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
-	excludesfile = ~/Projects/Labs/dotfiles/git/.gitignore_global
+	excludesfile = /Users/eplouvie/.gitignore_global
 	# need Git 2.9
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
 	# Overide local GitHook
@@ -148,3 +148,9 @@
 [user]
 	name = Emmanuel Plouvier
 	email = eplouvier@prismamedia.com
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
