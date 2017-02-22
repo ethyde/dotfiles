@@ -88,7 +88,7 @@ done
 read -p "Please specify Git Username: " USERNAME
 
 if test "$USERNAME" = ""; then
-        echo "$0: sorry, password cannot be blank" >&2
+        echo "$0: sorry, Username cannot be blank" >&2
         exit 1;
 fi
 
@@ -106,7 +106,7 @@ echo "done" >&2
 read -p "Please specify Git Email: " USERMAIL
 
 if test "$USERMAIL" = ""; then
-        echo "$0: sorry, password cannot be blank" >&2
+        echo "$0: sorry, Email cannot be blank" >&2
         exit 1;
 fi
 
