@@ -44,8 +44,11 @@ done
 
 # Loop on each Line in a file:
 # FIXME: Make a loop for some VARS
-# Source : http://stackoverflow.com/a/11349899
+# Source : http://stackoverflow.com/a/1521498/2435786
+#          https://www.cyberciti.biz/faq/bash-while-loop/
+#          http://stackoverflow.com/a/11349899
 #          http://www.compciv.org/topics/bash/loops/
+#          https://bash.cyberciti.biz/guide/For_loop
 # while read VARS
 # do
     # If VARS start with

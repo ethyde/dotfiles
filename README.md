@@ -7,7 +7,6 @@ Git Commit Message template are modified in `.gitconfig` :
 	template = ~/path/to/gitmessage/template/.gitmessage
 ```
 
-
 On OSX Make file (hook, $.sh, etc.) executable :
 `$ cd path/to/repository/githooks && chmod +x <file_name>`
 
