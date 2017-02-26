@@ -151,12 +151,3 @@
 	resh	= reset --soft HEAD
 	# Status =====
 	s	= status
-# [user]
-# 	name = Emmanuel Plouvier
-# 	email = eplouvier@prismamedia.com
-# [difftool "sourcetree"]
-# 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-# 	path = 
-# [mergetool "sourcetree"]
-# 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-# 	trustExitCode = true
