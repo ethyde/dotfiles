@@ -85,13 +85,19 @@
 	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
 	# List UnPuShed Commit =====
 	ups	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
-	# Add All And Commit =====
-	aac	= !git aa && git c
-	# Same as above but make a quick commit after =====
-	save	= !git aac -m "SAVEPOINT"
 	# Find alias and list all who match =====
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
 	fa = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
+	# From http://haacked.com/archive/2014/07/28/github-flow-aliases/
+	undo = reset HEAD~1 --mixed
+	amend = commit -a --amend
+	# Proper Reset
+	wipe = !git add -A && git commit -qm "WIPE SAVEPOINT" && git reset HEAD~1 --hard
+	# This after are adapted from same source has above
+	# Add All And Commit =====
+	aac	= !git aa && git c
+	# Quick Save =====
+	save	= !git aac -m "SAVEPOINT"
 	# Add =====
 	a	= add
 	aa	= add --all
@@ -145,12 +151,12 @@
 	resh	= reset --soft HEAD
 	# Status =====
 	s	= status
-[user]
-	name = Emmanuel Plouvier
-	email = eplouvier@prismamedia.com
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+# [user]
+# 	name = Emmanuel Plouvier
+# 	email = eplouvier@prismamedia.com
+# [difftool "sourcetree"]
+# 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+# 	path = 
+# [mergetool "sourcetree"]
+# 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+# 	trustExitCode = true
