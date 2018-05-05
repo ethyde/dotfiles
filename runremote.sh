@@ -21,3 +21,14 @@ done
   printf '%s\n' "set -- ${args[*]}"
   cat "$realscript"
 } | ssh -t $host1@$host2 "bash -s"
+
+
+# Others Sources :
+# 
+# https://thornelabs.net/2013/08/21/simple-ways-to-send-multiple-line-commands-over-ssh.html
+# https://zaiste.net/posts/a_few_ways_to_execute_commands_remotely_using_ssh/
+# https://www.shellhacks.com/ssh-execute-remote-command-script-linux/
+# https://unix.stackexchange.com/questions/87405/how-can-i-execute-local-script-on-remote-machine-and-include-arguments
+# https://stackoverflow.com/questions/9332802/how-to-write-a-bash-script-that-takes-optional-input-arguments
+# https://www.lifewire.com/pass-arguments-to-bash-script-2200571
+# https://openclassrooms.com/forum/sujet/bash-recupere-les-arguments-d-un-script-97057
