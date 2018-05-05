@@ -37,7 +37,6 @@ NC="\e[m"               # Color Reset
 ALERT=${BWhite}${On_Red} # Bold White on red background
 
 # Navigate to Workspace/, Display welcome message
-cd /Users/eplouvie/Projects/
 clear && echo -e "${Cyan}\nHi Manu.\n\nWelcome back to bash.\e[5;32;47m"
 echo -e "${Yellow}\n`date`.\e[5;32;47m${NC}"
 
