@@ -76,6 +76,7 @@ PATH="$NPM_PACKAGES/bin:$PATH"
 # export NVM_DIR="$HOME/.nvm"
 # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
+# source ~/.bash_profile.local
 if [ -f ~/.bash_profile.local ]; then
-   source ~/.bash_profile.local
+  source ~/.bash_profile.local
 fi

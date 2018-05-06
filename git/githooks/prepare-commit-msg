@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This way you can customize which branches should be skipped when
 # prepending commit message.
