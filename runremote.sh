@@ -5,7 +5,7 @@
 
 realscript=$1
 host1=shgate@107360_faucille10.nexen.net
-host2=studio_ssh@pmddeploy01 
+host2=studio_ssh@pmddeploy01
 shift 1
 
 # escape the arguments
