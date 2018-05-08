@@ -64,7 +64,7 @@
 	# Get the current branch name =====
 	# (not so useful in itself, but can be used in other aliases)
 	# Source : https://gist.github.com/robmiller/6018582
-	branch-name	= "!git rev-parse --abbrev-ref HEAD"
+	branch-name	=	"!git rev-parse --abbrev-ref HEAD"
 	# List All .gitconfig Alias
 	# Source : http://stackoverflow.com/a/11613251/2435786
 	#          https://github.com/sjas/.dotfiles/blob/master/git/.gitconfig
@@ -74,36 +74,37 @@
 	# Advenced with color
 	# laa	= "!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
 	# Pretty Log =====
-	lg	= log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+	lg	=	log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
 	# List commits as above but also showing changed files. =====
-	ll	= log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
+	ll	=	log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
 	# Afficher un historique condensé des commits
-	oneline = log --pretty=oneline --abbrev-commit --graph
+	oneline	= log --pretty=oneline --abbrev-commit --graph
 	# Afficher les changements réalisés depuis le dernier pull
 	lc = !git oneline ORIG_HEAD.. --stat --no-merges
 	# List UnPuShed Commit =====
-	ups	= log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
+	ups	=	log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
 	# Find alias and list all who match =====
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
-	fa = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
+	fa	=	"!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
 	# From http://haacked.com/archive/2014/07/28/github-flow-aliases/
-	undo = reset HEAD~1 --mixed
-	amend = commit -a --amend
-	# Set Upstream =====
+	test	=	"!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
+	undo	=	reset HEAD~1 --mixed
+	amend	= commit -a --amend
+	#	Set Upstream	=====
 	# Source : http://aaronbonner.io/post/80766268890/git-alias-to-simplify-setting-upstream-branch
-	su	= !git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
+	su	=	!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
 	# Update Current Branch with Remote
-	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+	up	= !git pull --rebase --prune $@ && git submodule update --init --recursive
 	# This after are adapted from same source has above
 	# Add All And Commit =====
-	aac	= !git add --all && git commit
+	aac	=	!git add --all && git commit
 	# Proper Reset
-	wipe = !git aac --no-verify -m 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+	wipe	= !git aac --no-verify -m 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
 	# Quick Save =====
-	save	= !git aac --no-verify -m 'SAVEPOINT'
-	wip = !git aac --no-verify -m
-	# Start =====
+	save	=	!git aac --no-verify -m 'SAVEPOINT'
+	wip	= !git aac --no-verify -m
+	#	Start	=====
 	# Start newBranch, push to origin newbranch, set-upstream
 	branch-start = "!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su; }; f"
 	# Branch Tools =====
@@ -117,68 +118,68 @@
 	# Local Spring Cleaning Branch after PR Remove locals branchs already merged
 	# Source : https://haacked.com/archive/2014/07/28/github-flow-aliases/
 	# Default Branch : master
-	bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs git branch --delete; }; f"
-  branch-done = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+	bclean	=	"!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs git branch --delete; }; f"
+  branch-done	= "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
 	# Source : https://gist.github.com/gnarf/5406589
 	# git pr-<provider-name> <pull-request-branche> <pull-request-number>
 	# <pull-request-branche> default : pr
 	# Can be improved with : https://gist.github.com/metlos/9368527#file-aliases-L61
-	pr-github  = "!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
-	pr-bitbucker = "!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull-requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
-	pr-gitlab = "!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/merge_requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
-	# Add =====
-	a	= add
-	aa	= add --all
-	ai	= add --interactive
-	# Branch =====
-	b	= branch
-	ba	= branch --all
-	bd	= branch --delete
-	bm	= branch --move
-	# Commit =====
-	c	= commit
-	ca	= commit --amend
-	# Checkout =====
-	co	= checkout
-	cob	= checkout -b
-	# Diff =====
-	d	= diff
-	dcw	= diff --color-words
-	dwd	= diff --word-diff
-	dt	= difftool
-	# Fetch =====
-	f	= fetch
-	fo	= fetch origin
-	fu	= fetch upstream
-	# Merge =====
-	m	= merge
-	ma	= merge --abort
-	mc	= merge --continue
-	ms	= merge --skip
-	# Pull =====
-	pl	= pull
-	plo	= pull origin
-	plr	= pull --rebase
-	# Push =====
-	ps	= push
-	pso	= push origin
-	# Rebase =====
-	rb	= rebase
-	rba	= rebase --abort
-	rbc	= rebase --continue
-	rbi	= rebase --interactive
-	rbs	= rebase --skip
-	# Reset =====
-	re	= reset
-	rh	= reset HEAD
-	reh	= reset --hard
-	rem	= reset --mixed
-	res	= reset --soft
-	rehh	= reset --hard HEAD
-	remh	= reset --mixed HEAD
-	resh	= reset --soft HEAD
-	# Status =====
-	s	= status
+	pr-github	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
+	pr-bitbucker	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull-requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
+	pr-gitlab	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/merge_requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
+	#	Add	=====
+	a	=	add
+	aa	=	add --all
+	ai	=	add --interactive
+	#	Branch	=====
+	b	=	branch
+	ba	=	branch --all
+	bd	=	branch --delete
+	bm	=	branch --move
+	#	Commit	=====
+	c	=	commit
+	ca	=	commit --amend
+	#	Checkout	=====
+	co	=	checkout
+	cob	=	checkout -b
+	#	Diff	=====
+	d	=	diff
+	dcw	=	diff --color-words
+	dwd	=	diff --word-diff
+	dt	=	difftool
+	#	Fetch	=====
+	f	=	fetch
+	fo	=	fetch origin
+	fu	=	fetch upstream
+	#	Merge	=====
+	m	=	merge
+	ma	=	merge --abort
+	mc	=	merge --continue
+	ms	=	merge --skip
+	#	Pull	=====
+	pl	=	pull
+	plo	=	pull origin
+	plr	=	pull --rebase
+	#	Push	=====
+	ps	=	push
+	pso	=	push origin
+	#	Rebase	=====
+	rb	=	rebase
+	rba	=	rebase --abort
+	rbc	=	rebase --continue
+	rbi	=	rebase --interactive
+	rbs	=	rebase --skip
+	#	Reset	=====
+	re	=	reset
+	rh	=	reset HEAD
+	reh	=	reset --hard
+	rem	=	reset --mixed
+	res	=	reset --soft
+	rehh	=	reset --hard HEAD
+	remh	=	reset --mixed HEAD
+	resh	=	reset --soft HEAD
+	#	Status	=====
+	s	=	status
 [user]
 	name = Emmanuel Plouvier
 	email = eplouvie@prismamedia.com
