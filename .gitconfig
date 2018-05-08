@@ -88,7 +88,6 @@
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
 	fa	=	"!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
 	# From http://haacked.com/archive/2014/07/28/github-flow-aliases/
-	test	=	"!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
 	undo	=	reset HEAD~1 --mixed
 	amend	= commit -a --amend
 	#	Set Upstream	=====
@@ -118,8 +117,8 @@
 	# Local Spring Cleaning Branch after PR Remove locals branchs already merged
 	# Source : https://haacked.com/archive/2014/07/28/github-flow-aliases/
 	# Default Branch : master
-	bclean	=	"!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs git branch --delete; }; f"
-  branch-done	= "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+	branch-clean	=	"!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs git branch --delete; }; f"
+	branch-done	= "!f() { git checkout ${1-master} && git up && git branch-clean ${1-master}; }; f"
 	# Source : https://gist.github.com/gnarf/5406589
 	# git pr-<provider-name> <pull-request-branche> <pull-request-number>
 	# <pull-request-branche> default : pr
