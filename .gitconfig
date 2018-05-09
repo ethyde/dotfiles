@@ -88,7 +88,7 @@
 	ups	=	log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
 	# Find alias and list all who match =====
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
-	fa	=	"!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
+	fa	=	"!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%-10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
 	# From http://haacked.com/archive/2014/07/28/github-flow-aliases/
 	undo	=	reset HEAD~1 --mixed
 	amend	= commit -a --amend
@@ -107,15 +107,15 @@
 	wip	= !git aac --no-verify -m
 	#	Start	=====
 	# Start newBranch, push to origin newbranch, set-upstream
-	branch-start = "!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su; }; f"
+	branch-start	=	"!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su; }; f"
 	# Branch Tools =====
 	# Sync Branch : fetch from remote, rebase from remote
 	# Default Branch : master
-	branch-sync = !git fetch origin ${1-master} && git rebase origin/${1-master}
+	branch-sync	=	!git fetch origin ${1-master} && git rebase origin/${1-master}
 	# Delete Branch Local and Remote
 	# no default
-	branch-delete = "!f() { git branch --delete $1 && git push origin --delete $1; }; f"
-	branch-force-delete = "!f() { git branch --delete --force $1 && git push origin --delete -force $1; }; f"
+	branch-delete	=	"!f() { git branch --delete $1 && git push origin --delete $1; }; f"
+	branch-force-delete	=	"!f() { git branch --delete --force $1 && git push origin --delete -force $1; }; f"
 	# Local Spring Cleaning Branch after PR Remove locals branchs already merged
 	# Source : https://haacked.com/archive/2014/07/28/github-flow-aliases/
 	# Default Branch : master
@@ -128,6 +128,11 @@
 	pr-github	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
 	pr-bitbucker	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull-requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
 	pr-gitlab	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/merge_requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
+	# Get pretty formatted tags list : https://www.everythingcli.org/git-like-a-pro/
+	tags	=	!"git for-each-ref \
+    --sort=taggerdate \
+    --format '%(tag)_,,,_%(taggerdate:raw)_,,,_%(taggername)_,,,_%(subject)' refs/tags \
+    | awk 'BEGIN { FS = \"_,,,_\"  } ; { t=strftime(\"%Y-%m-%d  %H:%M\",$2); printf \"%-20s %-18s %-25s %s\\n\", t, $1, $4, $3  }'"
 	#	Add	=====
 	a	=	add
 	aa	=	add --all
@@ -143,11 +148,6 @@
 	#	Checkout	=====
 	co	=	checkout
 	cob	=	checkout -b
-	#	Diff	=====
-	d	=	diff
-	dcw	=	diff --color-words
-	dwd	=	diff --word-diff
-	dt	=	difftool
 	#	Fetch	=====
 	f	=	fetch
 	fo	=	fetch origin
@@ -170,15 +170,6 @@
 	rbc	=	rebase --continue
 	rbi	=	rebase --interactive
 	rbs	=	rebase --skip
-	#	Reset	=====
-	re	=	reset
-	rh	=	reset HEAD
-	reh	=	reset --hard
-	rem	=	reset --mixed
-	res	=	reset --soft
-	rehh	=	reset --hard HEAD
-	remh	=	reset --mixed HEAD
-	resh	=	reset --soft HEAD
 	#	Status	=====
 	s	=	status
 [user]
