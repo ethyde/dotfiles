@@ -60,11 +60,7 @@
 	# Source : http://michaelwales.com/articles/make-gitconfig-work-for-you/
     insteadOf = gh:
 [alias]
-	# Tools =====
-	# Get the current branch name =====
-	# (not so useful in itself, but can be used in other aliases)
-	# Source : https://gist.github.com/robmiller/6018582
-	branch-name	=	"!git rev-parse --abbrev-ref HEAD"
+	# grep '\t=' ~/.gitconfig | lessTools =====
 	# List All .gitconfig Alias
 	# Source : http://stackoverflow.com/a/11613251/2435786
 	#          https://github.com/sjas/.dotfiles/blob/master/git/.gitconfig
@@ -72,43 +68,49 @@
 	# https://www.atlassian.com/blog/git/advanced-git-aliases
 	# FIXME: wait for reply https://github.com/sjas/.dotfiles/issues/2
 	# Basic 
-	# la	= "!grep '\t=' ~/.gitconfig | less"
+	# la = "!grep '\t=' ~/.gitconfig | less"
 	# Advenced with color
-	# laa	= "!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
-	# Pretty Log =====
+	# laa = "!grep '\t=' ~/.gitconfig | sed -e 's/=/^[[0;31m=^[[0m/g' | sed -e 's/#.*/^[[0;32m&^[[0m/g' | less -R"
+	#	Pretty Log	=====
 	lg	=	log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
 	# List commits as above but also showing changed files. =====
 	ll	=	log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
 	# Afficher un historique condensé des commits
-	oneline	= log --pretty=oneline --abbrev-commit --graph
+	oneline	=	log --pretty=oneline --abbrev-commit --graph
 	# Afficher les changements réalisés depuis le dernier pull
 	lc = !git oneline ORIG_HEAD.. --stat --no-merges
 	# List UnPuShed Commit =====
 	ups	=	log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
 	# Find alias and list all who match =====
+	# From https://github.com/sjas/.dotfiles
+	alias-list	=	"!grep '\t=' ~/.gitconfig | sed -e 's/=/\\o033[0;31m=\\o033[0m/g' | sed -e 's/#.*/\\o033[0;32m&\\o033[0m/g' | less -R"
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
-	fa	=	"!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%-10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
+	alias-list-2 = "!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%-10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
 	# From http://haacked.com/archive/2014/07/28/github-flow-aliases/
 	undo	=	reset HEAD~1 --mixed
-	amend	= commit -a --amend
+	amend	=	commit -a --amend
 	#	Set Upstream	=====
 	# Source : http://aaronbonner.io/post/80766268890/git-alias-to-simplify-setting-upstream-branch
 	su	=	!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
 	# Update Current Branch with Remote
-	up	= !git pull --rebase --prune $@ && git submodule update --init --recursive
+	up	=	!git pull --rebase --prune $@ && git submodule update --init --recursive
 	# This after are adapted from same source has above
 	# Add All And Commit =====
 	aac	=	!git add --all && git commit
 	# Proper Reset
 	wipe	= !git aac --no-verify -m 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
-	# Quick Save =====
+	#	Quick Save	=====
 	save	=	!git aac --no-verify -m 'SAVEPOINT'
 	wip	= !git aac --no-verify -m
+	#	Get the current branch name	=====
+	# (not so useful in itself, but can be used in other aliases)
+	# Source : https://gist.github.com/robmiller/6018582
+	branch-name	=	"!git rev-parse --abbrev-ref HEAD"
 	#	Start	=====
 	# Start newBranch, push to origin newbranch, set-upstream
 	branch-start	=	"!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su; }; f"
-	# Branch Tools =====
+	#	Branch Tools	=====
 	# Sync Branch : fetch from remote, rebase from remote
 	# Default Branch : master
 	branch-sync	=	!git fetch origin ${1-master} && git rebase origin/${1-master}

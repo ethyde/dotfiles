@@ -79,4 +79,4 @@ PATH="$NPM_PACKAGES/bin:$PATH"
 # source ~/.bash_profile.local
 if [ -f ~/.bash_profile.local ]; then
   source ~/.bash_profile.local
-fi
+fi[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
