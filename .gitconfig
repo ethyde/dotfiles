@@ -117,7 +117,7 @@
 	# Delete Branch Local and Remote
 	# no default
 	branch-delete	=	"!f() { git branch --delete $1 && git push origin --delete $1; }; f"
-	branch-force-delete	=	"!f() { git branch --delete --force $1 && git push origin --delete -force $1; }; f"
+	branch-delete-force	=	"!f() { git branch --delete --force $1 && git push origin --delete --force $1; }; f"
 	# Local Spring Cleaning Branch after PR Remove locals branchs already merged
 	# Source : https://haacked.com/archive/2014/07/28/github-flow-aliases/
 	# Default Branch : master
