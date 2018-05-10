@@ -95,7 +95,7 @@
 	amend	=	commit -a --amend
 	#	Proper Reset	=====
 	# You can run the git reflog command and find the SHA of the commit if you realize later that you made a mistake with the reset. The commit message will be “WIPE SAVEPOINT” in this case
-	wipe	=	"!f() { git aac --no-verify -qm '${1-WIPE-SVEPOINT}' && git reset HEAD~1 --hard; }; f"
+	wipe	=	! git aac --no-verify -qm "${1-WIPE-SAVEPOINT}" && git reset HEAD~1 --hard
 	#	 Reset last Commit but keep change in directory	=====
 	undo	=	reset HEAD~1 --mixed
 	#	Get current branch name	=====
