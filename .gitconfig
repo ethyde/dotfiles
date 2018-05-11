@@ -9,6 +9,8 @@
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
 	# Overide local GitHook
 	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
+[include]
+	# path = .bash_profile.local
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)

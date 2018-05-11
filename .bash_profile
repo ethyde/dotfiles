@@ -59,6 +59,10 @@ elif [ -f /etc/bash_completion ]; then
 	source /etc/bash_completion;
 fi;
 
+# PATH ALTERATIONS
+## Node
+PATH="/usr/local/bin:$PATH:./node_modules/.bin";
+
 # Enable tab completion for `g` by marking it as an alias for `git`
 # if type _git &> /dev/null && [ -f /usr/local/etc/bash_completion.d/git-completion.bash ]; then
 # 	complete -o default -o nospace -F _git g;
@@ -67,18 +71,6 @@ fi;
 # use gitconfig alias like bash_alias 
 # Source : https://gist.github.com/mwhite/6887990
 # If needed add git completion https://www.narga.net/helpful-hints-tips-tricks-mastering-git-github/
-
-# function_exists() {
-#     declare -f -F $1 > /dev/null
-#     return $?
-# }
-
-# for al in `__git_aliases`; do
-#     alias g$al="git $al"
-
-#     complete_func=_git_$(__git_aliased_command $al)
-#     function_exists $complete_fnc && __git_complete g$al $complete_func
-# done
 
 if [ -f ~/.bashrc ]; then
    source ~/.bashrc

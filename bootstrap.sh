@@ -42,86 +42,29 @@ do
     ln -s $dir/$file ~/$file
 done
 
-# Loop on each Line in a file:
-# FIXME: Make a loop for some VARS
-# Source : http://stackoverflow.com/a/1521498/2435786
-#          https://www.cyberciti.biz/faq/bash-while-loop/
-#          http://stackoverflow.com/a/11349899
-#          http://www.compciv.org/topics/bash/loops/
-#          https://bash.cyberciti.biz/guide/For_loop
-# while read VARS
-# do
-    # If VARS start with
-    # Source : http://stackoverflow.com/a/2172365
-#     if [[ "$VARS" =~ ^GIT_AUTHOR_* ]]; then
-#         echo "$VARS"
-#       http://stackoverflow.com/a/20348190
-#         # echo "${VARS%=*}"
-#         NEWVAR="${VARS%=*}"
+read -p "Please specify Git Author Name: " AUTHORNAME
+read -p "Please specify Git Author Email: " AUTHORMAIL
+while read -r line
+do
+  IFS='=' read -r -a array <<< "$line"
+  for index in "${!array[@]}"
+  do
+    # echo "$index ${array[index]}"
 
-#         echo "INNER $NEWVAR"
+    if [[ "${array[index]}" = "GIT_AUTHOR_NAME" && -z "${array[1]}" ]]; then
+      # read -p "Please specify Git Author Name: " USERNAME
+      sed -i -e"s/^GIT_AUTHOR_NAME=.*/GIT_AUTHOR_NAME=\"$AUTHORNAME\"/" .bash_profile.local
 
-        # read -p "user prompt" USERPROMPT
+      git config --global user.name "$AUTHORNAME"
+    elif [[ "${array[index]}" = "GIT_AUTHOR_EMAIL" && -z "${array[1]}" ]]; then
+      sed -i -e"s/^GIT_AUTHOR_EMAIL=.*/GIT_AUTHOR_EMAIL=\"$AUTHORMAIL\"/" .bash_profile.local
 
-        # read -p "Please specify Git $NEWVAR: " USERINPUT
+      git config --global user.email "$AUTHORMAIL"
+    fi
 
-        # if test "$USERINPUT" = ""; then
-        #     echo "$0: sorry, $NEWVAR cannot be blank" >&2
-        #     exit 1;
-        # fi
-
-        # sed -i -e"s/^$NEWVAR=.*/$NEWVAR=\"$USERINPUT\"/" .bash_profile.local
-
-        # if test $? -eq 0; then
-        #         echo 'Username Added' >&2
-        # else
-        #         echo 'change attempt failed' >&2
-        #         exit 1
-        # fi
-
-        # echo "done" >&2
-#     fi
-
-
-
-# done < .bash_profile.local
-
-# Prompt user for some info needed to update bash_profile.local
-# Source : http://stackoverflow.com/a/19473905
-read -p "Please specify Git Username: " USERNAME
-
-if test "$USERNAME" = ""; then
-        echo "$0: sorry, Username cannot be blank" >&2
-        exit 1;
-fi
-
-sed -i -e"s/^GIT_AUTHOR_NAME=.*/GIT_AUTHOR_NAME=\"$USERNAME\"/" .bash_profile.local
-
-if test $? -eq 0; then
-        echo 'Username Added' >&2
-else
-        echo 'change attempt failed' >&2
-        exit 1
-fi
-
-echo "done" >&2
-
-read -p "Please specify Git Email: " USERMAIL
-
-if test "$USERMAIL" = ""; then
-        echo "$0: sorry, Email cannot be blank" >&2
-        exit 1;
-fi
-
-sed -i -e"s/^GIT_AUTHOR_EMAIL=.*/GIT_AUTHOR_EMAIL=\"$USERMAIL\"/" .bash_profile.local
-
-if test $? -eq 0; then
-        echo 'User Email Added' >&2
-else
-        echo 'change attempt failed' >&2
-        exit 1
-fi
-
-echo "done" >&2
+  done
+  # name="$line"
+  # echo "Name read from file - $line"
+done < .bash_profile.local
 
 source ~/.bashrc
