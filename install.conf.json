@@ -12,6 +12,10 @@
   {
     "link": {
       "~/.gitconfig": ".gitconfig",
+      "~/.gitignore_global": {
+        "force": true,
+        "path": "./git/.gitignore_global"
+      },
       "~/.zshrc": ".zshrc"
     }
   },

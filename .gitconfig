@@ -4,7 +4,7 @@
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
-	excludesfile = /Users/eplouvie/.gitignore_global
+	excludesfile = ~/git/.gitignore_global
 	# need Git 2.9
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
 	# Overide local GitHook
