@@ -1,3 +1,2 @@
 *.local
 bash
-dotbot/lib/yaml/*
