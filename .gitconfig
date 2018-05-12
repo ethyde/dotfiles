@@ -4,13 +4,13 @@
 	editor = code --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
-	excludesfile = ~/git/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	# need Git 2.9
 	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
 	# Overide local GitHook
 	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
 [include]
-	# path = .bash_profile.local
+	path = ~/Projects/Labs/dotfiles/local/.gitconfig
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
@@ -171,8 +171,6 @@
 	rbc	=	rebase --continue
 	rbi	=	rebase --interactive
 	rbs	=	rebase --skip
-	#	Status	=====
-	s	=	status
-[user]
-	name = Emmanuel Plouvier
-	email = eplouvie@prismamedia.com
+# [user]
+# 	name = Emmanuel Plouvier
+# 	email = eplouvie@prismamedia.com
