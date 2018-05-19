@@ -1,0 +1,8 @@
+# https://gist.github.com/jexchan/2351996/
+Host github.com
+ HostName github.com
+ IdentityFile ~/.ssh/githubperso
+
+# Host bitbucket.org
+#  HostName bitbucket.org
+#  IdentityFile ~/.ssh/bitbucketprisma
