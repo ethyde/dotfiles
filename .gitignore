@@ -1,2 +1,4 @@
 *.local
 bash
+ssh/githubperso
+ssh/githubperso.pub
