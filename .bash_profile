@@ -61,7 +61,58 @@ fi;
 
 # PATH ALTERATIONS
 ## Node
-PATH="/usr/local/bin:$PATH:./node_modules/.bin";
+# PATH="/usr/local/bin:$PATH:./node_modules/.bin";
+# Source : https://gist.github.com/Fuxy22/da4b7ca3bcb0bfea2c582964eafeb4ed
+# adapted from https://gist.github.com/irazasyed/a7b0a079e7727a4315b9
+# remove specified host from /etc/hosts
+function removehost() {
+    if [[ "$1" ]]
+    then
+        HOSTNAME=$1
+
+        if [ -n "$(grep $HOSTNAME /etc/hosts)" ]
+        then
+            echo "$HOSTNAME Found in your /etc/hosts, Removing now...";
+            sudo sed -i".bak" "/$HOSTNAME/d" /etc/hosts
+        else
+            echo "$HOSTNAME was not found in your /etc/hosts";
+        fi
+    else
+        echo "Error: missing required parameters."
+        echo "Usage: "
+        echo "  removehost domain"
+    fi
+}
+
+#add new ip host pair to /etc/hosts
+function addhost() {
+    if [[ "$1" && "$2" ]]
+    then
+        IP=$1
+        HOSTNAME=$2
+
+        if [ -n "$(grep $HOSTNAME /etc/hosts)" ]
+            then
+                echo "$HOSTNAME already exists:";
+                echo $(grep $HOSTNAME /etc/hosts);
+            else
+                echo "Adding $HOSTNAME to your /etc/hosts";
+                printf "%s\t%s\n" "$IP" "$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null;
+
+                if [ -n "$(grep $HOSTNAME /etc/hosts)" ]
+                    then
+                        echo "$HOSTNAME was added succesfully:";
+                        echo $(grep $HOSTNAME /etc/hosts);
+                    else
+                        echo "Failed to Add $HOSTNAME, Try again!";
+                fi
+        fi
+    else
+        echo "Error: missing required parameters."
+        echo "Usage: "
+        echo "  addhost ip domain"
+    fi
+}
 
 # Enable tab completion for `g` by marking it as an alias for `git`
 # if type _git &> /dev/null && [ -f /usr/local/etc/bash_completion.d/git-completion.bash ]; then

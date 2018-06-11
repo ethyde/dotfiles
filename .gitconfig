@@ -124,6 +124,7 @@
 	#	Local Spring Cleaning Branch after PR Remove locals branchs already merged	=====
 	# Source : https://haacked.com/archive/2014/07/28/github-flow-aliases/
 	# Default Branch : master
+	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
 	b-clean	=	"!f() { git branch --merged ${1-master} | grep -v "${1-master}$" | xargs git branch --delete; }; f"
 	b-done	=	"!f() { git checkout ${1-master} && git up && git b-clean ${1-master}; }; f"
 	#	PR management for Github, Bitbucket and Gitlab	=====
