@@ -1,2 +1,6 @@
 alias g='git'
+# NPM Run
 alias nr='npm run'
+#	NPM Cleanup	=====
+# https://stackoverflow.com/questions/12478679/npm-install-vs-update-whats-the-difference
+alias	n-clean='npm install --no-package-lock --production && npm prune'
