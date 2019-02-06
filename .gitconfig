@@ -65,12 +65,12 @@
 	#	Pretty Log	=====
 	lg	=	log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
 	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
-	# List commits as above but also showing changed files. =====
-	ll = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
-	# Afficher un historique condensé des commits
-	oneline = log --pretty=oneline --abbrev-commit --graph
-	# Afficher les changements réalisés depuis le dernier pull =====
-	lc = !git oneline ORIG_HEAD.. --stat --no-merges
+	#	List commits as above but also showing changed files.	=====
+	ll	=	log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
+	#	Afficher un historique condensé des commits	=====
+	oneline	=	log --pretty=oneline --abbrev-commit --graph
+	#	Afficher les changements réalisés depuis le dernier pull	=====
+	lc	=	!git oneline ORIG_HEAD.. --stat --no-merges
 	#	List UnPuShed Commit	=====
 	ups	=	log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
 	#	Get pretty formatted tags list	=====
@@ -84,7 +84,7 @@
 	a-list	=	"!grep '\t=' ~/.gitconfig | sed -e 's/=/\\o033[0;31m=\\o033[0m/g' | sed -e 's/#.*/\\o033[0;32m&\\o033[0m/g' | less -R"
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
 	a-list-2 = "!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%-10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
-	#	Set Upstream	(after a Push Origin) =====
+	#	Set Upstream	(after a Push Origin)	=====
 	# Source : http://aaronbonner.io/post/80766268890/git-alias-to-simplify-setting-upstream-branch
 	su	=	!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
 	# This after are adapted from same source has above
@@ -99,13 +99,6 @@
 	wipe	=	!git aac --no-verify -qm '${1-WIPE-SAVEPOINT}' && git reset HEAD~1 --hard
 	#	Reset last Commit but keep change in directory	=====
 	undo	=	reset HEAD~1 --mixed
-	#	Get current branch name	=====
-	# (not so useful in itself, but can be used in other aliases)
-	# Source : https://gist.github.com/robmiller/6018582
-	b-name	=	!git rev-parse --abbrev-ref HEAD
-	#	Start a new branch with name newBranch	=====
-	# Start newBranch, push to origin newbranch, set-upstream
-	b-start	=	"!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su && git n-clean; }; f"
 	#	Branch Tools	=====
 	# Sync Branch : fetch from remote, rebase from remote
 	# Default Branch : master
@@ -114,6 +107,13 @@
 	b-sync	=	!git fetch origin ${1-master} && git rebase --preserve-merges origin/${1-master}
 	# Si git after 1.8.5 you can use this to sync
 	b-sync-new = !git pull --rebase=preserve --prune $@ && git submodule update --init --recursive
+	#	Get current branch name	=====
+	# (not so useful in itself, but can be used in other aliases)
+	# Source : https://gist.github.com/robmiller/6018582
+	b-name	=	!git rev-parse --abbrev-ref HEAD
+	#	Start a new branch with name newBranch	=====
+	# Start newBranch, push to origin newbranch, set-upstream
+	b-start	=	"!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su && git n-clean; }; f"
 	#	NPM Cleanup	=====
 	n-clean	=	"!npm install --no-package-lock --production && npm prune"
 	#	Delete Branch Local and Remote	=====
