@@ -1,7 +1,7 @@
 # https://gist.github.com/pksunkara/988716
 # http://www.git-attitude.fr/2013/04/03/configuration-git/
 [core]
-	editor = vscodium --wait
+	editor = codium --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
 	excludesfile = ~/.gitignore_global
@@ -10,7 +10,7 @@
 	# Overide local GitHook
 	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
 [include]
-	path = ~/Projects/Labs/dotfiles/local/.gitconfig
+	path = ~/Projets/dotfiles/local/.gitconfig
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
@@ -22,7 +22,7 @@
 	# When using --word-diff, assume --word-diff-regex=.
 	wordRegex = .
 [difftool "default-difftool"]
-	cmd = vscodium --wait --diff $LOCAL $REMOTE
+	cmd = codium --wait --diff $LOCAL $REMOTE
 [commit]
 	# template = ~/Projects/Labs/dotfiles/git/.gitmessage
 	status = true # add/remove default commit msg
@@ -35,7 +35,7 @@
 	hotfix = fix/
 	performance = perf/
 [color]
-	ui = auto
+	ui = true
 [color "branch"]
 	current = yellow bold
 	local = green bold
@@ -82,6 +82,8 @@
 	#	Find alias and list all who match	=====
 	# From https://github.com/sjas/.dotfiles
 	a-list	=	"!grep '\t=' ~/.gitconfig | sed -e 's/=/\\o033[0;31m=\\o033[0m/g' | sed -e 's/#.*/\\o033[0;32m&\\o033[0m/g' | less -R"
+	# not perfect but work
+	a-list2	=	"!grep '\t=' ~/.gitconfig --color=always | less -R"
 	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
 	a-list-2 = "!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%-10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
 	#	Set Upstream	(after a Push Origin)	=====
