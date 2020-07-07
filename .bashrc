@@ -40,7 +40,7 @@ agent_start() {
 
 # adding every id_rsa_* SSH key in my ~/.ssh folder.
 add_all_keys() {
-  ls ~/.ssh | grep id_rsa[^.]*$ | sed "s:^:`echo ~`/.ssh/:" | xargs -n 1 ssh-add
+  ls ~/.ssh | grep id_rsa_ | sed "s:^:`echo ~`/.ssh/:" | xargs -n 1 ssh-add
 }
 
 if ! agent_is_running; then
