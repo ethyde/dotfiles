@@ -1,7 +1,7 @@
 # https://gist.github.com/pksunkara/988716
 # http://www.git-attitude.fr/2013/04/03/configuration-git/
 [core]
-	editor = vscodium --wait
+	editor = codium --wait
 	# Don't consider trailing space change as a cause for merge conflicts
 	whitespace = -trailing-space
 	excludesfile = ~/.gitignore_global
@@ -22,7 +22,7 @@
 	# When using --word-diff, assume --word-diff-regex=.
 	wordRegex = .
 [difftool "default-difftool"]
-	cmd = vscodium --wait --diff $LOCAL $REMOTE
+	cmd = codium --wait --diff $LOCAL $REMOTE
 [commit]
 	# template = ~/Projects/Labs/dotfiles/git/.gitmessage
 	status = true # add/remove default commit msg

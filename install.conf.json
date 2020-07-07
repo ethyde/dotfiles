@@ -16,7 +16,13 @@
         "force": true,
         "path": "./git/.gitignore_global"
       },
-      "~/.zshrc": ".zshrc"
+      "~/.zshrc": {
+        "force": true,
+        "path": ".zshrc"
+      },
+      "~/.bashrc": ".bashrc",
+      "~/.bash_profile": ".bash_profile",
+      "~/.bash_alias": ".bash_alias"
     }
   },
   {
