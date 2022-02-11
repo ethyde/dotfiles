@@ -5,4 +5,4 @@ Host github.com
 
 # Host bitbucket.org
 #  HostName bitbucket.org
-#  IdentityFile ~/.ssh/bitbucketprisma
+#  IdentityFile ~/.ssh/bitbucket
