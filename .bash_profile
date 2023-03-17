@@ -130,3 +130,7 @@ fi
 if [ -f ~/.bash_alias ]; then
    source ~/.bash_alias
 fi
+
+if [ -f ~/.bash_profile.local ]; then
+   source ~/.bash_profile.local
+fi
