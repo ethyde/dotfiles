@@ -174,3 +174,6 @@
 	rbs	=	rebase --skip
 	#	Status	=====
 	s	=	status
+[user]
+	name = Emmanuel Plouvier
+	email = eplouvie@prismamedia.com

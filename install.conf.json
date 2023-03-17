@@ -13,7 +13,7 @@
   },
   {
     "link": {
-      "~/.gitconfig": ".gitconfig",
+      "~/.gitconfig": "./git/.gitconfig",
       "~/.gitignore_global": {
         "force": true,
         "path": "./git/.gitignore_global"
@@ -22,10 +22,10 @@
         "force": true,
         "path": ".zshrc"
       },
-      "~/.bashrc": ".bashrc",
-      "~/.bash_profile": ".bash_profile",
-      "~/.bash_alias": ".bash_alias",
-      "~/.bash_profile.local": ".bash_profile.local"
+      "~/.bashrc": "./shell/.bashrc",
+      "~/.bash_profile": "./shell/.bash_profile",
+      "~/.bash_alias": "./shell/.bash_alias",
+      "~/.bash_profile.local": "./shell/.bash_profile.local"
     }
   },
   {
