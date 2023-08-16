@@ -126,7 +126,7 @@
 	b-update = !git pull --rebase --prune $@ && git submodule update --init --recursive
 	b-clean	=	"!f() { git branch --merged ${1-master} | grep -v "${1-master}$" | xargs git branch --delete; }; f"
 	b-done	=	"!f() { git checkout ${1-master} && git b-update && git b-clean ${1-master} && git n-clean; }; f"
-	b-squash	=	"!git rbi $(git merge-base --fork-point \"$1\")"
+	b-squash	=	!git rbi $(git merge-base --fork-point ${1-develop})
 	#	PR management for Github, Bitbucket and Gitlab	=====
 	# Source : https://gist.github.com/gnarf/5406589
 	# git pr-<provider-name> <pull-request-branche> <pull-request-number>
