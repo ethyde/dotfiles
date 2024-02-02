@@ -40,7 +40,7 @@ ALERT=${BWhite}${On_Red} # Bold White on red background
 clear && echo -e "${Cyan}\nHi Manu.\n\nWelcome back to bash.\e[5;32;47m"
 echo -e "${Yellow}\n`date`.\e[5;32;47m${NC}"
 
-alias workspace="cd /Users/eplouvie/Projects/"
+alias workspace="cd /Users/eplouvie/Projets/"
 alias ws=workspace
 
 alias beautiful="clear && echo -e '${Cyan}\nI dont appreciate your sarcasm . . .' && sleep 1 && exit"

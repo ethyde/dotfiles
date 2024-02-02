@@ -31,7 +31,7 @@ sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 echo "Installing homebrew first"
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Make sure we’re using the latest Homebrew.
 brew update
@@ -39,9 +39,13 @@ brew update
 # Upgrade any already-installed formulae.
 brew upgrade
 
+# Save Homebrew’s installed location.
+BREW_PREFIX=$(brew --prefix)
+
 # Install GNU core utilities (those that come with macOS are outdated).
 # Don’t forget to add `$(brew --prefix coreutils)/libexec/gnubin` to `$PATH`.
 brew install coreutils
+ln -s "${BREW_PREFIX}/bin/gsha256sum" "${BREW_PREFIX}/bin/sha256sum"
 
 # Install some other useful utilities like `sponge`.
 brew install moreutils
@@ -53,14 +57,12 @@ brew install gnu-sed --with-default-names
 # Note: don’t forget to add `/usr/local/bin/bash` to `/etc/shells` before
 # running `chsh`.
 brew install bash
-brew tap homebrew/versions
-brew install bash-completion
-brew tap homebrew/completions
+brew install bash-completion2
 
 # Switch to using brew-installed bash as default shell
-if ! fgrep -q '/usr/local/bin/bash' /etc/shells; then
-  echo '/usr/local/bin/bash' | sudo tee -a /etc/shells;
-  chsh -s /usr/local/bin/bash;
+if ! fgrep -q "${BREW_PREFIX}/bin/bash" /etc/shells; then
+  echo "${BREW_PREFIX}/bin/bash" | sudo tee -a /etc/shells;
+  chsh -s "${BREW_PREFIX}/bin/bash";
 fi;
 
 
@@ -69,8 +71,8 @@ brew install wget --with-iri
 
 # Install more recent versions of some macOS tools.
 brew install vim --with-override-system-vi
-brew install homebrew/dupes/grep
-brew install homebrew/dupes/openssh
+brew install grep
+brew install openssh
 
 # Install Git
 brew install git
@@ -79,10 +81,10 @@ brew install git
 brew install cask
 
 # Install iTerm2
-brew cask install iterm2
+brew install --cask iterm2
 
-# Install VS Code
-brew cask install visual-studio-code
+# Install VS Codium
+brew install --cask vscodium
 
 # Rename iterm config file
 mv ~/Library/Preferences/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist.old
@@ -92,11 +94,11 @@ ln -s "$(pwd)/iterm/com.googlecode.iterm2.plist" ~/Library/Preferences/com.googl
 
 # install zsh and add remy's zsh theme: https://remysharp.com/2013/07/25/my-terminal-setup
 brew install zsh zsh-completions
-curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 # put the original .zshrc back
 mv .zshrc.pre-oh-my-zsh .zshrc
 # make zsh default
-chsh -s /bin/zsh
+chsh -s $(which zsh)
 
 # Remove outdated versions from the cellar.
 brew cleanup

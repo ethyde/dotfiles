@@ -1,7 +1,11 @@
 # https://gist.github.com/jexchan/2351996/
 Host github.com
  HostName github.com
- IdentityFile ~/.ssh/githubperso
+ IdentityFile ~/.ssh/github_perso
+
+Host prismamedia.com
+ HostName prismamedia.com
+ IdentityFile ~/.ssh/gitlab_prisma
 
 # Host bitbucket.org
 #  HostName bitbucket.org
