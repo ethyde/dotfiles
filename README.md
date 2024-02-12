@@ -28,3 +28,11 @@ GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 git config --global user.name "$GIT_AUTHOR_NAME"
 git config --global user.email "$GIT_AUTHOR_EMAIL"
 ```
+
+# usefull snippet
+
+
+make symlink for heynote file `ln -s "/Library/CloudStorage/OneDrive-Personnel/private/heynote/buffer.txt" "/Library/Application Support/Heynote/buffer.txt"`
+
+Squash Commit current branch from Master : `git rebase -i `git merge-base HEAD master``
+ou depuis vraiment le début de la branch `git rebase -i `git merge-base --fork-point master``
