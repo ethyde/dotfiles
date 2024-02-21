@@ -25,7 +25,8 @@
       "~/.bashrc": "./shell/.bashrc",
       "~/.bash_profile": "./shell/.bash_profile",
       "~/.bash_alias": "./shell/.bash_alias",
-      "~/.bash_profile.local": "./shell/.bash_profile.local"
+      "~/.bash_profile.local": "./shell/.bash_profile.local",
+      "~/.profile": "./shell/.profile"
     }
   },
   {
