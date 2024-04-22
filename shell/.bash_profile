@@ -123,18 +123,18 @@ function addhost() {
 # Source : https://gist.github.com/mwhite/6887990
 # If needed add git completion https://www.narga.net/helpful-hints-tips-tricks-mastering-git-github/
 
-if [ -f ~/.bashrc ]; then
-   source ~/.bashrc
-fi
-
 if [ -f ~/.bash_alias ]; then
    source ~/.bash_alias
+fi
+
+if [ -f ~/.profile ]; then
+   source ~/.profile
 fi
 
 if [ -f ~/.bash_profile.local ]; then
    source ~/.bash_profile.local
 fi
 
-if [ -f ~/.profile ]; then
-   source ~/.profile
+if [ -f ~/.bashrc ]; then
+   source ~/.bashrc
 fi
