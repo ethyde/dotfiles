@@ -63,11 +63,3 @@ unset env
 # load bash alias
 # FIXME: need for windows
 # source I:\\wamp\\www\\LABS\\githooks\\.bash_alias
-
-# Only for MacOSX #
-
-# Configuration to don't need sudo with npm install -g
-# Source : https://johnpapa.net/how-to-use-npm-global-without-sudo-on-osx/
-# NPM_PACKAGES=/Users/eplouvie/.npm-packages
-# NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
-# PATH="$NPM_PACKAGES/bin:$PATH"

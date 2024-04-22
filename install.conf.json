@@ -14,6 +14,7 @@
   {
     "link": {
       "~/.gitconfig": "./git/.gitconfig",
+      "~/.gitconfig.local": "./git/.gitconfig.local",
       "~/.gitignore_global": {
         "force": true,
         "path": "./git/.gitignore_global"

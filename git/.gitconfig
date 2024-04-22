@@ -10,7 +10,7 @@
 	# Overide local GitHook
 	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
 [include]
-	path = ~/Projects/Labs/dotfiles/local/.gitconfig
+	path = ~/git/.gitconfig.local
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
@@ -30,6 +30,7 @@
 [push]
 	# Default push should only push the current branch to its push target, regardless of its remote name
 	default = upstream
+	autoSetupRemote = true
 [gitflow "prefix"]
 	feature = feat/
 	hotfix = fix/
@@ -126,7 +127,7 @@
 	b-update = !git pull --rebase --prune $@ && git submodule update --init --recursive
 	b-clean	=	"!f() { git branch --merged ${1-master} | grep -v "${1-master}$" | xargs git branch --delete; }; f"
 	b-done	=	"!f() { git checkout ${1-master} && git b-update && git b-clean ${1-master} && git n-clean; }; f"
-	b-squash	=	!git rbi $(git merge-base --fork-point ${1-develop})
+	b-squash	=	!git rbi $(git merge-base --fork-point ${1-master})
 	#	PR management for Github, Bitbucket and Gitlab	=====
 	# Source : https://gist.github.com/gnarf/5406589
 	# git pr-<provider-name> <pull-request-branche> <pull-request-number>
@@ -175,6 +176,3 @@
 	rbs	=	rebase --skip
 	#	Status	=====
 	s	=	status
-[user]
-	name = Emmanuel Plouvier
-	email = eplouvie@prismamedia.com
