@@ -12,6 +12,14 @@
     ]
   },
   {
+    "shell": [
+      [
+        "git submodule update --init --recursive",
+        "Installing submodules"
+      ]
+    ]
+  },
+  {
     "link": {
       "~/.gitconfig": "./git/.gitconfig",
       "~/.gitconfig.local": "./git/.gitconfig.local",
@@ -29,13 +37,5 @@
       "~/.bash_profile.local": "./shell/.bash_profile.local",
       "~/.profile": "./shell/.profile"
     }
-  },
-  {
-    "shell": [
-      [
-        "git submodule update --init --recursive",
-        "Installing submodules"
-      ]
-    ]
   }
 ]

@@ -60,7 +60,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-better-npm-completion)
+# plugins=(zsh-better-npm-completion)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -93,20 +93,8 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-if [ -f ~/.bashrc ]; then
-   source ~/.bashrc
-fi
-
 if [ -f ~/.bash_profile ]; then
    source ~/.bash_profile
-fi
-
-if [ -f ~/.bash_alias ]; then
-   source ~/.bash_alias
-fi
-
-if [ -f ~/.profile ]; then
-   source ~/.profile
 fi
 
 # # export NVM_DIR="/Users/eplouvie/.nvm"
