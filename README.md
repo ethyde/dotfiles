@@ -12,8 +12,9 @@ On OSX Make file (hook, $.sh, etc.) executable :
 
 All sources are documented in file where are used
 
-Use `./bootstrap.sh` to install/update files. 
+<!-- Use `./bootstrap.sh` to install/update files.  -->
 Use `./apps.sh` to install all needed apps (iterm2, zsh with Oh My Zsh, etc.)
+Use `./install` to force (re)-create symlink files
 
 Sample of my `.bash_profile.local` but file are not in VCS to prevent miss-usage of indentity.
 
@@ -27,6 +28,13 @@ GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 # Set the credentials (modifies ~/.gitconfig)
 git config --global user.name "$GIT_AUTHOR_NAME"
 git config --global user.email "$GIT_AUTHOR_EMAIL"
+```
+
+Sample gitconfig.local
+```
+[user]
+	name = <user name>
+	email = <user@email.com>
 ```
 
 # usefull snippet

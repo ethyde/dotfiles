@@ -10,7 +10,7 @@
 	# Overide local GitHook
 	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
 [include]
-	path = ~/git/.gitconfig.local
+	path = ~/.gitconfig.local
 [diff]
 	# Use better, descriptive initials (c, i, w) instead of a/b.
 	# c for Commit (generaly  HEAD)
