@@ -65,7 +65,6 @@ if ! fgrep -q "${BREW_PREFIX}/bin/bash" /etc/shells; then
   chsh -s "${BREW_PREFIX}/bin/bash";
 fi;
 
-
 # Install `wget` with IRI support.
 brew install wget --with-iri
 
@@ -85,6 +84,15 @@ brew install --cask iterm2
 
 # Install VS Codium
 brew install --cask vscodium
+
+# Install OneDrive
+brew install --cask onedrive
+
+# Install Obsidian
+brew install --cask obsidian
+
+# Install Heynote
+brew install --cask heynote
 
 # Rename iterm config file
 mv ~/Library/Preferences/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist.old
