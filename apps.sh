@@ -94,6 +94,12 @@ brew install --cask obsidian
 # Install Heynote
 brew install --cask heynote
 
+# Install KeePassXC
+brew install --cask keepassxc
+
+# Install Script Kit
+brew install --cask kit
+
 # Rename iterm config file
 mv ~/Library/Preferences/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist.old
 
@@ -104,7 +110,7 @@ ln -s "$(pwd)/iterm/com.googlecode.iterm2.plist" ~/Library/Preferences/com.googl
 brew install zsh zsh-completions
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 # put the original .zshrc back
-mv .zshrc.pre-oh-my-zsh .zshrc
+# mv .zshrc.pre-oh-my-zsh .zshrc
 # make zsh default
 chsh -s $(which zsh)
 

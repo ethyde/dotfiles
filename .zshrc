@@ -100,9 +100,9 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# if [ -f ~/.bash_profile ]; then
-#    source ~/.bash_profile
-# fi
+if [ -f ~/.bash_profile ]; then
+   source ~/.bash_profile
+fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
