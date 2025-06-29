@@ -35,7 +35,15 @@
       "~/.bash_profile": "./shell/.bash_profile",
       "~/.bash_alias": "./shell/.bash_alias",
       "~/.bash_profile.local": "./shell/.bash_profile.local",
-      "~/.profile": "./shell/.profile"
+      "~/.profile": "./shell/.profile",
+      "~/.local/bin/aklo": {
+        "path": "aklo/bin/aklo",
+        "force": true
+      },
+      "~/.local/bin/toggle_push.sh": {
+        "path": "bin/toggle_push.sh",
+        "force": true
+      }
     }
   }
 ]
