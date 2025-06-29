@@ -69,7 +69,6 @@ fi;
 brew install wget --with-iri
 
 # Install more recent versions of some macOS tools.
-brew install vim --with-override-system-vi
 brew install grep
 brew install openssh
 
@@ -98,7 +97,7 @@ brew install --cask heynote
 brew install --cask keepassxc
 
 # Install Script Kit
-brew install --cask kit
+# brew install --cask kit
 
 # Rename iterm config file
 mv ~/Library/Preferences/com.googlecode.iterm2.plist ~/Library/Preferences/com.googlecode.iterm2.plist.old
