@@ -24,4 +24,28 @@ elif ! agent_has_keys; then
     add_all_keys
 else
     echo "Agent SSH prêt et clés déjà chargées."
+fi
+
+# ==============================================================================
+#                      VÉRIFICATION INITIALE DE LA VERSION NODE.JS
+#
+#    Vérifie s'il y a un .nvmrc dans le répertoire courant au démarrage
+#    et ajuste la version de Node.js en conséquence.
+# ==============================================================================
+if command -v nvm &> /dev/null; then
+    local nvmrc_path
+    nvmrc_path=$(nvm_find_up .nvmrc)
+    
+    if [[ -n "$nvmrc_path" ]]; then
+        local nvmrc_version
+        nvmrc_version=$(<"$nvmrc_path/.nvmrc")
+        echo "Fichier .nvmrc détecté avec la version: $nvmrc_version"
+        
+        if ! nvm use 2>/dev/null; then
+            echo "Version Node.js '$nvmrc_version' non installée, installation..."
+            nvm install
+        else
+            echo "Version Node.js activée: $(nvm current)"
+        fi
+    fi
 fi 
