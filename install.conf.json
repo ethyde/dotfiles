@@ -38,6 +38,7 @@
 
       "~/.shell_functions": "./shell/.shell_functions",
       "~/.shell_aliases": "./shell/.shell_aliases",
+      "~/.shell_interactive_setup": "./shell/.shell_interactive_setup",
 
       "~/.gitconfig": "./git/.gitconfig",
       "~/.gitignore_global": {
