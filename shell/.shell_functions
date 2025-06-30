@@ -248,47 +248,48 @@ git_pull_request() {
 # en lisant les commentaires de catégorie directement depuis le .gitconfig
 # Usage: git aliases
 git_display_help() {
-  # awk est utilisé pour parser le fichier .gitconfig
-  # Il recherche la section [alias], puis lit les commentaires formatés
-  # comme des titres de catégorie et affiche les alias qui suivent.
-  awk '
-    BEGIN {
-      in_alias_section = 0
-      current_category = "Alias Généraux"
-      C_CAT="\033[1;34m"
-      C_ALIAS="\033[1;33m"
-      C_CMD="\033[0;37m"
-      C_RST="\033[0m"
-    }
+  (
+    # Exécution dans une sous-shell pour isoler les variables et les couleurs
+    in_alias_section=0
+    current_category="Alias Généraux"
+    C_CAT=$(printf '\033[1;34m')
+    C_ALIAS=$(printf '\033[1;33m')
+    C_CMD=$(printf '\033[0;37m')
+    C_RST=$(printf '\033[0m')
 
-    /^\s*\[alias\]\s*$/ {
-      in_alias_section = 1
-      print "\n" C_CAT "---- " current_category " ----" C_RST
-      next
-    }
-
-    /^\s*\[.*\]\s*$/ {
-      if (in_alias_section) {
-        in_alias_section = 0
-      }
-    }
-
-    in_alias_section == 1 {
-      # Cherche une ligne de commentaire qui ressemble à un titre de catégorie
-      # Ex: #   Aide & Introspection  =====
-      if (match($0, /#\s+([A-Za-z0-9 &].+)\s+=====/, m)) {
-        current_category = m[1]
-        print "\n" C_CAT "---- " current_category " ----" C_RST
-        next
-      }
-      
-      # Cherche une ligne qui définit un alias
-      # Ex: lg  =   log --graph ...
-      if (match($0, /^\s*([a-zA-Z0-9-]+)\s*=\s*(.*)/, m)) {
-        printf "  " C_ALIAS "%-12s" C_RST C_CMD "%s\n" C_RST, m[1], m[2]
-      }
-    }
-  ' ~/.gitconfig
+    # Lecture du fichier .gitconfig ligne par ligne de manière portable
+    while IFS= read -r line || [ -n "$line" ]; do
+      # Utilisation de 'case' pour une meilleure portabilité (Bash, Zsh, sh)
+      case "$line" in
+        # Note: Les guillemets autour de [alias] sont importants pour 'case'
+        "["alias"]"*)
+          in_alias_section=1
+          printf "\n%s---- %s ----%s\n" "$C_CAT" "$current_category" "$C_RST"
+          ;;
+        "["*)
+          # Si on rencontre une autre section, on arrête de traiter les alias
+          if [ "$in_alias_section" -eq 1 ]; then
+            in_alias_section=0
+          fi
+          ;;
+        *)
+          # Traitement des lignes uniquement si on est dans la section [alias]
+          if [ "$in_alias_section" -eq 1 ]; then
+            # Recherche d'une ligne de catégorie, ex: #   Nom Catégorie  =====
+            if echo "$line" | grep -q '^\s*#\s*.*\s\+=====$'; then
+              current_category=$(echo "$line" | sed -e 's/^\s*#\s*//' -e 's/\s\+=====.*$//')
+              printf "\n%s---- %s ----%s\n" "$C_CAT" "$current_category" "$C_RST"
+            # Recherche d'une ligne d'alias valide (non commentée)
+            elif echo "$line" | grep -q '^\s*[a-zA-Z0-9-]\+\s*=.*'; then
+              key=$(echo "$line" | sed -e 's/\s*=.*//' -e 's/^\s*//')
+              value=$(echo "$line" | sed 's/.*=\s*//')
+              printf "  %s%-12s%s %s%s\n" "$C_ALIAS" "$key" "$C_RST" "$C_CMD" "$value"
+            fi
+          fi
+          ;;
+      esac
+    done
+  ) < ~/.gitconfig
 }
 
 # ==============================================================================
@@ -403,4 +404,27 @@ cd() {
       nvm use default >/dev/null
     fi
   fi
+}
+
+# ==============================================================================
+#                      Rechargement du Shell
+# ==============================================================================
+
+# Supprime un éventuel alias 'reload' pour éviter les conflits avant de
+# définir la fonction. Le '2>/dev/null || true' assure que la commande
+# ne génère pas d'erreur si l'alias n'existe pas.
+unalias reload 2>/dev/null || true
+
+# Recharge le shell en cours d'exécution de manière fiable.
+# Détecte s'il s'agit de Bash ou Zsh et utilise 'exec' pour un
+# rechargement complet, équivalent à un redémarrage.
+reload() {
+    echo "Rechargement du shell..."
+    if [ -n "$BASH_VERSION" ]; then
+        exec bash
+    elif [ -n "$ZSH_VERSION" ]; then
+        exec zsh
+    else
+        echo "Shell non supporté pour le rechargement automatique."
+    fi
 }

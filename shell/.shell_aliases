@@ -6,7 +6,8 @@
 # --- Navigation & Commandes Fun ---
 alias workspace="cd /Users/eplouvie/Projets/"
 alias ws=workspace
-alias reload="source ~/.zshrc" # ou ~/.bashrc selon le shell
+# La fonction de rechargement est maintenant gérée dans ~/.shell_functions
+# alias reload="exec zsh"
 
 alias beautiful="clear && echo -e '\nI dont appreciate your sarcasm . . .' && sleep 1 && exit"
 alias perfect="echo -e '\nNo, YOURE perfect. . .'"

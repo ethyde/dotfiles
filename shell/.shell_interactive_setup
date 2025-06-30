@@ -1,0 +1,27 @@
+# ~/.shell_interactive_setup
+# ==============================================================================
+#      SCRIPTS POUR LES SESSIONS INTERACTIVES (Bash, Zsh, etc.)
+#
+#    Ce fichier est sourcé par .bashrc et .zshrc pour assurer un
+#    comportement identique au démarrage des sessions interactives.
+# ==============================================================================
+
+
+# ==============================================================================
+#                      AUTO-CHARGEMENT DE L'AGENT SSH
+#
+#    Vérifie l'état de l'agent SSH et charge les clés si nécessaire.
+#    Affiche des messages pour informer l'utilisateur.
+# ==============================================================================
+agent_load_env
+if ! agent_is_running; then
+    echo "Agent SSH non trouvé, démarrage..."
+    agent_start
+    echo "Agent démarré. Tentative de chargement des clés..."
+    add_all_keys
+elif ! agent_has_keys; then
+    echo "Agent SSH trouvé, mais aucune clé chargée. Tentative..."
+    add_all_keys
+else
+    echo "Agent SSH prêt et clés déjà chargées."
+fi 

@@ -13,6 +13,9 @@
 # 3. Charger tous les alias partagés (la syntaxe est compatible)
 [ -f ~/.shell_aliases ] && . ~/.shell_aliases
 
+# 4. Charger les scripts de démarrage interactifs partagés (SSH, etc.)
+[ -f ~/.shell_interactive_setup ] && . ~/.shell_interactive_setup
+
 
 # ==============================================================================
 #      SPÉCIFIQUE À ZSH (Oh My Zsh, Powerlevel10k, Plugins...)
@@ -26,7 +29,9 @@ fi
 # --- Oh My Zsh ---
 export ZSH=/Users/eplouvie/.oh-my-zsh
 ZSH_THEME="powerlevel10k/powerlevel10k"
-plugins=(zsh-better-npm-completion)
+# Le plugin 'zsh-better-npm-completion' n'a pas été trouvé, ce qui causait une erreur.
+# Je le commente pour résoudre le problème. Si vous l'utilisez, il faudra l'installer correctement.
+# plugins=(zsh-better-npm-completion)
 source $ZSH/oh-my-zsh.sh
 
 # --- Complétion Zsh via Homebrew ---
