@@ -67,16 +67,16 @@ get_artefact_header() {
   #   - s/^[^:]*: \`*\([^`]*\)\`*$/\1/ : C'est l'expression de remplacement.
   #     - s/.../.../ : Commande de substitution.
   #     - ^[^:]*: : Capture tout depuis le début de la ligne jusqu'aux deux-points et l'espace.
-  #     - \`*\([^`]*\)\`* : C'est le groupe de capture. Il prend tout ce qui n'est pas un backtick (`),
+  #     - Group capture : Il prend tout ce qui n'est pas un backtick,
   #       et est lui-même entouré de potentiels backticks.
   #     - /\1/ : Remplace toute la ligne par le contenu du premier groupe de capture.
   #   - p : Imprime la ligne si une substitution a eu lieu.
-  sed -n "/^${HEADER_KEY}:/s/^[^:]*: \`*\([^`]*\)\`*$/\1/p" "$ARTEFACT_FILE"
+  sed -n "/^${HEADER_KEY}:/s/^[^:]*: \`*\([^\`]*\)\`*$/\1/p" "$ARTEFACT_FILE"
 }
 
 # Fonction: get_config (Version 2 - avec surcharge locale)
 # Rôle: Lit une valeur dans la configuration. Elle cherche d'abord un fichier
-#       `.aklo.conf` à la racine du projet courant pour des configurations
+#       .aklo.conf à la racine du projet courant pour des configurations
 #       spécifiques, et se rabat sur le fichier global dans les dotfiles
 #       si aucune configuration locale n'est trouvée.
 #
@@ -223,18 +223,18 @@ get_template_from_protocol() {
   # 1. '$0 ~ title { in_section=1 }' : Si la ligne courante ('$0') contient le titre
   #                                    de la section, on active un drapeau 'in_section'.
   # 2. 'in_section && /```markdown/ { in_code_block=1; next }' : Si on est dans la bonne
-  #                                    section ET qu'on trouve le début du bloc de code (```markdown),
+  #                                    section ET qu'on trouve le début du bloc de code (backtick-markdown),
   #                                    on active un second drapeau 'in_code_block' et on
   #                                    passe immédiatement à la ligne suivante ('next').
   # 3. 'in_section && /```/ { in_code_block=0; in_section=0 }' : Si on trouve la balise
-  #                                    de fin de bloc de code (```), on désactive les deux drapeaux.
+  #                                    de fin de bloc de code (backticks), on désactive les deux drapeaux.
   # 4. 'in_code_block { print }' : Si le drapeau 'in_code_block' est actif, alors on
   #                                imprime la ligne courante.
   #
   awk -v title="$SECTION_TITLE" '
     $0 ~ title { in_section=1 }
-    in_section && /```markdown/ { in_code_block=1; next }
-    in_section && /```/ { in_code_block=0; in_section=0 }
+    in_section && /^```markdown/ { in_code_block=1; next }
+    in_section && /^```$/ { in_code_block=0; in_section=0 }
     in_code_block { print }
   ' "$PROTOCOL_FILE"
 }
@@ -335,9 +335,8 @@ command_propose_pbi() {
   
   # --- Étape 2 : Assignation des variables ---
   PBI_TITLE="$1"
-  # Le chemin vers le répertoire des PBI est relatif au lien symbolique.
-  # L'utilisation de '..' permet de remonter depuis 'CHARTE_IA' vers 'docs/'.
-  PBI_PATH="./docs/CHARTE_IA/../backlog/00-pbi"
+  # Le chemin vers le répertoire des PBI
+  PBI_PATH="./docs/backlog/00-pbi"
   # On appelle notre fonction utilitaire pour obtenir un nouvel ID unique.
   PBI_ID=$(get_next_id "$PBI_PATH" "PBI-")
   # On construit le nom de fichier final.
@@ -361,12 +360,16 @@ command_propose_pbi() {
 
   # --- Étape 4 : Création de l'Artefact ---
   echo "› Création de l'artefact..."
+  # Créer le répertoire parent s'il n'existe pas
+  mkdir -p "$(dirname "$FILENAME")"
   # On utilise 'sed' pour remplacer les placeholders sémantiques (ex: [ID])
   # par les valeurs réelles directement. Les expressions régulières sont
   # échappées (\[, \]) pour correspondre aux crochets littéraux.
   echo "$RAW_TEMPLATE" | \
-    sed -e "s/\[ID\]/${PBI_ID}/g" \
-        -e "s/\[Titre concis du PBI\]/${PBI_TITLE}/g" > "$FILENAME"
+    sed -e "s/%%ID%%/${PBI_ID}/g" \
+        -e "s/%%TITLE%%/${PBI_TITLE}/g" \
+        -e "s/\[ID\]/${PBI_ID}/g" \
+        -e "s/\$(date +'%Y-%m-%d')/$(date +'%Y-%m-%d')/g" > "$FILENAME"
   
   echo "✅ Artefact créé : ${FILENAME}"
 }

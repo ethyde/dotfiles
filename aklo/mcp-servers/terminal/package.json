@@ -1,0 +1,20 @@
+{
+  "name": "@aklo/mcp-terminal",
+  "version": "1.0.0",
+  "description": "Serveur MCP pour gestion du terminal dans l'écosystème Aklo",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["aklo", "mcp", "terminal", "shell"],
+  "author": "Aklo Protocol",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

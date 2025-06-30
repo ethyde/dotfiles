@@ -26,7 +26,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Supprime l'avertissement de sortie console pour éviter les blocages avec les outils externes
+# Supprime l'avertissement de sortie console
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # --- Oh My Zsh ---
