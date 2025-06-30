@@ -1,178 +1,141 @@
+# ==============================================================================
+#                      Configuration Principale de Git
+# ==============================================================================
+
 # https://gist.github.com/pksunkara/988716
 # http://www.git-attitude.fr/2013/04/03/configuration-git/
 [core]
-	editor = codium --wait
-	# Don't consider trailing space change as a cause for merge conflicts
-	whitespace = -trailing-space
-	excludesfile = ~/.gitignore_global
-	# need Git 2.9
-	# Source : http://stackoverflow.com/questions/1977610/change-default-git-hooks/37293001#37293001
-	# Overide local GitHook
-	# hooksPath = ~/Projects/Labs/dotfiles/git/githooks
+    editor = codium --wait
+    whitespace = -trailing-space
+    excludesfile = ~/.gitignore_global
+
 [include]
-	path = ~/.gitconfig.local
+    # Pour les configurations locales/privées (ex: user.email)
+    path = ~/.gitconfig.local
+
 [diff]
-	# Use better, descriptive initials (c, i, w) instead of a/b.
-	# c for Commit (generaly  HEAD)
-	# i for Index (stage)
-	# w for Working directory
-	mnemonicPrefix = true
-	# define default-difftool has diff tool.
-	tool = default-difftool
-	# When using --word-diff, assume --word-diff-regex=.
-	wordRegex = .
+    mnemonicPrefix = true
+    tool = default-difftool
+    wordRegex = .
+
 [difftool "default-difftool"]
-	cmd = codium --wait --diff $LOCAL $REMOTE
+    cmd = codium --wait --diff $LOCAL $REMOTE
+
 [commit]
-	# template = ~/Projects/Labs/dotfiles/git/.gitmessage
-	status = true # add/remove default commit msg
-	verbose = true # Git commit --verbose by default : https://github.com/git/git/blob/v2.9.0/Documentation/RelNotes/2.9.0.txt#L150
+    status = true
+    verbose = true
+
 [push]
-	# Default push should only push the current branch to its push target, regardless of its remote name
-	default = upstream
-	autoSetupRemote = true
+    default = upstream
+    autoSetupRemote = true
+
 [gitflow "prefix"]
-	feature = feat/
-	hotfix = fix/
-	performance = perf/
+    feature = feat/
+    hotfix = fix/
+    performance = perf/
+
 [color]
-	ui = auto
+    ui = auto
 [color "branch"]
-	current = yellow bold
-	local = green bold
-	remote = cyan bold
+    current = yellow bold
+    local = green bold
+    remote = cyan bold
 [color "diff"]
-	meta = yellow bold
-	frag = magenta bold
-	old = red bold
-	new = green bold
-	whitespace = red reverse
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
 [color "status"]
-	added = green bold
-	changed = yellow bold
-	untracked = red bold
+    added = green bold
+    changed = yellow bold
+    untracked = red bold
+
 [merge]
-	# Display common-ancestor blocks in conflict hunks
-	conflictStyle = diff3
+    conflictStyle = diff3
+
 [log]
-	# Use abbrev SHAs whenever possible/relevant instead of full 40 chars
-	abbrevCommit = true
+    abbrevCommit = true
+
 [url "https://github.com/"]
-	# use Shorcut for repo
-	# Usage : $ git clone gh:walesmd/walesmd.github.io
-	# Source : http://michaelwales.com/articles/make-gitconfig-work-for-you/
     insteadOf = gh:
+
+# ==============================================================================
+#                               ALIASES GIT
+#
+#   Cette section est organisée par catégories pour être parsée par l'alias
+#   'git help' (qui utilise la fonction git_display_help dans ~/.git_functions)
+#
+# ==============================================================================
 [alias]
-	#	Pretty Log	=====
-	lg	=	log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
-	# Source for following Alias https://thestandardoutput.com/posts/useful-git-aliases/
-	#	List commits as above but also showing changed files.	=====
-	ll	=	log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
-	#	Afficher un historique condensé des commits	=====
-	oneline	=	log --pretty=oneline --abbrev-commit --graph
-	#	Afficher les changements réalisés depuis le dernier pull	=====
-	lc	=	!git oneline ORIG_HEAD.. --stat --no-merges
-	#	List UnPuShed Commit	=====
-	ups	=	log --branches --not --remotes --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
-	#	Get pretty formatted tags list	=====
-	# https://www.everythingcli.org/git-like-a-pro/
-	tags-l	=	!"git for-each-ref \
-    --sort=taggerdate \
-    --format '%(tag)_,,,_%(taggerdate:raw)_,,,_%(taggername)_,,,_%(subject)' refs/tags \
-    | awk 'BEGIN { FS = \"_,,,_\"  } ; { t=strftime(\"%Y-%m-%d  %H:%M\",$2); printf \"%-20s %-18s %-25s %s\\n\", t, $1, $4, $3  }'"
-	#	Find alias and list all who match	=====
-	# From https://github.com/sjas/.dotfiles
-	a-list	=	"!grep '\t=' ~/.gitconfig | sed -e 's/=/\\o033[0;31m=\\o033[0m/g' | sed -e 's/#.*/\\o033[0;32m&\\o033[0m/g' | less -R"
-	# Source : http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
-	a-list-2 = "!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%-10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
-	#	Set Upstream	(after a Push Origin)	=====
-	# Source : http://aaronbonner.io/post/80766268890/git-alias-to-simplify-setting-upstream-branch
-	su	=	!git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
-	# This after are adapted from same source has above
-	#	Add All And Commit	=====
-	aac	=	!git add --all && git commit
-	#	Quick Save	=====
-	# From http://haacked.com/archive/2014/07/28/github-flow-aliases/
-	save	=	!git aac --no-verify -m 'SAVEPOINT'
-	wip	=	!git aac --no-verify -m
-	#	Proper Reset	=====
-	# You can run the git reflog command and find the SHA of the commit if you realize later that you made a mistake with the reset. The commit message will be “WIPE SAVEPOINT” in this case
-	wipe	=	!git aac --no-verify -qm '${1-WIPE-SAVEPOINT}' && git reset HEAD~1 --hard
-	#	Reset last Commit but keep change in directory	=====
-	undo	=	reset HEAD~1 --mixed
-	#	Branch Tools	=====
-	# Sync Branch : fetch from remote, rebase from remote
-	# Default Branch : master
-	#	Update Current Branch with Remote	=====
-	# Si Git previous 1.8.5 https://delicious-insights.com/fr/articles/bien-utiliser-git-merge-et-rebase/#le-pi-ge-de-git-pull-et-du-r-flexe-pull-push-
-	b-sync	=	!git fetch origin ${1-master} && git rebase --preserve-merges origin/${1-master}
-	# Si git after 1.8.5 you can use this to sync
-	b-sync-new = !git pull --rebase=preserve --prune $@ && git submodule update --init --recursive
-	#	Get current branch name	=====
-	# (not so useful in itself, but can be used in other aliases)
-	# Source : https://gist.github.com/robmiller/6018582
-	b-name	=	!git rev-parse --abbrev-ref HEAD
-	#	Start a new branch with name newBranch	=====
-	# Start newBranch, push to origin newbranch, set-upstream
-	b-start	=	"!f() { git checkout -b ${1-newBranch} && git push origin ${1-newBranch} && git su && git n-clean; }; f"
-	#	NPM Cleanup	=====
-	n-clean	=	"!npm install --no-package-lock --production && npm prune"
-	#	Delete Branch Local and Remote	=====
-	# no default
-	b-del	=	"!f() { git branch --delete $1 && git push origin --delete $1; }; f"
-	b-del-f	=	"!f() { git branch --delete --force $1 && git push origin --delete --force $1; }; f"
-	#	Local Spring Cleaning Branch after PR Remove locals branchs already merged	=====
-	# Source : https://haacked.com/archive/2014/07/28/github-flow-aliases/
-	# Default Branch : master
-	b-update = !git pull --rebase --prune $@ && git submodule update --init --recursive
-	b-clean	=	"!f() { git branch --merged ${1-master} | grep -v "${1-master}$" | xargs git branch --delete; }; f"
-	b-done	=	"!f() { git checkout ${1-master} && git b-update && git b-clean ${1-master} && git n-clean; }; f"
-	b-squash	=	!git rbi $(git merge-base --fork-point ${1-master})
-	#	PR management for Github, Bitbucket and Gitlab	=====
-	# Source : https://gist.github.com/gnarf/5406589
-	# git pr-<provider-name> <pull-request-branche> <pull-request-number>
-	# <pull-request-branche> default : pr
-	# Can be improved with : https://gist.github.com/metlos/9368527#file-aliases-L61
-	pr-gh	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
-	pr-bb	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull-requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
-	pr-gl	=	"!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/merge_requests/$2/head:${1-pr}/$2 && git checkout ${1-pr}/$2; }; f"
-	#	Add	=====
-	a	=	add
-	aa	=	add --all
-	ai	=	add --interactive
-	#	Branch	=====
-	b	=	branch
-	ba	=	branch --all
-	bd	=	branch --delete
-	bm	=	branch --move
-	#	Commit	=====
-	c	=	commit
-	ca	=	commit --amend
-	caa	=	commit --all --amend
-	#	Checkout	=====
-	co	=	checkout
-	cob	=	checkout -b
-	#	Fetch	=====
-	f	=	fetch
-	fo	=	fetch origin
-	fu	=	fetch upstream
-	#	Merge	=====
-	m	=	merge
-	ma	=	merge --abort
-	mc	=	merge --continue
-	ms	=	merge --skip
-	#	Pull	=====
-	pl	=	pull
-	plo	=	pull origin
-	plr	=	pull --rebase
-	#	Push	=====
-	ps	=	push
-	pso	=	push origin
-	#	Rebase	=====
-	rb	=	rebase
-	rba	=	rebase --abort
-	rbc	=	rebase --continue
-	rbi	=	rebase --interactive
-	rbs	=	rebase --skip
-	#	Status	=====
-	s	=	status
+    #   Aide & Introspection  =====
+    # Affiche cette aide-mémoire formatée
+    aliases = "!. ~/.shell_functions && git_display_help"
+
+    #   Logs & Historique  =====
+    # Log graphique et concis
+    lg      = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    # Log graphique avec la liste des fichiers modifiés
+    ll      = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue) %Creset' --abbrev-commit --decorate --numstat
+    # Log sur une seule ligne
+    oneline = log --pretty=oneline --abbrev-commit --graph
+    # Affiche les changements depuis le dernier pull
+    lc      = "!. ~/.shell_functions && git_log_since_last_pull"
+    # Affiche les commits non "pushés"
+    ups     = "!. ~/.shell_functions && git_log_unpushed"
+    # Liste les tags de manière formatée et triée
+    tags-l  = "!. ~/.shell_functions && git_list_tags_formatted"
+
+    #   Workflow & Sauvegardes Rapides  =====
+    # Ajoute tous les fichiers et ouvre l'éditeur pour le commit
+    aac     = "!f() { . ~/.shell_functions && git_add_all_and_commit \"$@\"; }; f"
+    # Commit rapide "SAVEPOINT" sans vérification des hooks
+    save    = "!. ~/.shell_functions && git_savepoint"
+    # Commit rapide "Work In Progress" avec un message en ligne de commande
+    wip     = "!f() { . ~/.shell_functions && git_work_in_progress \"$@\"; }; f"
+    # Annule le dernier commit mais garde les changements dans les fichiers
+    undo    = reset HEAD~1 --mixed
+    # "Efface" les changements mais les garde en sécurité dans le reflog
+    wipe    = "!f() { . ~/.shell_functions && git_wipe_savepoint \"$@\"; }; f"
+
+    #   Gestion des Branches  =====
+    # Définit la branche amont (upstream) pour la branche actuelle
+    su      = "!. ~/.shell_functions && git_set_upstream"
+    # Affiche le nom de la branche actuelle
+    b-name  = rev-parse --abbrev-ref HEAD
+    # Démarre une nouvelle branche, la push et configure l'upstream
+    b-start = "!f() { . ~/.shell_functions && git_branch_start \"$@\"; }; f"
+    # Supprime une branche en local et sur le remote
+    b-del   = "!f() { . ~/.shell_functions && git_branch_delete \"$@\"; }; f"
+    # Force la suppression une branche en local et sur le remote
+    b-del-f = "!f() { . ~/.shell_functions && git_branch_delete_force \"$@\"; }; f"
+    # Lance un rebase interactif depuis le point de divergence avec la branche cible (master par défaut)
+    b-squash = "!f() { . ~/.shell_functions && git_branch_squash \"$@\"; }; f"
+
+    #   Synchronisation & Nettoyage  =====
+    # Met à jour la branche locale (pull --rebase) et les submodules
+    sync    = "!f() { . ~/.shell_functions && git_branch_sync \"$@\"; }; f"
+    # Supprime les branches locales déjà fusionnées dans la branche cible (master par défaut)
+    b-clean = "!f() { . ~/.shell_functions && git_branch_clean \"$@\"; }; f"
+    # Workflow complet de fin de tâche : sync, nettoyage des branches et des dépendances
+    b-done  = "!f() { . ~/.shell_functions && git_branch_done \"$@\"; }; f"
+    # Nettoyage des dépendances NPM pour la production
+    n-clean = "!. ~/.shell_functions && git_npm_clean"
+
+    #   Gestion des Pull Requests (PR)  =====
+    # Récupère une PR. Usage : git pr <gh|bb|gl> <numéro_pr> [nom_branche_locale]
+    pr      = "!f() { . ~/.shell_functions && git_pull_request \"$@\"; }; f"
+
+    #   Raccourcis Simples (1-2 lettres)  =====
+    a       = add
+    aa      = add --all
+    ai      = add --interactive
+    b       = branch
+    ba      = branch --all
+    bd      = branch --delete
+    bm      = branch --move
+    c       = commit
+    ca      = commit --amend
+    caa     = commit --all --amend
+    co      = checkout
+    cob     = checkout -b

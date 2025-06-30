@@ -1,0 +1,29 @@
+# ~/.shell_aliases
+# ==============================================================================
+#      BIBLIOTHÈQUE D'ALIAS SHELL (pour Bash et Zsh)
+# ==============================================================================
+
+# --- Navigation & Commandes Fun ---
+alias workspace="cd /Users/eplouvie/Projets/"
+alias ws=workspace
+alias reload="source ~/.zshrc" # ou ~/.bashrc selon le shell
+
+alias beautiful="clear && echo -e '\nI dont appreciate your sarcasm . . .' && sleep 1 && exit"
+alias perfect="echo -e '\nNo, YOURE perfect. . .'"
+alias damnit="echo -e '\nUh oh. . . did you try googling it?' && open https://www.google.fr"
+alias no="echo -e '\nDude, just google it.' && open https://www.google.fr"
+alias okay="echo -e '\nGreat, bye felicia' && sleep 2 && exit"
+alias awesome="echo -e '\nI dont appreciate your sarcasm' && sleep 2 && exit"
+
+alias g='git'
+# NPM Run
+alias nr='npm run'
+#	NPM Cleanup	=====
+# https://stackoverflow.com/questions/12478679/npm-install-vs-update-whats-the-difference
+alias	n-clean='npm install --no-package-lock --production && npm prune'
+
+# La commande 'cd' est maintenant directement définie comme une fonction
+# dans ~/.shell_functions pour une meilleure robustesse.
+# L'alias n'est plus nécessaire.
+# --- Override de 'cd' pour utiliser la fonction cdnvm ---
+# alias cd='cdnvm'

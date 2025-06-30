@@ -20,29 +20,47 @@
     ]
   },
   {
+    "create": [
+      "~/.config",
+      "~/.local",
+      "~/.local/bin"
+    ]
+  },
+  {
     "link": {
-      "~/.gitconfig": "./git/.gitconfig",
-      "~/.gitconfig.local": "./git/.gitconfig.local",
-      "~/.gitignore_global": {
-        "force": true,
-        "path": "./git/.gitignore_global"
-      },
-      "~/.zshrc": {
-        "force": true,
-        "path": ".zshrc"
-      },
-      "~/.bashrc": "./shell/.bashrc",
-      "~/.bash_profile": "./shell/.bash_profile",
-      "~/.bash_alias": "./shell/.bash_alias",
-      "~/.bash_profile.local": "./shell/.bash_profile.local",
       "~/.profile": "./shell/.profile",
+      "~/.bash_profile": "./shell/.bash_profile",
+      "~/.bashrc": "./shell/.bashrc",
+      "~/.zshrc": {
+          "path": ".zshrc",
+          "force": true
+      },
+
+      "~/.shell_functions": "./shell/.shell_functions",
+      "~/.shell_aliases": "./shell/.shell_aliases",
+
+      "~/.gitconfig": "./git/.gitconfig",
+      "~/.gitignore_global": {
+          "path": "./git/.gitignore_global",
+          "force": true
+      },
+      
+      "~/.gitconfig.local": {
+          "path": "./git/.gitconfig.local",
+          "if": "[ -f ./git/.gitconfig.local ]"
+      },
+      "~/.bash_profile.local": {
+          "path": "./shell/.bash_profile.local",
+          "if": "[ -f ./shell/.bash_profile.local ]"
+      },
+
       "~/.local/bin/aklo": {
-        "path": "aklo/bin/aklo",
-        "force": true
+          "path": "./aklo/bin/aklo",
+          "force": true
       },
       "~/.local/bin/toggle_push.sh": {
-        "path": "bin/toggle_push.sh",
-        "force": true
+          "path": "./bin/toggle_push.sh",
+          "force": true
       }
     }
   }
