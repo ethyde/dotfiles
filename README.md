@@ -1,20 +1,37 @@
-# My DotFile
+# 🏠 My Dotfiles
 
-Git Commit Message template are modified in `.gitconfig` :
+Configuration moderne et améliorée pour un environnement de développement productif.
 
+## 🚀 Installation rapide
+
+```bash
+# Cloner le repo
+git clone https://github.com/votre-username/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+
+# Installer les applications (optionnel)
+./apps.sh
+
+# Créer les liens symboliques
+./install
 ```
-[commit]
-	template = ~/path/to/gitmessage/template/.gitmessage
-```
 
-On OSX Make file (hook, $.sh, etc.) executable :
-`$ cd path/to/repository/githooks && chmod +x <file_name>`
+## ✨ Fonctionnalités principales
 
-All sources are documented in file where are used
+### 🐚 **Shell amélioré** (voir [shell/README.md](shell/README.md))
+- Fonctions SSH, NVM et Git avec affichage coloré
+- Mode silencieux compatible Powerlevel10k
+- Gestion automatique des clés SSH et versions Node.js
 
-<!-- Use `./bootstrap.sh` to install/update files.  -->
-Use `./apps.sh` to install all needed apps (iterm2, zsh with Oh My Zsh, etc.)
-Use `./install` to force (re)-create symlink files
+### ⚙️ **Configuration automatique**
+- Liens symboliques via dotbot
+- Support Bash et Zsh
+- Variables d'environnement partagées
+
+### 🛠️ **Outils intégrés**
+- Script Aklo pour la gestion de projets
+- Templates Git personnalisés
+- Aliases et fonctions optimisées
 
 Sample of my `.bash_profile.local` but file are not in VCS to prevent miss-usage of indentity.
 

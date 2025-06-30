@@ -16,7 +16,13 @@ alias no="echo -e '\nDude, just google it.' && open https://www.google.fr"
 alias okay="echo -e '\nGreat, bye felicia' && sleep 2 && exit"
 alias awesome="echo -e '\nI dont appreciate your sarcasm' && sleep 2 && exit"
 
+# --- Git de base ---
 alias g='git'
+
+# ==============================================================================
+#      AUTRES ALIASES
+# ==============================================================================
+
 # NPM Run
 alias nr='npm run'
 #	NPM Cleanup	=====
