@@ -13,17 +13,37 @@
 #    Vérifie l'état de l'agent SSH et charge les clés si nécessaire.
 #    Affiche des messages pour informer l'utilisateur.
 # ==============================================================================
+# Chargement de l'agent SSH avec gestion intelligente de l'affichage
 agent_load_env
+
+# Détermine si on doit afficher les messages (reload manuel vs démarrage auto)
+local should_show_ssh_status=false
+if [[ "$DOTFILES_VERBOSE_SSH" == "true" ]] || [[ "$DOTFILES_MANUAL_RELOAD" == "true" ]]; then
+    should_show_ssh_status=true
+fi
+
 if ! agent_is_running; then
-    echo "Agent SSH non trouvé, démarrage..."
-    agent_start
-    echo "Agent démarré. Tentative de chargement des clés..."
-    add_all_keys
+    if [[ "$should_show_ssh_status" == "true" ]]; then
+        echo "🚀 Démarrage de l'agent SSH..."
+    fi
+    agent_start >/dev/null 2>&1
+    add_all_keys >/dev/null 2>&1
 elif ! agent_has_keys; then
-    echo "Agent SSH trouvé, mais aucune clé chargée. Tentative..."
-    add_all_keys
-else
-    echo "Agent SSH prêt et clés déjà chargées."
+    if [[ "$should_show_ssh_status" == "true" ]]; then
+        echo "🔑 Chargement des clés SSH..."
+    fi
+    add_all_keys >/dev/null 2>&1
+fi
+
+# Affichage du statut final
+if [[ "$should_show_ssh_status" == "true" ]]; then
+    if agent_is_running && agent_has_keys; then
+        echo "✅ Agent SSH prêt et clés chargées"
+    elif agent_is_running; then
+        echo "⚠️  Agent SSH actif mais aucune clé chargée"
+    else
+        echo "❌ Agent SSH non disponible"
+    fi
 fi
 
 # ==============================================================================
@@ -32,6 +52,7 @@ fi
 #    Vérifie s'il y a un .nvmrc dans le répertoire courant au démarrage
 #    et ajuste la version de Node.js en conséquence.
 # ==============================================================================
+# Gestion silencieuse de NVM au démarrage (pour éviter les conflits avec Powerlevel10k)
 if command -v nvm &> /dev/null; then
     local nvmrc_path
     nvmrc_path=$(nvm_find_up .nvmrc)
@@ -39,13 +60,19 @@ if command -v nvm &> /dev/null; then
     if [[ -n "$nvmrc_path" ]]; then
         local nvmrc_version
         nvmrc_version=$(<"$nvmrc_path/.nvmrc")
-        echo "Fichier .nvmrc détecté avec la version: $nvmrc_version"
         
+        # Chargement silencieux
         if ! nvm use 2>/dev/null; then
-            echo "Version Node.js '$nvmrc_version' non installée, installation..."
-            nvm install
-        else
-            echo "Version Node.js activée: $(nvm current)"
+            nvm install >/dev/null 2>&1
+        fi
+        
+        # Affichage si demandé explicitement ou reload manuel
+        if [[ "$DOTFILES_VERBOSE_NVM" == "true" ]] || [[ "$DOTFILES_MANUAL_RELOAD" == "true" ]]; then
+            echo "📁 .nvmrc détecté: $nvmrc_version"
+            echo "🟢 Node.js activé: $(nvm current)"
         fi
     fi
-fi 
+fi
+
+# Nettoyer la variable de reload manuel après l'initialisation
+unset DOTFILES_MANUAL_RELOAD 

@@ -1,0 +1,871 @@
+#!/bin/bash
+
+# ==============================================================================
+#                 Fonctions Shell Améliorées avec Affichage Sympa
+# ==============================================================================
+
+# Source les fonctions d'affichage
+# Essayer d'abord le chemin relatif (pour développement), puis le chemin absolu (pour utilisation)
+if [ -f "$(dirname "${BASH_SOURCE[0]}")/.shell_display" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/.shell_display"
+elif [ -f ~/.shell_display ]; then
+    source ~/.shell_display
+else
+    echo "⚠️  Attention: fichier .shell_display non trouvé"
+fi
+
+# ==============================================================================
+#                      Workflow & Sauvegardes (Version Améliorée)
+# ==============================================================================
+
+# Version améliorée de git_add_all_and_commit
+git_add_all_and_commit_enhanced() {
+  start_operation "Préparation du commit"
+  
+  # 1. Ajoute tous les fichiers au "stage"
+  print_step "Ajout de tous les fichiers au stage..."
+  git add --all
+
+  # Vérifier s'il y a des changements à committer
+  if git diff --cached --quiet; then
+    print_warning "Aucun changement à committer"
+    return 0
+  fi
+
+  # Afficher un résumé des changements
+  local changes=$(git diff --cached --stat | tail -1)
+  print_info "Changements: $changes"
+
+  # 2. Vérifie si des arguments ont été passés
+  if [ $# -gt 0 ]; then
+    print_step "Utilisation du message de commit manuel..."
+    git commit "$@"
+    if [ $? -eq 0 ]; then
+      print_success "Commit créé avec succès !"
+    else
+      print_error "Échec du commit"
+      return 1
+    fi
+  else
+    # Génération automatique du message
+    local current_branch
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
+    print_branch "$current_branch"
+
+    local type jira_issue desc formatted_desc commit_message
+    IFS='/' read -r type jira_issue desc <<< "$current_branch"
+
+    if [[ -n "$type" && -n "$jira_issue" && -n "$desc" ]]; then
+      formatted_desc=$(echo "$desc" | sed 's/-/ /g')
+      commit_message="${type}(${jira_issue}): ${formatted_desc}"
+      
+      print_info "Message généré automatiquement:"
+      echo -e "   ${C_BOLD}${C_GREEN}→ ${commit_message}${C_RESET}"
+      
+      git commit -m "${commit_message}"
+      if [ $? -eq 0 ]; then
+        print_success "Commit créé avec le message généré !"
+      else
+        print_error "Échec du commit"
+        return 1
+      fi
+    else
+      print_warning "Format de branche non reconnu (attendu: type/JIRA/desc)"
+      print_step "Ouverture de l'éditeur pour le message de commit..."
+      git commit
+    fi
+  fi
+  
+  end_operation "Commit"
+}
+
+# Version améliorée de git_branch_start
+git_branch_start_enhanced() {
+  local branch_name=${1:-newBranch}
+  
+  start_operation "Création de la nouvelle branche '$branch_name'"
+  
+  print_step "Création de la branche locale..."
+  if git checkout -b "$branch_name"; then
+    print_success "Branche '$branch_name' créée localement"
+  else
+    print_error "Échec de la création de la branche"
+    return 1
+  fi
+  
+  print_step "Push de la branche vers origin..."
+  if git push origin "$branch_name"; then
+    print_success "Branche pushée vers origin"
+  else
+    print_error "Échec du push vers origin"
+    return 1
+  fi
+  
+  print_step "Configuration du suivi amont..."
+  if git_set_upstream_enhanced; then
+    print_success "Suivi amont configuré"
+  else
+    print_warning "Échec de la configuration du suivi amont"
+  fi
+  
+  print_step "Nettoyage des dépendances NPM..."
+  git_npm_clean_enhanced
+  
+  end_operation "Création de branche '$branch_name'"
+}
+
+# Version améliorée de git_set_upstream
+git_set_upstream_enhanced() {
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  
+  if [[ -n "$current_branch" ]]; then
+    if git branch --set-upstream-to="origin/$current_branch"; then
+      print_success "Suivi amont configuré pour '$current_branch'"
+      return 0
+    else
+      print_error "Échec de la configuration du suivi amont"
+      return 1
+    fi
+  else
+    print_error "Impossible de déterminer la branche actuelle"
+    return 1
+  fi
+}
+
+# Version améliorée de git_npm_clean
+git_npm_clean_enhanced() {
+  if [[ -f "package.json" ]]; then
+    print_step "Nettoyage des dépendances NPM..."
+    if npm install --no-package-lock --production && npm prune; then
+      print_success "Dépendances NPM nettoyées"
+    else
+      print_warning "Problème lors du nettoyage NPM"
+    fi
+  else
+    print_info "Pas de package.json trouvé, nettoyage NPM ignoré"
+  fi
+}
+
+# Version améliorée de git_branch_delete
+git_branch_delete_enhanced() {
+  local branch_name=$1
+  
+  if [[ -z "$branch_name" ]]; then
+    print_error "Nom de la branche manquant"
+    echo -e "${C_DIM}Usage: git_branch_delete_enhanced <nom_branche>${C_RESET}"
+    return 1
+  fi
+  
+  start_operation "Suppression de la branche '$branch_name'"
+  
+  # Vérifier que ce n'est pas la branche actuelle
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  
+  if [[ "$current_branch" == "$branch_name" ]]; then
+    print_error "Impossible de supprimer la branche actuelle '$branch_name'"
+    print_info "Changez de branche d'abord avec: git checkout master"
+    return 1
+  fi
+  
+  print_step "Suppression de la branche locale..."
+  if git branch --delete "$branch_name"; then
+    print_success "Branche locale '$branch_name' supprimée"
+  else
+    print_warning "Échec de la suppression locale (branche peut-être non fusionnée)"
+  fi
+  
+  print_step "Suppression de la branche distante..."
+  if git push origin --delete "$branch_name"; then
+    print_success "Branche distante '$branch_name' supprimée"
+  else
+    print_warning "Échec de la suppression distante (branche peut-être inexistante)"
+  fi
+  
+  end_operation "Suppression de branche '$branch_name'"
+}
+
+# Version améliorée de git_branch_sync
+git_branch_sync_enhanced() {
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  
+  start_operation "Synchronisation de la branche '$current_branch'"
+  
+  print_step "Pull avec rebase..."
+  if git pull --rebase=preserve --prune "$@"; then
+    print_success "Branche synchronisée avec le remote"
+  else
+    print_error "Échec de la synchronisation"
+    return 1
+  fi
+  
+  print_step "Mise à jour des submodules..."
+  if git submodule update --init --recursive; then
+    print_success "Submodules mis à jour"
+  else
+    print_warning "Problème avec les submodules"
+  fi
+  
+  end_operation "Synchronisation de '$current_branch'"
+}
+
+# ==============================================================================
+#                      Gestion /etc/hosts (Version Améliorée)
+# ==============================================================================
+
+removehost_enhanced() {
+    if [[ "$1" ]]; then
+        local HOSTNAME=$1
+        
+        start_operation "Suppression de '$HOSTNAME' du fichier hosts"
+        
+        if [ -n "$(grep "$HOSTNAME" /etc/hosts)" ]; then
+            print_step "Suppression de '$HOSTNAME' de /etc/hosts..."
+            if sudo sed -i".bak" "/$HOSTNAME/d" /etc/hosts; then
+                print_success "'$HOSTNAME' supprimé de /etc/hosts"
+                print_info "Sauvegarde créée: /etc/hosts.bak"
+            else
+                print_error "Échec de la suppression"
+                return 1
+            fi
+        else
+            print_warning "'$HOSTNAME' non trouvé dans /etc/hosts"
+        fi
+        
+        end_operation "Suppression de host"
+    else
+        print_error "Paramètre manquant"
+        echo -e "${C_DIM}Usage: removehost_enhanced <domaine>${C_RESET}"
+        return 1
+    fi
+}
+
+addhost_enhanced() {
+    if [[ "$1" && "$2" ]]; then
+        local IP=$1
+        local HOSTNAME=$2
+        
+        start_operation "Ajout de '$HOSTNAME' au fichier hosts"
+        
+        if [ -n "$(grep "$HOSTNAME" /etc/hosts)" ]; then
+            print_warning "'$HOSTNAME' existe déjà dans /etc/hosts:"
+            echo -e "${C_DIM}$(grep "$HOSTNAME" /etc/hosts)${C_RESET}"
+        else
+            print_step "Ajout de '$IP $HOSTNAME' dans /etc/hosts..."
+            if printf "%s\t%s\n" "$IP" "$HOSTNAME" | sudo tee -a /etc/hosts > /dev/null; then
+                print_success "'$HOSTNAME' ajouté à /etc/hosts"
+                print_info "Mapping: $IP → $HOSTNAME"
+            else
+                print_error "Échec de l'ajout"
+                return 1
+            fi
+        fi
+        
+        end_operation "Configuration de host"
+    else
+        print_error "Paramètres manquants"
+        echo -e "${C_DIM}Usage: addhost_enhanced <ip> <domaine>${C_RESET}"
+        return 1
+    fi
+}
+
+# ==============================================================================
+#                      Fonction de démonstration
+# ==============================================================================
+
+demo_enhanced_functions() {
+    print_header "Démonstration des fonctions améliorées"
+    
+    print_info "Fonctions disponibles avec affichage amélioré:"
+    echo -e "${C_YELLOW}  • git_add_all_and_commit_enhanced${C_RESET} - Commit avec affichage sympa"
+    echo -e "${C_YELLOW}  • git_branch_start_enhanced${C_RESET}       - Création de branche avec suivi"
+    echo -e "${C_YELLOW}  • git_branch_delete_enhanced${C_RESET}      - Suppression de branche sécurisée"
+    echo -e "${C_YELLOW}  • git_branch_sync_enhanced${C_RESET}        - Synchronisation avec feedback"
+    echo -e "${C_YELLOW}  • addhost_enhanced${C_RESET}                - Gestion /etc/hosts avec couleurs"
+    echo -e "${C_YELLOW}  • removehost_enhanced${C_RESET}             - Suppression hosts avec feedback"
+    
+    print_separator
+    
+    print_info "Fonctions d'affichage disponibles:"
+    echo -e "${C_GREEN}  • print_success${C_RESET} 'message'    - ✅ Message de succès"
+    echo -e "${C_RED}  • print_error${C_RESET} 'message'      - ❌ Message d'erreur"
+    echo -e "${C_YELLOW}  • print_warning${C_RESET} 'message'    - ⚠️  Message d'avertissement"
+    echo -e "${C_BLUE}  • print_info${C_RESET} 'message'       - ℹ️  Message d'information"
+    echo -e "${C_CYAN}  • print_step${C_RESET} 'message'       - 🔄 Étape en cours"
+    echo -e "${C_PURPLE}  • print_git${C_RESET} 'message'        - 🌿 Message Git"
+    
+    print_separator
+    print_success "Système d'affichage amélioré prêt à l'emploi !"
+}
+
+# ==============================================================================
+#                      Gestion SSH améliorée
+# ==============================================================================
+
+# Vérifie si l'agent SSH est en cours d'exécution avec un bel affichage
+ssh_agent_status() {
+    print_header "🔐 Statut de l'agent SSH"
+    
+    if agent_is_running; then
+        print_success "Agent SSH en cours d'exécution"
+        if agent_has_keys; then
+            local key_count=$(ssh-add -l 2>/dev/null | wc -l | tr -d ' ')
+            print_info "🔑 $key_count clé(s) chargée(s)"
+            echo ""
+            ssh-add -l | while read -r line; do
+                local key_file=$(echo "$line" | awk '{print $NF}')
+                local key_type=$(echo "$line" | awk '{print $4}' | sed 's/[()]//g')
+                print_step "  • $key_file ($key_type)"
+            done
+        else
+            print_warning "Aucune clé chargée"
+        fi
+    else
+        print_error "Agent SSH non démarré"
+    fi
+    echo ""
+}
+
+# Démarre l'agent SSH avec feedback
+ssh_agent_start_enhanced() {
+    print_header "🚀 Démarrage de l'agent SSH"
+    
+    if agent_is_running; then
+        print_warning "Agent SSH déjà en cours d'exécution"
+        return 0
+    fi
+    
+    print_step "Démarrage de l'agent SSH..."
+    agent_start
+    
+    if agent_is_running; then
+        print_success "Agent SSH démarré avec succès"
+        print_info "PID: $SSH_AGENT_PID"
+    else
+        print_error "Échec du démarrage de l'agent SSH"
+        return 1
+    fi
+}
+
+# Charge toutes les clés SSH avec feedback détaillé
+ssh_keys_load_enhanced() {
+    print_header "🔑 Chargement des clés SSH"
+    
+    if ! agent_is_running; then
+        print_warning "Agent SSH non démarré, démarrage automatique..."
+        ssh_agent_start_enhanced
+    fi
+    
+    local ssh_dir="$HOME/.ssh"
+    local keys_found=0
+    local keys_loaded=0
+    
+    print_step "Recherche des clés dans $ssh_dir..."
+    
+    for key_file in "$ssh_dir"/id_*; do
+        # Ignorer les fichiers .pub et vérifier que le fichier existe
+        if [[ -f "$key_file" && "$key_file" != *.pub ]]; then
+            keys_found=$((keys_found + 1))
+            local key_name=$(basename "$key_file")
+            
+            print_step "Chargement de $key_name..."
+            
+            if ssh-add "$key_file" 2>/dev/null; then
+                print_success "  ✅ $key_name chargée"
+                keys_loaded=$((keys_loaded + 1))
+            else
+                print_error "  ❌ Échec du chargement de $key_name"
+            fi
+        fi
+    done
+    
+    echo ""
+    if [ $keys_found -eq 0 ]; then
+        print_warning "Aucune clé SSH trouvée dans $ssh_dir"
+    else
+        print_info "📊 Résumé: $keys_loaded/$keys_found clé(s) chargée(s)"
+    fi
+}
+
+# Recharge l'environnement SSH avec feedback
+ssh_env_reload_enhanced() {
+    print_header "🔄 Rechargement de l'environnement SSH"
+    
+    print_step "Chargement de l'environnement depuis ~/.ssh/agent.env..."
+    agent_load_env
+    
+    if agent_is_running; then
+        print_success "Environnement SSH rechargé avec succès"
+        ssh_agent_status
+    else
+        print_warning "Agent SSH non trouvé, démarrage d'un nouvel agent..."
+        ssh_agent_start_enhanced
+        ssh_keys_load_enhanced
+    fi
+}
+
+# ==============================================================================
+#                      NVM/Node.js amélioré
+# ==============================================================================
+
+# Affiche la version Node actuelle avec style
+node_version_enhanced() {
+    print_header "🟢 Version Node.js"
+    
+    if command -v node &> /dev/null; then
+        local node_version=$(node --version)
+        local npm_version=$(npm --version 2>/dev/null || echo "non installé")
+        
+        print_success "Node.js: $node_version"
+        print_info "npm: $npm_version"
+        
+        if command -v nvm &> /dev/null; then
+            local nvm_current=$(nvm current 2>/dev/null)
+            local nvm_default=$(nvm version default 2>/dev/null)
+            
+            print_step "NVM actuel: $nvm_current"
+            if [[ "$nvm_default" != "N/A" ]]; then
+                print_step "NVM défaut: $nvm_default"
+            fi
+        fi
+    else
+        print_error "Node.js n'est pas installé"
+    fi
+    echo ""
+}
+
+# Liste les versions NVM avec style
+nvm_list_enhanced() {
+    print_header "📋 Versions Node.js disponibles"
+    
+    if ! command -v nvm &> /dev/null; then
+        print_error "NVM n'est pas installé"
+        return 1
+    fi
+    
+    print_step "Versions installées:"
+    nvm list
+    echo ""
+}
+
+# Installe une version Node avec feedback
+nvm_install_enhanced() {
+    local version="$1"
+    
+    if [[ -z "$version" ]]; then
+        print_error "Usage: nvm_install_enhanced <version>"
+        print_info "Exemples: nvm_install_enhanced lts/jod, nvm_install_enhanced 18.17.0"
+        return 1
+    fi
+    
+    print_header "📦 Installation Node.js $version"
+    
+    if ! command -v nvm &> /dev/null; then
+        print_error "NVM n'est pas installé"
+        return 1
+    fi
+    
+    print_step "Installation de Node.js $version..."
+    
+    if nvm install "$version"; then
+        print_success "Node.js $version installé avec succès"
+        node_version_enhanced
+    else
+        print_error "Échec de l'installation de Node.js $version"
+        return 1
+    fi
+}
+
+# Utilise une version Node avec feedback
+nvm_use_enhanced() {
+    local version="$1"
+    
+    if [[ -z "$version" ]]; then
+        print_error "Usage: nvm_use_enhanced <version>"
+        print_info "Exemples: nvm_use_enhanced lts/jod, nvm_use_enhanced 18.17.0"
+        return 1
+    fi
+    
+    print_header "🔄 Changement vers Node.js $version"
+    
+    if ! command -v nvm &> /dev/null; then
+        print_error "NVM n'est pas installé"
+        return 1
+    fi
+    
+    if nvm use "$version" 2>/dev/null; then
+        print_success "Utilisation de Node.js $version"
+        node_version_enhanced
+    else
+        print_warning "Version $version non installée"
+        print_step "Installation automatique..."
+        nvm_install_enhanced "$version"
+    fi
+}
+
+# Fonction cd améliorée avec feedback NVM
+cd_enhanced() {
+    # Exécute la commande cd originale
+    builtin cd "$@" || return $?
+    
+    # Si nvm n'est pas disponible, on s'arrête là
+    if ! command -v nvm &> /dev/null; then
+        return 0
+    fi
+    
+    local nvmrc_path
+    nvmrc_path=$(nvm_find_up .nvmrc)
+    
+    if [[ -n "$nvmrc_path" ]]; then
+        local nvmrc_version
+        nvmrc_version=$(<"$nvmrc_path/.nvmrc")
+        
+        print_info "📁 .nvmrc détecté: $nvmrc_version"
+        
+        if nvm use 2>/dev/null; then
+            print_success "🟢 Node.js $nvmrc_version activé"
+        else
+            print_warning "⚠️  Version $nvmrc_version non installée"
+            print_step "Installation automatique..."
+            if nvm install; then
+                print_success "✅ Node.js $nvmrc_version installé et activé"
+            else
+                print_error "❌ Échec de l'installation"
+            fi
+        fi
+    else
+        # Retour à la version par défaut si nécessaire
+        local default_version
+        default_version=$(nvm version default 2>/dev/null)
+        local current_version
+        current_version=$(nvm current 2>/dev/null)
+        
+        if [[ "$default_version" != "N/A" ]] && [[ "$current_version" != "$default_version" ]]; then
+            print_info "🔄 Retour à la version par défaut: $default_version"
+            nvm use default >/dev/null
+        fi
+    fi
+}
+
+# ==============================================================================
+#                      Fonctions Git améliorées
+# ==============================================================================
+
+# Commit amélioré avec de beaux messages
+git_add_all_and_commit_super_enhanced() {
+    print_header "📝 Commit Git"
+    
+    # Vérifier qu'on est dans un repo git
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        print_error "Pas dans un dépôt Git"
+        return 1
+    fi
+    
+    # Vérifier s'il y a des changements
+    if git diff --quiet && git diff --cached --quiet; then
+        print_warning "Aucun changement à commiter"
+        return 0
+    fi
+    
+    print_step "Ajout de tous les fichiers modifiés..."
+    git add -A
+    
+    if [[ "$1" ]]; then
+        print_info "🔄 Utilisation du message de commit manuel..."
+        local commit_message="$*"
+        print_step "Message: \"$commit_message\""
+    else
+        # Génération automatique du message basé sur la branche
+        local branch_name
+        branch_name=$(git branch --show-current 2>/dev/null)
+        
+        if [[ -z "$branch_name" ]]; then
+            print_error "Impossible de déterminer la branche actuelle"
+            return 1
+        fi
+        
+        print_step "Branche actuelle: $branch_name"
+        
+        if [[ "$branch_name" =~ ^(feat|fix|docs|style|refactor|test|chore)/([A-Z]+-[0-9]+)/(.+)$ ]]; then
+            local type="${BASH_REMATCH[1]}"
+            local jira="${BASH_REMATCH[2]}"
+            local desc="${BASH_REMATCH[3]}"
+            
+            local formatted_desc
+            formatted_desc=$(echo "$desc" | sed 's/-/ /g')
+            
+            local commit_message
+            case "$type" in
+                feat) commit_message="✨ feat($jira): $formatted_desc" ;;
+                fix) commit_message="🐛 fix($jira): $formatted_desc" ;;
+                docs) commit_message="📚 docs($jira): $formatted_desc" ;;
+                style) commit_message="💄 style($jira): $formatted_desc" ;;
+                refactor) commit_message="♻️ refactor($jira): $formatted_desc" ;;
+                test) commit_message="🧪 test($jira): $formatted_desc" ;;
+                chore) commit_message="🔧 chore($jira): $formatted_desc" ;;
+                *) commit_message="$type($jira): $formatted_desc" ;;
+            esac
+            
+            print_success "Message généré automatiquement:"
+            print_info "  => $commit_message"
+        else
+            print_warning "Le nom de la branche ne suit pas le format 'type/JIRA/desc'"
+            print_step "Ouverture de l'éditeur pour le message de commit..."
+            git commit
+            return $?
+        fi
+    fi
+    
+    print_step "Création du commit..."
+    if git commit -m "$commit_message"; then
+        print_success "✅ Commit créé avec succès !"
+        
+        # Afficher le hash du commit
+        local commit_hash
+        commit_hash=$(git rev-parse --short HEAD)
+        print_info "🔗 Hash: $commit_hash"
+        
+        # Afficher les stats
+        local stats
+        stats=$(git show --stat --format="" HEAD)
+        if [[ -n "$stats" ]]; then
+            print_step "📊 Statistiques:"
+            echo "$stats" | sed 's/^/    /'
+        fi
+    else
+        print_error "❌ Échec de la création du commit"
+        return 1
+    fi
+}
+
+# Création de branche améliorée
+git_branch_start_super_enhanced() {
+    local branch_name="$1"
+    
+    if [[ -z "$branch_name" ]]; then
+        print_error "Usage: git_branch_start_super_enhanced <nom-branche>"
+        print_info "Format recommandé: type/JIRA-123/description"
+        return 1
+    fi
+    
+    print_header "🌿 Création de branche Git"
+    
+    # Vérifier qu'on est dans un repo git
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        print_error "Pas dans un dépôt Git"
+        return 1
+    fi
+    
+    print_step "Vérification de l'état du dépôt..."
+    
+    # Vérifier s'il y a des changements non commités
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        print_warning "⚠️  Changements non commités détectés"
+        print_step "Stash des changements en cours..."
+        git stash push -m "Auto-stash avant création de branche $branch_name"
+        print_info "💾 Changements sauvegardés dans le stash"
+    fi
+    
+    print_step "Mise à jour de la branche principale..."
+    local main_branch
+    main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+    
+    git checkout "$main_branch" 2>/dev/null || git checkout main 2>/dev/null || git checkout master
+    git pull origin "$main_branch" 2>/dev/null || git pull
+    
+    print_step "Création de la nouvelle branche: $branch_name"
+    
+    if git checkout -b "$branch_name"; then
+        print_success "✅ Branche '$branch_name' créée avec succès"
+        print_info "📍 Branche basée sur: $main_branch"
+        
+        # Validation du format de branche
+        if [[ "$branch_name" =~ ^(feat|fix|docs|style|refactor|test|chore)/([A-Z]+-[0-9]+)/(.+)$ ]]; then
+            local type="${BASH_REMATCH[1]}"
+            local jira="${BASH_REMATCH[2]}"
+            local desc="${BASH_REMATCH[3]}"
+            
+            print_step "🏷️  Format détecté:"
+            print_info "  Type: $type"
+            print_info "  JIRA: $jira"
+            print_info "  Description: $desc"
+        else
+            print_warning "⚠️  Format de branche non standard"
+            print_info "Format recommandé: type/JIRA-123/description"
+        fi
+    else
+        print_error "❌ Échec de la création de la branche"
+        return 1
+    fi
+}
+
+# Suppression de branche améliorée
+git_branch_delete_super_enhanced() {
+    local branch_name="$1"
+    
+    if [[ -z "$branch_name" ]]; then
+        print_error "Usage: git_branch_delete_super_enhanced <nom-branche>"
+        return 1
+    fi
+    
+    print_header "🗑️  Suppression de branche Git"
+    
+    # Vérifier qu'on est dans un repo git
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        print_error "Pas dans un dépôt Git"
+        return 1
+    fi
+    
+    local current_branch
+    current_branch=$(git branch --show-current 2>/dev/null)
+    
+    if [[ "$current_branch" == "$branch_name" ]]; then
+        print_warning "⚠️  Vous êtes sur la branche à supprimer"
+        print_step "Basculement vers la branche principale..."
+        
+        local main_branch
+        main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+        git checkout "$main_branch" 2>/dev/null || git checkout main 2>/dev/null || git checkout master
+    fi
+    
+    print_step "Vérification de l'existence de la branche..."
+    
+    if ! git show-ref --verify --quiet "refs/heads/$branch_name"; then
+        print_error "❌ La branche '$branch_name' n'existe pas localement"
+        return 1
+    fi
+    
+    print_step "Suppression de la branche locale: $branch_name"
+    
+    if git branch -d "$branch_name" 2>/dev/null; then
+        print_success "✅ Branche locale '$branch_name' supprimée"
+    elif git branch -D "$branch_name"; then
+        print_warning "⚠️  Branche locale '$branch_name' supprimée (force)"
+    else
+        print_error "❌ Échec de la suppression de la branche locale"
+        return 1
+    fi
+    
+    # Vérifier et supprimer la branche distante
+    print_step "Vérification de la branche distante..."
+    
+    if git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
+        print_step "Suppression de la branche distante..."
+        if git push origin --delete "$branch_name"; then
+            print_success "✅ Branche distante '$branch_name' supprimée"
+        else
+            print_warning "⚠️  Échec de la suppression de la branche distante"
+        fi
+    else
+        print_info "ℹ️  Aucune branche distante à supprimer"
+    fi
+    
+    print_success "🎉 Nettoyage terminé !"
+}
+
+# Rebase interactif amélioré
+git_rebase_interactive_super_enhanced() {
+    local target_branch="${1:-main}"
+    
+    print_header "🔄 Rebase interactif Git"
+    
+    # Vérifier qu'on est dans un repo git
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        print_error "Pas dans un dépôt Git"
+        return 1
+    fi
+    
+    local current_branch
+    current_branch=$(git branch --show-current 2>/dev/null)
+    
+    if [[ -z "$current_branch" ]]; then
+        print_error "Impossible de déterminer la branche actuelle"
+        return 1
+    fi
+    
+    print_step "Branche actuelle: $current_branch"
+    print_step "Branche cible: $target_branch"
+    
+    print_step "Recherche du point de divergence..."
+    local fork_point
+    fork_point=$(git merge-base "$current_branch" "$target_branch")
+    
+    if [[ -z "$fork_point" ]]; then
+        print_error "Impossible de trouver un point de divergence avec '$target_branch'"
+        print_info "La branche est peut-être déjà à jour ou n'a pas d'historique commun"
+        return 1
+    fi
+    
+    local fork_point_short
+    fork_point_short=$(git rev-parse --short "$fork_point")
+    print_info "📍 Point de divergence: $fork_point_short"
+    
+    # Compter les commits à rebaser
+    local commit_count
+    commit_count=$(git rev-list --count "$fork_point..$current_branch")
+    print_step "📊 $commit_count commit(s) à rebaser"
+    
+    if [[ "$commit_count" -eq 0 ]]; then
+        print_success "✅ La branche est déjà à jour"
+        return 0
+    fi
+    
+    print_step "Lancement du rebase interactif..."
+    print_info "🎯 Depuis le commit: $fork_point_short"
+    
+    git rebase -i "$fork_point"
+}
+
+# Rechargement du shell amélioré
+reload_enhanced() {
+    print_header "🔄 Rechargement du shell"
+    
+    print_step "Détection du shell en cours..."
+    
+    # Marquer que c'est un reload manuel pour afficher les statuts SSH/NVM
+    export DOTFILES_MANUAL_RELOAD=true
+    
+    if [ -n "$BASH_VERSION" ]; then
+        print_info "🐚 Shell détecté: Bash $BASH_VERSION"
+        print_step "Rechargement de Bash..."
+        exec bash
+    elif [ -n "$ZSH_VERSION" ]; then
+        print_info "🐚 Shell détecté: Zsh $ZSH_VERSION"
+        print_step "Rechargement de Zsh..."
+        exec zsh
+    else
+        print_warning "⚠️  Shell non reconnu"
+        print_error "Shell non supporté pour le rechargement automatique"
+        return 1
+    fi
+}
+
+# ==============================================================================
+#                      Aliases pour les fonctions améliorées
+# ==============================================================================
+
+# Aliases SSH
+alias ssh-status='ssh_agent_status'
+alias ssh-start='ssh_agent_start_enhanced'
+alias ssh-load='ssh_keys_load_enhanced'
+alias ssh-reload='ssh_env_reload_enhanced'
+
+# Aliases NVM/Node
+alias node-version='node_version_enhanced'
+alias nvm-list='nvm_list_enhanced'
+alias nvm-install='nvm_install_enhanced'
+alias nvm-use='nvm_use_enhanced'
+
+# Aliases Git (versions super améliorées)
+alias gac='git_add_all_and_commit_super_enhanced'
+alias gbs='git_branch_start_super_enhanced'
+alias gbd='git_branch_delete_super_enhanced'
+alias gri='git_rebase_interactive_super_enhanced'
+
+# Alias reload
+alias reload='reload_enhanced'
+
+# Remplacer la fonction cd par la version améliorée
+alias cd='cd_enhanced' 

@@ -49,3 +49,14 @@ fi
 
 # --- iTerm2 ---
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+# ==============================================================================
+#      FONCTIONS D'AFFICHAGE AMÉLIORÉES
+# ==============================================================================
+
+# Charger les fonctions d'affichage avec couleurs et émojis
+[ -f ~/.shell_display ] && . ~/.shell_display
+
+# Charger les fonctions améliorées (SSH, NVM, Git)
+[ -f ~/.shell_functions_enhanced ] && . ~/.shell_functions_enhanced
+
