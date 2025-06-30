@@ -386,13 +386,16 @@ cd() {
   nvmrc_path=$(nvm_find_up .nvmrc)
 
   if [[ -n "$nvmrc_path" ]]; then
-    # Un .nvmrc a été trouvé. On utilise `nvm install`, qui est une commande
-    # très robuste :
-    # 1. Lit le .nvmrc.
-    # 2. Si la version n'est pas installée, il l'installe.
-    # 3. Active la version demandée.
-    # La sortie est masquée pour ne pas polluer le terminal.
-    nvm install >/dev/null
+    # Un .nvmrc a été trouvé. On utilise `nvm use` qui gère mieux les alias LTS.
+    # Si la version n'est pas installée, nvm use affichera un message d'erreur
+    # et on pourra alors utiliser nvm install.
+    local nvmrc_version
+    nvmrc_version=$(<"$nvmrc_path/.nvmrc")
+    
+    if ! nvm use 2>/dev/null; then
+      echo "Version Node.js '$nvmrc_version' non installée, installation..."
+      nvm install
+    fi
   else
     # Aucun .nvmrc n'a été trouvé. On revient à la version par défaut.
     local default_version
