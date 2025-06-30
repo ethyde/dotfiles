@@ -127,33 +127,43 @@
     pr      = "!f() { . ~/.shell_functions && git_pull_request \"$@\"; }; f"
 
     #   Raccourcis Simples (1-2 lettres)  =====
-    a       = add
-    aa      = add --all
-    ai      = add --interactive
-    b       = branch
-    ba      = branch --all
-    bd      = branch --delete
-    bm      = branch --move
-    c       = commit
-    ca      = commit --amend
-    caa     = commit --all --amend
-    co      = checkout
-    cob     = checkout -b
-    f       = fetch
-    fo      = fetch origin
-    fu      = fetch upstream
-    m       = merge
-    ma      = merge --abort
-    mc      = merge --continue
-    ms      = merge --skip
-    pl      = pull
-    plo     = pull origin
-    plr     = pull --rebase
-    ps      = push
-    pso     = push origin
-    rb      = rebase
-    rba     = rebase --abort
-    rbc     = rebase --continue
-    rbi     = rebase --interactive
-    rbs     = rebase --skip
-    s       = status
+    #	Add	=====
+	a	=	add
+	aa	=	add --all
+	ai	=	add --interactive
+	#	Branch	=====
+	b	=	branch
+	ba	=	branch --all
+	bd	=	branch --delete
+	bm	=	branch --move
+	#	Commit	=====
+	c	=	commit
+	ca	=	commit --amend
+	caa	=	commit --all --amend
+	#	Checkout	=====
+	co	=	checkout
+	cob	=	checkout -b
+	#	Fetch	=====
+	f	=	fetch
+	fo	=	fetch origin
+	fu	=	fetch upstream
+	#	Merge	=====
+	m	=	merge
+	ma	=	merge --abort
+	mc	=	merge --continue
+	ms	=	merge --skip
+	#	Pull	=====
+	pl	=	pull
+	plo	=	pull origin
+	plr	=	pull --rebase
+	#	Push	=====
+	ps	=	push
+	pso	=	push origin
+	#	Rebase	=====
+	rb	=	rebase
+	rba	=	rebase --abort
+	rbc	=	rebase --continue
+	rbi	=	rebase --interactive
+	rbs	=	rebase --skip
+	#	Status	=====
+	s	=	status
