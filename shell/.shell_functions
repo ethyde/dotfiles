@@ -210,7 +210,7 @@ git_display_help() {
   # === WORKFLOW & SAUVEGARDES ===
   printf "%s💾 Workflow & Sauvegardes Rapides%s\n" "$C_CAT" "$C_RST"
   printf "%s────────────────────────────────────────────────────────────────%s\n" "$C_CAT" "$C_RST"
-  printf "  %saac         %s %sAjoute tous les fichiers et commit (version basique)%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
+  printf "  %sgac         %s %sCommit intelligent avec messages automatiques%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
   printf "  %ssave        %s %sCommit rapide 'SAVEPOINT' sans hooks%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
   printf "  %swip         %s %sCommit rapide 'Work In Progress'%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
   printf "  %sundo        %s %sAnnule le dernier commit (garde les changements)%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
@@ -222,11 +222,11 @@ git_display_help() {
   printf "%s────────────────────────────────────────────────────────────────%s\n" "$C_CAT" "$C_RST"
   printf "  %ssu          %s %sDéfinit la branche upstream pour la branche actuelle%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
   printf "  %sb-name      %s %sAffiche le nom de la branche actuelle%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  printf "  %sb-start     %s %sDémarre une nouvelle branche et configure upstream%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  printf "  %sb-del       %s %sSupprime une branche locale et distante%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  printf "  %sb-del-f     %s %sForce la suppression d'une branche%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
+  printf "  %sgbs         %s %sCréation de branche avec validation format%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
+  printf "  %sgbd         %s %sSuppression branche locale + distante%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
+  printf "  %sgri         %s %sRebase interactif intelligent%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
   printf "  %sb-squash    %s %sRebase interactif depuis le point de divergence%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  printf "              %sExemples: %sgit b-start feat/PROJ-123/feature | git b-del old-branch%s\n\n" "$C_EXAMPLE" "$C_EXAMPLE" "$C_RST"
+  printf "              %sExemples: %sgbs feat/PROJ-123/feature | gbd old-branch%s\n\n" "$C_EXAMPLE" "$C_EXAMPLE" "$C_RST"
 
   # === SYNCHRONISATION ===
   printf "%s🔄 Synchronisation & Nettoyage%s\n" "$C_CAT" "$C_RST"
@@ -260,19 +260,23 @@ git_display_help() {
   # === COMMANDES SHELL AVANCÉES ===
   printf "%s🚀 Commandes Shell Avancées (avec couleurs et émojis)%s\n" "$C_CAT" "$C_RST"
   printf "%s────────────────────────────────────────────────────────────────%s\n" "$C_CAT" "$C_RST"
-  if command -v git_add_all_and_commit_super_enhanced >/dev/null 2>&1; then
+  
+  # Vérifier si les fonctions enhanced sont disponibles
+  local enhanced_available=false
+  if [[ -f "$HOME/.shell_functions_enhanced" ]] || [[ -f "$HOME/.shell_functions_lazy" ]]; then
+    enhanced_available=true
+  fi
+  
+  if [[ "$enhanced_available" == "true" ]]; then
     printf "  %sgac         %s %sCommit avec messages automatiques et émojis%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  fi
-  if command -v git_branch_start_super_enhanced >/dev/null 2>&1; then
     printf "  %sgbs         %s %sCréation de branche avec validation format%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  fi
-  if command -v git_branch_delete_super_enhanced >/dev/null 2>&1; then
     printf "  %sgbd         %s %sSuppression branche locale + distante%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
-  fi
-  if command -v git_rebase_interactive_super_enhanced >/dev/null 2>&1; then
     printf "  %sgri         %s %sRebase interactif intelligent%s\n" "$C_ALIAS" "$C_RST" "$C_DESC" "$C_RST"
+    printf "              %sExemples: %sgac \"fix login\" | gbs feat/PROJ-123/auth | gbd old-branch%s\n\n" "$C_EXAMPLE" "$C_EXAMPLE" "$C_RST"
+  else
+    printf "  %s⚠️  Commandes avancées non disponibles%s\n" "$C_DESC" "$C_RST"
+    printf "  %sInstallez les dotfiles avec: %s./install%s\n\n" "$C_DESC" "$C_EXAMPLE" "$C_RST"
   fi
-  printf "              %sExemples: %sgac \"fix login\" | gbs feat/PROJ-123/auth | gbd old-branch%s\n\n" "$C_EXAMPLE" "$C_EXAMPLE" "$C_RST"
 
   # === USAGE & CONSEILS ===
   printf "%s💡 Usage & Conseils%s\n" "$C_CAT" "$C_RST"
