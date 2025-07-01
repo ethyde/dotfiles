@@ -9,29 +9,42 @@ Configuration moderne et améliorée pour un environnement de développement pro
 git clone https://github.com/votre-username/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-# Installer les applications (optionnel)
-./apps.sh
-
-# Créer les liens symboliques
+# Installation complète
 ./install
 ```
 
+**📚 [Guide d'installation détaillé](docs/installation.md)**
+
 ## ✨ Fonctionnalités principales
 
-### 🐚 **Shell amélioré** (voir [shell/README.md](shell/README.md))
+### 🐚 **Shell amélioré** ([documentation](shell/README.md))
 - Fonctions SSH, NVM et Git avec affichage coloré
 - Mode silencieux compatible Powerlevel10k
 - Gestion automatique des clés SSH et versions Node.js
 
+### 🤖 **Protocole Aklo** ([documentation](aklo/README.md))
+- Système de gouvernance de développement
+- Serveurs MCP pour intégration Cursor
+- Workflows automatisés et templates
+
 ### ⚙️ **Configuration automatique**
-- Liens symboliques via dotbot
-- Support Bash et Zsh
+- Liens symboliques via Dotbot
+- Support Bash et Zsh complet
 - Variables d'environnement partagées
 
-### 🛠️ **Outils intégrés**
-- Script Aklo pour la gestion de projets
-- Templates Git personnalisés
-- Aliases et fonctions optimisées
+## 📚 Documentation
+
+| Composant | Description | Documentation |
+|-----------|-------------|---------------|
+| **🏠 Vue d'ensemble** | Ce fichier | [README.md](README.md) |
+| **📖 Documentation** | Guide centralisé | [docs/](docs/) |
+| **🐚 Shell** | Configuration shell avancée | [shell/README.md](shell/README.md) |
+| **🤖 Aklo** | Protocole de développement | [aklo/README.md](aklo/README.md) |
+| **🔧 MCP** | Serveurs Model Context Protocol | [aklo/mcp-servers/README.md](aklo/mcp-servers/README.md) |
+
+### 🎯 Guides rapides
+- **[Installation](docs/installation.md)** - Installation et configuration
+- **[Migration](docs/migration.md)** - Migrer depuis une config existante
 
 Sample of my `.bash_profile.local` but file are not in VCS to prevent miss-usage of indentity.
 
