@@ -65,7 +65,7 @@ Coordonner et automatiser les étapes nécessaires pour transformer une série d
 ## SECTION 3 : PROCÉDURE DE RELEASE
 
 1.  **[ANALYSE] Phase 1 : Lecture de la Configuration**
-    -   Lire et charger en mémoire les conventions depuis `CONFIG-PROJET.md`.
+    -   Lire et charger en mémoire les conventions depuis `.aklo.conf`.
     -   Déterminer le prochain numéro de version en se basant sur le **Schéma de version** défini.
     -   [ATTENTE_VALIDATION] Proposer le numéro de version au `Human_Developer` pour approbation.
 

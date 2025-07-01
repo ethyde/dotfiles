@@ -140,8 +140,8 @@ handle_list_protocols() {
         protocols_list="${protocols_list}• 00-CADRE-GLOBAL.md: Cadre global du protocole\\n"
     fi
     
-    if [ -f "$CHARTE_DIR/CONFIG-PROJET.md" ]; then
-        protocols_list="${protocols_list}• CONFIG-PROJET.md: Configuration projet\\n"
+    if [ -f "$CHARTE_DIR/../config/.aklo.conf" ]; then
+        protocols_list="${protocols_list}• .aklo.conf: Configuration projet\\n"
     fi
     
     cat << EOF
