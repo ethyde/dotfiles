@@ -66,7 +66,7 @@ Restaurer le service en production le plus rapidement possible en appliquant un 
 ## SECTION 3 : PROCÉDURE DE HOTFIX
 
 1.  **[ANALYSE] Phase 1 : Lecture de la Configuration et Validation de l'Urgence**
-      - Lire et charger les conventions depuis `CONFIG-PROJET.md`.
+      - Lire et charger les conventions depuis `.aklo.conf`.
       - **[ATTENTE\_VALIDATION]** Confirmer avec le `Human_Developer` que la situation justifie bien un `HOTFIX` et non un cycle de [DEBOGAGE] normal.
 
 2.  **[PROCEDURE] Phase 2 : Création de la Branche d'Urgence**
