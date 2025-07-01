@@ -46,6 +46,7 @@
       "~/.shell_templates": "./shell/.shell_templates",
       "~/.shell_security": "./shell/.shell_security",
       "~/.shell_analytics": "./shell/.shell_analytics",
+      "~/.shell_config": "./shell/.shell_config",
 
       "~/.gitconfig": "./git/.gitconfig",
       "~/.gitignore_global": {
