@@ -1,0 +1,204 @@
+# ==============================================================================
+#                      Templates et Détection de Contexte Projet
+# ==============================================================================
+
+# Détection automatique du type de projet
+detect_project_context() {
+    local context=""
+    local project_info=""
+    
+    # Détection des technologies
+    [[ -f "package.json" ]] && {
+        context="$context npm"
+        local pkg_name=$(grep '"name"' package.json 2>/dev/null | cut -d'"' -f4)
+        project_info="$project_info NPM:$pkg_name"
+    }
+    [[ -f "Cargo.toml" ]] && {
+        context="$context rust"
+        project_info="$project_info Rust"
+    }
+    [[ -f "requirements.txt" ]] && {
+        context="$context python"
+        project_info="$project_info Python"
+    }
+    [[ -f "pom.xml" ]] && {
+        context="$context java"
+        project_info="$project_info Java"
+    }
+    [[ -f "go.mod" ]] && {
+        context="$context go"
+        project_info="$project_info Go"
+    }
+    [[ -f "composer.json" ]] && {
+        context="$context php"
+        project_info="$project_info PHP"
+    }
+    [[ -f "Dockerfile" ]] && {
+        context="$context docker"
+        project_info="$project_info Docker"
+    }
+    
+    # Détection des frameworks
+    [[ -f "next.config.js" ]] && project_info="$project_info Next.js"
+    [[ -f "nuxt.config.js" ]] && project_info="$project_info Nuxt.js"
+    [[ -f "vue.config.js" ]] && project_info="$project_info Vue.js"
+    [[ -f "angular.json" ]] && project_info="$project_info Angular"
+    [[ -f "svelte.config.js" ]] && project_info="$project_info Svelte"
+    
+    echo "${context# }" # Supprime l'espace initial
+    [[ -n "$project_info" ]] && echo "📦 Projet détecté:$project_info" >&2
+}
+
+# Génération intelligente de noms de branches
+git_branch_suggest() {
+    local jira_ticket="$1"
+    local description="$2"
+    local type="${3:-feat}"
+    
+    if [[ -z "$jira_ticket" ]] || [[ -z "$description" ]]; then
+        echo "Usage: git_branch_suggest <JIRA-123> <description> [type]"
+        echo "Types disponibles: feat, fix, docs, style, refactor, test, chore"
+        return 1
+    fi
+    
+    # Convertit "Fix login issue" → "fix-login-issue"
+    local kebab_desc=$(echo "$description" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+    
+    # Validation du ticket JIRA
+    if [[ ! "$jira_ticket" =~ ^[A-Z]+-[0-9]+$ ]]; then
+        echo "⚠️  Format JIRA recommandé: PROJ-123"
+    fi
+    
+    local branch_name="$type/$jira_ticket/$kebab_desc"
+    echo "$branch_name"
+    
+    # Feedback utilisateur
+    echo "🌿 Branche suggérée: $branch_name" >&2
+    echo "📋 Commande: git gbs $branch_name" >&2
+}
+
+# Templates de commits selon le type de projet
+get_commit_template() {
+    local type="$1"
+    local context=$(detect_project_context)
+    
+    case "$type" in
+        feat)
+            if [[ "$context" =~ npm ]]; then
+                echo "✨ feat: add new component/feature"
+            else
+                echo "✨ feat: add new functionality"
+            fi
+            ;;
+        fix)
+            if [[ "$context" =~ npm ]]; then
+                echo "🐛 fix: resolve component/API issue"
+            else
+                echo "🐛 fix: resolve critical bug"
+            fi
+            ;;
+        docs)
+            echo "📚 docs: update documentation"
+            ;;
+        style)
+            if [[ "$context" =~ npm ]]; then
+                echo "💄 style: improve UI/UX styling"
+            else
+                echo "💄 style: improve code formatting"
+            fi
+            ;;
+        refactor)
+            echo "♻️ refactor: improve code structure"
+            ;;
+        test)
+            echo "🧪 test: add/update tests"
+            ;;
+        chore)
+            if [[ "$context" =~ npm ]]; then
+                echo "🔧 chore: update dependencies/build"
+            else
+                echo "🔧 chore: maintenance tasks"
+            fi
+            ;;
+        *)
+            echo "$type: update"
+            ;;
+    esac
+}
+
+# Détection automatique du préfixe JIRA selon le projet
+detect_jira_prefix() {
+    local project_name=""
+    
+    # Essayer de détecter depuis package.json
+    if [[ -f "package.json" ]]; then
+        project_name=$(grep '"name"' package.json 2>/dev/null | cut -d'"' -f4 | cut -d'/' -f2)
+    fi
+    
+    # Essayer de détecter depuis le nom du dossier
+    [[ -z "$project_name" ]] && project_name=$(basename "$PWD")
+    
+    # Convertir en préfixe JIRA standard
+    local jira_prefix=$(echo "$project_name" | tr '[:lower:]' '[:upper:]' | sed 's/[^A-Z0-9]//g')
+    
+    # Limiter à 4 caractères max
+    jira_prefix=${jira_prefix:0:4}
+    
+    echo "$jira_prefix"
+}
+
+# Assistant interactif pour création de branche
+git_branch_wizard() {
+    echo "🧙‍♂️ Assistant de création de branche"
+    echo "=================================="
+    
+    # Détecter le contexte
+    local context=$(detect_project_context)
+    local jira_prefix=$(detect_jira_prefix)
+    
+    echo "📁 Contexte détecté: ${context:-"générique"}"
+    echo "🏷️  Préfixe JIRA suggéré: $jira_prefix"
+    echo ""
+    
+    # Demander le type
+    echo "1. Type de branche:"
+    echo "   feat (✨) - Nouvelle fonctionnalité"
+    echo "   fix (🐛) - Correction de bug"
+    echo "   docs (📚) - Documentation"
+    echo "   style (💄) - Style/UI"
+    echo "   refactor (♻️) - Refactoring"
+    echo "   test (🧪) - Tests"
+    echo "   chore (🔧) - Maintenance"
+    echo ""
+    read -p "Type [feat]: " branch_type
+    branch_type=${branch_type:-feat}
+    
+    # Demander le ticket JIRA
+    echo ""
+    read -p "Ticket JIRA [$jira_prefix-XXX]: " jira_ticket
+    [[ -z "$jira_ticket" ]] && jira_ticket="$jira_prefix-XXX"
+    
+    # Demander la description
+    echo ""
+    read -p "Description courte: " description
+    
+    if [[ -n "$description" ]]; then
+        local suggested_branch=$(git_branch_suggest "$jira_ticket" "$description" "$branch_type")
+        echo ""
+        echo "🌿 Branche suggérée: $suggested_branch"
+        echo ""
+        read -p "Créer cette branche? [y/N]: " confirm
+        
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            git gbs "$suggested_branch"
+        else
+            echo "❌ Annulé"
+        fi
+    else
+        echo "❌ Description requise"
+    fi
+}
+
+# Alias pour l'assistant
+alias gbw='git_branch_wizard'
+alias gbs-help='git_branch_suggest' 

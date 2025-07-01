@@ -1,0 +1,87 @@
+# ==============================================================================
+#                      Auto-complétion Intelligente pour Dotfiles
+# ==============================================================================
+
+# Auto-complétion pour gbd (suppression de branche)
+_gbd_completion() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local branches=""
+    
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        # Récupère toutes les branches sauf la branche courante
+        local current_branch=$(git branch --show-current 2>/dev/null)
+        branches=$(git branch --format='%(refname:short)' 2>/dev/null | grep -v "^$current_branch$")
+    fi
+    
+    COMPREPLY=($(compgen -W "$branches" -- "$cur"))
+}
+
+# Auto-complétion pour gbs (création de branche avec templates)
+_gbs_completion() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local templates="feat/ fix/ docs/ style/ refactor/ test/ chore/"
+    
+    # Si on commence à taper, proposer les templates
+    if [[ "$cur" =~ ^[a-z]*/?$ ]]; then
+        COMPREPLY=($(compgen -W "$templates" -- "$cur"))
+    fi
+}
+
+# Auto-complétion pour gri (rebase interactif)
+_gri_completion() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local branches="main master develop"
+    
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        # Ajouter les branches locales et distantes
+        local local_branches=$(git branch --format='%(refname:short)' 2>/dev/null)
+        local remote_branches=$(git branch -r --format='%(refname:short)' 2>/dev/null | sed 's/origin\///')
+        branches="$branches $local_branches $remote_branches"
+    fi
+    
+    COMPREPLY=($(compgen -W "$branches" -- "$cur"))
+}
+
+# Auto-complétion pour les alias Git personnalisés
+_git_aliases_completion() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local aliases=""
+    
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        aliases=$(git config --get-regexp '^alias\.' | cut -d' ' -f1 | sed 's/alias\.//')
+    fi
+    
+    COMPREPLY=($(compgen -W "$aliases" -- "$cur"))
+}
+
+# Enregistrer les complétions
+if [[ -n "$BASH_VERSION" ]]; then
+    complete -F _gbd_completion gbd
+    complete -F _gbs_completion gbs  
+    complete -F _gri_completion gri
+    complete -F _git_aliases_completion git
+elif [[ -n "$ZSH_VERSION" ]]; then
+    # Support Zsh
+    autoload -U compinit && compinit
+    
+    _gbd_zsh() {
+        local branches=($(git branch --format='%(refname:short)' 2>/dev/null))
+        _describe 'branches' branches
+    }
+    
+    _gbs_zsh() {
+        local templates=(
+            'feat/:nouvelle fonctionnalité'
+            'fix/:correction de bug'
+            'docs/:documentation'
+            'style/:formatage code'
+            'refactor/:refactoring'
+            'test/:tests'
+            'chore/:maintenance'
+        )
+        _describe 'templates' templates
+    }
+    
+    compdef _gbd_zsh gbd
+    compdef _gbs_zsh gbs
+fi 
