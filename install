@@ -9,6 +9,16 @@ DOTBOT_BIN="bin/dotbot"
 BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 cd "${BASEDIR}"
+
+# Corriger les permissions des scripts avant l'installation
+echo "🔧 Correction des permissions des scripts..."
+if [ -f "${BASEDIR}/fix-permissions.sh" ]; then
+    "${BASEDIR}/fix-permissions.sh" --fix > /dev/null 2>&1 || true
+    echo "✅ Permissions corrigées"
+else
+    echo "⚠️  Script fix-permissions.sh non trouvé, permissions non vérifiées"
+fi
+
 git submodule update --init --recursive "${DOTBOT_DIR}"
 
 "${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" -c "${CONFIG}" "${@}"

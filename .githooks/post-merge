@@ -1,0 +1,22 @@
+#!/bin/bash
+#==============================================================================
+# Hook Git post-merge
+# Corrige automatiquement les permissions des scripts après un git pull/merge
+#==============================================================================
+
+# Obtenir le répertoire racine du projet
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+FIX_SCRIPT="$REPO_ROOT/fix-permissions.sh"
+
+# Vérifier si le script de correction existe
+if [ -f "$FIX_SCRIPT" ]; then
+    echo "🔧 Correction automatique des permissions après merge..."
+    "$FIX_SCRIPT" --fix > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "✅ Permissions corrigées automatiquement"
+    else
+        echo "⚠️  Erreur lors de la correction des permissions"
+    fi
+else
+    echo "⚠️  Script fix-permissions.sh non trouvé, permissions non vérifiées"
+fi 

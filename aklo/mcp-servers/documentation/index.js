@@ -15,6 +15,10 @@ import {
 import { readFile, readdir, stat } from 'fs/promises';
 import { join, basename, extname } from 'path';
 
+// Version et timestamp pour détecter les redémarrages nécessaires
+const SERVER_VERSION = '1.1.0';
+const SERVER_START_TIME = new Date().toISOString();
+
 class AkloDocumentationServer {
   constructor() {
     this.server = new Server(
@@ -152,6 +156,14 @@ class AkloDocumentationServer {
             required: ['artefact_path', 'artefact_type'],
           },
         },
+        {
+          name: 'server_info',
+          description: 'Informations sur le serveur MCP (version, démarrage)',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
       ],
     }));
 
@@ -172,6 +184,8 @@ class AkloDocumentationServer {
             return await this.handleProjectDocumentationSummary(args);
           case 'validate_artefact':
             return await this.handleValidateArtefact(args);
+          case 'server_info':
+            return await this.handleServerInfo(args);
           default:
             throw new Error(`Outil inconnu: ${name}`);
         }
@@ -193,30 +207,42 @@ class AkloDocumentationServer {
     const { protocol_name, section, charte_path } = args;
     
     const chartePath = charte_path || await this.findChartePath();
-    const protocolPath = join(chartePath, 'PROTOCOLES', `${protocol_name.toUpperCase().padStart(2, '0')}-${protocol_name.toUpperCase()}.md`);
+    const protocolsPath = join(chartePath, 'PROTOCOLES');
     
-    // Essayer plusieurs formats de nommage
-    const possiblePaths = [
-      protocolPath,
-      join(chartePath, 'PROTOCOLES', `${protocol_name.toUpperCase()}.md`),
-      join(chartePath, 'PROTOCOLES', `03-${protocol_name.toUpperCase()}.md`), // exemple pour DEVELOPPEMENT
-    ];
-    
+    // Rechercher le fichier par nom de protocole dans tous les fichiers
     let content = '';
     let foundPath = '';
+    let debugInfo = '';
     
-    for (const path of possiblePaths) {
-      try {
-        content = await readFile(path, 'utf-8');
-        foundPath = path;
-        break;
-      } catch {
-        continue;
+    try {
+      const files = await readdir(protocolsPath);
+      const protocolFiles = files.filter(file => file.endsWith('.md'));
+      
+      // Chercher le fichier qui contient le nom du protocole
+      const targetProtocol = protocol_name.toUpperCase();
+      debugInfo += `Recherche de: "${targetProtocol}"\n`;
+      debugInfo += `Fichiers disponibles: ${protocolFiles.join(', ')}\n`;
+      
+      const matchingFile = protocolFiles.find(file => {
+        // Format: XX-PROTOCOLE.md
+        const match = file.match(/^\d+-(.+)\.md$/);
+        const extracted = match ? match[1] : null;
+        debugInfo += `Fichier: ${file} -> Extrait: "${extracted}" (match: ${extracted === targetProtocol})\n`;
+        return match && match[1] === targetProtocol;
+      });
+      
+      debugInfo += `Fichier trouvé: ${matchingFile || 'AUCUN'}\n`;
+      
+      if (matchingFile) {
+        foundPath = join(protocolsPath, matchingFile);
+        content = await readFile(foundPath, 'utf-8');
       }
+    } catch (error) {
+      throw new Error(`Erreur lors de la lecture du répertoire des protocoles: ${error.message}`);
     }
     
     if (!content) {
-      throw new Error(`Protocole ${protocol_name} introuvable dans ${chartePath}`);
+      throw new Error(`Protocole ${protocol_name} introuvable dans ${chartePath}\n\nDébogage:\n${debugInfo}`);
     }
     
     let result = `📋 Protocole: ${protocol_name.toUpperCase()}\n`;
@@ -480,6 +506,44 @@ class AkloDocumentationServer {
     } catch (error) {
       throw new Error(`Erreur lors de la validation: ${error.message}`);
     }
+  }
+
+  async handleServerInfo(args) {
+    const uptime = Math.floor((Date.now() - new Date(SERVER_START_TIME).getTime()) / 1000);
+    const uptimeFormatted = `${Math.floor(uptime / 60)}m ${uptime % 60}s`;
+    
+    let result = `🤖 Serveur MCP Documentation Aklo\n\n`;
+    result += `📦 Version: ${SERVER_VERSION}\n`;
+    result += `🕐 Démarré: ${SERVER_START_TIME}\n`;
+    result += `⏱️  Uptime: ${uptimeFormatted}\n`;
+    result += `🔧 PID: ${process.pid}\n`;
+    result += `📁 Répertoire: ${process.cwd()}\n\n`;
+    
+    // Informations sur les fichiers surveillés
+    const watchedFiles = [
+      __filename,
+      join(process.cwd(), 'package.json'),
+    ];
+    
+    result += `📝 Fichiers surveillés:\n`;
+    for (const file of watchedFiles) {
+      try {
+        const stats = await stat(file);
+        const modTime = stats.mtime.toISOString();
+        result += `  • ${basename(file)}: ${modTime}\n`;
+      } catch {
+        result += `  • ${basename(file)}: non trouvé\n`;
+      }
+    }
+    
+    result += `\n💡 Pour redémarrer après modification:\n`;
+    result += `   cd aklo/mcp-servers && ./restart-mcp.sh\n`;
+    result += `\n🔍 Mode développement:\n`;
+    result += `   cd aklo/mcp-servers && ./watch-mcp.sh\n`;
+    
+    return {
+      content: [{ type: 'text', text: result }],
+    };
   }
 
   async findChartePath() {
