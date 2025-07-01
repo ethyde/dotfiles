@@ -13,9 +13,24 @@
 
 Ce système est intégré à ce dépôt `dotfiles` pour assurer que tout projet que vous entreprenez respecte les mêmes standards élevés de qualité.
 
-## 2. Le Rituel d'Installation (Une fois par machine)
+## 2. Installation et Configuration
+
+### 2.1 Installation Système (Une fois par machine)
 
 L'outil `aklo` est installé en même temps que le reste de vos `dotfiles` via le script `install` à la racine. Celui-ci, grâce à `dotbot`, crée un lien symbolique qui rend la commande `aklo` disponible globalement dans votre terminal.
+
+**Pour plus de détails sur la configuration PATH :** Voir [PATH-SETUP.md](PATH-SETUP.md)
+
+### 2.2 Sécurité et Migration
+
+⚠️ **Important :** Si vous avez des projets existants utilisant Aklo, consultez impérativement le guide de migration pour éviter les problèmes de sécurité Git.
+
+**Pour migrer des projets existants :** Voir [MIGRATION-SECURITY.md](MIGRATION-SECURITY.md)
+
+**Problèmes de sécurité résolus :**
+- Prévention du commit accidentel des fichiers de configuration Aklo
+- Gestion sécurisée des liens symboliques vers la Charte IA
+- Patterns `.gitignore` optimisés pour tous les artefacts Aklo
 
 ## 3. Les Rituels Quotidiens (Commandes `aklo`)
 
@@ -25,7 +40,7 @@ Voici le grimoire complet des commandes disponibles.
 
 | Commande | Arguments | Description |
 | :--- | :--- | :--- |
-| `aklo init` | - | **Initialise le projet.** Crée le lien vers la Charte, crée et pré-remplit le fichier .aklo.conf local, et configure .gitignore. **C'est la première et unique étape de configuration d'un projet.** |
+| `aklo init` | - | **Initialise le projet.** Crée le lien vers la Charte, crée et pré-remplit le fichier .aklo.conf local, configure .gitignore avec protection sécurisée, et vérifie automatiquement la sécurité Git. **C'est la première et unique étape de configuration d'un projet.** |
 | `aklo propose-pbi` | `"<titre>"` | Crée un nouvel artefact **Product Backlog Item** pour démarrer un travail. |
 | `aklo plan` | `<PBI_ID>` | Lance une session interactive pour **décomposer un PBI** en tâches techniques. |
 | `aklo start-task` | `<TASK_ID>` | Prépare l'environnement pour **commencer le développement** d'une tâche (crée la branche Git, etc.). |
@@ -134,6 +149,8 @@ PROJECT_WORKDIR=/chemin/vers/mon/projet
 ```
 
 Lorsque vous lancerez `aklo start-task` dans ce projet, il utilisera `main` comme branche de base, sans affecter vos autres projets. N'oubliez pas d'ajouter `.aklo.conf` à votre `.gitignore` si vous ne souhaitez pas versionner cette configuration spécifique au projet.
+
+**Note :** Depuis la version améliorée, `aklo init` configure automatiquement `.gitignore` avec les patterns de sécurité appropriés. Pour les projets existants, consultez [MIGRATION-SECURITY.md](MIGRATION-SECURITY.md).
 
 ## 6. Faire évoluer le Protocole
 
