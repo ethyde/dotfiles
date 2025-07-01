@@ -41,6 +41,9 @@
       "~/.shell_interactive_setup": "./shell/.shell_interactive_setup",
       "~/.shell_display": "./shell/.shell_display",
       "~/.shell_functions_enhanced": "./shell/.shell_functions_enhanced",
+      "~/.shell_functions_lazy": "./shell/.shell_functions_lazy",
+      "~/.shell_completions": "./shell/.shell_completions",
+      "~/.shell_templates": "./shell/.shell_templates",
 
       "~/.gitconfig": "./git/.gitconfig",
       "~/.gitignore_global": {
