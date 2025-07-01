@@ -1,0 +1,301 @@
+# ==============================================================================
+#                      Système de Monitoring et Analytics
+# ==============================================================================
+
+# Configuration
+DOTFILES_STATS_FILE="$HOME/.dotfiles_stats"
+DOTFILES_PERFORMANCE_FILE="$HOME/.dotfiles_performance"
+DOTFILES_ERRORS_FILE="$HOME/.dotfiles_errors"
+
+# Log d'usage des commandes
+log_command_usage() {
+    local cmd="$1"
+    local status="${2:-success}"
+    local duration="${3:-0}"
+    local context="${4:-unknown}"
+    
+    # Format: timestamp|command|status|duration|context|pwd
+    local log_entry="$(date '+%Y-%m-%d %H:%M:%S')|$cmd|$status|$duration|$context|$PWD"
+    echo "$log_entry" >> "$DOTFILES_STATS_FILE"
+    
+    # Garder seulement les 1000 dernières entrées
+    if [[ -f "$DOTFILES_STATS_FILE" ]] && [[ $(wc -l < "$DOTFILES_STATS_FILE") -gt 1000 ]]; then
+        tail -1000 "$DOTFILES_STATS_FILE" > "${DOTFILES_STATS_FILE}.tmp"
+        mv "${DOTFILES_STATS_FILE}.tmp" "$DOTFILES_STATS_FILE"
+    fi
+}
+
+# Mesure du temps d'exécution
+measure_execution_time() {
+    local cmd="$1"
+    shift
+    local start_time=$(date +%s.%N)
+    
+    # Exécuter la commande
+    "$cmd" "$@"
+    local exit_code=$?
+    
+    local end_time=$(date +%s.%N)
+    local duration=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
+    
+    # Logger les performances
+    local perf_entry="$(date '+%Y-%m-%d %H:%M:%S')|$cmd|$duration|$exit_code"
+    echo "$perf_entry" >> "$DOTFILES_PERFORMANCE_FILE"
+    
+    # Logger l'usage
+    local status="success"
+    [[ $exit_code -ne 0 ]] && status="error"
+    log_command_usage "$cmd" "$status" "$duration"
+    
+    return $exit_code
+}
+
+# Log des erreurs
+log_error() {
+    local cmd="$1"
+    local error_msg="$2"
+    local context="${3:-unknown}"
+    
+    local error_entry="$(date '+%Y-%m-%d %H:%M:%S')|$cmd|$error_msg|$context|$PWD"
+    echo "$error_entry" >> "$DOTFILES_ERRORS_FILE"
+    
+    # Logger aussi dans les stats
+    log_command_usage "$cmd" "error" "0" "$context"
+}
+
+# Dashboard de statistiques
+dotfiles_stats() {
+    echo "📊 Statistiques d'utilisation des dotfiles"
+    echo "=========================================="
+    
+    if [[ ! -f "$DOTFILES_STATS_FILE" ]]; then
+        echo "❌ Aucune statistique disponible"
+        echo "💡 Utilisez les commandes gac, gbs, gbd, gri pour commencer"
+        return 1
+    fi
+    
+    local total_commands=$(wc -l < "$DOTFILES_STATS_FILE")
+    echo "📈 Total de commandes exécutées: $total_commands"
+    echo ""
+    
+    # Top 10 des commandes les plus utilisées
+    echo "🏆 Top 10 des commandes:"
+    awk -F'|' '{print $2}' "$DOTFILES_STATS_FILE" | sort | uniq -c | sort -nr | head -10 | while read count cmd; do
+        printf "   %2d. %-15s (%d utilisations)\n" "$(echo "$count" | tr -d ' ')" "$cmd" "$count"
+    done
+    echo ""
+    
+    # Statistiques par période
+    echo "📅 Utilisation cette semaine:"
+    local week_ago=$(date -d '7 days ago' '+%Y-%m-%d' 2>/dev/null || date -v-7d '+%Y-%m-%d' 2>/dev/null || echo "1970-01-01")
+    local week_count=$(awk -F'|' -v week_ago="$week_ago" '$1 >= week_ago' "$DOTFILES_STATS_FILE" | wc -l)
+    echo "   $week_count commandes cette semaine"
+    
+    echo "📅 Utilisation aujourd'hui:"
+    local today=$(date '+%Y-%m-%d')
+    local today_count=$(awk -F'|' -v today="$today" '$1 ~ today' "$DOTFILES_STATS_FILE" | wc -l)
+    echo "   $today_count commandes aujourd'hui"
+    echo ""
+    
+    # Taux de succès
+    echo "✅ Taux de succès:"
+    local success_count=$(awk -F'|' '$3 == "success"' "$DOTFILES_STATS_FILE" | wc -l)
+    local error_count=$(awk -F'|' '$3 == "error"' "$DOTFILES_STATS_FILE" | wc -l)
+    local success_rate=$(echo "scale=1; $success_count * 100 / $total_commands" | bc 2>/dev/null || echo "0")
+    echo "   ${success_rate}% de succès ($success_count/$total_commands)"
+    [[ $error_count -gt 0 ]] && echo "   $error_count erreurs détectées"
+    echo ""
+    
+    # Contextes les plus utilisés
+    echo "📁 Projets les plus actifs:"
+    awk -F'|' '{print $6}' "$DOTFILES_STATS_FILE" | sort | uniq -c | sort -nr | head -5 | while read count path; do
+        local project_name=$(basename "$path")
+        printf "   %-20s (%d commandes)\n" "$project_name" "$count"
+    done
+}
+
+# Statistiques de performance
+dotfiles_performance() {
+    echo "⚡ Statistiques de performance"
+    echo "============================="
+    
+    if [[ ! -f "$DOTFILES_PERFORMANCE_FILE" ]]; then
+        echo "❌ Aucune donnée de performance disponible"
+        return 1
+    fi
+    
+    echo "🚀 Commandes les plus rapides:"
+    awk -F'|' '$4 == 0 {printf "%-15s: %.3fs\n", $2, $3}' "$DOTFILES_PERFORMANCE_FILE" | sort -k2 -n | head -5
+    echo ""
+    
+    echo "🐌 Commandes les plus lentes:"
+    awk -F'|' '$4 == 0 {printf "%-15s: %.3fs\n", $2, $3}' "$DOTFILES_PERFORMANCE_FILE" | sort -k2 -nr | head -5
+    echo ""
+    
+    # Moyenne par commande
+    echo "📊 Temps moyen par commande:"
+    awk -F'|' '$4 == 0' "$DOTFILES_PERFORMANCE_FILE" | awk -F'|' '{
+        sum[$2] += $3; count[$2]++
+    } END {
+        for (cmd in sum) {
+            printf "   %-15s: %.3fs (moyenne sur %d exécutions)\n", cmd, sum[cmd]/count[cmd], count[cmd]
+        }
+    }' | sort -k2 -n
+}
+
+# Analyse des erreurs
+dotfiles_errors() {
+    echo "🚨 Analyse des erreurs"
+    echo "====================="
+    
+    if [[ ! -f "$DOTFILES_ERRORS_FILE" ]]; then
+        echo "✅ Aucune erreur enregistrée"
+        return 0
+    fi
+    
+    local total_errors=$(wc -l < "$DOTFILES_ERRORS_FILE")
+    echo "📊 Total d'erreurs: $total_errors"
+    echo ""
+    
+    echo "🔥 Commandes avec le plus d'erreurs:"
+    awk -F'|' '{print $2}' "$DOTFILES_ERRORS_FILE" | sort | uniq -c | sort -nr | head -5 | while read count cmd; do
+        printf "   %-15s: %d erreurs\n" "$cmd" "$count"
+    done
+    echo ""
+    
+    echo "🕐 Erreurs récentes (5 dernières):"
+    tail -5 "$DOTFILES_ERRORS_FILE" | while IFS='|' read timestamp cmd error_msg context path; do
+        echo "   $timestamp - $cmd: $error_msg"
+    done
+}
+
+# Détection des patterns d'usage
+dotfiles_insights() {
+    echo "🔍 Insights et recommandations"
+    echo "=============================="
+    
+    if [[ ! -f "$DOTFILES_STATS_FILE" ]]; then
+        echo "❌ Données insuffisantes pour l'analyse"
+        return 1
+    fi
+    
+    # Analyse des heures d'activité
+    echo "🕐 Heures d'activité:"
+    awk -F'|' '{
+        split($1, datetime, " ")
+        split(datetime[2], time, ":")
+        hour = time[1]
+        hours[hour]++
+    } END {
+        for (h=0; h<24; h++) {
+            printf "   %02d:00-%02d:59: %d commandes\n", h, h, hours[sprintf("%02d", h)]+0
+        }
+    }' "$DOTFILES_STATS_FILE" | sort -k2 -nr | head -5
+    echo ""
+    
+    # Détection des workflows
+    echo "🔄 Workflows détectés:"
+    awk -F'|' '{print $2}' "$DOTFILES_STATS_FILE" | tail -20 | tr '\n' ' ' | sed 's/ /→/g' | sed 's/→$/\n/'
+    echo ""
+    
+    # Recommandations
+    echo "💡 Recommandations:"
+    
+    # Vérifier si l'utilisateur utilise les fonctions enhanced
+    local gac_count=$(awk -F'|' '$2 == "gac"' "$DOTFILES_STATS_FILE" | wc -l)
+    local gbs_count=$(awk -F'|' '$2 == "gbs"' "$DOTFILES_STATS_FILE" | wc -l)
+    
+    if [[ $gac_count -gt 0 ]]; then
+        echo "   ✅ Vous utilisez gac (commit intelligent)"
+    else
+        echo "   💡 Essayez 'gac' pour des commits avec émojis automatiques"
+    fi
+    
+    if [[ $gbs_count -gt 0 ]]; then
+        echo "   ✅ Vous utilisez gbs (création de branche intelligente)"
+    else
+        echo "   💡 Essayez 'gbs' ou 'gbw' pour créer des branches avec validation"
+    fi
+    
+    # Analyser les erreurs fréquentes
+    if [[ -f "$DOTFILES_ERRORS_FILE" ]]; then
+        local frequent_error=$(awk -F'|' '{print $2}' "$DOTFILES_ERRORS_FILE" | sort | uniq -c | sort -nr | head -1 | awk '{print $2}')
+        if [[ -n "$frequent_error" ]]; then
+            echo "   ⚠️  Erreur fréquente avec '$frequent_error' - consultez 'dotfiles-errors'"
+        fi
+    fi
+}
+
+# Nettoyage des fichiers de stats
+dotfiles_cleanup_stats() {
+    echo "🧹 Nettoyage des statistiques"
+    
+    local total_size=0
+    
+    if [[ -f "$DOTFILES_STATS_FILE" ]]; then
+        local stats_size=$(wc -c < "$DOTFILES_STATS_FILE")
+        total_size=$((total_size + stats_size))
+        echo "📊 Stats: $(wc -l < "$DOTFILES_STATS_FILE") entrées ($(echo "scale=1; $stats_size/1024" | bc 2>/dev/null || echo "0")KB)"
+    fi
+    
+    if [[ -f "$DOTFILES_PERFORMANCE_FILE" ]]; then
+        local perf_size=$(wc -c < "$DOTFILES_PERFORMANCE_FILE")
+        total_size=$((total_size + perf_size))
+        echo "⚡ Performance: $(wc -l < "$DOTFILES_PERFORMANCE_FILE") entrées ($(echo "scale=1; $perf_size/1024" | bc 2>/dev/null || echo "0")KB)"
+    fi
+    
+    if [[ -f "$DOTFILES_ERRORS_FILE" ]]; then
+        local errors_size=$(wc -c < "$DOTFILES_ERRORS_FILE")
+        total_size=$((total_size + errors_size))
+        echo "🚨 Erreurs: $(wc -l < "$DOTFILES_ERRORS_FILE") entrées ($(echo "scale=1; $errors_size/1024" | bc 2>/dev/null || echo "0")KB)"
+    fi
+    
+    echo "💾 Taille totale: $(echo "scale=1; $total_size/1024" | bc 2>/dev/null || echo "0")KB"
+    
+    if [[ $total_size -gt 51200 ]]; then  # > 50KB
+        echo ""
+        read -p "Nettoyer les anciennes données? [y/N]: " confirm
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            [[ -f "$DOTFILES_STATS_FILE" ]] && tail -500 "$DOTFILES_STATS_FILE" > "${DOTFILES_STATS_FILE}.tmp" && mv "${DOTFILES_STATS_FILE}.tmp" "$DOTFILES_STATS_FILE"
+            [[ -f "$DOTFILES_PERFORMANCE_FILE" ]] && tail -500 "$DOTFILES_PERFORMANCE_FILE" > "${DOTFILES_PERFORMANCE_FILE}.tmp" && mv "${DOTFILES_PERFORMANCE_FILE}.tmp" "$DOTFILES_PERFORMANCE_FILE"
+            [[ -f "$DOTFILES_ERRORS_FILE" ]] && tail -100 "$DOTFILES_ERRORS_FILE" > "${DOTFILES_ERRORS_FILE}.tmp" && mv "${DOTFILES_ERRORS_FILE}.tmp" "$DOTFILES_ERRORS_FILE"
+            echo "✅ Nettoyage terminé"
+        fi
+    else
+        echo "✅ Taille acceptable, pas de nettoyage nécessaire"
+    fi
+}
+
+# Export des données
+dotfiles_export_stats() {
+    local export_file="dotfiles_stats_$(date +%Y%m%d).json"
+    
+    echo "📤 Export des statistiques vers $export_file"
+    
+    {
+        echo "{"
+        echo "  \"export_date\": \"$(date -Iseconds)\","
+        echo "  \"stats\": ["
+        
+        if [[ -f "$DOTFILES_STATS_FILE" ]]; then
+            awk -F'|' '{
+                printf "    {\"timestamp\":\"%s\", \"command\":\"%s\", \"status\":\"%s\", \"duration\":%s, \"context\":\"%s\", \"path\":\"%s\"}", $1, $2, $3, $4, $5, $6
+                if (NR < total) printf ","
+                printf "\n"
+            }' total=$(wc -l < "$DOTFILES_STATS_FILE") "$DOTFILES_STATS_FILE"
+        fi
+        
+        echo "  ]"
+        echo "}"
+    } > "$export_file"
+    
+    echo "✅ Export terminé: $export_file"
+}
+
+# Aliases pour les analytics
+alias dotfiles-stats='dotfiles_stats'
+alias dotfiles-perf='dotfiles_performance'
+alias dotfiles-errors='dotfiles_errors'
+alias dotfiles-insights='dotfiles_insights'
+alias dotfiles-cleanup='dotfiles_cleanup_stats'
+alias dotfiles-export='dotfiles_export_stats' 
