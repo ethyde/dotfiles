@@ -88,7 +88,7 @@
 
     #   Workflow & Sauvegardes Rapides  =====
     # Commit avec messages automatiques et émojis (version avancée)
-    gac     = "!f() { . ~/.shell_functions_enhanced && git_add_all_and_commit_super_enhanced \"$@\"; }; f"
+    gac     = "!f() { . ~/.shell_functions_lazy && gac_lazy \"$@\"; }; f"
     # Commit rapide "SAVEPOINT" sans vérification des hooks
     save    = "!. ~/.shell_functions && git_savepoint"
     # Commit rapide "Work In Progress" avec un message en ligne de commande
@@ -104,11 +104,11 @@
     # Affiche le nom de la branche actuelle
     b-name  = rev-parse --abbrev-ref HEAD
     # Création de branche avec validation format (version avancée)
-    gbs     = "!f() { . ~/.shell_functions_enhanced && git_branch_start_super_enhanced \"$@\"; }; f"
+    gbs     = "!f() { . ~/.shell_functions_lazy && gbs_lazy \"$@\"; }; f"
     # Suppression branche locale + distante (version avancée)
-    gbd     = "!f() { . ~/.shell_functions_enhanced && git_branch_delete_super_enhanced \"$@\"; }; f"
+    gbd     = "!f() { . ~/.shell_functions_lazy && gbd_lazy \"$@\"; }; f"
     # Rebase interactif intelligent (version avancée)
-    gri     = "!f() { . ~/.shell_functions_enhanced && git_rebase_interactive_super_enhanced \"$@\"; }; f"
+    gri     = "!f() { . ~/.shell_functions_lazy && gri_lazy \"$@\"; }; f"
     # Lance un rebase interactif depuis le point de divergence avec la branche cible (master par défaut)
     b-squash = "!f() { . ~/.shell_functions && git_branch_squash \"$@\"; }; f"
 
