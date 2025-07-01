@@ -4,18 +4,8 @@
 #      CONFIGURATION POUR LES SESSIONS ZSH INTERACTIVES
 # ==============================================================================
 
-# 1. Charger la configuration de base (PATH, variables d'environnement...)
-[ -f ~/.profile ] && . ~/.profile
-
-# 2. Charger toutes les fonctions partagées (la syntaxe est compatible)
-[ -f ~/.shell_functions ] && . ~/.shell_functions
-
-# 3. Charger tous les alias partagés (la syntaxe est compatible)
-[ -f ~/.shell_aliases ] && . ~/.shell_aliases
-
-# 4. Charger les scripts de démarrage interactifs partagés (SSH, etc.)
-[ -f ~/.shell_interactive_setup ] && . ~/.shell_interactive_setup
-
+# 1. Charger toute la configuration Bash (source de vérité)
+[ -f ~/.bashrc ] && . ~/.bashrc
 
 # ==============================================================================
 #      SPÉCIFIQUE À ZSH (Oh My Zsh, Powerlevel10k, Plugins...)
@@ -49,14 +39,4 @@ fi
 
 # --- iTerm2 ---
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
-# ==============================================================================
-#      FONCTIONS D'AFFICHAGE AMÉLIORÉES
-# ==============================================================================
-
-# Charger les fonctions d'affichage avec couleurs et émojis
-[ -f ~/.shell_display ] && . ~/.shell_display
-
-# Charger les fonctions améliorées (SSH, NVM, Git)
-[ -f ~/.shell_functions_enhanced ] && . ~/.shell_functions_enhanced
 
