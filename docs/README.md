@@ -16,6 +16,7 @@ Documentation centralisée pour l'ensemble du projet dotfiles.
 ### 🔧 **Outils & Utilitaires**
 - **[Installation](./installation.md)** - Guide d'installation et configuration
 - **[Migration](./migration.md)** - Guide de migration entre versions
+- **[Gestion Permissions](./PERMISSIONS-MANAGEMENT.md)** - Système automatique de permissions
 
 ## 🚀 Démarrage rapide
 

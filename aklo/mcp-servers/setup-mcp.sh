@@ -107,6 +107,17 @@ save_config() {
 validate_config() {
     local config_path="$1"
     
+    log_step "Correction des permissions des scripts"
+    
+    # Corriger les permissions avant la validation
+    local fix_script="$SCRIPT_DIR/../../fix-permissions.sh"
+    if [ -f "$fix_script" ]; then
+        "$fix_script" --fix > /dev/null 2>&1 || true
+        log_success "Permissions des scripts corrigées"
+    else
+        log_warning "Script fix-permissions.sh non trouvé"
+    fi
+    
     log_step "Validation de la configuration"
     
     if [ ! -f "$config_path" ]; then
