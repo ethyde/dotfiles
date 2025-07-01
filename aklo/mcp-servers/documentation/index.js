@@ -488,6 +488,12 @@ class AkloDocumentationServer {
       join(process.cwd(), 'docs', 'CHARTE_IA'),
       join(process.env.HOME, '.dotfiles', 'aklo', 'charte'),
       join(process.env.HOME, 'dotfiles', 'aklo', 'charte'),
+      join(process.env.HOME, 'Projets', 'dotfiles', 'aklo', 'charte'),
+      // Chemin relatif depuis le répertoire du serveur MCP
+      join(process.cwd(), 'aklo', 'charte'),
+      // Chemin depuis le répertoire parent du serveur MCP
+      join(process.cwd(), '..', 'charte'),
+      join(process.cwd(), '..', '..', 'charte'),
     ];
     
     for (const path of possiblePaths) {
