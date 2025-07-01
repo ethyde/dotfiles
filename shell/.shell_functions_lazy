@@ -1,0 +1,115 @@
+# ==============================================================================
+#                      Système de Lazy Loading pour Fonctions Enhanced
+# ==============================================================================
+
+# Variables globales pour le lazy loading
+_ENHANCED_FUNCTIONS_LOADED=false
+_GIT_BRANCH_CACHE=""
+_GIT_BRANCH_CACHE_TIME=0
+_GIT_STATUS_CACHE=""
+_GIT_STATUS_CACHE_TIME=0
+
+# Charge les fonctions enhanced seulement si nécessaire
+load_enhanced_functions() {
+    if [[ "$_ENHANCED_FUNCTIONS_LOADED" != "true" ]]; then
+        local enhanced_file="$HOME/.shell_functions_enhanced"
+        if [[ -f "$enhanced_file" ]]; then
+            source "$enhanced_file"
+            _ENHANCED_FUNCTIONS_LOADED=true
+            echo "🚀 Fonctions enhanced chargées"
+        else
+            echo "❌ Fichier enhanced non trouvé: $enhanced_file"
+            return 1
+        fi
+    fi
+}
+
+# Cache intelligent pour le nom de branche Git
+get_current_branch_cached() {
+    local now=$(date +%s)
+    local cache_duration=5  # 5 secondes
+    
+    if [[ $((now - _GIT_BRANCH_CACHE_TIME)) -gt $cache_duration ]] || [[ -z "$_GIT_BRANCH_CACHE" ]]; then
+        if git rev-parse --git-dir >/dev/null 2>&1; then
+            _GIT_BRANCH_CACHE=$(git branch --show-current 2>/dev/null || echo "")
+            _GIT_BRANCH_CACHE_TIME=$now
+        else
+            _GIT_BRANCH_CACHE=""
+        fi
+    fi
+    
+    echo "$_GIT_BRANCH_CACHE"
+}
+
+# Cache intelligent pour le statut Git
+get_git_status_cached() {
+    local now=$(date +%s)
+    local cache_duration=3  # 3 secondes pour le statut
+    
+    if [[ $((now - _GIT_STATUS_CACHE_TIME)) -gt $cache_duration ]] || [[ -z "$_GIT_STATUS_CACHE" ]]; then
+        if git rev-parse --git-dir >/dev/null 2>&1; then
+            local changes=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+            _GIT_STATUS_CACHE="$changes"
+            _GIT_STATUS_CACHE_TIME=$now
+        else
+            _GIT_STATUS_CACHE="0"
+        fi
+    fi
+    
+    echo "$_GIT_STATUS_CACHE"
+}
+
+# Wrapper pour gac avec lazy loading
+gac_lazy() {
+    load_enhanced_functions || return 1
+    git_add_all_and_commit_super_enhanced "$@"
+}
+
+# Wrapper pour gbs avec lazy loading
+gbs_lazy() {
+    load_enhanced_functions || return 1
+    git_branch_start_super_enhanced "$@"
+}
+
+# Wrapper pour gbd avec lazy loading
+gbd_lazy() {
+    load_enhanced_functions || return 1
+    git_branch_delete_super_enhanced "$@"
+}
+
+# Wrapper pour gri avec lazy loading
+gri_lazy() {
+    load_enhanced_functions || return 1
+    git_rebase_interactive_super_enhanced "$@"
+}
+
+# Prompt Git optimisé avec cache
+git_prompt_fast() {
+    local branch=$(get_current_branch_cached)
+    local changes=$(get_git_status_cached)
+    
+    if [[ -n "$branch" ]]; then
+        local color=""
+        if [[ "$changes" -gt 0 ]]; then
+            color="\033[1;31m"  # Rouge si changements
+        else
+            color="\033[1;32m"  # Vert si propre
+        fi
+        
+        echo -e "${color}git:${branch}${changes:+ ($changes)}$\033[0m"
+    fi
+}
+
+# Invalidation du cache Git (à appeler après opérations Git)
+invalidate_git_cache() {
+    _GIT_BRANCH_CACHE=""
+    _GIT_BRANCH_CACHE_TIME=0
+    _GIT_STATUS_CACHE=""
+    _GIT_STATUS_CACHE_TIME=0
+}
+
+# Aliases lazy loading
+alias gac='gac_lazy'
+alias gbs='gbs_lazy'
+alias gbd='gbd_lazy'
+alias gri='gri_lazy' 
