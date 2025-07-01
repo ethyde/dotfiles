@@ -17,7 +17,7 @@
 agent_load_env
 
 # Détermine si on doit afficher les messages (reload manuel vs démarrage auto)
-local should_show_ssh_status=false
+should_show_ssh_status=false
 if [[ "$DOTFILES_VERBOSE_SSH" == "true" ]] || [[ "$DOTFILES_MANUAL_RELOAD" == "true" ]]; then
     should_show_ssh_status=true
 fi

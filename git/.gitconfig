@@ -87,8 +87,8 @@
     tags-l  = "!. ~/.shell_functions && git_list_tags_formatted"
 
     #   Workflow & Sauvegardes Rapides  =====
-    # Ajoute tous les fichiers et ouvre l'éditeur pour le commit
-    aac     = "!f() { . ~/.shell_functions && git_add_all_and_commit \"$@\"; }; f"
+    # Commit avec messages automatiques et émojis (version avancée)
+    gac     = "!f() { . ~/.shell_functions_enhanced && git_add_all_and_commit_super_enhanced \"$@\"; }; f"
     # Commit rapide "SAVEPOINT" sans vérification des hooks
     save    = "!. ~/.shell_functions && git_savepoint"
     # Commit rapide "Work In Progress" avec un message en ligne de commande
@@ -103,12 +103,12 @@
     su      = "!. ~/.shell_functions && git_set_upstream"
     # Affiche le nom de la branche actuelle
     b-name  = rev-parse --abbrev-ref HEAD
-    # Démarre une nouvelle branche, la push et configure l'upstream
-    b-start = "!f() { . ~/.shell_functions && git_branch_start \"$@\"; }; f"
-    # Supprime une branche en local et sur le remote
-    b-del   = "!f() { . ~/.shell_functions && git_branch_delete \"$@\"; }; f"
-    # Force la suppression une branche en local et sur le remote
-    b-del-f = "!f() { . ~/.shell_functions && git_branch_delete_force \"$@\"; }; f"
+    # Création de branche avec validation format (version avancée)
+    gbs     = "!f() { . ~/.shell_functions_enhanced && git_branch_start_super_enhanced \"$@\"; }; f"
+    # Suppression branche locale + distante (version avancée)
+    gbd     = "!f() { . ~/.shell_functions_enhanced && git_branch_delete_super_enhanced \"$@\"; }; f"
+    # Rebase interactif intelligent (version avancée)
+    gri     = "!f() { . ~/.shell_functions_enhanced && git_rebase_interactive_super_enhanced \"$@\"; }; f"
     # Lance un rebase interactif depuis le point de divergence avec la branche cible (master par défaut)
     b-squash = "!f() { . ~/.shell_functions && git_branch_squash \"$@\"; }; f"
 
@@ -134,7 +134,7 @@
 	#	Branch	=====
 	b	=	branch
 	ba	=	branch --all
-	bd	=	branch --delete
+	# bd supprimé - utilisez 'gbd' pour la version avancée
 	bm	=	branch --move
 	#	Commit	=====
 	c	=	commit
@@ -163,7 +163,7 @@
 	rb	=	rebase
 	rba	=	rebase --abort
 	rbc	=	rebase --continue
-	rbi	=	rebase --interactive
+	# rbi supprimé - utilisez 'gri' pour la version avancée
 	rbs	=	rebase --skip
 	#	Status	=====
 	s	=	status

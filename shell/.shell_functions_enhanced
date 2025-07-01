@@ -867,5 +867,6 @@ alias gri='git_rebase_interactive_super_enhanced'
 # Alias reload
 alias reload='reload_enhanced'
 
-# Remplacer la fonction cd par la version améliorée
-alias cd='cd_enhanced' 
+# REMARQUE : cd_enhanced est disponible, mais on ne redéfinit pas cd par défaut
+# Pour l'activer, décommentez la ligne suivante :
+# alias cd='cd_enhanced' 
