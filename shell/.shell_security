@@ -1,0 +1,299 @@
+# ==============================================================================
+#                      Système de Sécurité et Validation Git
+# ==============================================================================
+
+# Validation avancée des noms de branches
+git_branch_validate() {
+    local branch_name="$1"
+    
+    if [[ -z "$branch_name" ]]; then
+        echo "❌ Nom de branche requis"
+        return 1
+    fi
+    
+    # Vérifications de sécurité
+    if [[ ${#branch_name} -gt 100 ]]; then
+        echo "❌ Nom trop long (max 100 caractères, actuel: ${#branch_name})"
+        return 1
+    fi
+    
+    if [[ "$branch_name" =~ [[:space:]] ]]; then
+        echo "❌ Espaces interdits dans les noms de branches"
+        return 1
+    fi
+    
+    if [[ "$branch_name" =~ ^(master|main|develop|staging|production)$ ]]; then
+        echo "❌ Nom de branche protégé: $branch_name"
+        return 1
+    fi
+    
+    if [[ "$branch_name" =~ ^- ]] || [[ "$branch_name" =~ -$ ]]; then
+        echo "❌ Ne peut pas commencer ou finir par un tiret"
+        return 1
+    fi
+    
+    if [[ "$branch_name" =~ \.\. ]]; then
+        echo "❌ Double points interdits (conflit Git)"
+        return 1
+    fi
+    
+    if [[ "$branch_name" =~ [@{^~:?*\[] ]]; then
+        echo "❌ Caractères interdits: @ { ^ ~ : ? * [ ]"
+        return 1
+    fi
+    
+    # Vérifications de format recommandé
+    if [[ ! "$branch_name" =~ ^(feat|fix|docs|style|refactor|test|chore)/ ]]; then
+        echo "⚠️  Format recommandé: type/JIRA-123/description"
+        echo "   Types valides: feat, fix, docs, style, refactor, test, chore"
+    fi
+    
+    if [[ "$branch_name" =~ ^[^/]+/[^/]+/[^/]+$ ]]; then
+        local type=$(echo "$branch_name" | cut -d'/' -f1)
+        local jira=$(echo "$branch_name" | cut -d'/' -f2)
+        local desc=$(echo "$branch_name" | cut -d'/' -f3)
+        
+        if [[ ! "$jira" =~ ^[A-Z]+-[0-9]+$ ]]; then
+            echo "⚠️  Format JIRA recommandé: PROJ-123 (actuel: $jira)"
+        fi
+        
+        if [[ ${#desc} -lt 3 ]]; then
+            echo "⚠️  Description trop courte (min 3 caractères)"
+        fi
+    fi
+    
+    echo "✅ Nom de branche valide: $branch_name"
+    return 0
+}
+
+# Backup automatique avant opérations destructives
+git_safe_operation() {
+    local operation="$1"
+    local branch_name="$2"
+    
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "❌ Pas dans un dépôt Git"
+        return 1
+    fi
+    
+    local timestamp=$(date +%Y%m%d-%H%M%S)
+    local backup_ref="refs/backups/$timestamp-$operation"
+    
+    # Créer un backup de l'état actuel
+    if git update-ref "$backup_ref" HEAD 2>/dev/null; then
+        echo "🔒 Backup créé: $backup_ref"
+        
+        # Garder seulement les 10 derniers backups
+        local backup_count=$(git for-each-ref refs/backups/ | wc -l)
+        if [[ $backup_count -gt 10 ]]; then
+            local oldest_backup=$(git for-each-ref refs/backups/ --sort=committerdate --format='%(refname)' | head -1)
+            git update-ref -d "$oldest_backup"
+            echo "🗑️  Ancien backup supprimé: $(basename "$oldest_backup")"
+        fi
+        
+        return 0
+    else
+        echo "❌ Impossible de créer le backup"
+        return 1
+    fi
+}
+
+# Vérification de l'état du dépôt avant opérations
+git_repo_check() {
+    local operation="$1"
+    
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "❌ Pas dans un dépôt Git"
+        return 1
+    fi
+    
+    # Vérifier s'il y a des changements non commités
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        case "$operation" in
+            branch_create|branch_switch)
+                echo "⚠️  Changements non commités détectés"
+                echo "   Voulez-vous les stasher automatiquement? [y/N]"
+                read -r response
+                if [[ "$response" =~ ^[Yy]$ ]]; then
+                    local stash_message="Auto-stash avant $operation - $(date)"
+                    git stash push -m "$stash_message"
+                    echo "💾 Changements stashés: $stash_message"
+                else
+                    echo "❌ Opération annulée - commitez ou stashez vos changements"
+                    return 1
+                fi
+                ;;
+            branch_delete)
+                echo "❌ Changements non commités - commitez avant de supprimer une branche"
+                return 1
+                ;;
+        esac
+    fi
+    
+    # Vérifier la connexion au remote
+    if ! git ls-remote origin HEAD >/dev/null 2>&1; then
+        echo "⚠️  Impossible de contacter le remote 'origin'"
+        echo "   Continuer en mode local uniquement? [y/N]"
+        read -r response
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo "❌ Opération annulée"
+            return 1
+        fi
+    fi
+    
+    echo "✅ État du dépôt vérifié"
+    return 0
+}
+
+# Protection contre la suppression de branches importantes
+git_branch_protection_check() {
+    local branch_name="$1"
+    local current_branch=$(git branch --show-current 2>/dev/null)
+    
+    # Branches protégées
+    local protected_branches="master main develop staging production release"
+    
+    for protected in $protected_branches; do
+        if [[ "$branch_name" == "$protected" ]]; then
+            echo "🚫 INTERDIT: Suppression de la branche protégée '$branch_name'"
+            return 1
+        fi
+    done
+    
+    # Vérifier si la branche a été mergée
+    if git branch --merged | grep -q "^[* ] $branch_name$"; then
+        echo "✅ Branche '$branch_name' déjà mergée - suppression sécurisée"
+    else
+        echo "⚠️  ATTENTION: Branche '$branch_name' non mergée"
+        echo "   Cette branche contient des commits non fusionnés"
+        echo "   Forcer la suppression? [y/N]"
+        read -r response
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo "❌ Suppression annulée"
+            return 1
+        fi
+        echo "⚠️  Suppression forcée confirmée"
+    fi
+    
+    # Vérifier si on est sur la branche à supprimer
+    if [[ "$current_branch" == "$branch_name" ]]; then
+        echo "⚠️  Vous êtes sur la branche à supprimer"
+        echo "   Basculer vers 'main' automatiquement? [Y/n]"
+        read -r response
+        if [[ ! "$response" =~ ^[Nn]$ ]]; then
+            git checkout main 2>/dev/null || git checkout master 2>/dev/null || {
+                echo "❌ Impossible de basculer vers main/master"
+                return 1
+            }
+            echo "✅ Basculé vers la branche principale"
+        else
+            echo "❌ Impossible de supprimer la branche courante"
+            return 1
+        fi
+    fi
+    
+    return 0
+}
+
+# Validation des messages de commit
+git_commit_validate() {
+    local commit_message="$1"
+    
+    if [[ -z "$commit_message" ]]; then
+        echo "❌ Message de commit requis"
+        return 1
+    fi
+    
+    local message_length=${#commit_message}
+    
+    # Vérifications de longueur
+    if [[ $message_length -lt 10 ]]; then
+        echo "⚠️  Message très court (${message_length} chars, min recommandé: 10)"
+    fi
+    
+    if [[ $message_length -gt 72 ]]; then
+        echo "⚠️  Première ligne longue (${message_length} chars, max recommandé: 72)"
+    fi
+    
+    # Vérifications de format
+    if [[ "$commit_message" =~ ^[a-z] ]]; then
+        echo "⚠️  Commencer par une majuscule est recommandé"
+    fi
+    
+    if [[ "$commit_message" =~ \.$  ]]; then
+        echo "⚠️  Éviter le point final dans le titre"
+    fi
+    
+    # Vérifier le format Conventional Commits
+    if [[ "$commit_message" =~ ^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: ]]; then
+        echo "✅ Format Conventional Commits détecté"
+    else
+        echo "💡 Format Conventional Commits recommandé: type(scope): description"
+    fi
+    
+    return 0
+}
+
+# Restauration depuis les backups
+git_restore_backup() {
+    echo "🔒 Backups disponibles:"
+    git for-each-ref refs/backups/ --sort=-committerdate --format='%(refname:short) - %(committerdate:short)' | nl
+    
+    echo ""
+    read -p "Numéro du backup à restaurer (0 pour annuler): " backup_num
+    
+    if [[ "$backup_num" == "0" ]] || [[ -z "$backup_num" ]]; then
+        echo "❌ Restauration annulée"
+        return 1
+    fi
+    
+    local backup_ref=$(git for-each-ref refs/backups/ --sort=-committerdate --format='%(refname:short)' | sed -n "${backup_num}p")
+    
+    if [[ -z "$backup_ref" ]]; then
+        echo "❌ Backup invalide"
+        return 1
+    fi
+    
+    echo "⚠️  ATTENTION: Ceci va réinitialiser votre branche actuelle"
+    echo "   Backup sélectionné: $backup_ref"
+    read -p "Confirmer la restauration? [y/N]: " confirm
+    
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        git reset --hard "$backup_ref"
+        echo "✅ Backup restauré: $backup_ref"
+    else
+        echo "❌ Restauration annulée"
+    fi
+}
+
+# Nettoyage des backups anciens
+git_cleanup_backups() {
+    local backup_count=$(git for-each-ref refs/backups/ | wc -l)
+    
+    if [[ $backup_count -eq 0 ]]; then
+        echo "ℹ️  Aucun backup à nettoyer"
+        return 0
+    fi
+    
+    echo "📊 $backup_count backup(s) trouvé(s)"
+    
+    if [[ $backup_count -gt 20 ]]; then
+        echo "🧹 Nettoyage automatique des backups anciens..."
+        local backups_to_delete=$((backup_count - 20))
+        
+        git for-each-ref refs/backups/ --sort=committerdate --format='%(refname)' | head -$backups_to_delete | while read -r backup_ref; do
+            git update-ref -d "$backup_ref"
+            echo "🗑️  Supprimé: $(basename "$backup_ref")"
+        done
+        
+        echo "✅ $backups_to_delete backup(s) ancien(s) supprimé(s)"
+    else
+        echo "✅ Nombre de backups acceptable ($backup_count/20)"
+    fi
+}
+
+# Aliases pour les fonctions de sécurité
+alias git-validate='git_branch_validate'
+alias git-backup='git_safe_operation'
+alias git-restore='git_restore_backup'
+alias git-cleanup='git_cleanup_backups' 
