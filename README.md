@@ -17,10 +17,28 @@ cd ~/.dotfiles
 
 ## ✨ Fonctionnalités principales
 
+### 🚀 **Système Git Optimisé** (NOUVEAU!)
+- **Performance** : Lazy loading + cache intelligent (branches 5s, status 3s)
+- **UX** : Auto-complétion Bash/Zsh + assistant création branche (`gbw`)
+- **Sécurité** : Validation + backups automatiques + protection branches
+- **Analytics** : Monitoring usage + dashboard statistiques
+- **Configuration** : 15 paramètres personnalisables + hooks
+
+**Commandes principales :**
+```bash
+gac "message"          # Commit intelligent avec émojis
+gbs "branch-name"      # Création branche avec validation
+gbd "branch-name"      # Suppression sécurisée
+gbw                    # Assistant création branche
+dotfiles-stats         # Dashboard statistiques
+dotfiles-config wizard # Configuration interactive
+```
+
 ### 🐚 **Shell amélioré** ([documentation](shell/README.md))
 - Fonctions SSH, NVM et Git avec affichage coloré
 - Mode silencieux compatible Powerlevel10k
 - Gestion automatique des clés SSH et versions Node.js
+- **NOUVEAU** : Templates intelligents + détection contexte projet
 
 ### 🤖 **Protocole Aklo** ([documentation](aklo/README.md))
 - Système de gouvernance de développement
@@ -31,6 +49,7 @@ cd ~/.dotfiles
 - Liens symboliques via Dotbot
 - Support Bash et Zsh complet
 - Variables d'environnement partagées
+- **NOUVEAU** : Configuration centralisée personnalisable
 
 ## 📚 Documentation
 
@@ -38,11 +57,14 @@ cd ~/.dotfiles
 |-----------|-------------|---------------|
 | **🏠 Vue d'ensemble** | Ce fichier | [README.md](README.md) |
 | **📖 Documentation** | Guide centralisé | [docs/](docs/) |
+| **🚀 Optimisations** | **Système Git optimisé** | **[docs/OPTIMISATIONS.md](docs/OPTIMISATIONS.md)** |
 | **🐚 Shell** | Configuration shell avancée | [shell/README.md](shell/README.md) |
 | **🤖 Aklo** | Protocole de développement | [aklo/README.md](aklo/README.md) |
 | **🔧 MCP** | Serveurs Model Context Protocol | [aklo/mcp-servers/README.md](aklo/mcp-servers/README.md) |
 
 ### 🎯 Guides rapides
+- **[⚡ Démarrage Rapide](docs/QUICKSTART-OPTIMISATIONS.md)** - **Prise en main en 5 minutes**
+- **[🚀 Optimisations](docs/OPTIMISATIONS.md)** - **Guide complet du système optimisé**
 - **[Installation](docs/installation.md)** - Installation et configuration
 - **[Migration](docs/migration.md)** - Migrer depuis une config existante
 
