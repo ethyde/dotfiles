@@ -18,101 +18,13 @@ fi
 #                      Workflow & Sauvegardes (Version Améliorée)
 # ==============================================================================
 
-# Version améliorée de git_add_all_and_commit
-git_add_all_and_commit_enhanced() {
-  start_operation "Préparation du commit"
-  
-  # 1. Ajoute tous les fichiers au "stage"
-  print_step "Ajout de tous les fichiers au stage..."
-  git add --all
+# FONCTION SUPPRIMÉE : git_add_all_and_commit_enhanced
+# Remplacée par git_add_all_and_commit_super_enhanced (plus bas dans le fichier)
+# Utilisez l'alias 'gac' qui pointe vers la version optimisée
 
-  # Vérifier s'il y a des changements à committer
-  if git diff --cached --quiet; then
-    print_warning "Aucun changement à committer"
-    return 0
-  fi
-
-  # Afficher un résumé des changements
-  local changes=$(git diff --cached --stat | tail -1)
-  print_info "Changements: $changes"
-
-  # 2. Vérifie si des arguments ont été passés
-  if [ $# -gt 0 ]; then
-    print_step "Utilisation du message de commit manuel..."
-    git commit "$@"
-    if [ $? -eq 0 ]; then
-      print_success "Commit créé avec succès !"
-    else
-      print_error "Échec du commit"
-      return 1
-    fi
-  else
-    # Génération automatique du message
-    local current_branch
-    current_branch=$(git rev-parse --abbrev-ref HEAD)
-    print_branch "$current_branch"
-
-    local type jira_issue desc formatted_desc commit_message
-    IFS='/' read -r type jira_issue desc <<< "$current_branch"
-
-    if [[ -n "$type" && -n "$jira_issue" && -n "$desc" ]]; then
-      formatted_desc=$(echo "$desc" | sed 's/-/ /g')
-      commit_message="${type}(${jira_issue}): ${formatted_desc}"
-      
-      print_info "Message généré automatiquement:"
-      echo -e "   ${C_BOLD}${C_GREEN}→ ${commit_message}${C_RESET}"
-      
-      git commit -m "${commit_message}"
-      if [ $? -eq 0 ]; then
-        print_success "Commit créé avec le message généré !"
-      else
-        print_error "Échec du commit"
-        return 1
-      fi
-    else
-      print_warning "Format de branche non reconnu (attendu: type/JIRA/desc)"
-      print_step "Ouverture de l'éditeur pour le message de commit..."
-      git commit
-    fi
-  fi
-  
-  end_operation "Commit"
-}
-
-# Version améliorée de git_branch_start
-git_branch_start_enhanced() {
-  local branch_name=${1:-newBranch}
-  
-  start_operation "Création de la nouvelle branche '$branch_name'"
-  
-  print_step "Création de la branche locale..."
-  if git checkout -b "$branch_name"; then
-    print_success "Branche '$branch_name' créée localement"
-  else
-    print_error "Échec de la création de la branche"
-    return 1
-  fi
-  
-  print_step "Push de la branche vers origin..."
-  if git push origin "$branch_name"; then
-    print_success "Branche pushée vers origin"
-  else
-    print_error "Échec du push vers origin"
-    return 1
-  fi
-  
-  print_step "Configuration du suivi amont..."
-  if git_set_upstream_enhanced; then
-    print_success "Suivi amont configuré"
-  else
-    print_warning "Échec de la configuration du suivi amont"
-  fi
-  
-  print_step "Nettoyage des dépendances NPM..."
-  git_npm_clean_enhanced
-  
-  end_operation "Création de branche '$branch_name'"
-}
+# FONCTION SUPPRIMÉE : git_branch_start_enhanced
+# Remplacée par git_branch_start_super_enhanced (plus bas dans le fichier)
+# Utilisez l'alias 'gbs' qui pointe vers la version optimisée
 
 # Version améliorée de git_set_upstream
 git_set_upstream_enhanced() {
@@ -147,44 +59,9 @@ git_npm_clean_enhanced() {
   fi
 }
 
-# Version améliorée de git_branch_delete
-git_branch_delete_enhanced() {
-  local branch_name=$1
-  
-  if [[ -z "$branch_name" ]]; then
-    print_error "Nom de la branche manquant"
-    echo -e "${C_DIM}Usage: git_branch_delete_enhanced <nom_branche>${C_RESET}"
-    return 1
-  fi
-  
-  start_operation "Suppression de la branche '$branch_name'"
-  
-  # Vérifier que ce n'est pas la branche actuelle
-  local current_branch
-  current_branch=$(git rev-parse --abbrev-ref HEAD)
-  
-  if [[ "$current_branch" == "$branch_name" ]]; then
-    print_error "Impossible de supprimer la branche actuelle '$branch_name'"
-    print_info "Changez de branche d'abord avec: git checkout master"
-    return 1
-  fi
-  
-  print_step "Suppression de la branche locale..."
-  if git branch --delete "$branch_name"; then
-    print_success "Branche locale '$branch_name' supprimée"
-  else
-    print_warning "Échec de la suppression locale (branche peut-être non fusionnée)"
-  fi
-  
-  print_step "Suppression de la branche distante..."
-  if git push origin --delete "$branch_name"; then
-    print_success "Branche distante '$branch_name' supprimée"
-  else
-    print_warning "Échec de la suppression distante (branche peut-être inexistante)"
-  fi
-  
-  end_operation "Suppression de branche '$branch_name'"
-}
+# FONCTION SUPPRIMÉE : git_branch_delete_enhanced
+# Remplacée par git_branch_delete_super_enhanced (plus bas dans le fichier)
+# Utilisez l'alias 'gbd' qui pointe vers la version optimisée
 
 # Version améliorée de git_branch_sync
 git_branch_sync_enhanced() {
@@ -278,10 +155,10 @@ addhost_enhanced() {
 demo_enhanced_functions() {
     print_header "Démonstration des fonctions améliorées"
     
-    print_info "Fonctions disponibles avec affichage amélioré:"
-    echo -e "${C_YELLOW}  • git_add_all_and_commit_enhanced${C_RESET} - Commit avec affichage sympa"
-    echo -e "${C_YELLOW}  • git_branch_start_enhanced${C_RESET}       - Création de branche avec suivi"
-    echo -e "${C_YELLOW}  • git_branch_delete_enhanced${C_RESET}      - Suppression de branche sécurisée"
+    print_info "Fonctions Git optimisées (utilisez les alias):"
+    echo -e "${C_YELLOW}  • gac${C_RESET} - Commit intelligent avec émojis automatiques"
+    echo -e "${C_YELLOW}  • gbs${C_RESET} - Création de branche avec validation"
+    echo -e "${C_YELLOW}  • gbd${C_RESET} - Suppression de branche sécurisée"
     echo -e "${C_YELLOW}  • git_branch_sync_enhanced${C_RESET}        - Synchronisation avec feedback"
     echo -e "${C_YELLOW}  • addhost_enhanced${C_RESET}                - Gestion /etc/hosts avec couleurs"
     echo -e "${C_YELLOW}  • removehost_enhanced${C_RESET}             - Suppression hosts avec feedback"
