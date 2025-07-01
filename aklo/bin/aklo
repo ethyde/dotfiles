@@ -270,33 +270,40 @@ command_init() {
   echo "  1. Link the central Charte IA into './docs/CHARTE_IA'."
   echo "  2. Create a local '.aklo.conf' file."
   echo "  3. Automatically set 'PROJECT_WORKDIR' in this new file."
-  echo "  4. Update '.gitignore' to ignore both elements."
+  echo "  4. Configure '.gitignore' with optimized Aklo security patterns."
+  echo "  5. Ensure no Aklo files are tracked by Git."
   printf "\nProceed? (y/n) "
   read -r reply
   if [ "$reply" != "y" ]; then echo "Invocation aborted."; exit 0; fi
   echo ""
 
-  # --- Étape 3 : Création du Lien Symbolique et Mise à Jour du .gitignore ---
+  # --- Étape 3 : Création du Lien Symbolique ---
   echo "› Linking the Charte..."
   mkdir -p ./docs
   ln -s "$AKLO_CHARTE_PATH" "$TARGET_CHARTE_PATH"
-  touch "$GITIGNORE_FILE"
-  if ! grep -q "^${IGNORE_ENTRY_CHARTE}$" "$GITIGNORE_FILE"; then
-    echo "\n# Ignore the Aklo Protocol Charte linked locally" >> "$GITIGNORE_FILE"
-    echo "${IGNORE_ENTRY_CHARTE}" >> "$GITIGNORE_FILE"
-  fi
-  echo "  ✅ Charte linked and ignored."
+  echo "  ✅ Charte linked."
 
   # --- Étape 4 : Création du Fichier de Configuration Local ---
   echo "› Creating local configuration file..."
   touch "$LOCAL_CONFIG_FILE"
-  if ! grep -q "^${IGNORE_ENTRY_CONFIG}$" "$GITIGNORE_FILE"; then
-    echo "\n# Ignore project-specific Aklo configuration" >> "$GITIGNORE_FILE"
-    echo "${IGNORE_ENTRY_CONFIG}" >> "$GITIGNORE_FILE"
-  fi
-  echo "  ✅ .aklo.conf created and ignored."
+  echo "  ✅ .aklo.conf created."
 
-  # --- Étape 5 : Pré-remplissage du WORKDIR ---
+  # --- Étape 5 : Configuration Optimisée du .gitignore ---
+  echo "› Configuring .gitignore for Aklo security..."
+  touch "$GITIGNORE_FILE"
+  
+  # Vérifier si la section Aklo existe déjà
+  if ! grep -q "# Aklo Protocol" "$GITIGNORE_FILE"; then
+    echo "" >> "$GITIGNORE_FILE"
+    echo "# Aklo Protocol" >> "$GITIGNORE_FILE"
+    echo ".aklo.*" >> "$GITIGNORE_FILE"
+    echo "docs/CHARTE_IA" >> "$GITIGNORE_FILE"
+    echo "  ✅ .gitignore configured with optimized Aklo patterns."
+  else
+    echo "  ℹ️  .gitignore already contains Aklo configuration."
+  fi
+
+  # --- Étape 6 : Pré-remplissage du WORKDIR ---
   echo "› Setting project working directory..."
   # 'pwd' récupère le chemin absolu du répertoire courant.
   CURRENT_WORKDIR=$(pwd)
@@ -305,9 +312,24 @@ command_init() {
   echo "PROJECT_WORKDIR=${CURRENT_WORKDIR}" >> "$LOCAL_CONFIG_FILE"
   echo "  ✅ PROJECT_WORKDIR set to: ${CURRENT_WORKDIR}"
 
-  # --- Étape 6 : Message de Fin ---
+  # --- Étape 7 : Sécurisation Git ---
+  echo "› Securing Git configuration..."
+  # S'assurer que le lien symbolique n'est pas déjà tracké par Git
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    if git ls-files --cached | grep -q "^docs/CHARTE_IA$"; then
+      git rm --cached docs/CHARTE_IA >/dev/null 2>&1 || true
+      echo "  ✅ Removed existing CHARTE_IA symlink from Git tracking."
+    else
+      echo "  ✅ Git security verified - no Aklo files tracked."
+    fi
+  else
+    echo "  ℹ️  No Git repository detected - skipping Git security check."
+  fi
+
+  # --- Étape 8 : Message de Fin ---
   echo ""
   echo "🎉 Aklo Protocol is now fully initiated. Your project is ready."
+  echo "🔒 Security: Aklo files are properly excluded from Git tracking."
   echo "You can now use other Aklo commands like 'aklo propose-pbi'."
 }
 
