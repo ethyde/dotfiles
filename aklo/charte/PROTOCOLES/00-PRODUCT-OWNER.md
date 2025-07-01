@@ -20,7 +20,7 @@ La mission de ce mode est de définir, clarifier et formaliser une exigence pour
 
 ### 1.2. Livrable Attendu
 
-- Un nouveau fichier `PBI-[ID]-PROPOSED.md` dans le répertoire `/docs/pbi/`, respectant la structure définie et les critères de qualité **INVEST**.
+- Un nouveau fichier `PBI-[ID]-PROPOSED.md` dans le répertoire `/docs/backlog/00-pbi/`, respectant la structure définie et les critères de qualité **INVEST**.
 
 ## SECTION 2 : ARTEFACT PBI - GESTION ET STRUCTURE
 
