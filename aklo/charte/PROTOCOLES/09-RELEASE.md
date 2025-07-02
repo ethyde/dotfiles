@@ -1,7 +1,3 @@
----
-created: 2025-06-28 09:57
-modified: 2025-06-28 10:09
----
 # PROTOCOLE SPÉCIFIQUE : GESTION DE RELEASE
 
 Ce protocole s'active lorsque le `Human_Developer` décide qu'un ensemble de fonctionnalités est prêt à être publié en tant que nouvelle version stable de l'application.
@@ -63,6 +59,47 @@ Coordonner et automatiser les étapes nécessaires pour transformer une série d
 ```
 
 ## SECTION 3 : PROCÉDURE DE RELEASE
+
+**🛫 PLAN DE VOL RELEASE (Obligatoire avant Phase 1)**
+
+Avant toute procédure de release, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_RELEASE]**
+**Objectif :** Créer une version stable et déployable de l'application
+**Actions prévues :**
+1. Lecture de la configuration `.aklo.conf` pour conventions de versioning
+2. Détermination du prochain numéro de version (major/minor/patch)
+3. Création du rapport `RELEASE-[version]-PREPARING.md` dans `/docs/backlog/07-releases/`
+4. Création de branche de release (si configuré) ou travail sur branche principale
+5. Mise à jour des fichiers de version (package.json, etc.)
+6. Génération du CHANGELOG.md basé sur les PBI complétés
+7. Exécution complète de la suite de tests
+8. Build de production et validation
+9. Création du tag Git annoté et déploiement
+
+**Fichiers affectés :**
+- `/docs/backlog/07-releases/RELEASE-[version]-PREPARING.md` → `AWAITING_DEPLOYMENT` → `SHIPPED`
+- `CHANGELOG.md` : mise à jour avec nouvelles fonctionnalités
+- `package.json` (ou équivalent) : mise à jour version
+- Possibles fichiers de configuration de build
+- Artefacts de build de production
+
+**Commandes système :**
+- `aklo release <major|minor|patch>` : automatisation release (optionnel)
+- `git checkout -b release/[version]` : création branche release (si configuré)
+- Exécution suite complète de tests (unitaires, intégration, e2e)
+- Scripts de build de production selon stack technique
+- `git tag -a v[version]` : création tag annoté
+- Commandes de déploiement selon infrastructure
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_read_file` : lire configuration .aklo.conf
+- `mcp_desktop-commander_write_file` : créer rapport et CHANGELOG
+- `mcp_desktop-commander_edit_block` : mettre à jour fichiers de version
+- `mcp_desktop-commander_execute_command` : tests, build, git, déploiement
+- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant release
 
 1.  **[ANALYSE] Phase 1 : Lecture de la Configuration**
     -   Lire et charger en mémoire les conventions depuis `.aklo.conf`.

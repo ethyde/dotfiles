@@ -107,11 +107,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | ./shell-native/aklo-docu
 
 | Outil | Description | Paramètres |
 |-------|-------------|------------|
-| `read_protocol` | Lit un protocole spécifique | `protocol_number`, `protocol_name` |
-| `list_protocols` | Liste tous les protocoles | - |
-| `search_documentation` | Recherche dans la documentation | `keywords` |
-| `read_artefact` | Lit un artefact projet | `artefact_path` |
-| `validate_artefact` | Valide un artefact | `artefact_content`, `artefact_type` |
+| `read_protocol` | Lit un protocole spécifique | `protocol_name` (requis), `section`, `charte_path` |
+| `list_protocols` | Liste tous les protocoles | `charte_path` |
+| `search_documentation` | Recherche dans la documentation | `query` (requis), `scope`, `charte_path` |
+| `read_artefact` | Lit un artefact projet | `artefact_path` (requis), `extract_metadata` |
+| `project_documentation_summary` | Génère un résumé de la documentation | `project_path` (requis), `include_artefacts` |
+| `validate_artefact` | Valide un artefact | `artefact_path` (requis), `artefact_type` (requis) |
+| `server_info` | Informations sur le serveur MCP | - |
 
 ## 🔍 Détection d'Environnement
 

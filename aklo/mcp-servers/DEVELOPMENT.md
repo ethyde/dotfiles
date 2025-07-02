@@ -187,6 +187,33 @@ stat -f "%Sm" documentation/index.js terminal/index.js
 2. **Forcer l'arrêt** : `killall -9 node`
 3. **Relancer manuellement** : `./setup-mcp.sh`
 
+### 🔌 Problème de Reconnexion Cursor/MCP
+
+**Symptôme :** Après `./restart-mcp.sh`, les outils MCP ne répondent plus dans Cursor.
+
+**Cause :** Cursor ne détecte pas automatiquement le redémarrage des serveurs MCP et garde les anciennes connexions "mortes".
+
+**Solutions :**
+
+1. **Redémarrage Cursor (Recommandé)**
+   ```bash
+   ./restart-mcp.sh
+   # → Fermer Cursor complètement (⌘+Q sur Mac)
+   # → Rouvrir Cursor
+   # → Les connexions MCP se rétablissent automatiquement
+   ```
+
+2. **Vérification de l'État**
+   ```bash
+   # Vérifier que les serveurs sont bien redémarrés
+   ps aux | grep -E "(aklo/mcp-servers|mcp-servers.*aklo)"
+   
+   # Si aucun processus : les serveurs redémarreront au prochain appel MCP
+   # Si processus présents : problème de connexion Cursor
+   ```
+
+**Note Technique :** C'est une limitation architecturale de Cursor qui ne monitore pas les processus MCP. La reconnexion automatique n'est pas implémentée.
+
 ### Modifications Non Prises en Compte
 
 1. **Vérifier l'uptime** : Utiliser `server_info`

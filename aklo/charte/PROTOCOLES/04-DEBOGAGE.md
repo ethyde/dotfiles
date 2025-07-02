@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:52
-modified: 2025-06-28 14:39
----
-
 # PROTOCOLE SPÉCIFIQUE : DIAGNOSTIC ET CORRECTION DE BUGS
 
 Ce protocole s'active lorsqu'un bug est identifié. Son objectif est de produire un diagnostic traçable et une correction validée via la création et la gestion d'un Rapport de Débogage formel.
@@ -70,6 +65,42 @@ Diagnostiquer de manière systématique la cause racine (`root cause`) d'un comp
 ```
 
 ## SECTION 3 : PROCÉDURE DE DÉBOGAGE
+
+**🛫 PLAN DE VOL DEBOGAGE (Obligatoire avant Phase 1)**
+
+Avant tout diagnostic de bug, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_DEBOGAGE]**
+**Objectif :** Diagnostiquer et corriger un bug de manière systématique et traçable
+**Actions prévues :**
+1. Génération de l'ID unique pour le rapport de débogage
+2. Création du fichier `DEBUG-[ID]-INVESTIGATING.md` dans `/docs/backlog/04-debug/`
+3. Documentation du problème et des étapes de reproduction
+4. Formulation d'hypothèses initiales basées sur l'analyse du code
+5. Investigation itérative avec instrumentation (logs, tests, debugging)
+6. Identification de la cause racine (root cause analysis)
+7. Proposition d'un plan de correction avec test de non-régression
+8. Implémentation via protocole DEVELOPPEMENT après validation
+
+**Fichiers affectés :**
+- `/docs/backlog/04-debug/DEBUG-[ID]-INVESTIGATING.md` → `AWAITING_FIX` → `RESOLVED`
+- Fichiers de code source pour instrumentation temporaire (logs)
+- Fichiers de tests pour validation et non-régression
+- Possibles fichiers de correction selon diagnostic
+
+**Commandes système :**
+- `aklo new debug "<Titre>"` : automatisation création rapport (optionnel)
+- Exécution de tests pour reproduction du bug
+- Ajout de logs temporaires pour investigation
+- Exécution d'outils de debugging selon stack technique
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_write_file` : créer le rapport de débogage
+- `mcp_desktop-commander_edit_block` : ajouter instrumentation temporaire
+- `mcp_desktop-commander_execute_command` : tests et debugging
+- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant investigation
 
 1. **[PROCEDURE] Phase 1 : Initialisation**
       - **Action Requise :** Créer un nouveau fichier `DEBUG-[ID]-INVESTIGATING.md` dans `/docs/backlog/04-debug/`.

@@ -48,7 +48,7 @@ class AkloDocumentationServer {
             properties: {
               protocol_name: {
                 type: 'string',
-                description: 'Nom du protocole (ex: "DEVELOPPEMENT", "PLANIFICATION", "JOURNAL")',
+                description: 'Nom du protocole (ex: "DEVELOPPEMENT", "PLANIFICATION", "JOURNAL", "CADRE-GLOBAL")',
               },
               section: {
                 type: 'string',
@@ -206,6 +206,11 @@ class AkloDocumentationServer {
   async handleReadProtocol(args) {
     const { protocol_name, section, charte_path } = args;
     
+    // Cas spécial pour CADRE-GLOBAL
+    if (protocol_name.toUpperCase() === 'CADRE-GLOBAL') {
+      return await this.handleReadCadreGlobal({ section, charte_path });
+    }
+    
     const chartePath = charte_path || await this.findChartePath();
     const protocolsPath = join(chartePath, 'PROTOCOLES');
     
@@ -292,6 +297,10 @@ class AkloDocumentationServer {
       
       let result = '📚 Protocoles Aklo Disponibles\n\n';
       
+      // Ajouter le CADRE-GLOBAL en premier
+      result += `00. **CADRE-GLOBAL**\n`;
+      result += `   CADRE OPÉRATIONNEL POUR AGENT IA\n\n`;
+      
       for (const protocol of protocols) {
         result += `${protocol.number}. **${protocol.name}**\n`;
         
@@ -327,6 +336,26 @@ class AkloDocumentationServer {
     let results = [];
     
     if (scope === 'protocols' || scope === 'all') {
+      // Rechercher dans le CADRE-GLOBAL
+      try {
+        const cadreGlobalPath = join(chartePath, '00-CADRE-GLOBAL.md');
+        const content = await readFile(cadreGlobalPath, 'utf-8');
+        const contentLower = content.toLowerCase();
+        
+        const matches = searchTerms.filter(term => contentLower.includes(term));
+        if (matches.length > 0) {
+          results.push({
+            type: 'Cadre Global',
+            file: '00-CADRE-GLOBAL.md',
+            path: cadreGlobalPath,
+            matches: matches.length,
+            relevance: matches.length / searchTerms.length,
+          });
+        }
+      } catch {
+        // Ignorer si le fichier n'existe pas
+      }
+      
       // Rechercher dans les protocoles
       const protocolsPath = join(chartePath, 'PROTOCOLES');
       try {
@@ -544,6 +573,38 @@ class AkloDocumentationServer {
     return {
       content: [{ type: 'text', text: result }],
     };
+  }
+
+  async handleReadCadreGlobal(args) {
+    const { section, charte_path } = args;
+    
+    const chartePath = charte_path || await this.findChartePath();
+    const cadreGlobalPath = join(chartePath, '00-CADRE-GLOBAL.md');
+    
+    try {
+      const content = await readFile(cadreGlobalPath, 'utf-8');
+      
+      let result = `📋 CADRE-GLOBAL de la Charte IA\n`;
+      result += `📁 Fichier: ${cadreGlobalPath}\n\n`;
+      
+      if (section) {
+        const sectionContent = this.extractSection(content, section);
+        if (sectionContent) {
+          result += `## Section: ${section}\n\n${sectionContent}`;
+        } else {
+          result += `❌ Section "${section}" non trouvée dans le CADRE-GLOBAL\n\n`;
+          result += content;
+        }
+      } else {
+        result += content;
+      }
+      
+      return {
+        content: [{ type: 'text', text: result }],
+      };
+    } catch (error) {
+      throw new Error(`Impossible de lire le CADRE-GLOBAL: ${error.message}`);
+    }
   }
 
   async findChartePath() {

@@ -1,7 +1,3 @@
----
-created: 2025-06-28 10:15
-modified: 2025-06-28 11:17
----
 # PROTOCOLE SPÉCIFIQUE : GESTION DE HOTFIX (CORRECTION D'URGENCE)
 
 Ce protocole s'active **uniquement** pour corriger un bug critique en production qui bloque les utilisateurs ou cause une perte de revenus immédiate. Il court-circuite le flux de travail standard pour une rapidité maximale.
@@ -64,6 +60,47 @@ Restaurer le service en production le plus rapidement possible en appliquant un 
 ```
 
 ## SECTION 3 : PROCÉDURE DE HOTFIX
+
+**🛫 PLAN DE VOL HOTFIX (Obligatoire avant Phase 1)**
+
+Avant toute procédure de hotfix d'urgence, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_HOTFIX]**
+**Objectif :** Corriger un bug critique en production avec un impact minimal et maximal de rapidité
+**Actions prévues :**
+1. Validation de l'urgence réelle avec le Human_Developer
+2. Lecture de la configuration `.aklo.conf` pour conventions de hotfix
+3. Création du rapport `HOTFIX-[ID].md` dans `/docs/backlog/08-hotfixes/`
+4. Identification du tag de production actuellement déployé
+5. Création de branche hotfix depuis le tag de production
+6. Diagnostic rapide de la cause racine du bug critique
+7. Implémentation de la correction minimale via protocole DEVELOPPEMENT
+8. Build, test et déploiement d'urgence avec nouveau tag de patch
+9. Planification du post-mortem et synchronisation des branches
+
+**Fichiers affectés :**
+- `/docs/backlog/08-hotfixes/HOTFIX-[ID].md` : création et suivi
+- Fichiers de code source pour correction minimale
+- Possibles nouveaux fichiers de tests de non-régression
+- Nouveaux PBI/TASK pour correction définitive (post-mortem)
+- Tag Git de patch pour nouvelle version
+
+**Commandes système :**
+- `aklo hotfix "<description>"` : automatisation hotfix (optionnel)
+- `git checkout [tag-production]` : retour au tag de production
+- `git checkout -b hotfix/[description]` : création branche hotfix
+- Tests d'urgence pour validation de la correction
+- Build et déploiement d'urgence
+- `aklo hotfix publish` : automatisation publication (optionnel)
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_read_file` : lire configuration .aklo.conf
+- `mcp_desktop-commander_write_file` : créer rapport hotfix
+- `mcp_desktop-commander_edit_block` : correction minimale du code
+- `mcp_desktop-commander_execute_command` : git, tests, build, déploiement
+- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant hotfix d'urgence
 
 1.  **[ANALYSE] Phase 1 : Lecture de la Configuration et Validation de l'Urgence**
       - Lire et charger les conventions depuis `.aklo.conf`.

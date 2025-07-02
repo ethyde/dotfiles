@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:29
-modified: 2025-06-28 14:40
----
-
 # PROTOCOLE SPÉCIFIQUE : CONCEPTION D'ARCHITECTURE LOGICIELLE
 
 Ce protocole s'active sur recommandation du protocole [PLANIFICATION] pour une ou plusieurs `Tasks` identifiées comme présentant un risque ou une complexité élevés.
@@ -81,6 +76,38 @@ _Description détaillée des `Tasks` à créer, modifier ou supprimer pour impl�
 ```
 
 ## SECTION 3 : PROCÉDURE D'ARCHITECTURE
+
+**🛫 PLAN DE VOL ARCHITECTURE (Obligatoire avant Phase 1)**
+
+Avant l'analyse du problème architectural, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_ARCHITECTURE]**
+**Objectif :** Analyser et concevoir une solution architecturale pour Tasks complexes
+**Actions prévues :**
+1. Analyse des Tasks flaggées comme nécessitant une revue architecturale
+2. Identification du problème technique central à résoudre
+3. Génération de l'ID pour le document d'architecture
+4. Création du fichier `ARCH-[PBI_ID]-[ID]-DRAFT.md` dans `/docs/backlog/02-architecture/`
+5. Recherche et analyse de 2-3 options architecturales viables
+6. Évaluation des compromis (trade-offs) pour chaque option
+7. Mise à jour des Tasks concernées après validation de l'architecture
+
+**Fichiers affectés :**
+- `/docs/backlog/02-architecture/ARCH-[PBI_ID]-[ID]-DRAFT.md` : création
+- `/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.md` : modification (multiple)
+- Possibles nouveaux fichiers Task selon l'architecture retenue
+
+**Commandes système :**
+- Vérification des documents d'architecture existants pour ce PBI
+- Lecture des Tasks flaggées pour comprendre la complexité
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_list_directory` : vérifier documents ARCH existants
+- `mcp_desktop-commander_read_file` : lire PBI parent et Tasks flaggées
+- `mcp_desktop-commander_write_file` : créer le document d'architecture
+- `mcp_desktop-commander_edit_block` : mettre à jour les Tasks après validation
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant analyse
 
 1. **[ANALYSE] Phase 1 : Cadrage du Problème**
     - Prendre en entrée la liste des `Tasks` "flaggées".

@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:57
-modified: 2025-06-28 14:43
----
-
 # PROTOCOLE SPÉCIFIQUE : OPTIMISATION DE PERFORMANCE
 
 Ce protocole s'active lorsqu'une fonctionnalité ne respecte pas ses exigences de performance (temps de réponse, consommation mémoire/CPU). La règle d'or est : **Mesurer d'abord, optimiser ensuite.**
@@ -65,6 +60,44 @@ Identifier scientifiquement les goulets d'étranglement de performance, impléme
 ```
 
 ## SECTION 3 : PROCÉDURE D'OPTIMISATION
+
+**🛫 PLAN DE VOL OPTIMISATION (Obligatoire avant Phase 1)**
+
+Avant toute optimisation de performance, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_OPTIMISATION]**
+**Objectif :** Optimiser les performances selon des métriques mesurables et objectives
+**Actions prévues :**
+1. Génération de l'ID unique pour le rapport d'optimisation
+2. Création du fichier `OPTIM-[ID]-BENCHMARKING.md` dans `/docs/backlog/06-optim/`
+3. Définition de l'objectif de performance avec métrique chiffrée
+4. Mise en place d'un protocole de benchmark reproductible
+5. Mesure initiale des performances avant optimisation
+6. Analyse scientifique pour identifier le goulet d'étranglement
+7. Proposition d'une stratégie d'optimisation ciblée
+8. Implémentation via protocole DEVELOPPEMENT après validation
+9. Mesure finale pour prouver l'amélioration
+
+**Fichiers affectés :**
+- `/docs/backlog/06-optim/OPTIM-[ID]-BENCHMARKING.md` → `AWAITING_FIX` → `DONE`
+- Fichiers de code source à optimiser
+- Scripts ou configurations de benchmark
+- Possibles fichiers de tests de performance
+- Fichiers de configuration (cache, base de données, etc.)
+
+**Commandes système :**
+- `aklo new optim "<Titre>"` : automatisation création rapport (optionnel)
+- Outils de benchmark (k6, JMeter, console.time, etc.)
+- Outils de profiling et analyse de performance
+- Exécution de tests de non-régression
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_write_file` : créer le rapport d'optimisation
+- `mcp_desktop-commander_execute_command` : benchmarks et profiling
+- `mcp_desktop-commander_edit_block` : modifications de code optimisé
+- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant optimisation
 
 1. **[PROCEDURE] Phase 1 : Mesurer (Non négociable)**
     - **Action Requise :** Créer un fichier `OPTIM-[ID]-BENCHMARKING.md` dans `/docs/backlog/06-optim/`.

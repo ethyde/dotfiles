@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:16
-modified: 2025-06-28 12:25
----
-
 # PROTOCOLE SPÉCIFIQUE : GESTION PRODUIT (PRODUCT OWNER)
 
 Ce protocole s'active pour transformer une idée ou un besoin métier en un "Product Backlog Item" (PBI) formel, prêt pour le développement. C'est le point d'entrée de tout le flux de travail.
@@ -100,6 +95,32 @@ _Cette section sera remplie par le protocole [PLANIFICATION]._
      - **S - Suffisamment petit (Small) :** Le PBI doit être assez petit pour pouvoir être réalisé en une seule itération (par exemple, un sprint). Les PBI trop gros ("épics") doivent être décomposés.
      - **T - Testable :** Il doit être possible de vérifier que le PBI est terminé. Les critères d'acceptation sont la clé pour rendre un PBI testable.
    - Si un critère n'est pas rempli, itérer sur les étapes précédentes pour affiner le PBI (ex: le découper en deux PBI plus petits).
+
+**🛫 PLAN DE VOL PBI (Obligatoire avant Phase 5)**
+
+Avant la création du fichier PBI, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_PBI]**
+**Objectif :** Créer un Product Backlog Item formel et traçable
+**Actions prévues :**
+1. Génération de l'ID unique pour le PBI (vérification des IDs existants)
+2. Création du fichier `PBI-[ID]-PROPOSED.md` dans `/docs/backlog/00-pbi/`
+3. Remplissage de la structure obligatoire avec les données validées INVEST
+4. Application du template avec User Story, Critères d'Acceptation et métadonnées
+
+**Fichiers affectés :**
+- `/docs/backlog/00-pbi/PBI-[ID]-PROPOSED.md` : création
+
+**Commandes système :**
+- `aklo propose-pbi "[Titre]"` : automatisation de création (optionnel)
+- Vérification de l'unicité de l'ID via listing du répertoire PBI
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_list_directory` : vérifier IDs existants
+- `mcp_desktop-commander_write_file` : créer le fichier PBI
+- `mcp_aklo-terminal_aklo_execute` : commande aklo (si utilisée)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant création
 
 5. **[CONCLUSION] Phase 5 : Formalisation**
    - **Action Requise :** 

@@ -6,7 +6,7 @@
 
 # Obtenir le répertoire racine du projet
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-FIX_SCRIPT="$REPO_ROOT/fix-permissions.sh"
+FIX_SCRIPT="$REPO_ROOT/bin/fix-permissions.sh"
 
 # Vérifier si le script de correction existe
 if [ -f "$FIX_SCRIPT" ]; then
@@ -18,5 +18,5 @@ if [ -f "$FIX_SCRIPT" ]; then
         echo "⚠️  Erreur lors de la correction des permissions"
     fi
 else
-    echo "⚠️  Script fix-permissions.sh non trouvé, permissions non vérifiées"
+    echo "⚠️  Script bin/fix-permissions.sh non trouvé, permissions non vérifiées"
 fi 

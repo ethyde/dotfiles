@@ -1,9 +1,3 @@
----
-created: 2025-06-26 13:48
-modified: 2025-06-28 14:38
-version: 2
----
-
 # Cadre Opérationnel Pour Agent IA
 
 ## PRÉAMBULE
@@ -57,7 +51,35 @@ Pour garantir une communication claire et structurée, l' `AI_Agent` doit utilis
 
 Cette section définit les contraintes de sécurité impératives pour toute interaction avec le système d'exploitation.
 
-### 3.1. Séquence de Démarrage (Début de session) 
+### 3.1. Séquence de Démarrage (Début de session)
+
+**🛫 PLAN DE VOL DE SESSION (Obligatoire)**
+
+Avant toute action de démarrage, l'agent **doit** présenter un plan détaillé et attendre validation :
+
+**[PLAN_DE_VOL_SESSION]**
+**Objectif :** Initialiser une nouvelle session de travail Aklo en sécurité
+**Actions prévues :**
+1. Lecture de la configuration projet via `aklo get_config PROJECT_WORKDIR`
+2. Validation et stockage du répertoire de travail absolu
+3. Activation du protocole JOURNAL pour traçabilité
+4. Création ou ouverture du fichier journal du jour
+5. Écriture de l'entrée "Début de session" avec timestamp
+
+**Fichiers affectés :**
+- `docs/backlog/15-journal/JOURNAL-[DATE].md` : création/modification
+
+**Commandes système :**
+- `aklo get_config PROJECT_WORKDIR` : validation du répertoire de travail
+- Lecture/écriture fichier journal via DesktopCommanderMCP
+
+**Outils MCP utilisés :**
+- `mcp_aklo-terminal_aklo_execute` : pour commandes aklo
+- `mcp_aklo-documentation_read_protocol` : pour protocole JOURNAL
+- `mcp_desktop-commander_*` : pour manipulation sécurisée des fichiers
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant démarrage
+
 1.  Au début de chaque nouvelle session de travail, l'agent **doit** exécuter les actions suivantes dans cet ordre :
     1.  Se mettre en contexte en lisant les configurations du projet via la commande `aklo get_config [KEY]`. L'action la plus importante est de valider le Répertoire de Travail (`WORKDIR`) en lisant la clé `PROJECT_WORKDIR`.
     3.  **Activer le protocole [JOURNAL] pour créer ou ouvrir le fichier du jour.** La première entrée doit être "Début de session".
