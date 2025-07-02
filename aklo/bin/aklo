@@ -1,12 +1,12 @@
 #!/bin/sh
 #==============================================================================
-# The Aklo Protocol - Version 2.0 (Commits Atomiques)
+# The Aklo Protocol - Interface Unifiée
 #
 # Auteur: Human_Developer & AI_Agent
-# Version: 2.0 (Commits atomiques par protocole)
+# Version: Interface complète avec commits atomiques par protocole
 #
-# Cette version implémente le principe des commits atomiques par protocole
-# défini dans le META-IMPROVEMENT workflow-consistency-20250102.
+# Implémente l'interface unifiée aklo couvrant tous les protocoles
+# définie dans le META-IMPROVEMENT command-coverage-20250102.
 #==============================================================================
 
 # Configuration de base du Shell
@@ -107,7 +107,7 @@ EOF
 
 # Commande: plan (Version 2.0 - Commit Atomique)
 # Implémente le protocole PLANIFICATION avec commit atomique unique
-command_plan_v2() {
+command_plan() {
   if [ -z "$1" ]; then
     echo "Erreur : L'ID du PBI est requis (ex: 42)." >&2
     exit 1
@@ -366,7 +366,7 @@ Prochaine étape: DEVELOPPEMENT"
 #==============================================================================
 
 # Commande: release (Version 2.0 - Workflow Séquentiel + Commit Atomique)
-command_release_v2() {
+command_release() {
   if [ -z "$1" ]; then
     echo "Erreur : Le type de release est requis (major, minor, patch)." >&2
     exit 1
@@ -540,44 +540,499 @@ Type de release: ${BUMP_TYPE}"
 }
 
 #==============================================================================
+# SECTION 4 : COMMANDES SYSTÈME (P1 - Priorité maximale)
+#==============================================================================
+
+# Commande: status - Tableau de bord complet du projet
+command_status() {
+  local mode="${1:-standard}"
+  local script_dir="$(dirname "$0")"
+  
+  case "$mode" in
+    "--help")
+      echo "Usage: aklo status [--brief|--detailed|--json]"
+      echo ""
+      echo "Affiche le tableau de bord complet du projet aklo."
+      echo ""
+      echo "Options:"
+      echo "  --brief, -b     Affichage condensé"
+      echo "  --detailed, -d  Affichage détaillé avec métriques"
+      echo "  --json          Sortie au format JSON"
+      exit 0
+      ;;
+    *)
+      # Déléguer au script spécialisé pour tous les modes
+      if [ -f "$script_dir/../ux-improvements/status-command.sh" ]; then
+        . "$script_dir/../ux-improvements/status-command.sh"
+        # Passer le mode ou "standard" si vide
+        aklo_status "${mode:-standard}"
+      else
+        echo "Erreur : Script status-command.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+  esac
+}
+
+# Commande: mcp - Gestion des serveurs MCP
+command_mcp() {
+  local action="$1"
+  local script_dir="$(dirname "$0")"
+  
+  case "$action" in
+    "setup")
+      echo "🔧 Configuration des serveurs MCP..."
+      if [ -f "$script_dir/../mcp-servers/setup-mcp.sh" ]; then
+        "$script_dir/../mcp-servers/setup-mcp.sh"
+      else
+        echo "Erreur : Script setup-mcp.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+    "restart")
+      echo "🔄 Redémarrage des serveurs MCP..."
+      if [ -f "$script_dir/../mcp-servers/restart-mcp.sh" ]; then
+        "$script_dir/../mcp-servers/restart-mcp.sh"
+      else
+        echo "Erreur : Script restart-mcp.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+    "watch")
+      echo "👁️ Surveillance des serveurs MCP..."
+      if [ -f "$script_dir/../mcp-servers/watch-mcp.sh" ]; then
+        "$script_dir/../mcp-servers/watch-mcp.sh"
+      else
+        echo "Erreur : Script watch-mcp.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+    "--help"|"help"|"")
+      echo "Usage: aklo mcp <action>"
+      echo ""
+      echo "Gestion des serveurs MCP (Model Context Protocol)."
+      echo ""
+      echo "Actions:"
+      echo "  setup     Configuration initiale des serveurs MCP"
+      echo "  restart   Redémarrage des serveurs après modification"
+      echo "  watch     Surveillance en temps réel des serveurs"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo mcp setup      # Configuration initiale"
+      echo "  aklo mcp restart    # Après modification du code MCP"
+      echo "  aklo mcp watch      # Surveillance continue"
+      exit 0
+      ;;
+    *)
+      echo "Erreur : Action MCP inconnue '$action'." >&2
+      echo "Utilisez 'aklo mcp help' pour voir les actions disponibles."
+      exit 1
+      ;;
+  esac
+}
+
+# Commande: validate - Validation de projets et artefacts
+command_validate() {
+  local target="${1:-.}"
+  local script_dir="$(dirname "$0")"
+  
+  case "$target" in
+    "--help")
+      echo "Usage: aklo validate [path]"
+      echo ""
+      echo "Valide la structure et la cohérence du projet aklo."
+      echo ""
+      echo "Arguments:"
+      echo "  path    Chemin à valider (défaut: répertoire courant)"
+      echo ""
+      echo "Validations effectuées:"
+      echo "  • Structure des répertoires aklo"
+      echo "  • Cohérence des artefacts (PBI, TASK, etc.)"
+      echo "  • Respect des protocoles de la charte"
+      echo "  • Configuration .aklo.conf"
+      exit 0
+      ;;
+    *)
+      echo "🔍 Validation du projet aklo..."
+      if [ -f "$script_dir/../ux-improvements/validation.sh" ]; then
+        "$script_dir/../ux-improvements/validation.sh" "$target"
+      else
+        echo "Erreur : Script validation.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+  esac
+}
+
+# Commande: template - Gestion des templates
+command_template() {
+  local action="$1"
+  local script_dir="$(dirname "$0")"
+  
+  case "$action" in
+    "list")
+      echo "📋 Templates disponibles..."
+      if [ -f "$script_dir/../ux-improvements/templates.sh" ]; then
+        . "$script_dir/../ux-improvements/templates.sh"
+        list_templates
+      else
+        echo "Erreur : Script templates.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+    "create")
+      shift
+      echo "🆕 Création d'un nouveau template..."
+      if [ -f "$script_dir/../ux-improvements/templates.sh" ]; then
+        . "$script_dir/../ux-improvements/templates.sh"
+        create_template "$@"
+      else
+        echo "Erreur : Script templates.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+    "apply")
+      shift
+      echo "📝 Application d'un template..."
+      if [ -f "$script_dir/../ux-improvements/templates.sh" ]; then
+        . "$script_dir/../ux-improvements/templates.sh"
+        apply_template "$@"
+      else
+        echo "Erreur : Script templates.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+    "--help"|"help"|"")
+      echo "Usage: aklo template <action> [args...]"
+      echo ""
+      echo "Gestion des templates de projet aklo."
+      echo ""
+      echo "Actions:"
+      echo "  list              Liste les templates disponibles"
+      echo "  create <name>     Crée un nouveau template"
+      echo "  apply <name>      Applique un template au projet"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo template list"
+      echo "  aklo template create mon-template"
+      echo "  aklo template apply web-app"
+      exit 0
+      ;;
+    *)
+      echo "Erreur : Action template inconnue '$action'." >&2
+      echo "Utilisez 'aklo template help' pour voir les actions disponibles."
+      exit 1
+      ;;
+  esac
+}
+
+# Commande: install-ux - Installation des améliorations UX
+command_install_ux() {
+  local script_dir="$(dirname "$0")"
+  
+  case "${1:-}" in
+    "--help")
+      echo "Usage: aklo install-ux"
+      echo ""
+      echo "Installe les améliorations d'expérience utilisateur aklo :"
+      echo "  • Autocomplétion shell (bash/zsh)"
+      echo "  • Aliases et raccourcis"
+      echo "  • Configuration optimisée"
+      echo "  • Intégration avec les éditeurs"
+      exit 0
+      ;;
+    *)
+      echo "🎨 Installation des améliorations UX..."
+      if [ -f "$script_dir/../ux-improvements/install-ux.sh" ]; then
+        "$script_dir/../ux-improvements/install-ux.sh"
+      else
+        echo "Erreur : Script install-ux.sh introuvable." >&2
+        exit 1
+      fi
+      ;;
+  esac
+}
+
+# Commande: propose-pbi - Création d'un Product Backlog Item
+command_propose_pbi() {
+  local title="$1"
+  local template="${2:-default}"
+  local agent_assistance=$(get_config "agent_assistance" || echo "full")
+  local auto_journal=$(get_config "auto_journal" || echo "true")
+  
+  case "$title" in
+    "--help"|"help"|"")
+      echo "Usage: aklo propose-pbi \"<titre>\" [--template=<type>]"
+      echo ""
+      echo "Crée un nouveau Product Backlog Item selon le protocole PRODUCT-OWNER."
+      echo ""
+      echo "Arguments:"
+      echo "  titre       Titre descriptif du PBI (requis, entre guillemets)"
+      echo ""
+      echo "Options:"
+      echo "  --template=<type>  Type de template (default|feature|bug|improvement)"
+      echo "  --no-agent         Mode skeleton (structure vide à compléter)"
+      echo "  --no-journal       Pas de mise à jour automatique du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo propose-pbi \"Ajouter authentification OAuth\""
+      echo "  aklo propose-pbi \"Corriger bug de validation\" --template=bug"
+      echo "  aklo pbi \"Optimiser temps de chargement\" --no-agent"
+      exit 0
+      ;;
+    --no-agent)
+      agent_assistance="skeleton"
+      title="$2"
+      template="${3:-default}"
+      ;;
+    --no-journal)
+      auto_journal="false"
+      title="$2"
+      template="${3:-default}"
+      ;;
+  esac
+  
+  if [ -z "$title" ]; then
+    echo "Erreur : Le titre du PBI est requis." >&2
+    echo "Usage: aklo propose-pbi \"<titre>\""
+    echo "Utilisez 'aklo propose-pbi --help' pour plus d'informations."
+    exit 1
+  fi
+  
+  # Génération de l'ID unique
+  PBI_DIR="./docs/backlog/00-pbi"
+  mkdir -p "$PBI_DIR"
+  
+  PBI_ID=$(get_next_id "$PBI_DIR" "PBI")
+  PBI_FILE="${PBI_DIR}/PBI-${PBI_ID}-PROPOSED.md"
+  TODAY=$(date +%Y-%m-%d)
+  
+  echo "🎯 Création du PBI-${PBI_ID}: \"$title\""
+  
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète par l'IA..."
+      generate_pbi_full "$PBI_FILE" "$PBI_ID" "$title" "$TODAY"
+      ;;
+    "skeleton")
+      echo "📝 Génération de la structure à compléter..."
+      generate_pbi_skeleton "$PBI_FILE" "$PBI_ID" "$title" "$TODAY"
+      ;;
+    "minimal")
+      echo "🔧 Création minimale (ID et structure de base)..."
+      generate_pbi_minimal "$PBI_FILE" "$PBI_ID" "$title" "$TODAY"
+      ;;
+  esac
+  
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "PRODUCT-OWNER" "Création PBI" "Nouveau PBI-${PBI_ID}: $title" "PBI-${PBI_ID}-PROPOSED.md"
+  fi
+  
+  echo ""
+  echo "✅ PBI-${PBI_ID}-PROPOSED.md créé avec succès !"
+  echo "📍 Fichier: $PBI_FILE"
+  echo ""
+  echo "Prochaines étapes:"
+  echo "  1. Réviser et compléter le PBI"
+  echo "  2. Valider avec l'équipe"
+  echo "  3. aklo plan ${PBI_ID} (pour décomposer en tâches)"
+}
+
+# Fonctions de génération PBI
+generate_pbi_full() {
+  local file="$1"
+  local id="$2"
+  local title="$3"
+  local date="$4"
+  
+  cat > "$file" << EOF
+# PBI-${id} : ${title}
+
+---
+**Statut:** PROPOSED
+**Date de création:** ${date}
+---
+
+## 1. Description de la User Story
+
+_En tant que [utilisateur], je veux [action], afin de [bénéfice]._
+
+## 2. Critères d'Acceptation
+
+- [ ] Critère 1 : Condition binaire et testable.
+- [ ] Critère 2 : Autre condition binaire et testable.
+
+## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
+
+_Section pour l'architecte/lead dev._
+
+## 4. Documents d'Architecture Associés (Optionnel)
+
+_Liens vers les documents d'architecture si nécessaire._
+
+## 5. Tasks Associées
+
+_Cette section sera remplie par le protocole [PLANIFICATION]._
+
+EOF
+}
+
+generate_pbi_skeleton() {
+  local file="$1"
+  local id="$2"
+  local title="$3"
+  local date="$4"
+  
+  cat > "$file" << EOF
+# PBI-${id} : ${title}
+
+---
+**Statut:** PROPOSED
+**Date de création:** ${date}
+---
+
+## 1. Description de la User Story
+
+_À compléter: En tant que [utilisateur], je veux [action], afin de [bénéfice]._
+
+## 2. Critères d'Acceptation
+
+- [ ] _À définir_
+
+## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
+
+_À compléter si nécessaire_
+
+## 4. Documents d'Architecture Associés (Optionnel)
+
+_À compléter si nécessaire_
+
+## 5. Tasks Associées
+
+_Cette section sera remplie par le protocole [PLANIFICATION]._
+
+EOF
+}
+
+generate_pbi_minimal() {
+  local file="$1"
+  local id="$2"
+  local title="$3"
+  local date="$4"
+  
+  cat > "$file" << EOF
+# PBI-${id} : ${title}
+
+---
+**Statut:** PROPOSED
+**Date de création:** ${date}
+---
+
+## 1. Description de la User Story
+
+
+
+## 2. Critères d'Acceptation
+
+
+
+## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
+
+
+
+## 4. Documents d'Architecture Associés (Optionnel)
+
+
+
+## 5. Tasks Associées
+
+
+
+EOF
+}
+
+#==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
 
 # Fonction d'aide
 show_help() {
-  echo "Aklo Protocol - Commits Atomiques"
+  echo "🤖 Aklo Protocol - Interface Unifiée"
   echo ""
   echo "USAGE:"
   echo "  aklo <command> [options]"
   echo ""
-  echo "COMMANDES PRINCIPALES:"
-  echo "  plan <PBI_ID>           Planification avec commit atomique"
-  echo "    --no-agent            Mode skeleton (structure uniquement)"
-  echo "    --no-journal          Désactiver la mise à jour automatique du journal"
+  echo "🔧 COMMANDES SYSTÈME:"
+  echo "  status [--brief|--detailed|--json]  Tableau de bord du projet"
+  echo "  validate [path]                     Validation projet/artefacts"
+  echo "  mcp setup|restart|watch             Gestion serveurs MCP"
+  echo "  template list|create|apply          Gestion des templates"
+  echo "  install-ux                          Installation améliorations UX"
   echo ""
-  echo "  release <type>          Release avec workflow séquentiel + commit atomique"
-  echo "                          (type: major, minor, patch)"
+  echo "🚀 COMMANDES DÉVELOPPEMENT:"
+  echo "  propose-pbi \"<titre>\" [--template]  Création d'un Product Backlog Item"
+  echo "  pbi \"<titre>\"                       Alias pour propose-pbi"
+  echo "  plan <PBI_ID> [--no-agent]          Planification avec commit atomique"
+  echo "  release <type> [--dry-run]          Release (major|minor|patch)"
   echo ""
-  echo "NIVEAUX D'ASSISTANCE:"
+  echo "📚 AIDE ET INFORMATION:"
+  echo "  help                                Affiche cette aide"
+  echo "  <command> --help                    Aide spécifique à une commande"
+  echo ""
+  echo "🎯 NIVEAUX D'ASSISTANCE:"
   echo "  full      - Génération complète par l'IA (défaut)"
   echo "  skeleton  - Structure vide à compléter (--no-agent)"
   echo "  minimal   - IDs uniquement (via .aklo.conf uniquement)"
   echo ""
-  echo "CONFIGURATION:"
+  echo "⚙️ CONFIGURATION:"
   echo "  .aklo.conf              Configuration locale du projet"
   echo "    agent_assistance=full|skeleton|minimal"
   echo "    auto_journal=true|false"
+  echo ""
+  echo "📖 EXEMPLES:"
+  echo "  aklo status             # Tableau de bord complet"
+  echo "  aklo mcp restart        # Redémarrer les serveurs MCP"
+  echo "  aklo plan 42            # Planifier le PBI 42"
+  echo "  aklo validate           # Valider le projet"
+  echo ""
+  echo "💡 Astuce: Utilisez 'aklo <command> --help' pour l'aide détaillée."
 }
 
 # Dispatch principal
 case "${1:-help}" in
   "plan")
     shift
-    command_plan_v2 "$@"
+    command_plan "$@"
     ;;
   "release")
     shift
-    command_release_v2 "$@"
+    command_release "$@"
+    ;;
+  "status")
+    shift
+    command_status "$@"
+    ;;
+  "mcp")
+    shift
+    command_mcp "$@"
+    ;;
+  "validate")
+    shift
+    command_validate "$@"
+    ;;
+  "template")
+    shift
+    command_template "$@"
+    ;;
+  "install-ux")
+    shift
+    command_install_ux "$@"
+    ;;
+  "propose-pbi"|"pbi")
+    shift
+    command_propose_pbi "$@"
     ;;
   "help"|"--help"|"-h")
     show_help

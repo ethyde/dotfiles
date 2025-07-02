@@ -151,8 +151,21 @@ class AkloTerminalServer {
     
     // Validation des commandes aklo autorisées
     const allowedCommands = [
-      'init', 'propose-pbi', 'plan', 'start-task', 'submit-task', 
-      'merge-task', 'release', 'hotfix', 'new', 'get_config'
+      // Commandes legacy
+      'init', 'propose-pbi', 'pbi', 'plan', 'start-task', 'submit-task', 
+      'merge-task', 'release', 'hotfix', 'new', 'get_config',
+      
+      // Commandes système (PHASE 1)
+      'status', 'validate', 'mcp', 'template', 'install-ux',
+      
+      // Commandes développement (PHASE 2)
+      'arch', 'dev', 'debug', 'review', 'refactor',
+      
+      // Commandes qualité (PHASE 3)
+      'optimize', 'security', 'diagnose', 'experiment', 'docs',
+      
+      // Commandes spécialisées (PHASE 4)
+      'analyze', 'track', 'onboard', 'deprecate', 'kb', 'fast', 'meta'
     ];
     
     if (!allowedCommands.includes(command)) {

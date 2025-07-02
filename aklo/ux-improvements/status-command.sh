@@ -270,6 +270,116 @@ show_status_brief() {
     fi
 }
 
+# Status detailed (version détaillée avec métriques)
+show_status_detailed() {
+    echo "🤖 Aklo Project Status Dashboard - Detailed View"
+    echo "$(printf '%.0s═' {1..60})"
+    
+    # Configuration
+    echo ""
+    echo "📋 Configuration Projet"
+    echo "──────────────────────────────"
+    if [ -f ".aklo.conf" ]; then
+        echo "✅ Projet configuré (.aklo.conf trouvé)"
+        if command -v grep >/dev/null 2>&1; then
+            local workdir=$(grep "^PROJECT_WORKDIR=" .aklo.conf 2>/dev/null | cut -d'=' -f2 | tr -d '"')
+            local agent_assist=$(grep "^agent_assistance=" .aklo.conf 2>/dev/null | cut -d'=' -f2 | tr -d '"')
+            local auto_journal=$(grep "^auto_journal=" .aklo.conf 2>/dev/null | cut -d'=' -f2 | tr -d '"')
+            echo "   📁 Répertoire: ${workdir:-"Non défini"}"
+            echo "   🤖 Assistance: ${agent_assist:-"full"}"
+            echo "   📝 Journal auto: ${auto_journal:-"true"}"
+        fi
+    else
+        echo "❌ Projet non configuré"
+        echo "💡 Exécutez: aklo init"
+    fi
+    
+    # Statistiques PBI
+    echo ""
+    echo "📊 Product Backlog Items (PBI)"
+    echo "──────────────────────────────"
+    if [ -d "docs/backlog/00-pbi" ]; then
+        local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
+        local proposed_pbi=$(find docs/backlog/00-pbi -name "*-PROPOSED.md" 2>/dev/null | wc -l | tr -d ' ')
+        local agreed_pbi=$(find docs/backlog/00-pbi -name "*-AGREED.md" 2>/dev/null | wc -l | tr -d ' ')
+        local done_pbi=$(find docs/backlog/00-pbi -name "*-DONE.md" 2>/dev/null | wc -l | tr -d ' ')
+        
+        echo "   📈 Total PBI: $total_pbi"
+        echo "   🔄 Proposés: $proposed_pbi"
+        echo "   ✅ Acceptés: $agreed_pbi"
+        echo "   🎯 Terminés: $done_pbi"
+    else
+        echo "   📂 Aucun répertoire PBI trouvé"
+    fi
+    
+    # Statistiques Tasks
+    echo ""
+    echo "📋 Tasks de Développement"
+    echo "──────────────────────────────"
+    if [ -d "docs/backlog/01-tasks" ]; then
+        local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
+        local todo_tasks=$(find docs/backlog/01-tasks -name "*-TODO.md" 2>/dev/null | wc -l | tr -d ' ')
+        local progress_tasks=$(find docs/backlog/01-tasks -name "*-IN_PROGRESS.md" 2>/dev/null | wc -l | tr -d ' ')
+        local done_tasks=$(find docs/backlog/01-tasks -name "*-DONE.md" 2>/dev/null | wc -l | tr -d ' ')
+        
+        echo "   📈 Total Tasks: $total_tasks"
+        echo "   📝 À faire: $todo_tasks"
+        echo "   🔄 En cours: $progress_tasks"
+        echo "   ✅ Terminées: $done_tasks"
+    else
+        echo "   📂 Aucun répertoire Tasks trouvé"
+    fi
+    
+    # Git status
+    echo ""
+    echo "🔄 Statut Git"
+    echo "──────────────────────────────"
+    if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then
+        local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+        local commit_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+        local status_output=$(git status --porcelain 2>/dev/null)
+        
+        echo "   🌿 Branche courante: $current_branch"
+        echo "   📊 Nombre de commits: $commit_count"
+        
+        if [ -n "$status_output" ]; then
+            local modified=$(echo "$status_output" | grep "^ M" | wc -l | tr -d ' ')
+            local added=$(echo "$status_output" | grep "^A" | wc -l | tr -d ' ')
+            local untracked=$(echo "$status_output" | grep "^??" | wc -l | tr -d ' ')
+            echo "   📝 Fichiers modifiés: $modified"
+            echo "   ➕ Fichiers ajoutés: $added"
+            echo "   ❓ Non suivis: $untracked"
+        else
+            echo "   ✅ Répertoire propre"
+        fi
+    else
+        echo "   ❌ Pas un dépôt Git"
+    fi
+    
+    # Journal récent
+    echo ""
+    echo "📖 Journal Récent"
+    echo "──────────────────────────────"
+    if [ -d "docs/backlog/15-journal" ]; then
+        local latest_journal=$(find docs/backlog/15-journal -name "JOURNAL-*.md" 2>/dev/null | sort | tail -1)
+        if [ -n "$latest_journal" ]; then
+            local journal_date=$(basename "$latest_journal" .md | cut -d'-' -f2-4)
+            echo "   📅 Dernier journal: $journal_date"
+            if [ -f "$latest_journal" ]; then
+                local entry_count=$(grep "^### " "$latest_journal" 2>/dev/null | wc -l | tr -d ' ')
+                echo "   📝 Entrées: $entry_count"
+            fi
+        else
+            echo "   📂 Aucun journal trouvé"
+        fi
+    else
+        echo "   📂 Répertoire journal inexistant"
+    fi
+    
+    echo ""
+    echo "$(printf '%.0s═' {1..60})"
+}
+
 # Status JSON (pour intégrations)
 show_status_json() {
     local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
