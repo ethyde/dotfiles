@@ -1049,6 +1049,7 @@ if [ -z "$1" ]; then
   echo "  hotfix <description>    Starts the hotfix process from production."
   echo "  hotfix publish          Publishes a completed hotfix."
   echo "  new <type> [args...]    Creates a new support artefact (e.g., 'debug', 'refactor')."
+  echo "  get_config <key>        Gets a configuration value from .aklo.conf."
   exit 1
 fi
 
@@ -1065,5 +1066,6 @@ case "$COMMAND" in
   release) command_release "$@";;
   hotfix) command_hotfix "$@";;
   new) command_new "$@";;
+  get_config) get_config "$@";;
   *) echo "Error: Unknown command '${COMMAND}'." >&2; exit 1;;
 esac
