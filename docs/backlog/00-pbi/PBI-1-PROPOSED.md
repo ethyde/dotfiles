@@ -1,4 +1,4 @@
-# PBI-1 : Test
+# PBI-1 : Test casse standardisée
 
 ---
 **Statut:** PROPOSED
