@@ -216,8 +216,8 @@ main() {
     echo ""
     echo -e "${YELLOW}💡 Conseil :${NC}"
     echo "Pour éviter ce problème à l'avenir, utilisez :"
-    echo "  • ${CYAN}./restart-mcp.sh${NC} après chaque modification"
-    echo "  • ${CYAN}./watch-mcp.sh${NC} en mode développement (à venir)"
+    echo "  • ${CYAN}./restart-mcp.sh${NC} après chaque modification ponctuelle"
+    echo "  • ${CYAN}./watch-mcp.sh${NC} en mode développement (surveillance automatique)"
 }
 
 # Vérifier si le script est exécuté directement
