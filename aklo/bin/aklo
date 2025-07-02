@@ -812,16 +812,16 @@ command_propose_pbi() {
   # Génération du contenu selon le niveau d'assistance
   case "$agent_assistance" in
     "full")
-      echo "🤖 Génération complète par l'IA..."
-      generate_pbi_full "$PBI_FILE" "$PBI_ID" "$title" "$TODAY"
+      echo "🤖 Génération complète selon protocole PRODUCT-OWNER..."
+      generate_pbi_from_protocol "$PBI_FILE" "$PBI_ID" "$title" "$TODAY" "full"
       ;;
     "skeleton")
-      echo "📝 Génération de la structure à compléter..."
-      generate_pbi_skeleton "$PBI_FILE" "$PBI_ID" "$title" "$TODAY"
+      echo "📝 Structure protocole à compléter..."
+      generate_pbi_from_protocol "$PBI_FILE" "$PBI_ID" "$title" "$TODAY" "skeleton"
       ;;
     "minimal")
-      echo "🔧 Création minimale (ID et structure de base)..."
-      generate_pbi_minimal "$PBI_FILE" "$PBI_ID" "$title" "$TODAY"
+      echo "🔧 Structure minimale selon protocole..."
+      generate_pbi_from_protocol "$PBI_FILE" "$PBI_ID" "$title" "$TODAY" "minimal"
       ;;
   esac
   
@@ -840,14 +840,18 @@ command_propose_pbi() {
   echo "  3. aklo plan ${PBI_ID} (pour décomposer en tâches)"
 }
 
-# Fonctions de génération PBI
-generate_pbi_full() {
+# Fonction de génération PBI - Extraction depuis protocole PRODUCT-OWNER
+generate_pbi_from_protocol() {
   local file="$1"
   local id="$2"
   local title="$3"
   local date="$4"
+  local assistance_level="$5"
   
-  cat > "$file" << EOF
+  # Structure PBI extraite du protocole PRODUCT-OWNER (source unique de vérité)
+  case "$assistance_level" in
+    "full")
+      cat > "$file" << EOF
 # PBI-${id} : ${title}
 
 ---
@@ -857,35 +861,35 @@ generate_pbi_full() {
 
 ## 1. Description de la User Story
 
-_En tant que [utilisateur], je veux [action], afin de [bénéfice]._
+_En tant que [type d'utilisateur], je veux [réaliser une action], afin de [obtenir un bénéfice]._
 
 ## 2. Critères d'Acceptation
 
 - [ ] Critère 1 : Condition binaire et testable.
 - [ ] Critère 2 : Autre condition binaire et testable.
+- [ ] ...
 
 ## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
 
-_Section pour l'architecte/lead dev._
+_Section pour l'architecte/lead dev. Décrit les impacts, les dépendances, les choix techniques à haut niveau qui pourraient influencer la planification._
 
 ## 4. Documents d'Architecture Associés (Optionnel)
 
-_Liens vers les documents d'architecture si nécessaire._
+_Lien vers un ou plusieurs documents du répertoire \`/docs/backlog/02-architecture/\` si une phase de conception a été nécessaire._
+
+- [ARCH-${id}-1.md](../02-architecture/ARCH-${id}-1.md)
 
 ## 5. Tasks Associées
 
 _Cette section sera remplie par le protocole [PLANIFICATION]._
 
+- [ ] TASK-${id}-1
+- [ ] TASK-${id}-2
+- [ ] ...
 EOF
-}
-
-generate_pbi_skeleton() {
-  local file="$1"
-  local id="$2"
-  local title="$3"
-  local date="$4"
-  
-  cat > "$file" << EOF
+      ;;
+    "skeleton")
+      cat > "$file" << EOF
 # PBI-${id} : ${title}
 
 ---
@@ -895,7 +899,7 @@ generate_pbi_skeleton() {
 
 ## 1. Description de la User Story
 
-_À compléter: En tant que [utilisateur], je veux [action], afin de [bénéfice]._
+_À compléter: En tant que [type d'utilisateur], je veux [réaliser une action], afin de [obtenir un bénéfice]._
 
 ## 2. Critères d'Acceptation
 
@@ -912,17 +916,10 @@ _À compléter si nécessaire_
 ## 5. Tasks Associées
 
 _Cette section sera remplie par le protocole [PLANIFICATION]._
-
 EOF
-}
-
-generate_pbi_minimal() {
-  local file="$1"
-  local id="$2"
-  local title="$3"
-  local date="$4"
-  
-  cat > "$file" << EOF
+      ;;
+    "minimal")
+      cat > "$file" << EOF
 # PBI-${id} : ${title}
 
 ---
@@ -938,19 +935,13 @@ generate_pbi_minimal() {
 
 
 
-## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
-
-
-
-## 4. Documents d'Architecture Associés (Optionnel)
-
-
-
 ## 5. Tasks Associées
 
 
 
 EOF
+      ;;
+  esac
 }
 
 # Commande: arch - Conception d'architecture logicielle
@@ -1038,16 +1029,16 @@ command_arch() {
   # Génération du contenu selon le niveau d'assistance
   case "$agent_assistance" in
     "full")
-      echo "🤖 Génération complète par l'IA..."
-      generate_arch_full "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE"
+      echo "🤖 Génération complète selon protocole ARCHITECTURE..."
+      generate_arch_from_protocol "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE" "full"
       ;;
     "skeleton")
-      echo "📝 Génération de la structure à compléter..."
-      generate_arch_skeleton "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE"
+      echo "📝 Structure protocole à compléter..."
+      generate_arch_from_protocol "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE" "skeleton"
       ;;
     "minimal")
-      echo "🔧 Création minimale (structure de base)..."
-      generate_arch_minimal "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE"
+      echo "🔧 Structure minimale selon protocole..."
+      generate_arch_from_protocol "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE" "minimal"
       ;;
   esac
   
@@ -1251,6 +1242,284 @@ generate_arch_minimal() {
 EOF
 }
 
+# Fonction de génération ARCH - Extraction depuis protocole ARCHITECTURE
+generate_arch_from_protocol() {
+  local file="$1"
+  local pbi_id="$2"
+  local arch_id="$3"
+  local date="$4"
+  local pbi_file="$5"
+  local assistance_level="$6"
+  
+  # Extraire le titre du PBI
+  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed 's/^# PBI-[0-9]* : //' || echo "Architecture pour PBI-${pbi_id}")
+  
+  # Structure ARCH extraite du protocole ARCHITECTURE (source unique de vérité)
+  case "$assistance_level" in
+    "full")
+      cat > "$file" << EOF
+# ARCH-${pbi_id}-${arch_id} : Architecture pour ${pbi_title}
+
+---
+
+## DO NOT EDIT THIS SECTION MANUALLY
+**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
+**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
+**Assigné à:** \`Human_Developer\`
+**Branche Git:** \`feature/task-${pbi_id}-4-notification-service-skeleton\`
+
+---
+
+## 1. Problème à Résoudre
+
+_Description claire du défi technique qui a nécessité l'activation de ce protocole. Se base sur les Tasks "flaggées" par le planificateur._
+
+## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
+
+### Option A : [Nom de l'approche A]
+
+- **Description :** ...
+- **Avantages :** ...
+- **Inconvénients :** ...
+
+### Option B : [Nom de l'approche B]
+
+- **Description :** ...
+- **Avantages :** ...
+- **Inconvénients :** ...
+
+## 3. Décision et Justification
+
+_Annonce de l'option retenue et explication détaillée des raisons de ce choix, en s'appuyant sur l'analyse des compromis et les principes directeurs du projet (performance, coût, maintenabilité, etc.)._
+
+## 4. Schéma de la Solution (Optionnel)
+
+_Un schéma (ex: Mermaid, ASCII art) pour illustrer la solution retenue peut être inclus ici._
+
+## 5. Impact sur les Tâches
+
+_Description détaillée des Tasks à créer, modifier ou supprimer pour implémenter cette architecture._
+EOF
+      ;;
+    "skeleton")
+      cat > "$file" << EOF
+# ARCH-${pbi_id}-${arch_id} : Architecture pour ${pbi_title}
+
+---
+
+## DO NOT EDIT THIS SECTION MANUALLY
+**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
+**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
+**Assigné à:** \`Human_Developer\`
+**Date de création:** ${date}
+
+---
+
+## 1. Problème à Résoudre
+
+_À compléter_
+
+## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
+
+### Option A : _À nommer_
+
+- **Description :** _À compléter_
+- **Avantages :** _À lister_
+- **Inconvénients :** _À lister_
+
+### Option B : _À nommer_
+
+- **Description :** _À compléter_
+- **Avantages :** _À lister_
+- **Inconvénients :** _À lister_
+
+## 3. Décision et Justification
+
+_À compléter_
+
+## 4. Schéma de la Solution (Optionnel)
+
+_À compléter_
+
+## 5. Impact sur les Tâches
+
+_À définir_
+EOF
+      ;;
+    "minimal")
+      cat > "$file" << EOF
+# ARCH-${pbi_id}-${arch_id} : ${pbi_title}
+
+---
+**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
+**Date de création:** ${date}
+---
+
+## 1. Problème à Résoudre
+
+
+
+## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
+
+
+
+## 3. Décision et Justification
+
+
+
+## 5. Impact sur les Tâches
+
+
+
+EOF
+      ;;
+  esac
+}
+
+# Commande: dev - Développement TDD d'une Task
+command_dev() {
+  local task_id="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+  
+  case "$task_id" in
+    "--help"|"help"|"")
+      echo "Usage: aklo dev <TASK_ID>"
+      echo ""
+      echo "Démarre le développement TDD d'une Task selon le protocole DÉVELOPPEMENT."
+      echo ""
+      echo "Arguments:"
+      echo "  TASK_ID    ID de la task (format: PBI_ID-TASK_ID, ex: 1-2)"
+      echo ""
+      echo "Options:"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo dev 1-1              # Développer TASK-1-1"
+      echo "  aklo dev 2-3 --no-agent   # Développer TASK-2-3 en mode minimal"
+      echo ""
+      echo "Prérequis:"
+      echo "  - La Task doit exister avec le statut TODO"
+      echo "  - Le répertoire doit être un projet Git"
+      echo ""
+      echo "Workflow:"
+      echo "  1. Validation de la Task (statut TODO)"
+      echo "  2. Création de la branche feature/task-[PBI_ID]-[TASK_ID]"
+      echo "  3. Changement de statut TODO → IN_PROGRESS"
+      echo "  4. Présentation du plan de vol développement TDD"
+      echo "  5. Guidage dans le cycle TDD (RED-GREEN-BLUE)"
+      return 0
+      ;;
+  esac
+
+  # Validation du format TASK_ID
+  if [[ ! "$task_id" =~ ^[0-9]+-[0-9]+$ ]]; then
+    echo "❌ Erreur : Format TASK_ID invalide."
+    echo "   Format attendu: PBI_ID-TASK_ID (ex: 1-2)"
+    echo "   Reçu: '$task_id'"
+    return 1
+  fi
+
+  # Extraction PBI_ID et TASK_SEQ
+  local pbi_id=$(echo "$task_id" | cut -d'-' -f1)
+  local task_seq=$(echo "$task_id" | cut -d'-' -f2)
+  
+  # Recherche de la Task
+  local tasks_dir="./$(get_config "TASKS_DIR")"
+  local task_file=$(find "$tasks_dir" -name "TASK-${pbi_id}-${task_seq}-TODO.md" 2>/dev/null | head -1)
+  
+  if [ -z "$task_file" ]; then
+    echo "❌ Erreur : Task TASK-${pbi_id}-${task_seq} introuvable avec statut TODO."
+    echo "   Répertoire recherché: $tasks_dir"
+    echo "   Fichier attendu: TASK-${pbi_id}-${task_seq}-TODO.md"
+    echo ""
+    echo "Vérifiez que:"
+    echo "  1. La Task existe"
+    echo "  2. Elle a le statut TODO (pas IN_PROGRESS ou DONE)"
+    echo "  3. Le répertoire TASKS_DIR est correct dans .aklo.conf"
+    return 1
+  fi
+
+  echo "🚀 Démarrage du développement TDD pour TASK-${pbi_id}-${task_seq}"
+  echo "📁 Task trouvée: $task_file"
+  
+  # Vérification que nous sommes dans un repo Git
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "❌ Erreur : Ce répertoire n'est pas un dépôt Git."
+    echo "   Le développement TDD nécessite Git pour la gestion des branches."
+    return 1
+  fi
+
+  # Création de la branche feature
+  local branch_name="feature/task-${pbi_id}-${task_seq}"
+  echo "🌿 Création de la branche: $branch_name"
+  
+  if git show-ref --verify --quiet refs/heads/$branch_name; then
+    echo "⚠️  La branche $branch_name existe déjà."
+    echo "   Basculement vers la branche existante..."
+    git checkout $branch_name
+  else
+    git checkout -b $branch_name
+    if [ $? -ne 0 ]; then
+      echo "❌ Erreur : Impossible de créer la branche $branch_name"
+      return 1
+    fi
+  fi
+
+  # Changement de statut TODO → IN_PROGRESS
+  local new_task_file="${tasks_dir}/TASK-${pbi_id}-${task_seq}-IN_PROGRESS.md"
+  echo "📝 Mise à jour du statut: TODO → IN_PROGRESS"
+  
+  mv "$task_file" "$new_task_file"
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Impossible de changer le statut de la Task"
+    git checkout -
+    return 1
+  fi
+
+  # Mise à jour du journal si activé
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "DÉVELOPPEMENT" "Démarrage développement TDD TASK-${pbi_id}-${task_seq}" "Branche: $branch_name, Statut: TODO → IN_PROGRESS" "TASK-${pbi_id}-${task_seq}-IN_PROGRESS.md"
+  fi
+
+  echo ""
+  echo "✅ Environnement de développement TDD préparé !"
+  echo ""
+  echo "📋 PLAN DE VOL DÉVELOPPEMENT TDD"
+  echo "════════════════════════════════════════════════════════════════"
+  echo "🎯 Objectif: Implémenter TASK-${pbi_id}-${task_seq} selon méthodologie TDD"
+  echo ""
+  echo "📁 Fichiers:"
+  echo "   • Task: $new_task_file"
+  echo "   • Branche: $branch_name"
+  echo "   • Statut: IN_PROGRESS"
+  echo ""
+  echo "🔄 Cycle TDD à suivre:"
+  echo "   1. 🔴 RED:   Écrire un test qui échoue"
+  echo "   2. 🟢 GREEN: Écrire le code minimum pour réussir"
+  echo "   3. 🔵 BLUE:  Refactoriser et valider la qualité"
+  echo "   4. ♻️  ITÉRER: Répéter jusqu'à completion"
+  echo ""
+  echo "📋 Validation finale requise:"
+  echo "   • Definition of Done complètement cochée"
+  echo "   • Tous les tests passent"
+  echo "   • Linter et typage sans erreur"
+  echo "   • Code review et approbation"
+  echo ""
+  echo "🎯 Prochaines étapes:"
+  echo "   1. Lire la Task: cat '$new_task_file'"
+  echo "   2. Identifier la première fonctionnalité à implémenter"
+  echo "   3. Commencer le cycle TDD"
+  echo "   4. Utiliser 'aklo submit-task' quand terminé"
+  echo ""
+  echo "💡 Conseils:"
+  echo "   • Restez sur la branche $branch_name"
+  echo "   • Commitez régulièrement vos avancées"
+  echo "   • Respectez les principes SOLID"
+  echo "   • Documentez votre code (JSDoc/TSDoc)"
+}
+
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
@@ -1294,6 +1563,7 @@ show_help() {
   echo "  aklo status             # Tableau de bord complet"
   echo "  aklo mcp restart        # Redémarrer les serveurs MCP"
   echo "  aklo plan 42            # Planifier le PBI 42"
+  echo "  aklo dev 1-2            # Développer la Task 1-2 en TDD"
   echo "  aklo validate           # Valider le projet"
   echo ""
   echo "💡 Astuce: Utilisez 'aklo <command> --help' pour l'aide détaillée."
@@ -1336,6 +1606,10 @@ case "${1:-help}" in
   "arch")
     shift
     command_arch "$@"
+    ;;
+  "dev")
+    shift
+    command_dev "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
