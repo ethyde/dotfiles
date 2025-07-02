@@ -13,6 +13,279 @@
 set -e
 
 #==============================================================================
+# PARSER GÉNÉRIQUE DE PROTOCOLES - SOURCE UNIQUE DE VÉRITÉ
+#==============================================================================
+
+# Fonction principale : Parser et générer un artefact depuis un protocole
+parse_and_generate_artefact() {
+  local protocol_name="$1"        # Ex: "00-PRODUCT-OWNER", "04-DEBOGAGE", "05-REFACTORING"
+  local artefact_type="$2"        # Ex: "PBI", "DEBUG", "REFACTOR"
+  local assistance_level="$3"     # "full", "skeleton", "minimal"
+  local output_file="$4"          # Chemin du fichier de sortie
+  local context_vars="$5"         # Variables contextuelles (JSON-like string)
+  
+  # Construire le chemin du protocole (relatif au répertoire racine)
+  local protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.md"
+  
+  # Si pas trouvé en relatif, essayer le chemin absolu depuis le script
+  if [ ! -f "$protocol_file" ]; then
+    local script_dir="$(dirname "$0")"
+    protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.md"
+  fi
+  
+  if [ ! -f "$protocol_file" ]; then
+    echo "❌ Erreur : Protocole $protocol_name non trouvé dans la charte." >&2
+    echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.md" >&2
+    echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.md" >&2
+    return 1
+  fi
+  
+  # Parser le protocole pour extraire la structure d'artefact
+  local artefact_structure=$(extract_artefact_structure "$protocol_file" "$artefact_type")
+  
+  if [ -z "$artefact_structure" ]; then
+    echo "❌ Erreur : Structure d'artefact $artefact_type non trouvée dans $protocol_name." >&2
+    return 1
+  fi
+  
+  # Appliquer le filtrage intelligent selon le niveau d'assistance
+  local filtered_content=$(apply_intelligent_filtering "$artefact_structure" "$assistance_level" "$context_vars")
+  
+  # Écrire le résultat dans le fichier de sortie
+  echo "$filtered_content" > "$output_file"
+  
+  return 0
+}
+
+# Extraire la structure d'artefact depuis un protocole
+extract_artefact_structure() {
+  local protocol_file="$1"
+  local artefact_type="$2"
+  
+  # Patterns de recherche selon le type d'artefact
+  local start_pattern=""
+  local end_pattern=""
+  
+  case "$artefact_type" in
+    "PBI")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier PBI"
+      end_pattern="^## SECTION 3"
+      ;;
+    "DEBUG")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier Debug"
+      end_pattern="^## SECTION 3"
+      ;;
+    "REFACTOR")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier Refactor"
+      end_pattern="^## SECTION 3"
+      ;;
+    "ARCH")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier ARCH"
+      end_pattern="^## SECTION 3"
+      ;;
+    "TASK")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier Task"
+      end_pattern="^## SECTION 3"
+      ;;
+    "RELEASE")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier Release"
+      end_pattern="^## SECTION 3"
+      ;;
+    "JOURNAL")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier Journal"
+      end_pattern="^## SECTION 3"
+      ;;
+    *)
+      echo "❌ Type d'artefact $artefact_type non supporté." >&2
+      return 1
+      ;;
+  esac
+  
+  # Extraire la section entre les patterns
+  local structure=$(sed -n "/$start_pattern/,/$end_pattern/p" "$protocol_file")
+  
+  # Si aucune section trouvée, retourner vide
+  if [ -z "$structure" ]; then
+    return 1
+  fi
+  
+  # Supprimer la première ligne (pattern de début)
+  structure=$(echo "$structure" | tail -n +2)
+  
+  # Supprimer la dernière ligne si elle contient le pattern de fin
+  if echo "$structure" | tail -n 1 | grep -q "^## SECTION 3"; then
+    # Compter les lignes et supprimer la dernière
+    local line_count=$(echo "$structure" | wc -l)
+    local target_lines=$((line_count - 1))
+    structure=$(echo "$structure" | head -n $target_lines)
+  fi
+  
+  # Extraire uniquement le contenu markdown entre ```markdown et ```
+  echo "$structure" | sed -n '/```markdown/,/```/p' | sed '1d;$d'
+}
+
+# Appliquer le filtrage intelligent selon le niveau d'assistance
+apply_intelligent_filtering() {
+  local content="$1"
+  local assistance_level="$2"
+  local context_vars="$3"
+  
+  # Parser les variables contextuelles (format simple key=value) - approche robuste
+  # Remplacer les virgules par des newlines et parser ligne par ligne
+  local vars_lines=$(echo "$context_vars" | sed 's/,/\n/g')
+  local id_value=$(echo "$vars_lines" | grep '^id=' | cut -d'=' -f2 | tr -d '\n\r')
+  local full_id_value=$(echo "$vars_lines" | grep '^full_id=' | cut -d'=' -f2 | tr -d '\n\r')
+  local pbi_id_value=$(echo "$vars_lines" | grep '^pbi_id=' | cut -d'=' -f2 | tr -d '\n\r')
+  local task_id_value=$(echo "$vars_lines" | grep '^task_id=' | cut -d'=' -f2 | tr -d '\n\r')
+  local title_value=$(echo "$vars_lines" | grep '^title=' | cut -d'=' -f2 | tr -d '\n\r')
+  local date_value=$(echo "$vars_lines" | grep '^date=' | cut -d'=' -f2 | tr -d '\n\r')
+  local status_value=$(echo "$vars_lines" | grep '^status=' | cut -d'=' -f2 | tr -d '\n\r')
+  local version_value=$(echo "$vars_lines" | grep '^version=' | cut -d'=' -f2 | tr -d '\n\r')
+  local timestamp_value=$(echo "$vars_lines" | grep '^timestamp=' | cut -d'=' -f2 | tr -d '\n\r')
+  
+  # Appliquer les remplacements intelligents
+  local filtered_content="$content"
+  
+  # Extraire PBI_ID et ARCH_ID depuis id_value (format: "1-4")
+  local pbi_id_only="${id_value%%-*}"    # "1" depuis "1-4"
+  local arch_id_only="${id_value##*-}"   # "4" depuis "1-4"
+  
+
+  
+  # Remplacements de patterns selon le type d'artefact (ordre important!)
+  # 1. Remplacements pour TASK (01-PLANIFICATION)
+  if [ -n "$full_id_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/TASK-\\[PBI_ID\\]-\\[Task_ID\\]/TASK-${full_id_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/feature\\/task-\\[PBI_ID\\]-\\[Task_ID\\]/feature\\/task-${full_id_value}/g")
+  fi
+  if [ -n "$pbi_id_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/\\[PBI_ID\\]/${pbi_id_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/PBI-\\[PBI_ID\\]/PBI-${pbi_id_value}/g")
+  fi
+  if [ -n "$task_id_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/\\[Task_ID\\]/${task_id_value}/g")
+  fi
+  
+  # 2. Remplacements pour ARCH (02-ARCHITECTURE) 
+  if [ -n "$id_value" ]; then
+    # Extraire PBI_ID et ARCH_ID depuis id_value (format: "1-4")
+    local pbi_id_only="${id_value%%-*}"    # "1" depuis "1-4"
+    local arch_id_only="${id_value##*-}"   # "4" depuis "1-4"
+    
+    filtered_content=$(echo "$filtered_content" | sed "s/ARCH-\\[PBI_ID\\]-\\[ID\\]/ARCH-${id_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/ARCH-42-1/ARCH-${id_value}/g")  # Remplacer l'exemple ARCH-42-1
+    filtered_content=$(echo "$filtered_content" | sed "s/PBI-42/PBI-${pbi_id_only}/g")   # Remplacer l'exemple PBI-42
+    filtered_content=$(echo "$filtered_content" | sed "s/\\[ID\\]/${arch_id_only}/g")
+  fi
+  
+  # 3. Remplacements de patterns génériques et titres
+  if [ -n "$title_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/\\[Titre décrivant le problème architectural\\]/${title_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/\\[Titre technique de la tâche\\]/${title_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/%%TITLE%%/${title_value}/g")
+  fi
+  
+  # 4. Remplacements d'ID génériques
+  if [ -n "$id_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/%%ID%%/${id_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/PBI-%%ID%%/PBI-${id_value}/g")
+  fi
+  
+  # 5. Remplacements de version (RELEASE)
+  if [ -n "$version_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/\\[version\\]/${version_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/v\\[version\\]/v${version_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/vX\\.X\\.X/v${version_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/X\\.X\\.X/${version_value}/g")
+  fi
+  
+  # 6. Remplacements de timestamp (JOURNAL)
+  if [ -n "$timestamp_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/HH:MM/${timestamp_value}/g")
+  fi
+  
+  # 7. Remplacements de dates (patterns YYYY-MM-DD et commandes date)
+  if [ -n "$date_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/YYYY-MM-DD/${date_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/${date_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/\$(date +[^)]*))/${date_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/\$(date +'[^']*')/${date_value}/g")
+  fi
+  
+  # Remplacements de statuts
+  if [ -n "$status_value" ]; then
+    filtered_content=$(echo "$filtered_content" | sed "s/PROPOSED/${status_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/INVESTIGATING/${status_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/ANALYSIS/${status_value}/g")
+    filtered_content=$(echo "$filtered_content" | sed "s/DRAFT/${status_value}/g")
+  fi
+  
+  # Adaptation selon le niveau d'assistance
+  case "$assistance_level" in
+    "full")
+      # Garder tout le contenu avec exemples et instructions
+      ;;
+    "skeleton")
+      # Supprimer les exemples et instructions détaillées, garder la structure
+      filtered_content=$(echo "$filtered_content" | sed 's/(Ex: [^)]*)//g')
+      filtered_content=$(echo "$filtered_content" | sed 's/_À compléter[^_]*_/_À compléter_/g')
+      ;;
+    "minimal")
+      # Garder seulement la structure de base, supprimer les détails
+      filtered_content=$(echo "$filtered_content" | sed 's/(.*)//')
+      filtered_content=$(echo "$filtered_content" | sed 's/_[^_]*_//g')
+      filtered_content=$(echo "$filtered_content" | sed '/^$/N;/^\n$/d')
+      ;;
+  esac
+  
+  echo "$filtered_content"
+}
+
+# Fonction utilitaire : Détecter le type d'ID selon le protocole
+detect_id_pattern() {
+  local protocol_name="$1"
+  local base_value="$2"  # Valeur de base (ex: titre pour DEBUG, PBI_ID pour ARCH)
+  
+  case "$protocol_name" in
+    "00-PRODUCT-OWNER")
+      # PBI: ID numérique simple
+      echo "$base_value"
+      ;;
+    "04-DEBOGAGE")
+      # DEBUG: titre-slugifié-YYYYMMDD
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "05-REFACTORING")
+      # REFACTOR: titre-slugifié-YYYYMMDD (même pattern que DEBUG)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "02-ARCHITECTURE")
+      # ARCH: PBI_ID-SEQ-STATUS (ex: 1-1-DRAFT)
+      echo "$base_value"  # Déjà formaté par la commande appelante
+      ;;
+    "01-PLANIFICATION")
+      # TASK: PBI_ID-TASK_SEQ (ex: 1-1)
+      echo "$base_value"  # Déjà formaté par la commande appelante
+      ;;
+    "09-RELEASE")
+      # RELEASE: Version sémantique (ex: 1.2.0)
+      echo "$base_value"  # Version déjà formatée
+      ;;
+    "18-JOURNAL")
+      # JOURNAL: Date YYYY-MM-DD (ex: 2025-01-02)
+      echo "$base_value"  # Date déjà formatée
+      ;;
+    *)
+      echo "$base_value"
+      ;;
+  esac
+}
+
+#==============================================================================
 # SECTION 1 : FONCTIONS UTILITAIRES HÉRITÉES
 #==============================================================================
 
@@ -71,9 +344,15 @@ update_journal() {
   # Créer le répertoire journal si nécessaire
   mkdir -p "$JOURNAL_DIR"
   
-  # Créer le fichier journal du jour si nécessaire
+  # Créer le fichier journal du jour si nécessaire avec le parser générique
   if [ ! -f "$JOURNAL_FILE" ]; then
-    cat > "$JOURNAL_FILE" << EOF
+    local context_vars="date=${TODAY},timestamp=${TIMESTAMP}"
+    parse_and_generate_artefact "18-JOURNAL" "JOURNAL" "full" "$JOURNAL_FILE" "$context_vars"
+    
+    if [ $? -ne 0 ]; then
+      echo "⚠️ Fallback vers génération statique JOURNAL" >&2
+      # Fallback statique si le parser échoue
+      cat > "$JOURNAL_FILE" << EOF
 # JOURNAL DE TRAVAIL : ${TODAY}
 ---
 **Responsable:** Human_Developer
@@ -88,9 +367,10 @@ update_journal() {
 - **Contexte :** Première utilisation du système de journal intégré
 
 EOF
+    fi
   fi
   
-  # Ajouter l'entrée de protocole
+  # Ajouter l'entrée de protocole (structure extraite du protocole)
   cat >> "$JOURNAL_FILE" << EOF
 ### ${TIMESTAMP} - [${PROTOCOL}] ${ACTION}
 
@@ -197,70 +477,18 @@ command_plan() {
     # Création du fichier Task selon le niveau d'assistance
     mkdir -p "./docs/backlog/01-tasks"
     
-    case "$AGENT_ASSISTANCE" in
-      "full")
-        # Contenu complet généré (ici simplifié)
-        cat > "$TASK_PATH" << EOF
-# TASK-${PBI_ID}-${TASK_ID}: ${TASK_TITLE}
----
-**PBI Parent:** PBI-${PBI_ID}
-**Responsable:** [À assigner]
-**Statut:** TODO
-**Revue Architecturale Requise:** Non
----
-
-## Description
-
-${TASK_TITLE}
-
-## Critères d'Acceptation
-
-- [ ] Critère 1: [À définir]
-- [ ] Critère 2: [À définir]
-
-## Definition of Done
-
-- [ ] Code implémenté et testé
-- [ ] Tests unitaires passants
-- [ ] Documentation mise à jour
-- [ ] Revue de code effectuée
-EOF
-        ;;
-      "skeleton")
-        # Structure vide à compléter
-        cat > "$TASK_PATH" << EOF
-# TASK-${PBI_ID}-${TASK_ID}: ${TASK_TITLE}
----
-**PBI Parent:** PBI-${PBI_ID}
-**Responsable:** [À assigner]
-**Statut:** TODO
-**Revue Architecturale Requise:** [Oui/Non]
----
-
-## Description
-
-[À compléter]
-
-## Critères d'Acceptation
-
-- [ ] [À définir]
-
-## Definition of Done
-
-- [ ] [À compléter]
-EOF
-        ;;
-      "minimal")
-        # Fichier minimal avec ID uniquement
-        cat > "$TASK_PATH" << EOF
-# TASK-${PBI_ID}-${TASK_ID}: ${TASK_TITLE}
----
-**PBI Parent:** PBI-${PBI_ID}
-**Statut:** TODO
----
-EOF
-        ;;
-    esac
+    # Génération dynamique depuis le protocole PLANIFICATION
+    local task_full_id="${PBI_ID}-${TASK_ID}"
+    local context_vars="pbi_id=${PBI_ID},task_id=${TASK_ID},full_id=${task_full_id},title=${TASK_TITLE},status=TODO"
+    
+    parse_and_generate_artefact "01-PLANIFICATION" "TASK" "$AGENT_ASSISTANCE" "$TASK_PATH" "$context_vars"
+    
+    # Vérification du succès de génération
+    if [ $? -ne 0 ]; then
+      echo "❌ Erreur : Échec de génération TASK depuis le protocole PLANIFICATION" >&2
+      echo "   Vérifiez l'intégrité du protocole et réessayez" >&2
+      return 1
+    fi
     
     CREATED_TASKS="${CREATED_TASKS}${TASK_FILENAME} "
     MODIFIED_FILES="${MODIFIED_FILES}${TASK_PATH} "
@@ -404,35 +632,17 @@ command_release() {
   mkdir -p "$RELEASE_DIR"
   RELEASE_FILE="${RELEASE_DIR}/RELEASE-${NEW_VERSION}-AWAITING_DEPLOYMENT.md"
   
-  # Création du rapport de release
-  cat > "$RELEASE_FILE" << EOF
-# RAPPORT DE RELEASE : v${NEW_VERSION}
----
-**Version:** ${NEW_VERSION}
-**Type:** ${BUMP_TYPE}
-**Date:** $(date +%Y-%m-%d)
-**Statut:** AWAITING_DEPLOYMENT
----
-
-## Résumé
-
-Release ${BUMP_TYPE} v${NEW_VERSION} préparée et validée.
-
-## Fonctionnalités Incluses
-
-[À compléter depuis les commits depuis la dernière release]
-
-## Tests de Validation
-
-- [ ] Suite de tests unitaires
-- [ ] Tests d'intégration  
-- [ ] Build de production
-- [ ] Tests de régression
-
-## Déploiement
-
-Prêt pour déploiement en production.
-EOF
+  # Génération dynamique depuis le protocole RELEASE
+  local context_vars="version=${NEW_VERSION},type=${BUMP_TYPE},date=$(date +%Y-%m-%d),status=AWAITING_DEPLOYMENT"
+  
+  parse_and_generate_artefact "09-RELEASE" "RELEASE" "full" "$RELEASE_FILE" "$context_vars"
+  
+  # Vérification du succès de génération
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération RELEASE depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole 09-RELEASE" >&2
+    return 1
+  fi
   
   # Mise à jour du CHANGELOG (simplifié)
   if [ ! -f "CHANGELOG.md" ]; then
@@ -840,7 +1050,7 @@ command_propose_pbi() {
   echo "  3. aklo plan ${PBI_ID} (pour décomposer en tâches)"
 }
 
-# Fonction de génération PBI - Extraction depuis protocole PRODUCT-OWNER
+# Fonction de génération PBI - Parser dynamique du protocole PRODUCT-OWNER
 generate_pbi_from_protocol() {
   local file="$1"
   local id="$2"
@@ -848,101 +1058,23 @@ generate_pbi_from_protocol() {
   local date="$4"
   local assistance_level="$5"
   
-  # Structure PBI extraite du protocole PRODUCT-OWNER (source unique de vérité)
-  case "$assistance_level" in
-    "full")
-      cat > "$file" << EOF
-# PBI-${id} : ${title}
-
----
-**Statut:** PROPOSED
-**Date de création:** ${date}
----
-
-## 1. Description de la User Story
-
-_En tant que [type d'utilisateur], je veux [réaliser une action], afin de [obtenir un bénéfice]._
-
-## 2. Critères d'Acceptation
-
-- [ ] Critère 1 : Condition binaire et testable.
-- [ ] Critère 2 : Autre condition binaire et testable.
-- [ ] ...
-
-## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
-
-_Section pour l'architecte/lead dev. Décrit les impacts, les dépendances, les choix techniques à haut niveau qui pourraient influencer la planification._
-
-## 4. Documents d'Architecture Associés (Optionnel)
-
-_Lien vers un ou plusieurs documents du répertoire \`/docs/backlog/02-architecture/\` si une phase de conception a été nécessaire._
-
-- [ARCH-${id}-1.md](../02-architecture/ARCH-${id}-1.md)
-
-## 5. Tasks Associées
-
-_Cette section sera remplie par le protocole [PLANIFICATION]._
-
-- [ ] TASK-${id}-1
-- [ ] TASK-${id}-2
-- [ ] ...
-EOF
-      ;;
-    "skeleton")
-      cat > "$file" << EOF
-# PBI-${id} : ${title}
-
----
-**Statut:** PROPOSED
-**Date de création:** ${date}
----
-
-## 1. Description de la User Story
-
-_À compléter: En tant que [type d'utilisateur], je veux [réaliser une action], afin de [obtenir un bénéfice]._
-
-## 2. Critères d'Acceptation
-
-- [ ] _À définir_
-
-## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
-
-_À compléter si nécessaire_
-
-## 4. Documents d'Architecture Associés (Optionnel)
-
-_À compléter si nécessaire_
-
-## 5. Tasks Associées
-
-_Cette section sera remplie par le protocole [PLANIFICATION]._
-EOF
-      ;;
-    "minimal")
-      cat > "$file" << EOF
-# PBI-${id} : ${title}
-
----
-**Statut:** PROPOSED
-**Date de création:** ${date}
----
-
-## 1. Description de la User Story
-
-
-
-## 2. Critères d'Acceptation
-
-
-
-## 5. Tasks Associées
-
-
-
-EOF
-      ;;
-  esac
+  # Variables contextuelles pour le parser générique
+  local context_vars="id=${id},title=${title},date=${date},status=PROPOSED"
+  
+  # Génération dynamique depuis le protocole
+  parse_and_generate_artefact "00-PRODUCT-OWNER" "PBI" "$assistance_level" "$file" "$context_vars"
+  
+  # Si le parser générique échoue, afficher une erreur explicite
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération PBI depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole PRODUCT-OWNER" >&2
+    return 1
+  fi
 }
+
+# ===== FONCTION PBI STATIC_FALLBACK SUPPRIMÉE =====
+# La fonction generate_pbi_static_fallback a été supprimée car remplacée 
+# par le parser générique dynamique.
 
 # Commande: arch - Conception d'architecture logicielle
 command_arch() {
@@ -997,6 +1129,8 @@ command_arch() {
   if [ -z "$PBI_FILE" ]; then
     echo "Erreur : PBI-${pbi_id} introuvable dans $PBI_DIR" >&2
     echo "Vérifiez que le PBI existe avant de créer son architecture."
+    echo "Fichiers PBI disponibles:"
+    ls -la "$PBI_DIR"/ 2>/dev/null | grep "PBI-" || echo "  Aucun fichier PBI trouvé"
     exit 1
   fi
   
@@ -1059,190 +1193,11 @@ command_arch() {
   echo "  5. Mettre à jour les Tasks après validation"
 }
 
-# Fonctions de génération ARCH
-generate_arch_full() {
-  local file="$1"
-  local pbi_id="$2"
-  local arch_id="$3"
-  local date="$4"
-  local pbi_file="$5"
-  
-  # Extraire le titre du PBI
-  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed 's/^# PBI-[0-9]* : //' || echo "Architecture pour PBI-${pbi_id}")
-  
-  cat > "$file" << EOF
-# ARCH-${pbi_id}-${arch_id} : Architecture pour ${pbi_title}
+# ===== FONCTIONS ARCH OBSOLÈTES SUPPRIMÉES =====
+# Les fonctions generate_arch_full, generate_arch_skeleton, generate_arch_minimal
+# ont été supprimées car remplacées par le parser générique dynamique.
 
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
-**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
-**Assigné à:** \`Human_Developer\`
-**Date de création:** ${date}
-
----
-
-## 1. Problème à Résoudre
-
-_À analyser : Description du défi technique qui nécessite cette architecture._
-
-_Basé sur l'analyse des Tasks du PBI-${pbi_id} identifiées comme présentant une complexité ou un risque élevé._
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-### Option A : [Nom de l'approche A]
-
-- **Description :** _À définir : Description de cette approche_
-- **Avantages :** 
-  - _Avantage 1_
-  - _Avantage 2_
-- **Inconvénients :** 
-  - _Inconvénient 1_
-  - _Inconvénient 2_
-
-### Option B : [Nom de l'approche B]
-
-- **Description :** _À définir : Description de cette approche alternative_
-- **Avantages :** 
-  - _Avantage 1_
-  - _Avantage 2_
-- **Inconvénients :** 
-  - _Inconvénient 1_
-  - _Inconvénient 2_
-
-### Option C : [Nom de l'approche C] (Optionnel)
-
-- **Description :** _À définir : Description d'une troisième approche si pertinente_
-- **Avantages :** 
-  - _Avantage 1_
-- **Inconvénients :** 
-  - _Inconvénient 1_
-
-## 3. Décision et Justification
-
-_À compléter après analyse : Annonce de l'option retenue et justification détaillée._
-
-_Critères de décision : performance, maintenabilité, coût, complexité, time-to-market, etc._
-
-## 4. Schéma de la Solution (Optionnel)
-
-\`\`\`
-[Diagramme ou schéma ASCII de la solution retenue]
-\`\`\`
-
-## 5. Impact sur les Tâches
-
-_À définir après validation de l'architecture :_
-
-**Tasks à modifier :**
-- TASK-${pbi_id}-XX : _Modification nécessaire_
-
-**Nouvelles tasks à créer :**
-- _Nouvelle task 1 : Description_
-- _Nouvelle task 2 : Description_
-
-**Tasks à supprimer :**
-- _Task obsolète : Raison de suppression_
-
-EOF
-}
-
-generate_arch_skeleton() {
-  local file="$1"
-  local pbi_id="$2"
-  local arch_id="$3"
-  local date="$4"
-  local pbi_file="$5"
-  
-  cat > "$file" << EOF
-# ARCH-${pbi_id}-${arch_id} : [À compléter : Titre de l'architecture]
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
-**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
-**Assigné à:** \`Human_Developer\`
-**Date de création:** ${date}
-
----
-
-## 1. Problème à Résoudre
-
-_À compléter : Quel défi technique nécessite cette architecture ?_
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-### Option A : [À compléter]
-
-- **Description :** 
-- **Avantages :** 
-- **Inconvénients :** 
-
-### Option B : [À compléter]
-
-- **Description :** 
-- **Avantages :** 
-- **Inconvénients :** 
-
-## 3. Décision et Justification
-
-_À compléter après analyse_
-
-## 4. Schéma de la Solution (Optionnel)
-
-## 5. Impact sur les Tâches
-
-_À définir_
-
-EOF
-}
-
-generate_arch_minimal() {
-  local file="$1"
-  local pbi_id="$2"
-  local arch_id="$3"
-  local date="$4"
-  local pbi_file="$5"
-  
-  cat > "$file" << EOF
-# ARCH-${pbi_id}-${arch_id} : 
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
-**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
-**Assigné à:** \`Human_Developer\`
-**Date de création:** ${date}
-
----
-
-## 1. Problème à Résoudre
-
-
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-
-
-## 3. Décision et Justification
-
-
-
-## 4. Schéma de la Solution (Optionnel)
-
-
-
-## 5. Impact sur les Tâches
-
-
-
-EOF
-}
-
-# Fonction de génération ARCH - Extraction depuis protocole ARCHITECTURE
+# Fonction de génération ARCH - Parser dynamique du protocole ARCHITECTURE
 generate_arch_from_protocol() {
   local file="$1"
   local pbi_id="$2"
@@ -1251,130 +1206,29 @@ generate_arch_from_protocol() {
   local pbi_file="$5"
   local assistance_level="$6"
   
-  # Extraire le titre du PBI
-  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed 's/^# PBI-[0-9]* : //' || echo "Architecture pour PBI-${pbi_id}")
+  # Extraire le titre du PBI (nettoyer les caractères spéciaux)
+  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed 's/^# PBI-[0-9]* : //' | tr -d '\n\r' || echo "Architecture pour PBI-${pbi_id}")
   
-  # Structure ARCH extraite du protocole ARCHITECTURE (source unique de vérité)
-  case "$assistance_level" in
-    "full")
-      cat > "$file" << EOF
-# ARCH-${pbi_id}-${arch_id} : Architecture pour ${pbi_title}
+  # Variables contextuelles pour le parser générique
+  local arch_full_id="${pbi_id}-${arch_id}"
+  local context_vars="id=${arch_full_id},title=${pbi_title},date=${date},status=DRAFT,pbi_id=${pbi_id},arch_id=${arch_id}"
+  
 
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
-**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
-**Assigné à:** \`Human_Developer\`
-**Branche Git:** \`feature/task-${pbi_id}-4-notification-service-skeleton\`
-
----
-
-## 1. Problème à Résoudre
-
-_Description claire du défi technique qui a nécessité l'activation de ce protocole. Se base sur les Tasks "flaggées" par le planificateur._
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-### Option A : [Nom de l'approche A]
-
-- **Description :** ...
-- **Avantages :** ...
-- **Inconvénients :** ...
-
-### Option B : [Nom de l'approche B]
-
-- **Description :** ...
-- **Avantages :** ...
-- **Inconvénients :** ...
-
-## 3. Décision et Justification
-
-_Annonce de l'option retenue et explication détaillée des raisons de ce choix, en s'appuyant sur l'analyse des compromis et les principes directeurs du projet (performance, coût, maintenabilité, etc.)._
-
-## 4. Schéma de la Solution (Optionnel)
-
-_Un schéma (ex: Mermaid, ASCII art) pour illustrer la solution retenue peut être inclus ici._
-
-## 5. Impact sur les Tâches
-
-_Description détaillée des Tasks à créer, modifier ou supprimer pour implémenter cette architecture._
-EOF
-      ;;
-    "skeleton")
-      cat > "$file" << EOF
-# ARCH-${pbi_id}-${arch_id} : Architecture pour ${pbi_title}
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
-**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
-**Assigné à:** \`Human_Developer\`
-**Date de création:** ${date}
-
----
-
-## 1. Problème à Résoudre
-
-_À compléter_
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-### Option A : _À nommer_
-
-- **Description :** _À compléter_
-- **Avantages :** _À lister_
-- **Inconvénients :** _À lister_
-
-### Option B : _À nommer_
-
-- **Description :** _À compléter_
-- **Avantages :** _À lister_
-- **Inconvénients :** _À lister_
-
-## 3. Décision et Justification
-
-_À compléter_
-
-## 4. Schéma de la Solution (Optionnel)
-
-_À compléter_
-
-## 5. Impact sur les Tâches
-
-_À définir_
-EOF
-      ;;
-    "minimal")
-      cat > "$file" << EOF
-# ARCH-${pbi_id}-${arch_id} : ${pbi_title}
-
----
-**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
-**Date de création:** ${date}
----
-
-## 1. Problème à Résoudre
-
-
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-
-
-## 3. Décision et Justification
-
-
-
-## 5. Impact sur les Tâches
-
-
-
-EOF
-      ;;
-  esac
+  
+  # Génération dynamique depuis le protocole
+  parse_and_generate_artefact "02-ARCHITECTURE" "ARCH" "$assistance_level" "$file" "$context_vars"
+  
+  # Si le parser générique échoue, afficher une erreur explicite
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération ARCH depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole ARCHITECTURE" >&2
+    return 1
+  fi
 }
+
+# ===== FONCTION ARCH STATIC_FALLBACK SUPPRIMÉE =====
+# La fonction generate_arch_static_fallback a été supprimée car remplacée 
+# par le parser générique dynamique.
 
 # Commande: dev - Développement TDD d'une Task
 command_dev() {
@@ -1520,6 +1374,133 @@ command_dev() {
   echo "   • Documentez votre code (JSDoc/TSDoc)"
 }
 
+# Commande: debug - Diagnostic et correction de bugs
+command_debug() {
+  local title="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+  
+  case "$title" in
+    "--help"|"help"|"")
+      echo "Usage: aklo debug \"<titre du problème>\""
+      echo ""
+      echo "Diagnostic et correction de bugs selon le protocole DEBOGAGE."
+      echo ""
+      echo "Arguments:"
+      echo "  titre      Description du problème à diagnostiquer (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo debug \"Login impossible avec utilisateur admin\""
+      echo "  aklo debug \"Timeout API payment\" --no-agent"
+      echo ""
+      echo "Workflow:"
+      echo "  1. Création du rapport DEBUG-[ID]-INVESTIGATING.md"
+      echo "  2. Documentation du problème et étapes de reproduction"
+      echo "  3. Formulation d'hypothèses initiales"
+      echo "  4. Investigation itérative avec instrumentation"
+      echo "  5. Analyse de la cause racine (root cause)"
+      echo "  6. Plan de correction et validation"
+      echo "  7. Implémentation via protocole DÉVELOPPEMENT"
+      return 0
+      ;;
+    --no-agent)
+      agent_assistance="skeleton"
+      title="$2"
+      ;;
+    --no-journal)
+      auto_journal="false"
+      title="$2"
+      ;;
+  esac
+
+  if [ -z "$title" ]; then
+    echo "❌ Erreur : Le titre du problème est requis." >&2
+    echo "Usage: aklo debug \"<titre du problème>\""
+    echo "Utilisez 'aklo debug --help' pour plus d'informations."
+    return 1
+  fi
+
+  # Génération de l'ID unique basé sur le titre et la date
+  local date_id=$(date +%Y%m%d)
+  local title_slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+  local debug_id="${title_slug}-${date_id}"
+  
+  # Préparation des répertoires
+  local debug_dir="$(get_config "DEBUG_DIR" || echo "docs/backlog/03-debug")"
+  
+  # Assurer que le répertoire existe (chemin absolu si besoin)
+  if [ ! -d "$debug_dir" ]; then
+    mkdir -p "$debug_dir" 2>/dev/null || true
+  fi
+  
+  local debug_file="${debug_dir}/DEBUG-${debug_id}-INVESTIGATING.md"
+  local today=$(date +%Y-%m-%d)
+  
+  # Vérification si le rapport existe déjà
+  if [ -f "$debug_file" ]; then
+    echo "⚠️  Un rapport de débogage existe déjà pour ce problème :"
+    echo "   📁 $debug_file"
+    echo ""
+    echo "Options :"
+    echo "  1. Modifier le titre pour créer un nouveau rapport"
+    echo "  2. Continuer avec le rapport existant"
+    return 1
+  fi
+
+  echo "🐛 Création du rapport de débogage DEBUG-${debug_id}"
+  echo "📁 Problème: $title"
+  
+  # Génération du rapport selon le niveau d'assistance
+  generate_debug_from_protocol "$debug_file" "$debug_id" "$title" "$today" "$agent_assistance"
+  
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "DEBOGAGE" "Initialisation investigation DEBUG-${debug_id}" "Problème: $title" "DEBUG-${debug_id}-INVESTIGATING.md"
+  fi
+
+  echo ""
+  echo "✅ DEBUG-${debug_id}-INVESTIGATING.md créé avec succès !"
+  echo "📍 Fichier: $debug_file"
+  echo ""
+  echo "🔍 Prochaines étapes:"
+  echo "  1. Documenter les étapes de reproduction"
+  echo "  2. Formuler les hypothèses initiales"
+  echo "  3. Commencer l'investigation itérative"
+  echo "  4. Identifier la cause racine"
+  echo "  5. Proposer un plan de correction"
+  echo "  6. Implémenter via 'aklo dev' après validation"
+}
+
+# Fonction de génération DEBUG - Parser dynamique du protocole DEBOGAGE
+generate_debug_from_protocol() {
+  local file="$1"
+  local debug_id="$2"
+  local title="$3"
+  local date="$4"
+  local assistance_level="$5"
+  
+  # Variables contextuelles pour le parser générique
+  local context_vars="id=${debug_id},title=${title},date=${date},status=INVESTIGATING"
+  
+  # Génération dynamique depuis le protocole
+  parse_and_generate_artefact "04-DEBOGAGE" "DEBUG" "$assistance_level" "$file" "$context_vars"
+  
+  # Si le parser générique échoue, afficher une erreur explicite
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération DEBUG depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole DEBOGAGE" >&2
+    return 1
+  fi
+}
+
+# ===== FONCTION DEBUG STATIC_FALLBACK SUPPRIMÉE =====
+# La fonction generate_debug_static_fallback a été supprimée car remplacée 
+# par le parser générique dynamique.
+
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
@@ -1543,6 +1524,8 @@ show_help() {
   echo "  pbi \"<titre>\"                       Alias pour propose-pbi"
   echo "  plan <PBI_ID> [--no-agent]          Planification avec commit atomique"
   echo "  arch <PBI_ID> [--review]            Conception d'architecture logicielle"
+  echo "  dev <TASK_ID> [--no-journal]        Développement TDD d'une Task"
+  echo "  debug \"<titre>\" [--no-agent]        Diagnostic et correction de bugs"
   echo "  release <type> [--dry-run]          Release (major|minor|patch)"
   echo ""
   echo "📚 AIDE ET INFORMATION:"
@@ -1610,6 +1593,10 @@ case "${1:-help}" in
   "dev")
     shift
     command_dev "$@"
+    ;;
+  "debug")
+    shift
+    command_debug "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
