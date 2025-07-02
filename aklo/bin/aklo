@@ -74,21 +74,34 @@ get_artefact_header() {
   sed -n "/^${HEADER_KEY}:/s/^[^:]*: \`*\([^\`]*\)\`*$/\1/p" "$ARTEFACT_FILE"
 }
 
-# Fonction: get_config (Version 2 - avec surcharge locale)
+# Fonction: get_config (Version 3 - avec recherche récursive)
 # Rôle: Lit une valeur dans la configuration. Elle cherche d'abord un fichier
-#       .aklo.conf à la racine du projet courant pour des configurations
-#       spécifiques, et se rabat sur le fichier global dans les dotfiles
-#       si aucune configuration locale n'est trouvée.
+#       .aklo.conf en remontant dans l'arborescence depuis le répertoire courant
+#       pour des configurations spécifiques, et se rabat sur le fichier global
+#       dans les dotfiles si aucune configuration locale n'est trouvée.
 #
 # Usage: get_config [CLE]
 #
 get_config() {
   KEY="$1"
-  LOCAL_CONFIG_FILE="./.aklo.conf"
   GLOBAL_CONFIG_FILE="$(dirname "$0")/../config/.aklo.conf"
 
-  # On cherche d'abord dans le fichier de configuration local au projet.
-  if [ -f "$LOCAL_CONFIG_FILE" ]; then
+  # Fonction interne pour trouver le fichier .aklo.conf en remontant l'arborescence
+  find_local_config() {
+    local current_dir="$(pwd)"
+    while [ "$current_dir" != "/" ]; do
+      if [ -f "$current_dir/.aklo.conf" ]; then
+        echo "$current_dir/.aklo.conf"
+        return 0
+      fi
+      current_dir="$(dirname "$current_dir")"
+    done
+    return 1
+  }
+
+  # On cherche d'abord dans l'arborescence locale
+  LOCAL_CONFIG_FILE=$(find_local_config)
+  if [ -n "$LOCAL_CONFIG_FILE" ] && [ -f "$LOCAL_CONFIG_FILE" ]; then
     # 'grep' retourne la ligne si elle est trouvée.
     VALUE=$(grep "^${KEY}=" "$LOCAL_CONFIG_FILE" | cut -d'=' -f2)
     # Si une valeur a été trouvée, on la retourne et on arrête la fonction.
