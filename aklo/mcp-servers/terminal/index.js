@@ -152,7 +152,7 @@ class AkloTerminalServer {
     // Validation des commandes aklo autorisées
     const allowedCommands = [
       'init', 'propose-pbi', 'plan', 'start-task', 'submit-task', 
-      'merge-task', 'release', 'hotfix', 'new'
+      'merge-task', 'release', 'hotfix', 'new', 'get_config'
     ];
     
     if (!allowedCommands.includes(command)) {
@@ -326,6 +326,7 @@ class AkloTerminalServer {
     // Chercher le script aklo dans plusieurs emplacements possibles
     const possiblePaths = [
       join(workdir, 'aklo', 'bin', 'aklo'),
+      join(process.env.HOME, 'Projets', 'dotfiles', 'aklo', 'bin', 'aklo'),
       join(process.env.HOME, '.dotfiles', 'aklo', 'bin', 'aklo'),
       join(process.env.HOME, 'dotfiles', 'aklo', 'bin', 'aklo'),
       'aklo', // Dans le PATH
