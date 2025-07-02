@@ -119,6 +119,34 @@ extract_artefact_structure() {
       start_pattern="### 2\.3\. Structure Obligatoire du Fichier de Documentation"
       end_pattern="^## SECTION 3"
       ;;
+    "COMPETITION")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier d'Analyse"
+      end_pattern="^## SECTION 3"
+      ;;
+    "TRACKING-PLAN")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier de Tracking"
+      end_pattern="^## SECTION 3"
+      ;;
+    "ONBOARDING")
+      start_pattern="### 2\.3\. : STRUCTURE DU RAPPORT D'ONBOARDING"
+      end_pattern="^## SECTION 3"
+      ;;
+    "DEPRECATION")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier de Dépréciation"
+      end_pattern="^## SECTION 3"
+      ;;
+    "KNOWLEDGE-BASE")
+      start_pattern="### 2\.2\. Structure Recommandée du Fichier"
+      end_pattern="^## SECTION 3"
+      ;;
+    "FAST-TRACK")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier Fast-Track"
+      end_pattern="^## SECTION 3"
+      ;;
+    "META-IMPROVEMENT")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier Improve"
+      end_pattern="^## SECTION 3"
+      ;;
     *)
       echo "❌ Type d'artefact $artefact_type non supporté." >&2
       return 1
@@ -331,6 +359,38 @@ detect_id_pattern() {
       ;;
     "17-USER-DOCS")
       # USER-DOCS: description-slugifiée-YYYYMMDD (ex: new-payment-feature-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "12-ANALYSE-CONCURRENCE")
+      # COMPETITION: description-slugifiée-YYYYMMDD (ex: auth-methods-competitors-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "16-TRACKING-PLAN")
+      # TRACKING-PLAN: ID du PBI ou de la fonctionnalité (ex: PBI-42 ou feature-login)
+      echo "$base_value"
+      ;;
+    "14-ONBOARDING")
+      # ONBOARDING: Date au format AAAA-MM-DD
+      date +%Y-%m-%d
+      ;;
+    "15-DEPRECATION")
+      # DEPRECATION: description-slugifiée-YYYYMMDD (ex: old-billing-api-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "20-FAST-TRACK")
+      # FAST-TRACK: description-slugifiée-YYYYMMDD (ex: fix-typo-homepage-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "21-META-IMPROVEMENT")
+      # META-IMPROVEMENT: description-slugifiée-YYYYMMDD (ex: improve-debug-protocol-20250628)
       local date_id=$(date +%Y%m%d)
       local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
       echo "${title_slug}-${date_id}"
@@ -2617,6 +2677,998 @@ command_docs() {
   echo "✍️ RAPPEL: Documentation claire et synchronisée !"
 }
 
+# Commande: analyze - Analyse de la concurrence
+command_analyze() {
+  local subject="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$subject" in
+    "--help"|"help"|"")
+      echo "Usage: aklo analyze \"<sujet d'analyse>\" [--features]"
+      echo ""
+      echo "Analyse de la concurrence selon le protocole ANALYSE-CONCURRENCE."
+      echo ""
+      echo "Arguments:"
+      echo "  sujet        Sujet de l'analyse concurrentielle (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --features     Mode analyse de fonctionnalités spécifiques"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo analyze \"Méthodes d'authentification concurrentes\""
+      echo "  aklo analyze \"Interfaces de paiement\" --features"
+      echo "  aklo analyze \"Stratégies de pricing des concurrents\""
+      echo ""
+      echo "Workflow d'analyse:"
+      echo "  1. Cadrage de l'analyse et identification des concurrents"
+      echo "  2. Recherche et synthèse des informations"
+      echo "  3. Analyse détaillée par concurrent"
+      echo "  4. Recommandations et plan d'action"
+      echo "  5. Validation et création des PBI de suivi"
+      echo ""
+      echo "Statuts:"
+      echo "  ANALYSIS  - Recherche et rédaction en cours"
+      echo "  CONCLUDED - Analyse terminée avec actions de suivi"
+      echo ""
+      echo "Livrables:"
+      echo "  • Rapport d'analyse concurrentielle complet"
+      echo "  • Propositions de PBI découlant des conclusions"
+      echo "  • Recommandations actionnables"
+      echo ""
+      echo "🔍 PRINCIPE: Analyse structurée pour opportunités actionnables"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local features_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --features)
+            features_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$subject" ]; then
+    echo "Erreur : Sujet d'analyse concurrentielle requis." >&2
+    echo "Utilisez 'aklo analyze --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID d'analyse
+  COMPETITION_DIR="./$(get_config "COMPETITION_DIR" || echo "docs/backlog/10-competition")"
+  mkdir -p "$COMPETITION_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  analysis_id=$(detect_id_pattern "12-ANALYSE-CONCURRENCE" "$subject")
+  ANALYSIS_FILE="${COMPETITION_DIR}/COMPETITION-${analysis_id}-ANALYSIS.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "🔍 Création de l'analyse concurrentielle COMPETITION-${analysis_id}"
+  echo "🎯 Sujet: $subject"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole ANALYSE-CONCURRENCE..."
+      generate_analysis_from_protocol "$ANALYSIS_FILE" "$analysis_id" "$subject" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_analysis_from_protocol "$ANALYSIS_FILE" "$analysis_id" "$subject" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_analysis_from_protocol "$ANALYSIS_FILE" "$analysis_id" "$subject" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "ANALYZE" "Analyse concurrentielle: $subject" "COMPETITION-${analysis_id}-ANALYSIS.md"
+  fi
+
+  echo ""
+  echo "✅ COMPETITION-${analysis_id}-ANALYSIS.md créé avec succès !"
+  echo "📍 Fichier: $ANALYSIS_FILE"
+  echo ""
+  echo "🔍 Prochaines étapes (analyse structurée):"
+  echo "  1. Identifier clairement les concurrents à analyser"
+  echo "  2. Mener la recherche sur le sujet défini"
+  echo "  3. Synthétiser les observations par concurrent"
+  echo "  4. Formuler des recommandations actionnables"
+  echo "  5. Valider et créer les PBI de suivi"
+  echo ""
+  echo "📊 RAPPEL: Analyse structurée pour opportunités actionnables !"
+}
+
+# Commande: track - Plan de tracking
+command_track() {
+  local feature_id="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$feature_id" in
+    "--help"|"help"|"")
+      echo "Usage: aklo track <PBI_ID|feature_name> [--plan]"
+      echo ""
+      echo "Plan de tracking selon le protocole TRACKING-PLAN."
+      echo ""
+      echo "Arguments:"
+      echo "  feature_id   ID du PBI ou nom de la fonctionnalité (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --plan         Mode plan détaillé avec métriques"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo track PBI-42                    # Tracking pour PBI-42"
+      echo "  aklo track \"feature-login\" --plan    # Plan détaillé"
+      echo "  aklo track \"new-payment-flow\""
+      echo ""
+      echo "Workflow de tracking:"
+      echo "  1. Définition des objectifs de collecte"
+      echo "  2. Définition des événements et métriques"
+      echo "  3. Validation du plan par Human_Developer"
+      echo "  4. Intégration au développement (Tasks)"
+      echo ""
+      echo "Statuts:"
+      echo "  DRAFT                 - Définition du plan en cours"
+      echo "  AWAITING_IMPLEMENTATION - Plan validé, prêt pour dev"
+      echo "  IMPLEMENTED           - Plan implémenté en production"
+      echo ""
+      echo "Types de données:"
+      echo "  • Événements utilisateur (Analytics)"
+      echo "  • Métriques de performance (Observability)"
+      echo "  • Logs techniques (Debugging)"
+      echo ""
+      echo "📊 PRINCIPE: Collecte intentionnelle et structurée"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local plan_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --plan)
+            plan_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$feature_id" ]; then
+    echo "Erreur : ID de fonctionnalité ou PBI requis." >&2
+    echo "Utilisez 'aklo track --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID de tracking
+  TRACKING_DIR="./$(get_config "TRACKING_DIR" || echo "docs/backlog/13-tracking")"
+  mkdir -p "$TRACKING_DIR"
+
+  # Générer l'ID selon le protocole (ID du PBI ou de la fonctionnalité)
+  tracking_id=$(detect_id_pattern "16-TRACKING-PLAN" "$feature_id")
+  TRACKING_FILE="${TRACKING_DIR}/TRACKING-PLAN-${tracking_id}-DRAFT.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "📊 Création du plan de tracking TRACKING-PLAN-${tracking_id}"
+  echo "🎯 Fonctionnalité: $feature_id"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole TRACKING-PLAN..."
+      generate_tracking_from_protocol "$TRACKING_FILE" "$tracking_id" "$feature_id" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_tracking_from_protocol "$TRACKING_FILE" "$tracking_id" "$feature_id" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_tracking_from_protocol "$TRACKING_FILE" "$tracking_id" "$feature_id" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "TRACK" "Plan de tracking: $feature_id" "TRACKING-PLAN-${tracking_id}-DRAFT.md"
+  fi
+
+  echo ""
+  echo "✅ TRACKING-PLAN-${tracking_id}-DRAFT.md créé avec succès !"
+  echo "📍 Fichier: $TRACKING_FILE"
+  echo ""
+  echo "📊 Prochaines étapes (plan de tracking):"
+  echo "  1. Définir les objectifs de collecte de données"
+  echo "  2. Spécifier les événements, métriques et logs"
+  echo "  3. Préciser les destinations et outils concernés"
+  echo "  4. Valider le plan avec Human_Developer"
+  echo "  5. Intégrer dans les Tasks de développement"
+  echo ""
+  echo "📈 RAPPEL: Collecte intentionnelle et structurée !"
+}
+
+# Commande: onboard - Onboarding de projet
+command_onboard() {
+  local user_role="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$user_role" in
+    "--help"|"help"|"")
+      echo "Usage: aklo onboard [<user_role>] [--role]"
+      echo ""
+      echo "Onboarding de projet selon le protocole ONBOARDING."
+      echo ""
+      echo "Arguments:"
+      echo "  user_role    Rôle du nouvel utilisateur (optionnel)"
+      echo ""
+      echo "Options:"
+      echo "  --role         Mode spécialisé par rôle utilisateur"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo onboard                         # Onboarding général"
+      echo "  aklo onboard \"developer\" --role      # Onboarding développeur"
+      echo "  aklo onboard \"product-manager\""
+      echo ""
+      echo "Workflow d'onboarding:"
+      echo "  1. Cadrage de l'intention d'onboarding"
+      echo "  2. Collecte d'informations projet"
+      echo "  3. Rédaction du rapport de synthèse"
+      echo "  4. Livraison du résumé d'onboarding"
+      echo ""
+      echo "Contenu du rapport:"
+      echo "  • Mission et objectif du projet"
+      echo "  • Concepts métier clés (glossaire)"
+      echo "  • Vue d'ensemble de l'architecture"
+      echo "  • Démarrage rapide (quick start)"
+      echo "  • Points d'entrée du code"
+      echo ""
+      echo "Livrable:"
+      echo "  • ONBOARDING-SUMMARY-YYYY-MM-DD.md"
+      echo ""
+      echo "👋 PRINCIPE: Intégration rapide et contexte global"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local role_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --role)
+            role_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  # Génération de l'ID d'onboarding (date)
+  ONBOARDING_DIR="./$(get_config "ONBOARDING_DIR" || echo "docs/project")"
+  mkdir -p "$ONBOARDING_DIR"
+
+  # Générer l'ID selon le protocole (date AAAA-MM-DD)
+  onboarding_id=$(detect_id_pattern "14-ONBOARDING" "")
+  ONBOARDING_FILE="${ONBOARDING_DIR}/ONBOARDING-SUMMARY-${onboarding_id}.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "👋 Création du rapport d'onboarding ONBOARDING-SUMMARY-${onboarding_id}"
+  if [ -n "$user_role" ]; then
+    echo "🎯 Rôle cible: $user_role"
+  else
+    echo "🎯 Onboarding général"
+  fi
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole ONBOARDING..."
+      generate_onboarding_from_protocol "$ONBOARDING_FILE" "$onboarding_id" "$user_role" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_onboarding_from_protocol "$ONBOARDING_FILE" "$onboarding_id" "$user_role" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_onboarding_from_protocol "$ONBOARDING_FILE" "$onboarding_id" "$user_role" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "ONBOARD" "Onboarding projet: $user_role" "ONBOARDING-SUMMARY-${onboarding_id}.md"
+  fi
+
+  echo ""
+  echo "✅ ONBOARDING-SUMMARY-${onboarding_id}.md créé avec succès !"
+  echo "📍 Fichier: $ONBOARDING_FILE"
+  echo ""
+  echo "👋 Prochaines étapes (onboarding):"
+  echo "  1. Réviser la mission et les objectifs du projet"
+  echo "  2. Compléter le glossaire des concepts métier"
+  echo "  3. Valider l'architecture et les points d'entrée"
+  echo "  4. Tester les instructions de démarrage rapide"
+  echo "  5. Présenter le rapport au nouveau membre"
+  echo ""
+  echo "🚀 RAPPEL: Intégration rapide et contexte global !"
+}
+
+# Commande: deprecate - Dépréciation de fonctionnalité
+command_deprecate() {
+  local feature="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$feature" in
+    "--help"|"help"|"")
+      echo "Usage: aklo deprecate \"<fonctionnalité>\" [--timeline]"
+      echo ""
+      echo "Dépréciation de fonctionnalité selon le protocole DEPRECATION."
+      echo ""
+      echo "Arguments:"
+      echo "  feature      Nom de la fonctionnalité à déprécier (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --timeline     Mode avec timeline détaillée"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo deprecate \"API v1 billing\""
+      echo "  aklo deprecate \"Legacy auth system\" --timeline"
+      echo "  aklo deprecate \"Old dashboard module\""
+      echo ""
+      echo "Workflow de dépréciation:"
+      echo "  1. Analyse et planification du retrait"
+      echo "  2. Exécution de la suppression technique"
+      echo "  3. Communication et clôture"
+      echo ""
+      echo "Statuts:"
+      echo "  ANALYSIS          - Analyse d'impact en cours"
+      echo "  AWAITING_EXECUTION - Plan validé, prêt pour suppression"
+      echo "  EXECUTED          - Code retiré, version prête"
+      echo "  COMMUNICATED      - Suppression communiquée (fini)"
+      echo ""
+      echo "Livrables:"
+      echo "  • Plan de dépréciation complet"
+      echo "  • Commits de suppression"
+      echo "  • Communication utilisateur (si applicable)"
+      echo ""
+      echo "📉 PRINCIPE: Retrait sécurisé et contrôlé"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local timeline_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --timeline)
+            timeline_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$feature" ]; then
+    echo "Erreur : Nom de la fonctionnalité à déprécier requis." >&2
+    echo "Utilisez 'aklo deprecate --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID de dépréciation
+  DEPRECATION_DIR="./$(get_config "DEPRECATION_DIR" || echo "docs/backlog/12-deprecations")"
+  mkdir -p "$DEPRECATION_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  deprecation_id=$(detect_id_pattern "15-DEPRECATION" "$feature")
+  DEPRECATION_FILE="${DEPRECATION_DIR}/DEPRECATION-${deprecation_id}-ANALYSIS.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "📉 Création du plan de dépréciation DEPRECATION-${deprecation_id}"
+  echo "🎯 Fonctionnalité: $feature"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole DEPRECATION..."
+      generate_deprecation_from_protocol "$DEPRECATION_FILE" "$deprecation_id" "$feature" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_deprecation_from_protocol "$DEPRECATION_FILE" "$deprecation_id" "$feature" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_deprecation_from_protocol "$DEPRECATION_FILE" "$deprecation_id" "$feature" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "DEPRECATE" "Dépréciation: $feature" "DEPRECATION-${deprecation_id}-ANALYSIS.md"
+  fi
+
+  echo ""
+  echo "✅ DEPRECATION-${deprecation_id}-ANALYSIS.md créé avec succès !"
+  echo "📍 Fichier: $DEPRECATION_FILE"
+  echo ""
+  echo "📉 Prochaines étapes (dépréciation):"
+  echo "  1. Analyser l'impact utilisateur et technique"
+  echo "  2. Définir le plan d'action technique"
+  echo "  3. Planifier la communication si nécessaire"
+  echo "  4. Valider le plan avec Human_Developer"
+  echo "  5. Exécuter la suppression (Tasks)"
+  echo ""
+  echo "⚠️  RAPPEL: Retrait sécurisé et contrôlé !"
+}
+
+# Commande: kb - Knowledge Base
+command_kb() {
+  local action="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$action" in
+    "--help"|"help"|"")
+      echo "Usage: aklo kb <action> [arguments]"
+      echo ""
+      echo "Gestion de la base de connaissances selon le protocole KNOWLEDGE-BASE."
+      echo ""
+      echo "Actions:"
+      echo "  search <query>       Rechercher dans la base de connaissances"
+      echo "  add <subject>        Ajouter une nouvelle connaissance"
+      echo "  update <KB-ID>       Mettre à jour une entrée existante"
+      echo ""
+      echo "Options globales:"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo kb search \"performance\""
+      echo "  aklo kb add \"Problème avec Redis clustering\""
+      echo "  aklo kb update KB-003"
+      echo ""
+      echo "Workflow Knowledge Base:"
+      echo "  1. Détection d'une connaissance critique"
+      echo "  2. Proposition d'ajout à la base"
+      echo "  3. Validation par Human_Developer"
+      echo "  4. Mise à jour du fichier KNOWLEDGE-BASE.md"
+      echo ""
+      echo "Structure des entrées:"
+      echo "  • ID unique (KB-XXX)"
+      echo "  • Sujet et statut"
+      echo "  • Connaissance acquise"
+      echo "  • Analyse d'impact"
+      echo "  • Recommandation actionnable"
+      echo ""
+      echo "📚 PRINCIPE: Capitalisation des apprentissages"
+      exit 0
+      ;;
+    "search")
+      shift
+      kb_search "$@"
+      ;;
+    "add")
+      shift
+      kb_add "$@"
+      ;;
+    "update")
+      shift
+      kb_update "$@"
+      ;;
+    *)
+      echo "Action inconnue: $action" >&2
+      echo "Utilisez 'aklo kb --help' pour voir les actions disponibles."
+      exit 1
+      ;;
+  esac
+}
+
+# Sous-commande: kb search
+kb_search() {
+  local query="$1"
+  
+  if [ -z "$query" ]; then
+    echo "Erreur : Terme de recherche requis." >&2
+    echo "Usage: aklo kb search <query>"
+    exit 1
+  fi
+
+  KB_FILE="./$(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.md")"
+  
+  if [ ! -f "$KB_FILE" ]; then
+    echo "📚 Base de connaissances non trouvée: $KB_FILE"
+    echo "Utilisez 'aklo kb add' pour créer la première entrée."
+    exit 1
+  fi
+
+  echo "🔍 Recherche dans la base de connaissances: '$query'"
+  echo "📍 Fichier: $KB_FILE"
+  echo ""
+
+  # Recherche avec contexte (3 lignes avant et après)
+  if grep -i -A 3 -B 3 "$query" "$KB_FILE" > /dev/null 2>&1; then
+    echo "📚 Résultats trouvés:"
+    echo "===================="
+    grep -i -A 10 -B 2 --color=always "$query" "$KB_FILE" | head -50
+    echo ""
+    echo "💡 Utilisez 'less $KB_FILE' pour voir le fichier complet."
+  else
+    echo "❌ Aucun résultat trouvé pour '$query'"
+    echo ""
+    echo "💡 Suggestions:"
+    echo "  • Vérifiez l'orthographe du terme"
+    echo "  • Essayez des mots-clés plus généraux"
+    echo "  • Consultez le fichier complet: less $KB_FILE"
+  fi
+}
+
+# Sous-commande: kb add
+kb_add() {
+  local subject="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+  
+  if [ -z "$subject" ]; then
+    echo "Erreur : Sujet de la connaissance requis." >&2
+    echo "Usage: aklo kb add \"<sujet>\""
+    exit 1
+  fi
+
+  KB_FILE="./$(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.md")"
+  KB_DIR=$(dirname "$KB_FILE")
+  mkdir -p "$KB_DIR"
+
+  echo "📚 Ajout d'une nouvelle connaissance à la base"
+  echo "🎯 Sujet: $subject"
+
+  # Générer le prochain ID KB-XXX
+  next_id="KB-001"
+  if [ -f "$KB_FILE" ]; then
+    # Trouver le dernier ID et incrémenter
+    last_id=$(grep -o "ID: KB-[0-9]*" "$KB_FILE" | tail -1 | sed 's/ID: KB-//')
+    if [ -n "$last_id" ]; then
+      next_num=$((last_id + 1))
+      next_id=$(printf "KB-%03d" $next_num)
+    fi
+  fi
+
+  TODAY=$(date +%Y-%m-%d)
+
+  # Créer ou enrichir le fichier selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète de l'entrée $next_id..."
+      kb_generate_entry "$KB_FILE" "$next_id" "$subject" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure d'entrée à compléter..."
+      kb_generate_entry "$KB_FILE" "$next_id" "$subject" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale..."
+      kb_generate_entry "$KB_FILE" "$next_id" "$subject" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "KB_ADD" "Ajout KB: $subject" "$next_id dans KNOWLEDGE-BASE.md"
+  fi
+
+  echo ""
+  echo "✅ Entrée $next_id ajoutée avec succès !"
+  echo "📍 Fichier: $KB_FILE"
+  echo ""
+  echo "📚 Prochaines étapes:"
+  echo "  1. Compléter l'analyse d'impact"
+  echo "  2. Préciser la recommandation actionnable"
+  echo "  3. Valider avec Human_Developer"
+  echo "  4. Commit: git commit -m \"docs(kb): add $next_id - $subject\""
+  echo ""
+  echo "🧠 RAPPEL: Capitalisation des apprentissages !"
+}
+
+# Sous-commande: kb update (placeholder)
+kb_update() {
+  local kb_id="$1"
+  
+  if [ -z "$kb_id" ]; then
+    echo "Erreur : ID de l'entrée requis." >&2
+    echo "Usage: aklo kb update <KB-ID>"
+    exit 1
+  fi
+
+  echo "🔧 Mise à jour de l'entrée $kb_id"
+  echo "📝 Fonctionnalité en cours de développement..."
+  echo ""
+  echo "💡 Pour l'instant, éditez manuellement le fichier:"
+  echo "   $(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.md")"
+}
+
+# Génération d'entrée KB
+kb_generate_entry() {
+  local file="$1"
+  local kb_id="$2"
+  local subject="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Créer le fichier de base s'il n'existe pas
+  if [ ! -f "$file" ]; then
+    cat > "$file" << 'EOF'
+# BASE DE CONNAISSANCES DU PROJET
+---
+*Ce document est la source de vérité pour les décisions techniques récurrentes et les leçons apprises. Il doit être consulté avant toute décision d'architecture ou de choix de dépendance.*
+
+---
+EOF
+  fi
+
+  # Template d'entrée selon le niveau d'assistance
+  case "$assistance_level" in
+    "full")
+      cat >> "$file" << EOF
+## ID: $kb_id
+**Sujet:** $subject
+**Statut:** Actif
+**Date d'ajout:** $date
+**Source:** [À compléter - lien vers l'artefact source]
+
+#### Connaissance
+[Décrire la connaissance critique acquise - que s'est-il passé ?]
+
+#### Analyse d'Impact
+- **Impact Direct :** [Comment cela affecte-t-il le projet actuellement ?]
+- **Risque :** [Quel risque si cette connaissance n'est pas appliquée ?]
+
+#### Recommandation Actionnable
+1. **ACTION 1 :** [Que faut-il faire concrètement ?]
+2. **ACTION 2 :** [Autre action recommandée]
+3. **VALIDATION :** [Comment valider que la recommandation est suivie ?]
+
+---
+EOF
+      ;;
+    "skeleton")
+      cat >> "$file" << EOF
+## ID: $kb_id
+**Sujet:** $subject
+**Statut:** Actif
+**Date d'ajout:** $date
+**Source:** [À compléter]
+
+#### Connaissance
+[À compléter]
+
+#### Analyse d'Impact
+- **Impact Direct :** [À compléter]
+- **Risque :** [À compléter]
+
+#### Recommandation Actionnable
+1. [À compléter]
+
+---
+EOF
+      ;;
+    "minimal")
+      cat >> "$file" << EOF
+## ID: $kb_id
+**Sujet:** $subject
+**Date d'ajout:** $date
+
+[À compléter]
+
+---
+EOF
+      ;;
+     esac
+}
+
+# Commande: fast - Fast Track
+command_fast() {
+  local task="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$task" in
+    "--help"|"help"|"")
+      echo "Usage: aklo fast \"<tâche>\" [--skip-validation]"
+      echo ""
+      echo "Procédure accélérée selon le protocole FAST-TRACK."
+      echo ""
+      echo "Arguments:"
+      echo "  task         Description de la tâche mineure (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --skip-validation  Validation minimale (à utiliser avec précaution)"
+      echo "  --no-agent         Assistance minimale (skeleton)"
+      echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo fast \"Corriger faute de frappe dans le titre\""
+      echo "  aklo fast \"Ajuster couleur du bouton principal\""
+      echo "  aklo fast \"Mettre à jour version dans package.json\""
+      echo ""
+      echo "Workflow Fast-Track:"
+      echo "  1. Initialisation par Human_Developer"
+      echo "  2. Implémentation rapide par AI_Agent"
+      echo "  3. Validation minimale"
+      echo "  4. Commit sémantique et finalisation"
+      echo ""
+      echo "Statuts:"
+      echo "  TODO - Tâche définie, prête à être exécutée"
+      echo "  DONE - Diff validé, commit créé"
+      echo ""
+      echo "Critères Fast-Track:"
+      echo "  • Modification mineure à faible risque"
+      echo "  • Pas d'impact sur la logique métier"
+      echo "  • Ne justifie pas un cycle PBI -> TASK complet"
+      echo ""
+      echo "⚡ PRINCIPE: Rapidité avec traçabilité complète"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local skip_validation=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --skip-validation)
+            skip_validation=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$task" ]; then
+    echo "Erreur : Description de la tâche fast-track requise." >&2
+    echo "Utilisez 'aklo fast --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID fast-track
+  FAST_DIR="./$(get_config "FAST_DIR" || echo "docs/backlog/17-fast-track")"
+  mkdir -p "$FAST_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  fast_id=$(detect_id_pattern "20-FAST-TRACK" "$task")
+  FAST_FILE="${FAST_DIR}/FAST-${fast_id}-TODO.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "⚡ Création de la tâche fast-track FAST-${fast_id}"
+  echo "🎯 Tâche: $task"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole FAST-TRACK..."
+      generate_fast_from_protocol "$FAST_FILE" "$fast_id" "$task" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_fast_from_protocol "$FAST_FILE" "$fast_id" "$task" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_fast_from_protocol "$FAST_FILE" "$fast_id" "$task" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "FAST" "Fast-track: $task" "FAST-${fast_id}-TODO.md"
+  fi
+
+  echo ""
+  echo "✅ FAST-${fast_id}-TODO.md créé avec succès !"
+  echo "📍 Fichier: $FAST_FILE"
+  echo ""
+  echo "⚡ Prochaines étapes (fast-track):"
+  echo "  1. Créer une branche: git checkout -b fast/$(echo "$fast_id" | tr '[:upper:]' '[:lower:]')"
+  echo "  2. Implémenter la modification"
+  echo "  3. Compléter le diff proposé dans l'artefact"
+  echo "  4. Valider avec Human_Developer"
+  echo "  5. Commit sémantique et merge"
+  echo ""
+  echo "🚀 RAPPEL: Rapidité avec traçabilité complète !"
+}
+
+# Commande: meta - Meta Improvement
+command_meta() {
+  local improvement="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$improvement" in
+    "--help"|"help"|"")
+      echo "Usage: aklo meta \"<amélioration>\" [--analyze]"
+      echo ""
+      echo "Amélioration de la charte selon le protocole META-IMPROVEMENT."
+      echo ""
+      echo "Arguments:"
+      echo "  improvement  Description de l'amélioration proposée (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --analyze      Mode analyse d'impact détaillée"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo meta \"Simplifier le protocole DEBUG pour les bugs évidents\""
+      echo "  aklo meta \"Ajouter support pour les tests automatisés\" --analyze"
+      echo "  aklo meta \"Améliorer la traçabilité des PBI\""
+      echo ""
+      echo "Workflow Meta-Improvement:"
+      echo "  1. Identification d'une friction"
+      echo "  2. Validation de la proposition"
+      echo "  3. Implémentation des modifications"
+      echo "  4. Finalisation et commit de la charte"
+      echo ""
+      echo "Statuts:"
+      echo "  PROPOSED    - Proposition rédigée, en attente de discussion"
+      echo "  ACCEPTED    - Proposition validée, prête pour implémentation"
+      echo "  IMPLEMENTED - Charte mise à jour"
+      echo ""
+      echo "Livrables:"
+      echo "  • Proposition d'amélioration détaillée"
+      echo "  • Mise à jour de la charte (commit)"
+      echo "  • Analyse d'impact sur les autres protocoles"
+      echo ""
+      echo "🔄 PRINCIPE: Évolution continue de la charte"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local analyze_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --analyze)
+            analyze_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$improvement" ]; then
+    echo "Erreur : Description de l'amélioration requise." >&2
+    echo "Utilisez 'aklo meta --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID meta-improvement
+  META_DIR="./$(get_config "META_DIR" || echo "docs/backlog/18-improvements")"
+  mkdir -p "$META_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  meta_id=$(detect_id_pattern "21-META-IMPROVEMENT" "$improvement")
+  META_FILE="${META_DIR}/IMPROVE-${meta_id}-PROPOSED.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "🔄 Création de la proposition d'amélioration IMPROVE-${meta_id}"
+  echo "🎯 Amélioration: $improvement"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole META-IMPROVEMENT..."
+      generate_meta_from_protocol "$META_FILE" "$meta_id" "$improvement" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_meta_from_protocol "$META_FILE" "$meta_id" "$improvement" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_meta_from_protocol "$META_FILE" "$meta_id" "$improvement" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "META" "Meta-improvement: $improvement" "IMPROVE-${meta_id}-PROPOSED.md"
+  fi
+
+  echo ""
+  echo "✅ IMPROVE-${meta_id}-PROPOSED.md créé avec succès !"
+  echo "📍 Fichier: $META_FILE"
+  echo ""
+  echo "🔄 Prochaines étapes (meta-improvement):"
+  echo "  1. Analyser la friction observée en détail"
+  echo "  2. Évaluer l'impact sur les autres protocoles"
+  echo "  3. Proposer une solution claire et mesurable"
+  echo "  4. Soumettre pour validation Human_Developer"
+  echo "  5. Implémenter les modifications de la charte"
+  echo ""
+  echo "📈 RAPPEL: Évolution continue de la charte !"
+}
+
 # Fonction de génération OPTIM - Parser dynamique du protocole OPTIMISATION
 generate_debug_from_protocol() {
   local file="$1"
@@ -2784,6 +3836,126 @@ generate_docs_from_protocol() {
   fi
 }
 
+generate_analysis_from_protocol() {
+  local file="$1"
+  local analysis_id="$2"
+  local subject="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="analysis_id:${analysis_id},subject:${subject},date:${date},status:ANALYSIS"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "12-ANALYSE-CONCURRENCE" "COMPETITION" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération COMPETITION depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole ANALYSE-CONCURRENCE" >&2
+    return 1
+  fi
+}
+
+generate_tracking_from_protocol() {
+  local file="$1"
+  local tracking_id="$2"
+  local feature_id="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="tracking_id:${tracking_id},feature_id:${feature_id},date:${date},status:DRAFT"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "16-TRACKING-PLAN" "TRACKING-PLAN" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération TRACKING-PLAN depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole TRACKING-PLAN" >&2
+    return 1
+  fi
+}
+
+generate_onboarding_from_protocol() {
+  local file="$1"
+  local onboarding_id="$2"
+  local user_role="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="onboarding_id:${onboarding_id},user_role:${user_role},date:${date}"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "14-ONBOARDING" "ONBOARDING" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération ONBOARDING depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole ONBOARDING" >&2
+    return 1
+  fi
+}
+
+generate_deprecation_from_protocol() {
+  local file="$1"
+  local deprecation_id="$2"
+  local feature="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="deprecation_id:${deprecation_id},feature:${feature},date:${date},status:ANALYSIS"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "15-DEPRECATION" "DEPRECATION" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération DEPRECATION depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole DEPRECATION" >&2
+    return 1
+  fi
+}
+
+generate_fast_from_protocol() {
+  local file="$1"
+  local fast_id="$2"
+  local task="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="fast_id:${fast_id},task:${task},date:${date},status:TODO"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "20-FAST-TRACK" "FAST-TRACK" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération FAST-TRACK depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole FAST-TRACK" >&2
+    return 1
+  fi
+}
+
+generate_meta_from_protocol() {
+  local file="$1"
+  local meta_id="$2"
+  local improvement="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="meta_id:${meta_id},improvement:${improvement},date:${date},status:PROPOSED"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "21-META-IMPROVEMENT" "META-IMPROVEMENT" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération META-IMPROVEMENT depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole META-IMPROVEMENT" >&2
+    return 1
+  fi
+}
+
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
@@ -2820,6 +3992,15 @@ show_help() {
   echo "  diagnose [\"<erreur>\"] [--interactive] Diagnostic d'environnement"
   echo "  experiment \"<hypothèse>\" [--ab-test] Expérimentation A/B"
   echo "  docs \"<sujet>\" [--guide]            Documentation utilisateur"
+  echo ""
+  echo "🔍 COMMANDES ANALYSE:"
+  echo "  analyze \"<sujet>\" [--features]       Analyse de la concurrence"
+  echo "  track <PBI_ID> [--plan]               Plan de tracking"
+  echo "  onboard [<role>] [--role]             Onboarding de projet"
+  echo "  deprecate \"<feature>\" [--timeline]   Dépréciation de fonctionnalité"
+  echo "  kb <action> [args]                    Knowledge base (search/add)"
+  echo "  fast \"<tâche>\" [--skip-validation]   Procédure accélérée"
+  echo "  meta \"<amélioration>\" [--analyze]    Amélioration de la charte"
   echo ""
   echo "📚 AIDE ET INFORMATION:"
   echo "  help                                Affiche cette aide"
@@ -2922,6 +4103,34 @@ case "${1:-help}" in
   "docs")
     shift
     command_docs "$@"
+    ;;
+  "analyze")
+    shift
+    command_analyze "$@"
+    ;;
+  "track")
+    shift
+    command_track "$@"
+    ;;
+  "onboard")
+    shift
+    command_onboard "$@"
+    ;;
+  "deprecate")
+    shift
+    command_deprecate "$@"
+    ;;
+  "kb")
+    shift
+    command_kb "$@"
+    ;;
+  "fast")
+    shift
+    command_fast "$@"
+    ;;
+  "meta")
+    shift
+    command_meta "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
