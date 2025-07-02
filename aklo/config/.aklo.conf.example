@@ -1,211 +1,62 @@
-# Configuration Aklo - Commits Atomiques par Protocole
+# Configuration Aklo - Template de configuration projet
 # 
-# Ce fichier définit le comportement des commandes aklo pour votre projet.
-# Copiez ce fichier vers .aklo.conf à la racine de votre projet et adaptez-le.
-#
-# 📖 PRINCIPE FONDAMENTAL (META-IMPROVEMENT workflow-consistency-20250102) :
-# Un protocole = Un commit atomique incluant artefact principal + connexes + journal
-#
-# 🎯 UTILISATION :
+# Ce fichier sert de template pour la configuration personnalisée d'un projet.
+# Copiez ce fichier à la racine de votre projet et adaptez selon vos besoins :
+# 
 # cp aklo/config/.aklo.conf.example .aklo.conf
-# aklo plan 42              # Utilise la configuration du projet
-# aklo plan 42 --no-agent   # Override vers mode skeleton
+# (puis modifiez les valeurs selon votre projet)
 
 #==============================================================================
-# SECTION 1 : AUTOMATISATION INTELLIGENTE
+# CONFIGURATION PROJET
 #==============================================================================
 
-# 🤖 Niveau d'assistance de l'IA pour la génération de contenu
-# 
-# full     : Génération complète du contenu par l'IA (recommandé pour débuter)
-#            → Contenu détaillé, sections remplies, critères d'acceptation générés
-#            → Journal détaillé avec contexte et décisions
-#            → Idéal pour : nouveaux projets, prototypage rapide
-#
-# skeleton : Structure et sections vides à compléter manuellement  
-#            → Fichiers créés avec en-têtes et structure correcte
-#            → Contenu à remplir par l'humain
-#            → Idéal pour : projets matures, contrôle précis du contenu
-#
-# minimal  : Fichiers avec IDs/nommage uniquement (niveau expert)
-#            → Création des fichiers avec métadonnées de base uniquement
-#            → Tout le contenu à créer manuellement
-#            → Idéal pour : utilisateurs expérimentés, workflows spécifiques
+# Assistance IA par défaut
 AGENT_ASSISTANCE=full
-
-# 📝 Mise à jour automatique du journal lors des opérations
-# 
-# true  : Journal mis à jour automatiquement dans chaque commit atomique (recommandé)
-#         → Traçabilité complète des actions et décisions
-#         → Historique détaillé pour reprise de contexte
-#         → Respect du principe des commits atomiques
-#
-# false : Pas de mise à jour automatique du journal
-#         → Mise à jour manuelle requise
-#         → Risque d'oubli et de perte de traçabilité
 AUTO_JOURNAL=true
 
-#==============================================================================
-# SECTION 2 : CONFIGURATION GIT ET VERSIONING
-#==============================================================================
-
-# 🌿 Branches principales du projet
-# Adaptez selon votre workflow Git (main/master, develop, etc.)
+# Configuration Git (adaptez selon votre projet)
 MAIN_BRANCH=main
 PRODUCTION_BRANCH=main
-
-# 🚀 Configuration des releases
-# USE_RELEASE_BRANCHES=true  → Utilise des branches release/x.y.z temporaires
-# USE_RELEASE_BRANCHES=false → Release directement depuis la branche principale
 USE_RELEASE_BRANCHES=false
-
-# Format des branches de release (si USE_RELEASE_BRANCHES=true)
-# %s sera remplacé par le numéro de version (ex: release/1.2.0)
 RELEASE_BRANCH_FORMAT=release/%s
-
-# 🏷️ Format des tags Git pour les releases
-# %s sera remplacé par le numéro de version (ex: v1.2.0)
 GIT_TAG_FORMAT=v%s
 
-#==============================================================================
-# SECTION 3 : STRUCTURE DES ARTEFACTS
-#==============================================================================
+# Structure d'artefacts (adaptez les chemins selon votre organisation)
+PROJECT_WORKDIR=/path/to/your/project
+PBI_DIR=docs/backlog/00-pbi
+TASKS_DIR=docs/backlog/01-tasks
+ARCH_DIR=docs/backlog/02-architecture
+DEBUG_DIR=docs/backlog/03-debug
+REVIEWS_DIR=docs/backlog/03-reviews
+REFACTOR_DIR=docs/backlog/05-refactor
+OPTIM_DIR=docs/backlog/06-optim
+RELEASES_DIR=docs/backlog/07-releases
+EXPERIMENTS_DIR=docs/backlog/09-experiments
+COMPETITION_DIR=docs/backlog/10-competition
+SECURITY_DIR=docs/backlog/11-security
+DEPRECATION_DIR=docs/backlog/12-deprecations
+KB_FILE=docs/KNOWLEDGE-BASE.md
+ONBOARDING_DIR=docs/project
+TRACKING_DIR=docs/backlog/13-tracking
+USER_DOCS_DIR=docs/backlog/14-user-docs
+FAST_DIR=docs/backlog/17-fast-track
+META_DIR=docs/backlog/18-improvements
+HOTFIX_DIR=docs/backlog/08-hotfixes
+JOURNAL_DIR=docs/backlog/15-journal
+SCRATCHPAD_DIR=docs/backlog/16-scratchpads
 
-# 📁 Répertoire racine du projet 
-# Laissez vide pour détection automatique depuis le répertoire courant
-PROJECT_WORKDIR=
-
-# 📋 Chemins relatifs des répertoires d'artefacts
-# Adaptez selon l'organisation de votre projet
-# Structure recommandée par la Charte Aklo :
-PBI_DIR=docs/backlog/00-pbi                    # Product Backlog Items
-TASKS_DIR=docs/backlog/01-tasks                # Tâches techniques
-ARCH_DIR=docs/backlog/02-architecture          # Documents d'architecture
-RELEASES_DIR=docs/backlog/07-releases          # Rapports de release
-JOURNAL_DIR=docs/backlog/15-journal            # Journal quotidien (commits atomiques)
-SCRATCHPAD_DIR=docs/backlog/16-scratchpads     # Brouillons (hors Git, voir .gitignore)
-
-#==============================================================================
-# SECTION 4 : VALIDATION ET QUALITÉ
-#==============================================================================
-
-# ✅ Validations automatiques avant commits atomiques
-# Recommandé : activez toutes les validations pour garantir la qualité
-VALIDATE_LINTER=true    # Vérification du style de code
-VALIDATE_TESTS=true     # Exécution de la suite de tests
-VALIDATE_BUILD=true     # Validation du build de production
-
-# 🛠️ Commandes spécifiques selon votre stack technique
-# Adaptez ces commandes à votre environnement :
-# 
-# JavaScript/Node.js :
+# Validation de base (adaptez selon vos outils)
+VALIDATE_LINTER=true
+VALIDATE_TESTS=true
+VALIDATE_BUILD=true
 LINTER_COMMAND=npm run lint
 TEST_COMMAND=npm test
 BUILD_COMMAND=npm run build
-#
-# Python :
-# LINTER_COMMAND=flake8 .
-# TEST_COMMAND=pytest
-# BUILD_COMMAND=python setup.py build
-#
-# Go :
-# LINTER_COMMAND=golangci-lint run
-# TEST_COMMAND=go test ./...
-# BUILD_COMMAND=go build
 
-#==============================================================================
-# SECTION 5 : INTÉGRATION MCP
-#==============================================================================
-
-# Utilisation des serveurs MCP pour l'automatisation avancée
+# MCP et sécurité
 USE_MCP_SERVERS=true
-
-# Serveurs MCP disponibles
 MCP_TERMINAL_SERVER=@aklo/mcp-terminal
 MCP_DOCUMENTATION_SERVER=@aklo/mcp-documentation
-
-# Timeout pour les opérations MCP (en millisecondes)
 MCP_TIMEOUT=30000
-
-#==============================================================================
-# SECTION 6 : PERSONNALISATION PAR PROTOCOLE
-#==============================================================================
-
-# Configuration spécifique pour le protocole PLANIFICATION
-PLANNING_DEFAULT_ASSISTANCE=full
-PLANNING_AUTO_ARCH_DETECTION=true
-
-# Configuration spécifique pour le protocole DÉVELOPPEMENT
-DEV_AUTO_TESTS=true
-DEV_AUTO_LINTING=true
-
-# Configuration spécifique pour le protocole RELEASE
-RELEASE_AUTO_CHANGELOG=true
-RELEASE_REQUIRE_TESTS=true
-
-#==============================================================================
-# SECTION 7 : SÉCURITÉ ET RESTRICTIONS
-#==============================================================================
-
-# Restrictions de sécurité
-ALLOW_FORCE_PUSH=false
-REQUIRE_SIGNED_COMMITS=false
-
-# Validation obligatoire avant commits atomiques
 REQUIRE_HUMAN_VALIDATION=true
-
-# Sauvegarde automatique avant opérations destructrices
 AUTO_BACKUP=true
-
-#==============================================================================
-# EXEMPLES DE CONFIGURATIONS PAR TYPE DE PROJET
-#==============================================================================
-
-# 🚀 PROJET PROTOTYPE / EXPLORATION RAPIDE :
-# AGENT_ASSISTANCE=full
-# AUTO_JOURNAL=true
-# VALIDATE_LINTER=false
-# VALIDATE_TESTS=false
-
-# 🏭 PROJET PRODUCTION / ÉQUIPE :
-# AGENT_ASSISTANCE=skeleton
-# AUTO_JOURNAL=true
-# VALIDATE_LINTER=true
-# VALIDATE_TESTS=true
-# REQUIRE_HUMAN_VALIDATION=true
-
-# 🎯 PROJET PERSONNEL / CONTRÔLE TOTAL :
-# AGENT_ASSISTANCE=minimal
-# AUTO_JOURNAL=false
-# USE_MCP_SERVERS=false
-
-# 📚 PROJET DOCUMENTATION / CONTENU :
-# AGENT_ASSISTANCE=full
-# AUTO_JOURNAL=true
-# VALIDATE_BUILD=false
-# VALIDATE_TESTS=false
-
-#==============================================================================
-# AIDE-MÉMOIRE DES COMMANDES
-#==============================================================================
-
-# 📋 PLANIFICATION :
-# aklo plan 42              # Mode full avec journal
-# aklo plan 42 --no-agent   # Mode skeleton avec journal  
-# aklo plan 42 --no-journal # Mode full sans journal
-
-# 🚀 RELEASE :
-# aklo release patch        # 1.0.0 → 1.0.1
-# aklo release minor        # 1.0.1 → 1.1.0  
-# aklo release major        # 1.1.0 → 2.0.0
-
-# 📝 WORKFLOW COMMITS ATOMIQUES :
-# 1. Un protocole = Un commit atomique
-# 2. Commit inclut : artefact principal + connexes + journal
-# 3. Validation humaine obligatoire avant commit
-# 4. Message standardisé selon le protocole
-
-# 🔧 CONFIGURATION :
-# cp aklo/config/.aklo.conf.example .aklo.conf
-# vim .aklo.conf            # Adapter à votre projet
-# aklo help                 # Voir toutes les commandes
