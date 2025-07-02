@@ -110,12 +110,12 @@ validate_config() {
     log_step "Correction des permissions des scripts"
     
     # Corriger les permissions avant la validation
-    local fix_script="$SCRIPT_DIR/../../fix-permissions.sh"
+    local fix_script="$SCRIPT_DIR/../../bin/fix-permissions.sh"
     if [ -f "$fix_script" ]; then
         "$fix_script" --fix > /dev/null 2>&1 || true
         log_success "Permissions des scripts corrigées"
     else
-        log_warning "Script fix-permissions.sh non trouvé"
+        log_warning "Script bin/fix-permissions.sh non trouvé"
     fi
     
     log_step "Validation de la configuration"

@@ -115,6 +115,74 @@ wait_for_servers() {
     log_info "Ils redémarreront au prochain appel MCP"
 }
 
+# Fonction de health-check des serveurs MCP
+health_check_servers() {
+    log_step "Vérification de l'état de santé des serveurs..."
+    
+    # Détecter quel type de serveurs est utilisé
+    local using_node=false
+    local using_shell=false
+    
+    # Vérification des processus Node.js
+    local doc_node_process=$(ps aux | grep "documentation/index.js" | grep -v grep | wc -l | tr -d ' ')
+    local term_node_process=$(ps aux | grep "terminal/index.js" | grep -v grep | wc -l | tr -d ' ')
+    
+    # Vérification des processus Shell
+    local doc_shell_process=$(ps aux | grep "aklo-documentation.sh" | grep -v grep | wc -l | tr -d ' ')
+    local term_shell_process=$(ps aux | grep "aklo-terminal.sh" | grep -v grep | wc -l | tr -d ' ')
+    
+    # Déterminer l'approche utilisée
+    if [ "$doc_node_process" -gt 0 ] || [ "$term_node_process" -gt 0 ]; then
+        using_node=true
+        log_info "🟢 Mode détecté: Node.js (fonctionnalités complètes)"
+    fi
+    
+    if [ "$doc_shell_process" -gt 0 ] || [ "$term_shell_process" -gt 0 ]; then
+        using_shell=true
+        log_info "🟡 Mode détecté: Shell/Bash (fallback, fonctionnalités limitées)"
+    fi
+    
+    # Rapport détaillé par approche
+    if [ "$using_node" = true ]; then
+        log_info "📊 Serveurs Node.js:"
+        if [ "$doc_node_process" -gt 0 ]; then
+            log_success "  • Documentation: Processus actif (7 outils + server_info)"
+        else
+            log_info "  • Documentation: Sera démarré au prochain appel MCP"
+        fi
+        
+        if [ "$term_node_process" -gt 0 ]; then
+            log_success "  • Terminal: Processus actif (4 outils)"
+        else
+            log_info "  • Terminal: Sera démarré au prochain appel MCP"
+        fi
+        
+        log_info "  💡 Test connectivité: Utilisez 'server_info' dans Cursor"
+    fi
+    
+    if [ "$using_shell" = true ]; then
+        log_info "📊 Serveurs Shell:"
+        if [ "$doc_shell_process" -gt 0 ]; then
+            log_success "  • Documentation: Processus actif (3 outils basiques)"
+        else
+            log_info "  • Documentation: Sera démarré au prochain appel MCP"
+        fi
+        
+        if [ "$term_shell_process" -gt 0 ]; then
+            log_success "  • Terminal: Processus actif (outils basiques)"
+        else
+            log_info "  • Terminal: Sera démarré au prochain appel MCP"
+        fi
+        
+        log_warning "  ⚠️  Mode shell: Pas de server_info, fonctionnalités limitées"
+    fi
+    
+    if [ "$using_node" = false ] && [ "$using_shell" = false ]; then
+        log_info "💤 Aucun serveur MCP actif (démarrage à la demande)"
+        log_info "   Ils se lanceront automatiquement au premier appel MCP"
+    fi
+}
+
 # Fonction principale
 main() {
     show_banner
@@ -129,10 +197,20 @@ main() {
     kill_mcp_processes
     check_servers_status
     wait_for_servers
+    health_check_servers
     
     echo ""
     log_success "Redémarrage terminé !"
     log_info "Les serveurs MCP utiliseront maintenant le code modifié"
+    
+    # Avertissement important pour Cursor
+    echo ""
+    echo -e "${RED}⚠️  IMPORTANT - RECONNEXION CURSOR${NC}"
+    echo -e "${YELLOW}Cursor ne détecte pas automatiquement le redémarrage des serveurs MCP.${NC}"
+    echo -e "${YELLOW}Pour rétablir la connexion MCP :${NC}"
+    echo -e "  1. ${CYAN}Fermer Cursor complètement${NC} (⌘+Q sur Mac)"
+    echo -e "  2. ${CYAN}Rouvrir Cursor${NC}"
+    echo -e "  3. ${GREEN}Les outils MCP fonctionneront à nouveau${NC}"
     
     # Conseil pour éviter le problème à l'avenir
     echo ""

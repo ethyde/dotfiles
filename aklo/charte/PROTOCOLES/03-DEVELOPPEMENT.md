@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:33
-modified: 2025-06-28 12:30
----
-
 # PROTOCOLE SPÉCIFIQUE : DÉVELOPPEMENT ET IMPLÉMENTATION
 
 Ce protocole s'active pour chaque `Task` individuelle (`Status = TODO`). Il régit la manière dont le code est écrit, testé et documenté. C'est la source de vérité unique pour toutes les normes de qualité du code.
@@ -43,9 +38,48 @@ Toutes les règles suivantes doivent être respectées.
 - **Format JSDoc/TSDoc :** Chaque fonction, méthode, classe, type ou interface exporté doit être précédé d'un bloc de commentaires complet.
 - **Contenu :** La documentation doit expliquer le **rôle** de l'élément (`@description`), chaque **paramètre** (`@param`) et la **valeur de retour** (`@returns`).
 
-## SECTION 3 : PROCÉDURE D'IMPLÉMENTATION (CYCLE TDD)
+## SECTION 3 : PROCÉDURE DE DÉVELOPPEMENT TDD
 
 L'implémentation de toute fonctionnalité doit suivre ce micro-cycle itératif.
+
+**🛫 PLAN DE VOL DEVELOPPEMENT (Obligatoire avant Prérequis)**
+
+Avant tout développement de code, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_DEVELOPPEMENT]**
+**Objectif :** Implémenter une Task selon la méthodologie TDD (Test-Driven Development)
+**Actions prévues :**
+1. Création de la branche Git selon format `feature/task-[PBI_ID]-[Task_ID]`
+2. Mise à jour du statut Task de `TODO` à `IN_PROGRESS`
+3. Cycle TDD pour chaque fonctionnalité :
+   - Écriture de tests unitaires (RED)
+   - Implémentation du code minimum (GREEN)
+   - Refactorisation et validation qualité (BLUE)
+4. Validation complète de la "Definition of Done"
+5. Préparation du diff pour revue
+6. Commit atomique et sémantique après approbation
+
+**Fichiers affectés :**
+- `/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.md` → `IN_PROGRESS` → `AWAITING_REVIEW` → `DONE`
+- Fichiers de code source selon spécifications de la Task
+- Fichiers de tests unitaires correspondants
+- Possibles fichiers de documentation/docstring
+
+**Commandes système :**
+- `git checkout -b feature/task-[PBI_ID]-[Task_ID]` : création branche
+- `aklo start-task [ID]` : automatisation démarrage (optionnel)
+- Exécution de tests : `npm test`, `pytest`, etc.
+- Validation linter et typage selon stack technique
+- `aklo submit-task` : automatisation soumission (optionnel)
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_read_file` : lire spécifications Task
+- `mcp_desktop-commander_edit_block` : modifier code source et tests
+- `mcp_desktop-commander_move_file` : renommer fichier Task (changement statut)
+- `mcp_desktop-commander_execute_command` : tests, linter, git
+- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant développement
 
 **Prérequis : Préparation de l'environnement**
     - **Action Requise :** Avant de commencer, créer une branche Git qui respecte le format défini dans l'en-tête de la `TASK`, puis renommer le fichier de l'artefact `TASK` pour changer son statut de `TODO` à `IN_PROGRESS`.

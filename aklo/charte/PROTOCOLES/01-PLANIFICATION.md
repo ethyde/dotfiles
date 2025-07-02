@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:23
-modified: 2025-06-28 14:45
----
-
 # PROTOCOLE SPÉCIFIQUE : PLANIFICATION ET DÉCOMPOSITION
 
 Ce protocole s'active après la validation d'un `PBI` (`Status = AGREED`). Il a pour mission de transformer l'exigence fonctionnelle en un plan d'action technique initial.
@@ -82,6 +77,36 @@ _Liste séquentielle et précise des actions que le protocole [DEVELOPPEMENT] de
 1. **[ANALYSE] Phase 1 : Appropriation du PBI**
    - Prendre en entrée un `PBI` avec le statut `AGREED`.
    - Analyser en profondeur les critères d'acceptation et les contraintes. Poser des questions de clarification au `Human_Developer` si nécessaire.
+
+**🛫 PLAN DE VOL PLANIFICATION (Obligatoire avant Phase 2)**
+
+Avant la décomposition et création des Tasks, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_PLANIFICATION]**
+**Objectif :** Décomposer un PBI en Tasks techniques atomiques et traçables
+**Actions prévues :**
+1. Analyse approfondie du PBI parent et de ses critères d'acceptation
+2. Identification des composants techniques à modifier/créer
+3. Décomposition en Tasks SMART (Spécifique, Mesurable, Atteignable, Réaliste, Temporellement défini)
+4. Génération des IDs séquentiels pour chaque Task du PBI
+5. Création des fichiers `TASK-[PBI_ID]-[Task_ID]-TODO.md` dans `/docs/backlog/01-tasks/`
+6. Évaluation du besoin de revue architecturale pour chaque Task
+
+**Fichiers affectés :**
+- `/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.md` : création (multiple)
+- `/docs/backlog/00-pbi/PBI-[PBI_ID]-AGREED.md` : mise à jour section "Tasks Associées"
+
+**Commandes système :**
+- `aklo plan [PBI_ID]` : automatisation de planification (optionnel)
+- Vérification des IDs Task existants pour ce PBI
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_list_directory` : vérifier Tasks existantes
+- `mcp_desktop-commander_read_file` : lire le PBI parent
+- `mcp_desktop-commander_write_file` : créer les fichiers Task
+- `mcp_aklo-terminal_aklo_execute` : commande aklo (si utilisée)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant création
 
 2. **[PROCEDURE] Phase 2 : Décomposition en Tâches**
    - Décomposer le `PBI` en une liste de `Tasks` techniques. Chaque `Task` doit être petite, indépendante et testable par rapport aux critères **SMART** :

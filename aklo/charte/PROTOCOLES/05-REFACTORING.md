@@ -1,8 +1,3 @@
----
-created: 2025-06-27 15:54
-modified: 2025-06-27 20:08
----
-
 # PROTOCOLE SPÉCIFIQUE : REFACTORING DE CODE
 
 Ce protocole s'active lorsqu'une portion de code existant est identifiée comme nécessitant une amélioration de sa structure interne sans modification de son comportement externe.
@@ -54,6 +49,42 @@ Améliorer la qualité interne du code (lisibilité, maintenabilité, performanc
 ```
 
 ## SECTION 3 : PROCÉDURE DE REFACTORING
+
+**🛫 PLAN DE VOL REFACTORING (Obligatoire avant Phase 1)**
+
+Avant tout refactoring de code, l'agent **doit** présenter un plan détaillé :
+
+**[PLAN_DE_VOL_REFACTORING]**
+**Objectif :** Améliorer la structure interne du code sans altérer son comportement externe
+**Actions prévues :**
+1. Génération de l'ID unique pour le rapport de refactoring
+2. Création du fichier `REFACTOR-[ID]-ANALYSIS.md` dans `/docs/backlog/05-refactor/`
+3. Diagnostic du "code smell" et identification du problème structurel
+4. Définition d'une stratégie de refactoring avec plan d'action détaillé
+5. Vérification obligatoire de la couverture de tests existante
+6. Écriture de tests manquants si nécessaire (via protocole DEVELOPPEMENT)
+7. Exécution du refactoring par micro-changements avec validation continue
+8. Validation de non-régression après chaque modification
+
+**Fichiers affectés :**
+- `/docs/backlog/05-refactor/REFACTOR-[ID]-ANALYSIS.md` → `REFACTORING` → `DONE`
+- Fichiers de code source à refactoriser
+- Possibles nouveaux fichiers de tests si couverture insuffisante
+- Fichiers de tests existants (validation de non-régression)
+
+**Commandes système :**
+- `aklo new refactor "<Titre>"` : automatisation création rapport (optionnel)
+- Exécution de la suite de tests avant/pendant/après refactoring
+- Outils d'analyse de couverture de code
+- Outils de linting et validation qualité
+
+**Outils MCP utilisés :**
+- `mcp_desktop-commander_write_file` : créer le rapport de refactoring
+- `mcp_desktop-commander_edit_block` : modifier code par micro-changements
+- `mcp_desktop-commander_execute_command` : tests et validation continue
+- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
+
+**Validation requise :** ✅ OUI - Attente approbation explicite avant refactoring
 
 1. **[ANALYSE] Phase 1 : Cadrage et Sécurisation**
     - **Action Requise :** Créer un fichier `REFACTOR-[ID]-ANALYSIS.md` dans `/docs/backlog/05-refactor/`.

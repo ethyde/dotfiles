@@ -10,14 +10,14 @@ Ce document explique le système de gestion automatique des permissions pour tou
 
 ## 🛠️ Solutions Implémentées
 
-### 1. Script Principal de Correction (`fix-permissions.sh`)
+### 1. Script Principal de Correction (`bin/fix-permissions.sh`)
 
 **Usage de base :**
 ```bash
-./fix-permissions.sh                # Corriger toutes les permissions
-./fix-permissions.sh --check        # Vérifier sans modifier
-./fix-permissions.sh --dry-run      # Voir ce qui serait corrigé
-./fix-permissions.sh --list         # Lister les répertoires critiques
+./bin/fix-permissions.sh                # Corriger toutes les permissions
+./bin/fix-permissions.sh --check        # Vérifier sans modifier
+./bin/fix-permissions.sh --dry-run      # Voir ce qui serait corrigé
+./bin/fix-permissions.sh --list         # Lister les répertoires critiques
 ```
 
 **Fonctionnalités :**
@@ -54,8 +54,8 @@ cd aklo/mcp-servers && ./setup-mcp.sh
 
 #### Installation du Hook
 ```bash
-./install-git-hooks.sh              # Installer les hooks
-./install-git-hooks.sh --uninstall  # Désinstaller les hooks
+./bin/install-git-hooks.sh              # Installer les hooks
+./bin/install-git-hooks.sh --uninstall  # Désinstaller les hooks
 ```
 
 #### Fonctionnement
