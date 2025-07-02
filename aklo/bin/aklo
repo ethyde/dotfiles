@@ -103,6 +103,22 @@ extract_artefact_structure() {
       start_pattern="### 2\.3\. Structure Obligatoire du Fichier Hotfix"
       end_pattern="^## SECTION 3"
       ;;
+    "OPTIM")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier Optim"
+      end_pattern="^## SECTION 3"
+      ;;
+    "AUDIT")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier d'Audit"
+      end_pattern="^## SECTION 3"
+      ;;
+    "EXPERIMENT")
+      start_pattern="### 2\.3\. Structure Obligatoire Du Fichier Experiment"
+      end_pattern="^## SECTION 3"
+      ;;
+    "USER-DOCS")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier de Documentation"
+      end_pattern="^## SECTION 3"
+      ;;
     *)
       echo "❌ Type d'artefact $artefact_type non supporté." >&2
       return 1
@@ -293,6 +309,28 @@ detect_id_pattern() {
       ;;
     "10-HOTFIX")
       # HOTFIX: description-slugifiée-YYYYMMDD (ex: bug-login-prod-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "06-OPTIMISATION")
+      # OPTIM: description-slugifiée-YYYYMMDD (ex: api-users-performance-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "13-SECURITE-AUDIT")
+      # AUDIT-SECURITY: YYYY-MM-DD (ex: 2025-06-28)
+      echo "$(date +%Y-%m-%d)"
+      ;;
+    "11-EXPERIMENTATION")
+      # EXPERIMENT: description-slugifiée-YYYYMMDD (ex: button-cta-color-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
+      ;;
+    "17-USER-DOCS")
+      # USER-DOCS: description-slugifiée-YYYYMMDD (ex: new-payment-feature-20250628)
       local date_id=$(date +%Y%m%d)
       local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
       echo "${title_slug}-${date_id}"
@@ -1873,7 +1911,713 @@ command_hotfix() {
   echo "⚡ RAPPEL: Planifier le post-mortem après stabilisation"
 }
 
-# Fonction de génération HOTFIX - Parser dynamique du protocole HOTFIX
+# Commande: optimize - Optimisation de performance
+command_optimize() {
+  local scope="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$scope" in
+    "--help"|"help"|"")
+      echo "Usage: aklo optimize \"<objectif de performance>\" [--profile]"
+      echo ""
+      echo "Optimisation de performance selon le protocole OPTIMISATION."
+      echo ""
+      echo "Arguments:"
+      echo "  objectif     Objectif de performance à atteindre (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --profile      Mode profiling avec outils d'analyse"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo optimize \"Réduire temps de réponse API users < 100ms\""
+      echo "  aklo optimize \"Optimiser consommation mémoire < 512MB\" --profile"
+      echo "  aklo optimize \"Accélérer rendu page d'accueil < 2s\""
+      echo ""
+      echo "Workflow scientifique:"
+      echo "  1. Définition objectif de performance chiffré"
+      echo "  2. Mise en place protocole de benchmark reproductible"
+      echo "  3. Mesure initiale des performances (baseline)"
+      echo "  4. Analyse scientifique du goulet d'étranglement"
+      echo "  5. Stratégie d'optimisation ciblée"
+      echo "  6. Implémentation et mesure finale"
+      echo ""
+      echo "Statuts:"
+      echo "  BENCHMARKING - Mesure et analyse en cours"
+      echo "  AWAITING_FIX - Solution proposée en attente de validation"
+      echo "  DONE         - Optimisation implémentée et validée"
+      echo ""
+      echo "🔬 PRINCIPE: Mesurer d'abord, optimiser ensuite"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local profile_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --profile)
+            profile_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$scope" ]; then
+    echo "Erreur : Objectif de performance requis." >&2
+    echo "Utilisez 'aklo optimize --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID d'optimisation
+  OPTIM_DIR="./$(get_config "OPTIM_DIR" || echo "docs/backlog/06-optim")"
+  mkdir -p "$OPTIM_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  optim_id=$(detect_id_pattern "06-OPTIMISATION" "$scope")
+  OPTIM_FILE="${OPTIM_DIR}/OPTIM-${optim_id}-BENCHMARKING.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "🔬 Création de l'optimisation OPTIM-${optim_id}"
+  echo "🎯 Objectif: $scope"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole OPTIMISATION..."
+      generate_optim_from_protocol "$OPTIM_FILE" "$optim_id" "$scope" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_optim_from_protocol "$OPTIM_FILE" "$optim_id" "$scope" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_optim_from_protocol "$OPTIM_FILE" "$optim_id" "$scope" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "OPTIM" "Optimisation: $scope" "OPTIM-${optim_id}-BENCHMARKING.md"
+  fi
+
+  echo ""
+  echo "✅ OPTIM-${optim_id}-BENCHMARKING.md créé avec succès !"
+  echo "📍 Fichier: $OPTIM_FILE"
+  echo ""
+  echo "🔬 Prochaines étapes (méthode scientifique):"
+  echo "  1. Définir la métrique ciblée avec objectif chiffré"
+  echo "  2. Mettre en place un protocole de benchmark reproductible"
+  echo "  3. Effectuer la mesure initiale (baseline)"
+  echo "  4. Analyser scientifiquement le goulet d'étranglement"
+  echo "  5. Proposer une stratégie d'optimisation ciblée"
+  echo "  6. Implémenter et mesurer l'amélioration"
+  echo ""
+  echo "📊 RAPPEL: Mesurer d'abord, optimiser ensuite !"
+}
+
+# Commande: security - Audit de sécurité
+command_security() {
+  local scope="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$scope" in
+    "--help"|"help"|"")
+      echo "Usage: aklo security [<périmètre>] [--scan-only]"
+      echo ""
+      echo "Audit de sécurité selon le protocole SECURITE-AUDIT."
+      echo ""
+      echo "Arguments:"
+      echo "  périmètre    Périmètre d'audit (optionnel, par défaut: complet)"
+      echo ""
+      echo "Options:"
+      echo "  --scan-only    Mode scan uniquement (sans triage)"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo security                                # Audit complet"
+      echo "  aklo security \"Dépendances NPM\"              # Audit ciblé"
+      echo "  aklo security \"API d'authentification\" --scan-only"
+      echo ""
+      echo "Workflow d'audit:"
+      echo "  1. Scan automatisé avec outils de sécurité"
+      echo "  2. Triage et analyse manuelle des vulnérabilités"
+      echo "  3. Évaluation de criticité et impact réel"
+      echo "  4. Plan d'action avec tasks/PBI de correction"
+      echo "  5. Validation et clôture de l'audit"
+      echo ""
+      echo "Statuts:"
+      echo "  SCANNING  - Analyse automatisée en cours"
+      echo "  TRIAGE    - Priorisation des vulnérabilités"
+      echo "  CONCLUDED - Audit terminé avec plan d'action"
+      echo ""
+      echo "🔒 PRINCIPE: Sécurité proactive et systématique"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local scan_only=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --scan-only)
+            scan_only=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  # Génération de l'ID d'audit de sécurité
+  SECURITY_DIR="./$(get_config "SECURITY_DIR" || echo "docs/backlog/11-security")"
+  mkdir -p "$SECURITY_DIR"
+
+  # Générer l'ID selon le protocole (YYYY-MM-DD)
+  audit_id=$(detect_id_pattern "13-SECURITE-AUDIT" "audit")
+  AUDIT_FILE="${SECURITY_DIR}/AUDIT-SECURITY-${audit_id}-SCANNING.md"
+  TODAY=$(date +%Y-%m-%d)
+  
+  # Définir le périmètre par défaut
+  if [ -z "$scope" ]; then
+    scope="Audit de sécurité complet"
+  fi
+
+  echo "🔒 Création de l'audit de sécurité AUDIT-SECURITY-${audit_id}"
+  echo "🎯 Périmètre: $scope"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole SECURITE-AUDIT..."
+      generate_security_from_protocol "$AUDIT_FILE" "$audit_id" "$scope" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_security_from_protocol "$AUDIT_FILE" "$audit_id" "$scope" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_security_from_protocol "$AUDIT_FILE" "$audit_id" "$scope" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "SECURITY" "Audit de sécurité: $scope" "AUDIT-SECURITY-${audit_id}-SCANNING.md"
+  fi
+
+  echo ""
+  echo "✅ AUDIT-SECURITY-${audit_id}-SCANNING.md créé avec succès !"
+  echo "📍 Fichier: $AUDIT_FILE"
+  echo ""
+  echo "🔒 Prochaines étapes (méthode systématique):"
+  echo "  1. Exécuter les outils d'analyse de sécurité automatisés"
+  echo "  2. Compiler les résultats bruts dans le rapport"
+  echo "  3. Effectuer le triage et l'analyse manuelle"
+  echo "  4. Évaluer l'impact réel et assigner les criticités"
+  echo "  5. Créer le plan d'action avec tasks/PBI de correction"
+  echo "  6. Valider et clôturer l'audit"
+  echo ""
+  echo "🛡️ RAPPEL: Sécurité proactive et systématique !"
+}
+
+# Commande: diagnose - Diagnostic de l'environnement
+command_diagnose() {
+  local error_msg="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$error_msg" in
+    "--help"|"help"|"")
+      echo "Usage: aklo diagnose [\"<message d'erreur>\"] [--interactive]"
+      echo ""
+      echo "Diagnostic d'environnement selon le protocole DIAGNOSTIC-ENV."
+      echo ""
+      echo "Arguments:"
+      echo "  erreur       Message d'erreur à diagnostiquer (optionnel)"
+      echo ""
+      echo "Options:"
+      echo "  --interactive  Mode interactif avec checklist guidée"
+      echo "  --no-agent     Assistance minimale (liste seule)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo diagnose                                    # Diagnostic général"
+      echo "  aklo diagnose \"npm error Tracker already exists\" # Erreur spécifique"
+      echo "  aklo diagnose \"Cannot find module 'X'\" --interactive"
+      echo ""
+      echo "Procédure de diagnostic:"
+      echo "  1. Halte et identification de l'erreur"
+      echo "  2. Consultation du catalogue des erreurs connues"
+      echo "  3. Application de la solution spécifique ou checklist générale"
+      echo "  4. Validation et correction de l'environnement"
+      echo ""
+      echo "Erreurs cataloguées:"
+      echo "  • npm error Tracker \"idealTree\" already exists"
+      echo "  • 'npm' is not recognized as internal command"
+      echo "  • Error: EPERM/EACCES permission denied"
+      echo "  • Error: Cannot find module 'X'"
+      echo ""
+      echo "🔧 PRINCIPE: Diagnostic systématique avant correction"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local interactive_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --interactive)
+            interactive_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  echo "🔧 Démarrage du diagnostic d'environnement"
+  if [ -n "$error_msg" ]; then
+    echo "🎯 Erreur rapportée: $error_msg"
+  else
+    echo "🎯 Mode: Diagnostic général de l'environnement"
+  fi
+  echo ""
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    local journal_msg="Diagnostic d'environnement"
+    if [ -n "$error_msg" ]; then
+      journal_msg="Diagnostic: $error_msg"
+    fi
+    update_journal "DIAGNOSE" "$journal_msg" "Diagnostic en cours"
+  fi
+
+  # Analyse de l'erreur selon le catalogue
+  echo "📋 ÉTAPE 1: Identification et classification de l'erreur"
+  echo ""
+  
+  local error_type="unknown"
+  local solution_found=false
+
+  if [ -n "$error_msg" ]; then
+    # Catalogue des erreurs connues
+    case "$error_msg" in
+      *"idealTree"*"already exists"*)
+        error_type="npm_tracker"
+        solution_found=true
+        echo "✅ ERREUR CATALOGUÉE: CAS N°1 - npm error Tracker 'idealTree' already exists"
+        echo ""
+        echo "🔍 DIAGNOSTIC:"
+        echo "   Conflit de processus npm ou exécution depuis un mauvais répertoire (WORKDIR)"
+        echo ""
+        echo "🛠️ PROCÉDURE DE RÉSOLUTION:"
+        echo "   1. Vérifier qu'aucun autre processus npm n'est en cours"
+        echo "   2. Forcer la re-validation du WORKDIR à la racine du projet"
+        echo "   3. Exécuter 'npm cache clean --force' depuis la racine"
+        echo "   4. Relancer la commande initiale"
+        ;;
+      *"npm"*"not recognized"*|*"npm"*"command not found"*)
+        error_type="npm_missing"
+        solution_found=true
+        echo "✅ ERREUR CATALOGUÉE: CAS N°2 - 'npm' is not recognized"
+        echo ""
+        echo "🔍 DIAGNOSTIC:"
+        echo "   Problème de variable d'environnement PATH. Node.js/npm non accessible"
+        echo ""
+        echo "🛠️ PROCÉDURE DE RÉSOLUTION:"
+        echo "   ❌ LIMITATION: Ce problème ne peut pas être résolu par l'agent"
+        echo "   📞 ACTION REQUISE: Informer le Human_Developer que l'environnement"
+        echo "      d'exécution est mal configuré et que la variable PATH doit être inspectée"
+        ;;
+      *"EPERM"*|*"EACCES"*|*"permission denied"*)
+        error_type="permission"
+        solution_found=true
+        echo "✅ ERREUR CATALOGUÉE: CAS N°3 - Error: EPERM/EACCES permission denied"
+        echo ""
+        echo "🔍 DIAGNOSTIC:"
+        echo "   Tentative d'écriture/modification sans droits nécessaires"
+        echo ""
+        echo "🛠️ PROCÉDURE DE RÉSOLUTION:"
+        echo "   1. Identifier précisément le fichier/dossier concerné"
+        echo "   📞 ACTION REQUISE: Informer le Human_Developer du problème"
+        echo "      de permission. Les permissions doivent être ajustées manuellement"
+        ;;
+      *"Cannot find module"*)
+        error_type="module_missing"
+        solution_found=true
+        echo "✅ ERREUR CATALOGUÉE: CAS N°4 - Error: Cannot find module"
+        echo ""
+        echo "🔍 DIAGNOSTIC:"
+        echo "   Commande lancée depuis un sous-répertoire au lieu de la racine,"
+        echo "   ou installation de dépendances corrompue"
+        echo ""
+        echo "🛠️ PROCÉDURE DE RÉSOLUTION:"
+        echo "   1. Forcer la re-validation du WORKDIR à la racine du projet"
+        echo "   2. Relancer la commande depuis cette racine"
+        echo "   3. Si l'erreur persiste: supprimer node_modules et package-lock.json"
+        echo "   4. Relancer 'npm install' depuis la racine"
+        ;;
+    esac
+  fi
+
+  if [ "$solution_found" = false ]; then
+    echo "❓ ERREUR NON CATALOGUÉE - Application de la checklist générale"
+    echo ""
+    echo "📋 ÉTAPE 3: Checklist de diagnostic de base"
+    echo ""
+    echo "🔍 1. VALIDATION DU RÉPERTOIRE DE TRAVAIL (WORKDIR):"
+    echo "   ⚠️  Cause la plus fréquente de problèmes"
+    echo "   📍 Répertoire actuel: $(pwd)"
+    echo "   ✅ Vérifier que toutes les commandes sont lancées depuis la racine absolue du projet"
+    echo ""
+    echo "🔍 2. VÉRIFICATION DES PERMISSIONS:"
+    if [ -n "$error_msg" ]; then
+      if echo "$error_msg" | grep -q -E "(EPERM|EACCES|permission)"; then
+        echo "   ❌ L'erreur indique un problème de permission"
+      else
+        echo "   ✅ Aucun indicateur de problème de permission détecté"
+      fi
+    else
+      echo "   ❓ Vérifier les permissions sur les fichiers/dossiers critiques"
+    fi
+    echo ""
+    echo "🔍 3. ÉTAT DES DÉPENDANCES:"
+    if [ -n "$error_msg" ]; then
+      if echo "$error_msg" | grep -q -E "(module|dependency|package)"; then
+        echo "   ❌ L'erreur semble liée aux dépendances/modules"
+      else
+        echo "   ✅ Aucun indicateur de problème de dépendances détecté"
+      fi
+    else
+      echo "   ❓ Vérifier l'état des node_modules et package-lock.json"
+    fi
+  fi
+
+  echo ""
+  echo "📋 ÉTAPE 4: Actions recommandées"
+  echo ""
+
+  case "$error_type" in
+    "npm_tracker")
+      echo "🚀 ACTIONS IMMÉDIATES:"
+      echo "   1. Vérifier les processus npm: ps aux | grep npm"
+      echo "   2. Valider le WORKDIR: cd \$(git rev-parse --show-toplevel)"
+      echo "   3. Nettoyer le cache: npm cache clean --force"
+      echo "   4. Relancer la commande originale"
+      ;;
+    "npm_missing")
+      echo "🚨 ESCALADE REQUISE:"
+      echo "   Configuration d'environnement requise par l'administrateur système"
+      ;;
+    "permission")
+      echo "🚨 ESCALADE REQUISE:"
+      echo "   Ajustement des permissions requis par l'administrateur système"
+      ;;
+    "module_missing")
+      echo "🚀 ACTIONS IMMÉDIATES:"
+      echo "   1. Valider le WORKDIR: cd \$(git rev-parse --show-toplevel)"
+      echo "   2. Relancer depuis la racine"
+      echo "   3. Si échec: rm -rf node_modules package-lock.json"
+      echo "   4. Réinstaller: npm install"
+      ;;
+    "unknown")
+      echo "🤔 DIAGNOSTIC MANUEL REQUIS:"
+      echo "   1. Corriger le WORKDIR si nécessaire"
+      echo "   2. Vérifier les permissions sur les ressources critiques"
+      echo "   3. Vérifier l'état des dépendances"
+      echo "   4. Présenter les résultats au Human_Developer"
+      ;;
+  esac
+
+  echo ""
+  echo "✅ Diagnostic d'environnement terminé"
+  echo "🔧 RAPPEL: Diagnostic systématique avant correction !"
+}
+
+# Commande: experiment - Gestion d'expérimentation A/B
+command_experiment() {
+  local hypothesis="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$hypothesis" in
+    "--help"|"help"|"")
+      echo "Usage: aklo experiment \"<hypothèse>\" [--ab-test]"
+      echo ""
+      echo "Gestion d'expérimentation A/B selon le protocole EXPERIMENTATION."
+      echo ""
+      echo "Arguments:"
+      echo "  hypothèse    Hypothèse à valider par expérimentation (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --ab-test      Mode A/B test complet avec métriques"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo experiment \"Bouton CTA rouge augmente conversion\""
+      echo "  aklo experiment \"Nouveau onboarding réduit churn\" --ab-test"
+      echo "  aklo experiment \"Feature X améliore engagement utilisateur\""
+      echo ""
+      echo "Workflow d'expérimentation:"
+      echo "  1. Planification et définition de l'hypothèse"
+      echo "  2. Implémentation technique (feature flags, tracking)"
+      echo "  3. Exécution et monitoring des métriques"
+      echo "  4. Analyse des résultats et significativité statistique"
+      echo "  5. Décision et clôture (généraliser ou abandonner)"
+      echo ""
+      echo "Statuts:"
+      echo "  PLANNING              - Définition hypothèse et métriques"
+      echo "  AWAITING_IMPLEMENTATION - Plan validé, en attente dev"
+      echo "  RUNNING               - Expérience en ligne collectant données"
+      echo "  COMPLETED             - Expérience terminée, en attente analyse"
+      echo "  CONCLUDED             - Analyse terminée avec décision prise"
+      echo ""
+      echo "🧪 PRINCIPE: Validation scientifique basée sur les données"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local ab_test_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --ab-test)
+            ab_test_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$hypothesis" ]; then
+    echo "Erreur : Hypothèse d'expérimentation requise." >&2
+    echo "Utilisez 'aklo experiment --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID d'expérimentation
+  EXPERIMENTS_DIR="./$(get_config "EXPERIMENTS_DIR" || echo "docs/backlog/09-experiments")"
+  mkdir -p "$EXPERIMENTS_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  experiment_id=$(detect_id_pattern "11-EXPERIMENTATION" "$hypothesis")
+  EXPERIMENT_FILE="${EXPERIMENTS_DIR}/EXPERIMENT-${experiment_id}-PLANNING.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "🧪 Création de l'expérimentation EXPERIMENT-${experiment_id}"
+  echo "🎯 Hypothèse: $hypothesis"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole EXPERIMENTATION..."
+      generate_experiment_from_protocol "$EXPERIMENT_FILE" "$experiment_id" "$hypothesis" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_experiment_from_protocol "$EXPERIMENT_FILE" "$experiment_id" "$hypothesis" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_experiment_from_protocol "$EXPERIMENT_FILE" "$experiment_id" "$hypothesis" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "EXPERIMENT" "Expérimentation: $hypothesis" "EXPERIMENT-${experiment_id}-PLANNING.md"
+  fi
+
+  echo ""
+  echo "✅ EXPERIMENT-${experiment_id}-PLANNING.md créé avec succès !"
+  echo "📍 Fichier: $EXPERIMENT_FILE"
+  echo ""
+  echo "🧪 Prochaines étapes (méthode scientifique):"
+  echo "  1. Définir l'hypothèse avec critères de succès mesurables"
+  echo "  2. Concevoir les variantes A (contrôle) et B (test)"
+  echo "  3. Planifier l'implémentation technique (feature flags, tracking)"
+  echo "  4. Valider le plan avant implémentation"
+  echo "  5. Exécuter l'expérience et monitorer les métriques"
+  echo "  6. Analyser les résultats avec significativité statistique"
+  echo "  7. Prendre une décision basée sur les données"
+  echo ""
+  echo "📊 RAPPEL: Validation scientifique basée sur les données !"
+}
+
+# Commande: docs - Documentation utilisateur
+command_docs() {
+  local topic="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$topic" in
+    "--help"|"help"|"")
+      echo "Usage: aklo docs \"<sujet de documentation>\" [--guide]"
+      echo ""
+      echo "Documentation utilisateur selon le protocole USER-DOCS."
+      echo ""
+      echo "Arguments:"
+      echo "  sujet        Sujet de la documentation à créer (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --guide        Mode guide utilisateur détaillé"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo docs \"Nouvelle fonctionnalité de paiement\""
+      echo "  aklo docs \"Guide d'utilisation avancée\" --guide"
+      echo "  aklo docs \"FAQ mise à jour limites de compte\""
+      echo ""
+      echo "Workflow de documentation:"
+      echo "  1. Identification du besoin de documentation"
+      echo "  2. Rédaction du contenu (plan et contenu brut)"
+      echo "  3. Relecture et validation par Human_Developer"
+      echo "  4. Publication sur la plateforme de documentation"
+      echo ""
+      echo "Statuts:"
+      echo "  DRAFT           - Rédaction en cours"
+      echo "  AWAITING_REVIEW - Prêt pour relecture et validation"
+      echo "  PUBLISHED       - Documentation mise en ligne"
+      echo ""
+      echo "Audiences cibles:"
+      echo "  • Nouveaux utilisateurs"
+      echo "  • Administrateurs de compte"
+      echo "  • Tous les utilisateurs"
+      echo ""
+      echo "📚 PRINCIPE: Documentation claire et synchronisée"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local guide_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --guide)
+            guide_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$topic" ]; then
+    echo "Erreur : Sujet de documentation requis." >&2
+    echo "Utilisez 'aklo docs --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID de documentation
+  USER_DOCS_DIR="./$(get_config "USER_DOCS_DIR" || echo "docs/backlog/14-user-docs")"
+  mkdir -p "$USER_DOCS_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  docs_id=$(detect_id_pattern "17-USER-DOCS" "$topic")
+  DOCS_FILE="${USER_DOCS_DIR}/USER-DOCS-${docs_id}-DRAFT.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "📚 Création de la documentation USER-DOCS-${docs_id}"
+  echo "🎯 Sujet: $topic"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole USER-DOCS..."
+      generate_docs_from_protocol "$DOCS_FILE" "$docs_id" "$topic" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_docs_from_protocol "$DOCS_FILE" "$docs_id" "$topic" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_docs_from_protocol "$DOCS_FILE" "$docs_id" "$topic" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "DOCS" "Documentation: $topic" "USER-DOCS-${docs_id}-DRAFT.md"
+  fi
+
+  echo ""
+  echo "✅ USER-DOCS-${docs_id}-DRAFT.md créé avec succès !"
+  echo "📍 Fichier: $DOCS_FILE"
+  echo ""
+  echo "📚 Prochaines étapes (processus de documentation):"
+  echo "  1. Définir l'objectif et l'audience cible de la documentation"
+  echo "  2. Élaborer le plan de contenu avec structure claire"
+  echo "  3. Rédiger le contenu en langage simple et accessible"
+  echo "  4. Soumettre pour relecture et validation"
+  echo "  5. Publier sur la plateforme de documentation"
+  echo ""
+  echo "✍️ RAPPEL: Documentation claire et synchronisée !"
+}
+
+# Fonction de génération OPTIM - Parser dynamique du protocole OPTIMISATION
 generate_debug_from_protocol() {
   local file="$1"
   local debug_id="$2"
@@ -1960,6 +2704,86 @@ generate_hotfix_from_protocol() {
   fi
 }
 
+generate_optim_from_protocol() {
+  local file="$1"
+  local optim_id="$2"
+  local objective="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="optim_id:${optim_id},objective:${objective},date:${date},status:BENCHMARKING"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "06-OPTIMISATION" "OPTIM" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération OPTIM depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole OPTIMISATION" >&2
+    return 1
+  fi
+}
+
+generate_security_from_protocol() {
+  local file="$1"
+  local audit_id="$2"
+  local scope="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="audit_id:${audit_id},scope:${scope},date:${date},status:SCANNING"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "13-SECURITE-AUDIT" "AUDIT" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération AUDIT depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole SECURITE-AUDIT" >&2
+    return 1
+  fi
+}
+
+generate_experiment_from_protocol() {
+  local file="$1"
+  local experiment_id="$2"
+  local hypothesis="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="experiment_id:${experiment_id},hypothesis:${hypothesis},date:${date},status:PLANNING"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "11-EXPERIMENTATION" "EXPERIMENT" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération EXPERIMENT depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole EXPERIMENTATION" >&2
+    return 1
+  fi
+}
+
+generate_docs_from_protocol() {
+  local file="$1"
+  local docs_id="$2"
+  local topic="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="docs_id:${docs_id},topic:${topic},date:${date},status:DRAFT"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "17-USER-DOCS" "USER-DOCS" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération USER-DOCS depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole USER-DOCS" >&2
+    return 1
+  fi
+}
+
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
@@ -1988,7 +2812,14 @@ show_help() {
   echo "  review <TASK_ID|COMMIT> [--checklist] Revue de code assistée"
   echo "  refactor \"<description>\" [--safe]   Refactoring sécurisé de code"
   echo "  hotfix \"<bug critique>\" [--emergency] Correction d'urgence production"
+  echo "  optimize \"<objectif>\" [--profile]    Optimisation de performance"
+  echo "  security [<périmètre>] [--scan-only] Audit de sécurité"
   echo "  release <type> [--dry-run]          Release (major|minor|patch)"
+  echo ""
+  echo "🔧 COMMANDES QUALITÉ:"
+  echo "  diagnose [\"<erreur>\"] [--interactive] Diagnostic d'environnement"
+  echo "  experiment \"<hypothèse>\" [--ab-test] Expérimentation A/B"
+  echo "  docs \"<sujet>\" [--guide]            Documentation utilisateur"
   echo ""
   echo "📚 AIDE ET INFORMATION:"
   echo "  help                                Affiche cette aide"
@@ -2071,6 +2902,26 @@ case "${1:-help}" in
   "hotfix")
     shift
     command_hotfix "$@"
+    ;;
+  "optimize")
+    shift
+    command_optimize "$@"
+    ;;
+  "security")
+    shift
+    command_security "$@"
+    ;;
+  "diagnose")
+    shift
+    command_diagnose "$@"
+    ;;
+  "experiment")
+    shift
+    command_experiment "$@"
+    ;;
+  "docs")
+    shift
+    command_docs "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
