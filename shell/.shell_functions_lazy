@@ -8,6 +8,26 @@ _GIT_BRANCH_CACHE=""
 _GIT_BRANCH_CACHE_TIME=0
 _GIT_STATUS_CACHE=""
 _GIT_STATUS_CACHE_TIME=0
+_AKLO_AVAILABLE=""
+_AKLO_PROJECT_INITIALIZED=""
+
+# Détection de la disponibilité d'Aklo
+check_aklo_availability() {
+    if [[ -z "$_AKLO_AVAILABLE" ]]; then
+        if command -v aklo >/dev/null 2>&1; then
+            _AKLO_AVAILABLE="true"
+            # Vérifier si le projet est initialisé avec Aklo
+            if [[ -f "docs/project.conf" ]] && [[ -d "docs/backlog" ]]; then
+                _AKLO_PROJECT_INITIALIZED="true"
+            else
+                _AKLO_PROJECT_INITIALIZED="false"
+            fi
+        else
+            _AKLO_AVAILABLE="false"
+            _AKLO_PROJECT_INITIALIZED="false"
+        fi
+    fi
+}
 
 # Charge les fonctions enhanced seulement si nécessaire
 load_enhanced_functions() {
@@ -59,44 +79,145 @@ get_git_status_cached() {
     echo "$_GIT_STATUS_CACHE"
 }
 
-# Wrapper pour gac avec lazy loading
+# Détecte si on est dans un contexte de tâche Aklo
+detect_aklo_task_context() {
+    check_aklo_availability
+    
+    if [[ "$_AKLO_PROJECT_INITIALIZED" == "true" ]]; then
+        local current_branch=$(get_current_branch_cached)
+        # Vérifie si la branche suit le pattern task-XX-X
+        if [[ "$current_branch" =~ task-[0-9]+-[0-9]+ ]]; then
+            # Extrait l'ID de la tâche
+            local task_id=$(echo "$current_branch" | sed -n 's/.*task-\([0-9]\+-[0-9]\+\).*/\1/p')
+            echo "$task_id"
+            return 0
+        fi
+    fi
+    
+    return 1
+}
+
+# Wrapper intelligent pour gac avec intégration Aklo
 gac_lazy() {
+    check_aklo_availability
+    
+    # Si Aklo est disponible et on est dans un contexte de tâche
+    local task_id=$(detect_aklo_task_context)
+    if [[ $? -eq 0 ]] && [[ -n "$task_id" ]]; then
+        echo "🎯 Contexte Aklo détecté (tâche $task_id)"
+        echo "💡 Utilisation recommandée: aklo submit-task"
+        echo "   Ou continuez avec gac standard..."
+        
+        # Demande confirmation pour utiliser Aklo
+        echo -n "Utiliser aklo submit-task ? (y/N): "
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            echo "🚀 Exécution: aklo submit-task"
+            aklo submit-task
+            return $?
+        fi
+    fi
+    
+    # Fallback sur la fonction enhanced standard
     load_enhanced_functions || return 1
     git_add_all_and_commit_super_enhanced "$@"
 }
 
-# Wrapper pour gbs avec lazy loading
+# Wrapper intelligent pour gbs avec intégration Aklo
 gbs_lazy() {
+    check_aklo_availability
+    
+    # Si Aklo est disponible et projet initialisé
+    if [[ "$_AKLO_PROJECT_INITIALIZED" == "true" ]] && [[ $# -eq 1 ]]; then
+        local branch_name="$1"
+        
+        # Vérifie si c'est un pattern de tâche Aklo
+        if [[ "$branch_name" =~ ^[0-9]+-[0-9]+$ ]]; then
+            echo "🎯 Pattern de tâche Aklo détecté: $branch_name"
+            echo "💡 Utilisation recommandée: aklo start-task $branch_name"
+            echo "   Ou continuez avec gbs standard..."
+            
+            # Demande confirmation pour utiliser Aklo
+            echo -n "Utiliser aklo start-task ? (y/N): "
+            read -r response
+            if [[ "$response" =~ ^[Yy]$ ]]; then
+                echo "🚀 Exécution: aklo start-task $branch_name"
+                aklo start-task "$branch_name"
+                return $?
+            fi
+        fi
+    fi
+    
+    # Fallback sur la fonction enhanced standard
     load_enhanced_functions || return 1
     git_branch_start_super_enhanced "$@"
 }
 
-# Wrapper pour gbd avec lazy loading
+# Wrapper pour gbd avec lazy loading (pas d'intégration Aklo spécifique)
 gbd_lazy() {
     load_enhanced_functions || return 1
     git_branch_delete_super_enhanced "$@"
 }
 
-# Wrapper pour gri avec lazy loading
+# Wrapper pour gri avec lazy loading (pas d'intégration Aklo spécifique)
 gri_lazy() {
     load_enhanced_functions || return 1
     git_rebase_interactive_super_enhanced "$@"
 }
 
-# Prompt Git optimisé avec cache
+# Nouvelle fonction : Assistant Aklo pour workflow complet
+aklo_workflow_assistant() {
+    check_aklo_availability
+    
+    if [[ "$_AKLO_AVAILABLE" != "true" ]]; then
+        echo "❌ Aklo n'est pas disponible sur ce système"
+        return 1
+    fi
+    
+    if [[ "$_AKLO_PROJECT_INITIALIZED" != "true" ]]; then
+        echo "❌ Projet non initialisé avec Aklo"
+        echo "💡 Initialisez avec: aklo init"
+        return 1
+    fi
+    
+    echo "🎯 Assistant Workflow Aklo"
+    echo "========================="
+    echo ""
+    echo "Commandes disponibles:"
+    echo "  aklo propose-pbi    - Créer un nouveau PBI"
+    echo "  aklo plan <PBI_ID>  - Planifier les tâches d'un PBI"
+    echo "  aklo start-task <ID> - Commencer une tâche"
+    echo "  aklo submit-task    - Soumettre pour revue"
+    echo "  aklo status         - État du projet"
+    echo ""
+    
+    # Affiche le statut actuel
+    echo "📊 Statut actuel:"
+    aklo status 2>/dev/null || echo "   (Impossible de récupérer le statut)"
+}
+
+# Prompt Git optimisé avec cache et indicateur Aklo
 git_prompt_fast() {
     local branch=$(get_current_branch_cached)
     local changes=$(get_git_status_cached)
     
     if [[ -n "$branch" ]]; then
         local color=""
+        local aklo_indicator=""
+        
+        # Détection contexte Aklo
+        check_aklo_availability
+        if [[ "$_AKLO_PROJECT_INITIALIZED" == "true" ]] && [[ "$branch" =~ task-[0-9]+-[0-9]+ ]]; then
+            aklo_indicator="⚡"
+        fi
+        
         if [[ "$changes" -gt 0 ]]; then
             color="\033[1;31m"  # Rouge si changements
         else
             color="\033[1;32m"  # Vert si propre
         fi
         
-        echo -e "${color}git:${branch}${changes:+ ($changes)}$\033[0m"
+        echo -e "${color}git:${branch}${changes:+ ($changes)}${aklo_indicator}$\033[0m"
     fi
 }
 
@@ -108,8 +229,127 @@ invalidate_git_cache() {
     _GIT_STATUS_CACHE_TIME=0
 }
 
+# Invalidation du cache Aklo
+invalidate_aklo_cache() {
+    _AKLO_AVAILABLE=""
+    _AKLO_PROJECT_INITIALIZED=""
+}
+
+# Fonction utilitaire pour MCP : Détection et suggestion Aklo
+mcp_aklo_suggest() {
+    local operation="$1"
+    local context="$2"
+    
+    check_aklo_availability
+    
+    case "$operation" in
+        "start-task")
+            if [[ "$_AKLO_PROJECT_INITIALIZED" == "true" ]] && [[ "$context" =~ ^[0-9]+-[0-9]+$ ]]; then
+                echo "💡 MCP Suggestion: Utilisez 'mcp_aklo-terminal_aklo_execute' avec command='start-task' et args=['$context']"
+                echo "   Cela activera le protocole DÉVELOPPEMENT automatiquement"
+                return 0
+            fi
+            ;;
+        "submit-task")
+            local task_id=$(detect_aklo_task_context)
+            if [[ $? -eq 0 ]] && [[ -n "$task_id" ]]; then
+                echo "💡 MCP Suggestion: Utilisez 'mcp_aklo-terminal_aklo_execute' avec command='submit-task'"
+                echo "   Cela activera le protocole REVUE DE CODE automatiquement"
+                return 0
+            fi
+            ;;
+        "check-context")
+            if [[ "$_AKLO_AVAILABLE" == "true" ]]; then
+                echo "✅ Aklo disponible"
+                if [[ "$_AKLO_PROJECT_INITIALIZED" == "true" ]]; then
+                    echo "✅ Projet Aklo initialisé"
+                    local task_id=$(detect_aklo_task_context)
+                    if [[ $? -eq 0 ]] && [[ -n "$task_id" ]]; then
+                        echo "✅ Contexte tâche détecté: $task_id"
+                    else
+                        echo "ℹ️  Pas de contexte tâche actuel"
+                    fi
+                else
+                    echo "❌ Projet non initialisé avec Aklo"
+                fi
+            else
+                echo "❌ Aklo non disponible"
+            fi
+            ;;
+    esac
+    
+    return 1
+}
+
+# Fonction de transition intelligente : Git → Aklo
+git_to_aklo_bridge() {
+    local git_command="$1"
+    shift
+    local args="$@"
+    
+    check_aklo_availability
+    
+    # Si Aklo n'est pas disponible, exécuter la commande Git normale
+    if [[ "$_AKLO_AVAILABLE" != "true" ]] || [[ "$_AKLO_PROJECT_INITIALIZED" != "true" ]]; then
+        echo "🔄 Fallback: Exécution Git standard"
+        case "$git_command" in
+            "checkout-task")
+                git checkout -b "feature/task-$args"
+                ;;
+            "commit-task")
+                git add . && git commit -m "feat: $args"
+                ;;
+            *)
+                echo "❌ Commande Git non reconnue: $git_command"
+                return 1
+                ;;
+        esac
+        return $?
+    fi
+    
+    # Si Aklo est disponible, proposer l'alternative Aklo
+    case "$git_command" in
+        "checkout-task")
+            if [[ "$args" =~ ^[0-9]+-[0-9]+$ ]]; then
+                echo "🎯 Alternative Aklo disponible:"
+                echo "   aklo start-task $args"
+                echo "   (Crée la branche + met à jour le statut de la tâche)"
+                echo ""
+                echo -n "Utiliser Aklo ? (y/N): "
+                read -r response
+                if [[ "$response" =~ ^[Yy]$ ]]; then
+                    aklo start-task "$args"
+                    return $?
+                fi
+            fi
+            git checkout -b "feature/task-$args"
+            ;;
+        "commit-task")
+            local task_id=$(detect_aklo_task_context)
+            if [[ $? -eq 0 ]] && [[ -n "$task_id" ]]; then
+                echo "🎯 Alternative Aklo disponible:"
+                echo "   aklo submit-task"
+                echo "   (Commit + push + met à jour le statut)"
+                echo ""
+                echo -n "Utiliser Aklo ? (y/N): "
+                read -r response
+                if [[ "$response" =~ ^[Yy]$ ]]; then
+                    aklo submit-task
+                    return $?
+                fi
+            fi
+            git add . && git commit -m "feat: $args"
+            ;;
+    esac
+}
+
+# Note: Les fonctions sont disponibles après sourcing du fichier
+# (export -f n'est pas supporté dans zsh)
+
 # Aliases lazy loading
 alias gac='gac_lazy'
 alias gbs='gbs_lazy'
 alias gbd='gbd_lazy'
-alias gri='gri_lazy' 
+alias gri='gri_lazy'
+alias aklo-help='aklo_workflow_assistant'
+alias aklo-suggest='mcp_aklo_suggest check-context' 
