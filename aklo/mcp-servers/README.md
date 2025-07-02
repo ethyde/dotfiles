@@ -144,6 +144,44 @@ Le système détecte automatiquement :
 | `generate-config.sh` | Génération configuration JSON pure |
 | `test-fallback.sh` | Tests complets du système fallback |
 | `install-node.sh` | Assistant installation Node.js |
+| `restart-mcp.sh` | Redémarrage des serveurs après modification |
+| `watch-mcp.sh` | Surveillance automatique et redémarrage |
+| `aklo-mcp.sh` | Script principal de gestion des serveurs |
+| `demo-fallback.sh` | Démonstration du système de fallback |
+| `demo-multi-clients.sh` | Démonstration multi-clients |
+| `generate-config-universal.sh` | Configuration universelle multi-environnements |
+| `install.sh` | Installation simple des dépendances npm |
+
+## 🔄 Gestion des Serveurs
+
+### Redémarrage après Modification
+```bash
+# Redémarre automatiquement tous les serveurs MCP
+./restart-mcp.sh
+```
+
+### Surveillance Continue
+```bash  
+# Surveillance et redémarrage automatique en cas de modification
+./watch-mcp.sh
+```
+
+### Gestion Avancée
+```bash
+# Script principal de gestion
+./aklo-mcp.sh status    # État des serveurs
+./aklo-mcp.sh restart   # Redémarrage
+./aklo-mcp.sh logs      # Logs des serveurs
+```
+
+### Démonstrations
+```bash
+# Démonstration du système de fallback
+./demo-fallback.sh
+
+# Démonstration multi-clients
+./demo-multi-clients.sh
+```
 
 ## 💡 Utilisation dans Cursor
 
@@ -212,6 +250,13 @@ aklo/mcp-servers/
 ├── generate-config.sh     # Génération config pure
 ├── test-fallback.sh       # Tests système
 ├── install-node.sh        # Assistant Node.js
+├── restart-mcp.sh        # Redémarrage serveurs
+├── watch-mcp.sh          # Surveillance automatique  
+├── aklo-mcp.sh           # Gestion avancée
+├── demo-fallback.sh      # Démonstration fallback
+├── demo-multi-clients.sh # Démonstration multi-clients
+├── generate-config-universal.sh # Config universelle
+├── install.sh            # Installation simple
 ├── terminal/              # Serveur Node.js terminal
 │   ├── index.js
 │   ├── package.json
