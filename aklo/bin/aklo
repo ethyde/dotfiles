@@ -95,6 +95,14 @@ extract_artefact_structure() {
       start_pattern="### 2\.3\. Structure Obligatoire du Fichier Journal"
       end_pattern="^## SECTION 3"
       ;;
+    "REVIEW")
+      start_pattern="### 2\.2\. Structure Obligatoire Du Fichier Review"
+      end_pattern="^## SECTION 3"
+      ;;
+    "HOTFIX")
+      start_pattern="### 2\.3\. Structure Obligatoire du Fichier Hotfix"
+      end_pattern="^## SECTION 3"
+      ;;
     *)
       echo "❌ Type d'artefact $artefact_type non supporté." >&2
       return 1
@@ -278,6 +286,16 @@ detect_id_pattern() {
     "18-JOURNAL")
       # JOURNAL: Date YYYY-MM-DD (ex: 2025-01-02)
       echo "$base_value"  # Date déjà formatée
+      ;;
+    "07-REVUE-DE-CODE")
+      # REVIEW: ID de task ou PR (ex: task-42-1, pr-123)
+      echo "$base_value"  # ID déjà formaté par la commande appelante
+      ;;
+    "10-HOTFIX")
+      # HOTFIX: description-slugifiée-YYYYMMDD (ex: bug-login-prod-20250628)
+      local date_id=$(date +%Y%m%d)
+      local title_slug=$(echo "$base_value" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+      echo "${title_slug}-${date_id}"
       ;;
     *)
       echo "$base_value"
@@ -1475,7 +1493,387 @@ command_debug() {
   echo "  6. Implémenter via 'aklo dev' après validation"
 }
 
-# Fonction de génération DEBUG - Parser dynamique du protocole DEBOGAGE
+# Commande: review - Revue de code assistée
+command_review() {
+  local target="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$target" in
+    "--help"|"help"|"")
+      echo "Usage: aklo review <TASK_ID|COMMIT|PR> [--checklist]"
+      echo ""
+      echo "Revue de code assistée selon le protocole REVUE-DE-CODE."
+      echo ""
+      echo "Arguments:"
+      echo "  TASK_ID    ID de la task à réviser (format: PBI_ID-TASK_ID, ex: 1-2)"
+      echo "  COMMIT     Hash du commit à réviser (ex: abc123f)"
+      echo "  PR         Numéro de PR à réviser (ex: pr-42)"
+      echo ""
+      echo "Options:"
+      echo "  --checklist    Mode checklist détaillée pour validation"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo review 1-2              # Réviser la Task 1-2"
+      echo "  aklo review abc123f          # Réviser un commit spécifique"
+      echo "  aklo review pr-42            # Réviser une Pull Request"
+      echo "  aklo review 1-2 --checklist  # Mode checklist détaillée"
+      echo ""
+      echo "Workflow:"
+      echo "  1. Analyse du diff de code"
+      echo "  2. Vérification conformité protocole DÉVELOPPEMENT"
+      echo "  3. Évaluation principes SOLID et qualité"
+      echo "  4. Génération rapport REVIEW-[ID].md"
+      echo "  5. Classification des observations (CRITICAL/MAJOR/MINOR)"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local checklist_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --checklist)
+            checklist_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$target" ]; then
+    echo "Erreur : Cible de revue requise (TASK_ID, COMMIT ou PR)." >&2
+    echo "Utilisez 'aklo review --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID de review
+  REVIEW_DIR="./$(get_config "REVIEWS_DIR" || echo "docs/backlog/03-reviews")"
+  mkdir -p "$REVIEW_DIR"
+
+  # Déterminer le type de cible et formater l'ID
+  local review_id=""
+  if [[ "$target" =~ ^[0-9]+-[0-9]+$ ]]; then
+    # Format TASK_ID (ex: 1-2)
+    review_id="task-${target}"
+  elif [[ "$target" =~ ^pr-[0-9]+$ ]]; then
+    # Format PR (ex: pr-42)
+    review_id="$target"
+  elif [[ "$target" =~ ^[a-f0-9]{6,40}$ ]]; then
+    # Format commit hash
+    review_id="commit-${target:0:7}"
+  else
+    # Format libre
+    review_id="$target"
+  fi
+
+  REVIEW_FILE="${REVIEW_DIR}/REVIEW-${review_id}.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "🔍 Création de la revue REVIEW-${review_id} pour: $target"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole REVUE-DE-CODE..."
+      generate_review_from_protocol "$REVIEW_FILE" "$review_id" "$target" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_review_from_protocol "$REVIEW_FILE" "$review_id" "$target" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_review_from_protocol "$REVIEW_FILE" "$review_id" "$target" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "REVIEW" "Revue de code: $target" "REVIEW-${review_id}.md"
+  fi
+
+  echo ""
+  echo "✅ REVIEW-${review_id}.md créé avec succès !"
+  echo "📍 Fichier: $REVIEW_FILE"
+  echo ""
+  echo "🔍 Prochaines étapes:"
+  echo "  1. Analyser le diff de code concerné"
+  echo "  2. Remplir la checklist de conformité"
+  echo "  3. Documenter les observations par criticité"
+  echo "  4. Présenter le rapport au développeur"
+  echo "  5. Fusionner après corrections (aklo merge-task)"
+}
+
+# Commande: refactor - Refactoring sécurisé de code
+command_refactor() {
+  local scope="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$scope" in
+    "--help"|"help"|"")
+      echo "Usage: aklo refactor \"<description>\" [--safe]"
+      echo ""
+      echo "Refactoring sécurisé de code selon le protocole REFACTORING."
+      echo ""
+      echo "Arguments:"
+      echo "  description  Description du refactoring à effectuer (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --safe         Mode sécurisé avec validation continue"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo refactor \"Extraire logique métier en service\""
+      echo "  aklo refactor \"Simplifier fonction de validation\" --safe"
+      echo "  aklo refactor \"Réorganiser structure des classes\""
+      echo ""
+      echo "Workflow:"
+      echo "  1. Diagnostic du code smell et problème identifié"
+      echo "  2. Stratégie de refactoring avec plan d'action"
+      echo "  3. Vérification couverture de tests (prérequis)"
+      echo "  4. Exécution par micro-changements avec validation"
+      echo "  5. Preuve de non-régression et finalisation"
+      echo ""
+      echo "Statuts:"
+      echo "  ANALYSIS     - Diagnostic en cours"
+      echo "  REFACTORING  - Exécution du plan approuvé"
+      echo "  DONE         - Refactoring terminé et validé"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local safe_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --safe)
+            safe_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$scope" ]; then
+    echo "Erreur : Description du refactoring requise." >&2
+    echo "Utilisez 'aklo refactor --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Génération de l'ID de refactoring
+  REFACTOR_DIR="./$(get_config "REFACTOR_DIR" || echo "docs/backlog/05-refactor")"
+  mkdir -p "$REFACTOR_DIR"
+
+  # Générer l'ID selon le protocole (titre-slugifié-YYYYMMDD)
+  refactor_id=$(detect_id_pattern "05-REFACTORING" "$scope")
+  REFACTOR_FILE="${REFACTOR_DIR}/REFACTOR-${refactor_id}-ANALYSIS.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  echo "🔧 Création du refactoring REFACTOR-${refactor_id}"
+  echo "📋 Description: $scope"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole REFACTORING..."
+      generate_refactor_from_protocol "$REFACTOR_FILE" "$refactor_id" "$scope" "$TODAY" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_refactor_from_protocol "$REFACTOR_FILE" "$refactor_id" "$scope" "$TODAY" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_refactor_from_protocol "$REFACTOR_FILE" "$refactor_id" "$scope" "$TODAY" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "REFACTOR" "Refactoring: $scope" "REFACTOR-${refactor_id}-ANALYSIS.md"
+  fi
+
+  echo ""
+  echo "✅ REFACTOR-${refactor_id}-ANALYSIS.md créé avec succès !"
+  echo "📍 Fichier: $REFACTOR_FILE"
+  echo ""
+  echo "🔧 Prochaines étapes:"
+  echo "  1. Diagnostiquer le code smell identifié"
+  echo "  2. Définir la stratégie et plan d'action"
+  echo "  3. Vérifier la couverture de tests (OBLIGATOIRE)"
+  echo "  4. Soumettre le plan pour validation"
+  echo "  5. Exécuter le refactoring par micro-changements"
+  echo ""
+  echo "⚠️  RAPPEL: La couverture de tests est un prérequis non négociable"
+}
+
+# Commande: hotfix - Correction d'urgence en production
+command_hotfix() {
+  local issue="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+
+  case "$issue" in
+    "--help"|"help"|"")
+      echo "Usage: aklo hotfix \"<description du bug critique>\" [--emergency]"
+      echo ""
+      echo "Correction d'urgence en production selon le protocole HOTFIX."
+      echo ""
+      echo "Arguments:"
+      echo "  description  Description du bug critique en production (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --emergency    Mode urgence avec validation accélérée"
+      echo "  --no-agent     Assistance minimale (skeleton)"
+      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo hotfix \"Login impossible pour nouveaux utilisateurs\""
+      echo "  aklo hotfix \"Panier d'achat inaccessible\" --emergency"
+      echo "  aklo hotfix \"API payment timeout en production\""
+      echo ""
+      echo "Workflow d'urgence:"
+      echo "  1. Validation de l'urgence réelle (production bloquée)"
+      echo "  2. Création branche hotfix depuis tag de production"
+      echo "  3. Diagnostic rapide de la cause racine"
+      echo "  4. Correction minimale et ciblée"
+      echo "  5. Déploiement d'urgence avec nouveau tag de patch"
+      echo "  6. Planification post-mortem et synchronisation"
+      echo ""
+      echo "Statuts:"
+      echo "  INVESTIGATING - Analyse cause racine en cours"
+      echo "  AWAITING_FIX  - Plan de correction en attente de validation"
+      echo "  DEPLOYING     - Correctif validé, déploiement en cours"
+      echo "  RESOLVED      - Hotfix en production, post-mortem planifié"
+      echo ""
+      echo "⚠️  ATTENTION: Réservé aux bugs critiques bloquant la production"
+      exit 0
+      ;;
+    *)
+      # Parsing des arguments
+      shift
+      local emergency_mode=false
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          --emergency)
+            emergency_mode=true
+            ;;
+          --no-agent)
+            agent_assistance="skeleton"
+            ;;
+          --no-journal)
+            auto_journal="false"
+            ;;
+          *)
+            echo "Argument inconnu: $1" >&2
+            exit 1
+            ;;
+        esac
+        shift
+      done
+      ;;
+  esac
+
+  if [ -z "$issue" ]; then
+    echo "Erreur : Description du bug critique requise." >&2
+    echo "Utilisez 'aklo hotfix --help' pour plus d'informations."
+    exit 1
+  fi
+
+  # Validation de l'urgence
+  echo "🚨 HOTFIX D'URGENCE DÉTECTÉ"
+  echo "📋 Bug critique: $issue"
+  echo ""
+  echo "⚠️  VALIDATION REQUISE:"
+  echo "   Ce bug bloque-t-il réellement la production ?"
+  echo "   Cause-t-il une perte de revenus immédiate ?"
+  echo "   Les utilisateurs sont-ils impactés de manière critique ?"
+  echo ""
+  read -p "Confirmer l'urgence réelle (y/N): " confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo "❌ Hotfix annulé. Utilisez 'aklo debug' pour un diagnostic normal."
+    exit 1
+  fi
+
+  # Génération de l'ID de hotfix
+  HOTFIX_DIR="./$(get_config "HOTFIX_DIR" || echo "docs/backlog/08-hotfixes")"
+  mkdir -p "$HOTFIX_DIR"
+
+  # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
+  hotfix_id=$(detect_id_pattern "10-HOTFIX" "$issue")
+  HOTFIX_FILE="${HOTFIX_DIR}/HOTFIX-${hotfix_id}.md"
+  TODAY=$(date +%Y-%m-%d)
+  TIME=$(date +%H:%M)
+
+  echo ""
+  echo "🚨 Création du hotfix HOTFIX-${hotfix_id}"
+  echo "⏰ Urgence confirmée - Procédure accélérée activée"
+
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole HOTFIX..."
+      generate_hotfix_from_protocol "$HOTFIX_FILE" "$hotfix_id" "$issue" "$TODAY" "$TIME" "full"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      generate_hotfix_from_protocol "$HOTFIX_FILE" "$hotfix_id" "$issue" "$TODAY" "$TIME" "skeleton"
+      ;;
+    "minimal")
+      echo "🔧 Structure minimale selon protocole..."
+      generate_hotfix_from_protocol "$HOTFIX_FILE" "$hotfix_id" "$issue" "$TODAY" "$TIME" "minimal"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "HOTFIX" "URGENCE: $issue" "HOTFIX-${hotfix_id}.md"
+  fi
+
+  echo ""
+  echo "✅ HOTFIX-${hotfix_id}.md créé avec succès !"
+  echo "📍 Fichier: $HOTFIX_FILE"
+  echo ""
+  echo "🚨 PROCÉDURE D'URGENCE - Prochaines étapes:"
+  echo "  1. Identifier le tag de production actuellement déployé"
+  echo "  2. Créer branche hotfix depuis ce tag"
+  echo "  3. Diagnostiquer rapidement la cause racine"
+  echo "  4. Implémenter la correction MINIMALE"
+  echo "  5. Déployer d'urgence avec nouveau tag de patch"
+  echo "  6. Planifier le post-mortem (PBI/TASK de correction définitive)"
+  echo ""
+  echo "⚡ RAPPEL: Correction minimale uniquement - Pas de refactoring !"
+  echo "⚡ RAPPEL: Planifier le post-mortem après stabilisation"
+}
+
+# Fonction de génération HOTFIX - Parser dynamique du protocole HOTFIX
 generate_debug_from_protocol() {
   local file="$1"
   local debug_id="$2"
@@ -1498,8 +1896,69 @@ generate_debug_from_protocol() {
 }
 
 # ===== FONCTION DEBUG STATIC_FALLBACK SUPPRIMÉE =====
-# La fonction generate_debug_static_fallback a été supprimée car remplacée 
+# La fonction generate_debug_static_fallback a été supprimée car remplacée
 # par le parser générique dynamique.
+
+generate_review_from_protocol() {
+  local file="$1"
+  local review_id="$2"
+  local target="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="review_id:${review_id},target:${target},date:${date},status:PENDING"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "07-REVUE-DE-CODE" "REVIEW" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération REVIEW depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole REVUE-DE-CODE" >&2
+    return 1
+  fi
+}
+
+generate_refactor_from_protocol() {
+  local file="$1"
+  local refactor_id="$2"
+  local description="$3"
+  local date="$4"
+  local assistance_level="$5"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="refactor_id:${refactor_id},description:${description},date:${date},status:ANALYSIS"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "05-REFACTORING" "REFACTOR" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération REFACTOR depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole REFACTORING" >&2
+    return 1
+  fi
+}
+
+generate_hotfix_from_protocol() {
+  local file="$1"
+  local hotfix_id="$2"
+  local issue="$3"
+  local date="$4"
+  local time="$5"
+  local assistance_level="$6"
+
+  # Variables contextuelles pour le parser générique
+  local context_vars="hotfix_id:${hotfix_id},issue:${issue},date:${date},time:${time},status:INVESTIGATING"
+
+  # Appel du parser générique
+  parse_and_generate_artefact "10-HOTFIX" "HOTFIX" "$assistance_level" "$file" "$context_vars"
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur : Échec de génération HOTFIX depuis le protocole" >&2
+    echo "   Vérifiez l'intégrité du protocole HOTFIX" >&2
+    return 1
+  fi
+}
 
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
@@ -1526,6 +1985,9 @@ show_help() {
   echo "  arch <PBI_ID> [--review]            Conception d'architecture logicielle"
   echo "  dev <TASK_ID> [--no-journal]        Développement TDD d'une Task"
   echo "  debug \"<titre>\" [--no-agent]        Diagnostic et correction de bugs"
+  echo "  review <TASK_ID|COMMIT> [--checklist] Revue de code assistée"
+  echo "  refactor \"<description>\" [--safe]   Refactoring sécurisé de code"
+  echo "  hotfix \"<bug critique>\" [--emergency] Correction d'urgence production"
   echo "  release <type> [--dry-run]          Release (major|minor|patch)"
   echo ""
   echo "📚 AIDE ET INFORMATION:"
@@ -1597,6 +2059,18 @@ case "${1:-help}" in
   "debug")
     shift
     command_debug "$@"
+    ;;
+  "review")
+    shift
+    command_review "$@"
+    ;;
+  "refactor")
+    shift
+    command_refactor "$@"
+    ;;
+  "hotfix")
+    shift
+    command_hotfix "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
