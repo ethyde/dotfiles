@@ -129,3 +129,68 @@ Avant l'analyse du problème architectural, l'agent **doit** présenter un plan 
     - Une fois le document `VALIDATED`, exécuter le plan décrit dans la section "Impact sur les Tâches".
     - Activer le protocole [KNOWLEDGE-BASE] pour déterminer si l'analyse a produit une connaissance qui mérite d'être centralisée.
     - Modifier, supprimer et créer les fichiers `TASK` dans `/docs/backlog/01-tasks/`.
+
+## SECTION 4 : COMMIT ATOMIQUE D'ARCHITECTURE
+
+### 4.1. Principe du Commit Unique
+
+**Règle Fondamentale :** L'architecture d'un PBI produit un unique commit atomique qui inclut :
+
+1. **Document d'architecture validé** : `ARCH-[PBI_ID]-[ID]-VALIDATED.md`
+2. **Toutes les TASK modifiées** : Mises à jour selon l'impact architectural
+3. **Nouvelles TASK créées** : Si l'architecture nécessite des tâches supplémentaires
+4. **TASK supprimées** : Si l'architecture rend certaines tâches obsolètes
+5. **Mise à jour du journal** : Documentation du processus architectural
+
+### 4.2. Contenu du Commit
+
+**Message de commit type :**
+```
+feat(arch): Architecture PBI-[ID] - [Titre de l'architecture]
+
+- Document ARCH-[PBI_ID]-[ID] validé
+- [N] tasks modifiées selon l'impact architectural
+- [X] nouvelles tasks créées
+- [Y] tasks supprimées (devenues obsolètes)
+- Journal mis à jour avec les décisions architecturales
+
+Architecture retenue: [Résumé de la solution]
+
+Tasks impactées:
+- TASK-[PBI_ID]-01: [Modification apportée]
+- TASK-[PBI_ID]-02: [Modification apportée]
+- [...]
+
+Nouvelles tasks:
+- TASK-[PBI_ID]-05: [Nouvelle tâche]
+- [...]
+
+Prochaine étape: DEVELOPPEMENT
+```
+
+### 4.3. Workflow de Validation
+
+**[PROCEDURE] Séquence de Validation Complète**
+
+1. **Phase Draft :** Création et analyse des options (pas de commit)
+2. **Phase Awaiting Review :** Présentation de la solution complète
+3. **[ATTENTE_VALIDATION] Diff Complet :** Présentation de tous les changements :
+   - Document d'architecture final
+   - Toutes les modifications de TASK
+   - Nouvelles TASK créées
+   - TASK supprimées (avec justification)
+   - Mise à jour du journal
+4. **Commit Atomique :** Après validation explicite du `Human_Developer`
+
+### 4.4. Gestion des Révisions Architecturales
+
+**Règle :** Si l'architecture doit être révisée après validation, cela constitue un nouveau cycle complet du protocole ARCHITECTURE avec son propre commit atomique.
+
+**Exemple de révision :**
+```
+fix(arch): Révision architecture PBI-[ID] - [Raison de la révision]
+
+- Document ARCH-[PBI_ID]-[ID] mis à jour (version 2)
+- [N] tasks re-modifiées selon la nouvelle architecture
+- Journal mis à jour avec la justification de révision
+```

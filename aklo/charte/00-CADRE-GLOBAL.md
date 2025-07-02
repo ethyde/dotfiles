@@ -23,6 +23,37 @@ Je suis un ingénieur Frontend senior spécialisé en monétisation de sites à 
 6. **Non-Répétition (DRY) :** L'IA doit être spécifiquement instruite pour identifier et utiliser les constantes, les fonctions utilitaires et les configurations existantes.
 7. **Autorité du Développeur :** En cas de conflit ou d'ambiguïté, la décision du `Human_Developer` prévaut toujours sur les suggestions de l' `AI_Agent`.
 
+### 1.3. Principe des Commits Atomiques par Protocole
+
+**Règle Fondamentale :** Chaque protocole de la charte produit un unique commit atomique qui inclut toutes les modifications liées à ce protocole.
+
+#### 1.3.1. Composition d'un Commit Atomique
+
+Un commit atomique de protocole comprend obligatoirement :
+1. **L'artefact principal** du protocole (ex: TASK créée, ARCH validé, code implémenté)
+2. **Tous les artefacts connexes** modifiés ou créés (ex: TASK mises à jour, PBI changé de statut)
+3. **La mise à jour du journal** documentant l'exécution du protocole
+
+#### 1.3.2. Exemples d'Application
+
+- **PLANIFICATION :** `commit(toutes-TASK-créées + journal-update)`
+- **ARCHITECTURE :** `commit(ARCH-VALIDATED + TASK-modifiées + journal-update)`
+- **DÉVELOPPEMENT :** `commit(code + TASK-DONE + journal-update)`
+- **Changement de statut PBI :** `commit(PBI-AGREED + journal-update)`
+
+#### 1.3.3. Gestion des Protocoles Abandonnés
+
+Si un protocole est abandonné en cours d'exécution :
+1. **Obligation de documentation :** Le journal doit être mis à jour avec la raison de l'abandon
+2. **Commit de clôture :** Un commit doit documenter l'état final, même en cas d'échec
+3. **Traçabilité préservée :** Aucun travail ne doit rester non documenté
+
+#### 1.3.4. Indépendance des Outils d'Automatisation
+
+- **Principe :** La charte doit fonctionner parfaitement sans les commandes `aklo` ou les serveurs MCP
+- **Automatisation optionnelle :** Les outils `aklo` sont des facilitateurs qui respectent les mêmes règles
+- **Validation humaine obligatoire :** Même avec automatisation, le `Human_Developer` valide tous les diffs
+
 ## SECTION 2 : STRUCTURE DE COMMUNICATION
 
 Pour garantir une communication claire et structurée, l' `AI_Agent` doit utiliser les balises suivantes dans ses réponses :
@@ -104,6 +135,72 @@ Avant toute action de démarrage, l'agent **doit** présenter un plan détaillé
 ### 3.5. Gestion des Erreurs d'Exécution
 
 - En cas d'échec d'une commande système, l'agent **doit** immédiatement activer le protocole [DIAGNOSTIC-ENV].
+
+## SECTION 3.6 : AUTOMATISATION INTELLIGENTE DES COMMANDES AKLO
+
+Cette section définit le comportement des commandes d'automatisation `aklo` lorsqu'elles sont disponibles.
+
+### 3.6.1. Principe Général
+
+Les commandes `aklo` sont des **facilitateurs optionnels** qui :
+- Respectent scrupuleusement les principes fondamentaux de la charte
+- Reproduisent fidèlement les workflows manuels des protocoles
+- S'adaptent intelligemment au contexte et aux préférences utilisateur
+- Maintiennent l'obligation de validation humaine
+
+### 3.6.2. Niveaux d'Assistance Automatisée
+
+Les commandes `aklo` offrent trois niveaux d'assistance configurables :
+
+**1. `full` (Assistance Complète)**
+- Génération automatique du contenu complet par l'IA
+- Mise à jour détaillée du journal
+- Présentation du diff complet pour validation
+
+**2. `skeleton` (Assistance Structurelle)**
+- Génération de la structure et des sections vides
+- Contenu à remplir par l'humain
+- Mise à jour complète ou minimale du journal selon configuration
+
+**3. `minimal` (Assistance Technique)**
+- Création des fichiers avec IDs et nommage uniquement
+- Aucun contenu généré
+- Mise à jour minimale du journal
+- **Disponible uniquement via configuration .aklo.conf**
+
+### 3.6.3. Logique des Arguments CLI
+
+```bash
+# Comportement par défaut (sans configuration)
+aklo <commande> <args>
+# = agent_assistance=full + auto_journal=true
+
+# Override vers assistance structurelle + journal complet
+aklo <commande> <args> --no-agent
+# = agent_assistance=skeleton + auto_journal=true
+
+# Override vers assistance structurelle + journal minimal
+aklo <commande> <args> --no-agent --no-journal
+# = agent_assistance=skeleton + auto_journal=false
+```
+
+### 3.6.4. Configuration .aklo.conf
+
+```ini
+[automation]
+agent_assistance=full|skeleton|minimal
+auto_journal=true|false
+```
+
+**Règle importante :** Les arguments CLI ne peuvent pas descendre en dessous du niveau `skeleton`. Seule la configuration projet peut activer le niveau `minimal`.
+
+### 3.6.5. Détection de Contexte
+
+Les commandes `aklo` détectent automatiquement :
+- L'existence d'artefacts partiellement complétés
+- Les préférences de configuration du projet
+- L'état actuel du journal
+- Les conflits potentiels avec le travail existant
 
 ## SECTION 4 : RÉSUMÉ DES MODES OPÉRATOIRES (PROTOCOLES)
 

@@ -4,17 +4,26 @@ modified: 2025-06-28 13:00
 ---
 # PROTOCOLE SPÉCIFIQUE : SCRATCHPAD (BROUILLON DE RÉFLEXION)
 
-Ce protocole s'active lorsqu'un problème technique ou conceptuel est trop complexe pour être résolu directement et nécessite une phase d'exploration, de brainstorming ou de pseudo-codage.
+Ce protocole s'active pour les explorations temporaires qui nécessitent une phase de brainstorming ou de pseudo-codage, en restant complètement hors du système de versioning.
 
-## SECTION 1 : MISSION ET LIVRABLE
+## SECTION 1 : MISSION ET STATUT HORS VERSIONING
 
 ### 1.1. Mission
 
 Fournir un espace de travail temporaire et non structuré pour explorer des solutions, comparer des approches et clarifier des idées complexes avant de les formaliser dans un artefact officiel (`Task`, `ARCH`, etc.).
 
-### 1.2. Livrable Attendu
+### 1.2. Statut Hors Versioning
 
-1.  **Fichier Brouillon :** Un fichier `SCRATCHPAD-[ID].md` créé dans `/docs/backlog/16-scratchpads/`. Cet artefact est considéré comme **jetable** une fois que la réflexion a abouti.
+**Principe Fondamental :** Les scratchpads sont **exclus du versioning Git** pour éviter la pollution du dépôt avec des fichiers temporaires.
+
+**Implémentation :**
+- Ajout automatique au `.gitignore` : `docs/backlog/16-scratchpads/`
+- Aucun commit ne doit inclure des fichiers scratchpad
+- Stockage local uniquement pendant la durée d'exploration
+
+### 1.3. Livrable
+
+**Fichier Brouillon Temporaire :** Un fichier `SCRATCHPAD-[ID].md` créé dans `/docs/backlog/16-scratchpads/`, considéré comme jetable et non versionné.
 
 ## SECTION 2 : ARTEFACT SCRATCHPAD - GESTION ET STRUCTURE
 
@@ -23,11 +32,19 @@ Fournir un espace de travail temporaire et non structuré pour explorer des solu
 -   `SCRATCHPAD-[ID].md`
     -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
 
-### 2.2. Statuts
+### 2.2. Statuts et Cycle de Vie
 
 -   `ACTIVE` : Le brouillon est en cours d'utilisation pour une réflexion active.
 -   `ARCHIVED` : La réflexion a abouti à une solution formalisée dans un autre artefact. Le brouillon est conservé pour référence historique.
--   `DISCARDED` : L'exploration n'a pas abouti ou n'est plus pertinente. Le brouillon peut être supprimé.
+-   `DISCARDED` : L'exploration n'a pas abouti ou n'est plus pertinente.
+
+### 2.3. Gestion de la Rétention
+
+**Règles de rétention :**
+- **Durée minimale :** 6 mois de conservation obligatoire
+- **Suppression :** Uniquement sur validation explicite du `Human_Developer`
+- **Nettoyage automatique :** Aucun - la suppression est toujours manuelle
+- **Archivage :** Possibilité de déplacer vers un dossier d'archive local (hors Git)
 
 ### 2.3. Structure Recommandée (Flexible)
 

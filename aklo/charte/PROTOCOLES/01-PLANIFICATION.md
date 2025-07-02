@@ -129,3 +129,53 @@ Avant la décomposition et création des Tasks, l'agent **doit** présenter un p
      - **Cas 1 (Trivial) :** Si la demande initiale est mineure et ne justifie pas une `Task`, recommander d'utiliser le protocole [FAST-TRACK].
      - **Cas 2 (Simple) :** Si aucune `Task` ne requiert de revue, recommander de passer directement au protocole [DEVELOPPEMENT].
      - **Cas 3 (Complexe) :** Si des `Tasks` requièrent une revue, recommander d'activer le protocole [ARCHITECTURE].
+
+## SECTION 4 : COMMIT ATOMIQUE DE PLANIFICATION
+
+### 4.1. Principe du Commit Unique
+
+**Règle Fondamentale :** La planification d'un PBI produit un unique commit atomique qui inclut :
+
+1. **Toutes les TASK créées** : Tous les fichiers `TASK-[PBI_ID]-[Task_ID]-TODO.md`
+2. **Mise à jour du PBI parent** : Section "Tasks Associées" complétée
+3. **Mise à jour du journal** : Documentation du processus de planification
+
+### 4.2. Contenu du Commit
+
+**Message de commit type :**
+```
+feat(planning): Décomposition PBI-[ID] en [N] tasks
+
+- Création de [N] tasks techniques SMART
+- [X] tasks nécessitent une revue architecturale
+- PBI-[ID] mis à jour avec la liste des tasks associées
+- Journal mis à jour avec le processus de planification
+
+Tasks créées:
+- TASK-[PBI_ID]-01: [Titre]
+- TASK-[PBI_ID]-02: [Titre]
+- [...]
+
+Prochaine étape: [ARCHITECTURE|DEVELOPPEMENT|FAST-TRACK]
+```
+
+### 4.3. Validation Avant Commit
+
+**[ATTENTE_VALIDATION] Présentation du Diff Complet**
+
+Avant le commit, présenter au `Human_Developer` :
+1. **Diff de tous les fichiers TASK** créés
+2. **Diff du PBI parent** modifié
+3. **Diff du journal** mis à jour
+4. **Recommandation** pour la suite du workflow
+
+**Validation requise :** Le `Human_Developer` doit approuver explicitement le commit atomique complet.
+
+### 4.4. Gestion des Modifications Post-Planification
+
+**Règle :** Les modifications ultérieures des TASK (changements de statut, mises à jour de contenu) font partie d'autres protocoles et génèrent leurs propres commits atomiques.
+
+**Exemples :**
+- Changement `TASK-TODO` → `TASK-DONE` : commit du protocole DÉVELOPPEMENT
+- Modification des critères d'une TASK : commit du protocole META-IMPROVEMENT
+- Ajout de TASK supplémentaires : nouveau cycle de protocole PLANIFICATION

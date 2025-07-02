@@ -118,6 +118,67 @@ Avant tout développement de code, l'agent **doit** présenter un plan détaill�
     - **⚡ Automatisation `aklo` :** `aklo submit-task`
     - **Note :** La commande `aklo` vous demandera de confirmer le message de commit avant de l'exécuter.
 
-7. **[CONCLUSION] Étape 7 : Finalisation**
+7. **[CONCLUSION] Étape 7 : Finalisation et Commit Atomique**
     - Mettre à jour le statut de la `Task` à `DONE`.
+    - Mettre à jour le journal avec le résumé de l'implémentation.
     - Une fois le `diff` approuvé, créer le `commit` atomique et sémantique.
+
+## SECTION 4 : COMMIT ATOMIQUE DE DÉVELOPPEMENT
+
+### 4.1. Principe du Commit Unique
+
+**Règle Fondamentale :** Le développement d'une TASK produit un unique commit atomique qui inclut :
+
+1. **Code implémenté** : Toutes les modifications de code pour la TASK
+2. **Tests associés** : Tests unitaires, d'intégration selon la Definition of Done
+3. **TASK mise à jour** : Statut `TODO` → `DONE` avec checklist complétée
+4. **Mise à jour du journal** : Documentation de l'implémentation
+
+### 4.2. Contenu du Commit
+
+**Message de commit type :**
+```
+feat(TASK-[PBI_ID]-[Task_ID]): [Titre de la TASK]
+
+[Description détaillée de l'implémentation]
+
+- Implémentation complète selon Definition of Done
+- Tous les tests passent (linter, typage, suite de tests)
+- TASK-[PBI_ID]-[Task_ID] marquée comme DONE
+- Journal mis à jour avec le processus d'implémentation
+
+Closes TASK-[PBI_ID]-[Task_ID]
+```
+
+### 4.3. Validation Avant Commit
+
+**[ATTENTE_VALIDATION] Présentation du Diff Complet**
+
+Avant le commit, présenter au `Human_Developer` :
+1. **Diff du code implémenté** : Toutes les modifications de code
+2. **Diff des tests** : Tests créés ou modifiés
+3. **Diff de la TASK** : Statut et checklist mis à jour
+4. **Diff du journal** : Documentation de l'implémentation
+5. **Rapport de validation** : Confirmation que tous les critères sont remplis
+
+### 4.4. Gestion des Implémentations Partielles
+
+**Règle :** Si une TASK s'avère trop grande pendant l'implémentation :
+
+1. **Option 1 - Division :** Activer le protocole META-IMPROVEMENT pour diviser la TASK
+2. **Option 2 - Commit partiel :** Commit avec statut `IN_PROGRESS` et justification dans le journal
+3. **Option 3 - Révision :** Retour au protocole PLANIFICATION pour redéfinir la TASK
+
+**Exemple de commit partiel :**
+```
+feat(TASK-[PBI_ID]-[Task_ID]): [Titre] - Implémentation partielle
+
+[Description de ce qui a été implémenté]
+
+- Implémentation partielle : [Justification]
+- TASK-[PBI_ID]-[Task_ID] statut IN_PROGRESS
+- Journal mis à jour avec l'état d'avancement
+- Prochaine étape : [Plan pour finaliser]
+
+Partial implementation of TASK-[PBI_ID]-[Task_ID]
+```
