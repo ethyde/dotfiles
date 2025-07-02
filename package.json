@@ -1,0 +1,9 @@
+{
+  "name": "dotfiles",
+  "version": "1.0.3",
+  "description": "Configuration et outils de développement",
+  "scripts": {
+    "test": "echo \"Tests en cours...\" && exit 0"
+  },
+  "private": true
+}
