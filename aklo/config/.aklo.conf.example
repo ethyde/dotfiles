@@ -1,62 +1,230 @@
-# Configuration Aklo - Template de configuration projet
+# ===============================================================================
+# CONFIGURATION AKLO - DOCUMENTATION COMPLÈTE
+# ===============================================================================
 # 
-# Ce fichier sert de template pour la configuration personnalisée d'un projet.
+# Ce fichier sert de template ET de documentation pour tous les paramètres Aklo.
 # Copiez ce fichier à la racine de votre projet et adaptez selon vos besoins :
 # 
 # cp aklo/config/.aklo.conf.example .aklo.conf
 # (puis modifiez les valeurs selon votre projet)
+#
+# ⚠️  IMPORTANT: Les chemins relatifs sont calculés depuis la racine du projet
+# ===============================================================================
 
-#==============================================================================
-# CONFIGURATION PROJET
-#==============================================================================
+#===============================================================================
+# 🤖 ASSISTANCE IA ET COMPORTEMENT
+#===============================================================================
 
-# Assistance IA par défaut
+# Niveau d'assistance par défaut pour toutes les commandes
+# - full     : Génération automatique complète par l'IA (recommandé)
+# - skeleton : Structure générée, contenu à compléter manuellement
+# - minimal  : Fichiers créés avec IDs uniquement, pas de contenu
 AGENT_ASSISTANCE=full
+
+# Mise à jour automatique du journal quotidien
+# - true  : Chaque commande ajoute une entrée au journal (recommandé)
+# - false : Pas de mise à jour automatique du journal
 AUTO_JOURNAL=true
 
-# Configuration Git (adaptez selon votre projet)
+#===============================================================================
+# 🌿 CONFIGURATION GIT ET VERSIONING
+#===============================================================================
+
+# Branche principale du projet (généralement 'main' ou 'master')
 MAIN_BRANCH=main
+
+# Branche de production (peut être différente de la branche principale)
 PRODUCTION_BRANCH=main
+
+# Utilisation de branches de release dédiées
+# - true  : Création de branches release/vX.X.X pour les releases
+# - false : Releases directement depuis la branche principale
 USE_RELEASE_BRANCHES=false
+
+# Format des branches de release (utilisé si USE_RELEASE_BRANCHES=true)
+# %s sera remplacé par le numéro de version (ex: release/1.2.3)
 RELEASE_BRANCH_FORMAT=release/%s
+
+# Format des tags Git pour les versions
+# %s sera remplacé par le numéro de version (ex: v1.2.3)
 GIT_TAG_FORMAT=v%s
 
-# Structure d'artefacts (adaptez les chemins selon votre organisation)
+#===============================================================================
+# 📁 STRUCTURE D'ARTEFACTS - RÉPERTOIRES DE TRAVAIL
+#===============================================================================
+
+# Répertoire racine du projet (chemin absolu recommandé)
 PROJECT_WORKDIR=/path/to/your/project
+
+# 📋 Product Backlog Items - Fonctionnalités et user stories
 PBI_DIR=docs/backlog/00-pbi
+
+# 📝 Tasks - Tâches techniques décomposées depuis les PBI
 TASKS_DIR=docs/backlog/01-tasks
+
+# 🏗️ Architecture - Documents de conception technique
 ARCH_DIR=docs/backlog/02-architecture
+
+# 🐛 Debug - Rapports de bugs et corrections
 DEBUG_DIR=docs/backlog/03-debug
+
+# 👀 Reviews - Revues de code et analyses
 REVIEWS_DIR=docs/backlog/03-reviews
+
+# ♻️ Refactoring - Améliorations de code sans changement fonctionnel
 REFACTOR_DIR=docs/backlog/05-refactor
+
+# ⚡ Optimisation - Améliorations de performance
 OPTIM_DIR=docs/backlog/06-optim
+
+# 🚀 Releases - Gestion des versions et déploiements
 RELEASES_DIR=docs/backlog/07-releases
-EXPERIMENTS_DIR=docs/backlog/09-experiments
-COMPETITION_DIR=docs/backlog/10-competition
-SECURITY_DIR=docs/backlog/11-security
-DEPRECATION_DIR=docs/backlog/12-deprecations
-KB_FILE=docs/KNOWLEDGE-BASE.md
-ONBOARDING_DIR=docs/project
-TRACKING_DIR=docs/backlog/13-tracking
-USER_DOCS_DIR=docs/backlog/14-user-docs
-FAST_DIR=docs/backlog/17-fast-track
-META_DIR=docs/backlog/18-improvements
+
+# 🚨 Hotfixes - Corrections d'urgence en production
 HOTFIX_DIR=docs/backlog/08-hotfixes
+
+# 🧪 Expérimentations - Tests A/B et hypothèses
+EXPERIMENTS_DIR=docs/backlog/09-experiments
+
+# 📊 Analyse concurrentielle - Études de marché et benchmarks
+COMPETITION_DIR=docs/backlog/10-competition
+
+# 🔐 Sécurité - Audits et corrections de sécurité
+SECURITY_DIR=docs/backlog/11-security
+
+# ⚠️ Dépréciations - Suppression progressive de fonctionnalités
+DEPRECATION_DIR=docs/backlog/12-deprecations
+
+# 📈 Tracking - Plans de suivi et analytics
+TRACKING_DIR=docs/backlog/13-tracking
+
+# 📖 Documentation utilisateur - Guides et tutoriels
+USER_DOCS_DIR=docs/backlog/14-user-docs
+
+# 📓 Journal - Entrées quotidiennes de travail
 JOURNAL_DIR=docs/backlog/15-journal
+
+# 📝 Scratchpads - Brouillons et réflexions temporaires
 SCRATCHPAD_DIR=docs/backlog/16-scratchpads
 
-# Validation de base (adaptez selon vos outils)
+# ⚡ Fast-track - Procédures accélérées pour petits changements
+FAST_DIR=docs/backlog/17-fast-track
+
+# 🔄 Meta-improvements - Améliorations de la charte et processus
+META_DIR=docs/backlog/18-improvements
+
+#===============================================================================
+# 📚 FICHIERS SPÉCIAUX ET DOCUMENTATION PROJET
+#===============================================================================
+
+# Base de connaissances centralisée (fichier unique)
+# Contient les apprentissages et solutions réutilisables
+KB_FILE=docs/KNOWLEDGE-BASE.md
+
+# Répertoire pour la documentation d'onboarding
+# Contient les guides d'accueil pour nouveaux développeurs
+ONBOARDING_DIR=docs/project
+
+#===============================================================================
+# ✅ VALIDATION ET QUALITÉ
+#===============================================================================
+
+# Activation de la validation par linter
+# - true  : Exécute le linter avant certaines opérations
+# - false : Pas de validation automatique par linter
 VALIDATE_LINTER=true
+
+# Activation de la validation par tests
+# - true  : Exécute les tests avant certaines opérations
+# - false : Pas d'exécution automatique des tests
 VALIDATE_TESTS=true
+
+# Activation de la validation par build
+# - true  : Vérifie que le projet se compile avant certaines opérations
+# - false : Pas de vérification de build automatique
 VALIDATE_BUILD=true
+
+# Commande pour exécuter le linter (adaptez selon votre stack)
+# Exemples: "npm run lint", "flake8 .", "golangci-lint run"
 LINTER_COMMAND=npm run lint
+
+# Commande pour exécuter les tests (adaptez selon votre stack)
+# Exemples: "npm test", "pytest", "go test ./..."
 TEST_COMMAND=npm test
+
+# Commande pour builder le projet (adaptez selon votre stack)
+# Exemples: "npm run build", "make build", "go build"
 BUILD_COMMAND=npm run build
 
-# MCP et sécurité
+#===============================================================================
+# 🔌 SERVEURS MCP ET INTÉGRATIONS
+#===============================================================================
+
+# Activation des serveurs MCP (Model Context Protocol)
+# - true  : Utilise les serveurs MCP pour l'assistance IA avancée
+# - false : Fonctionnement en mode autonome sans serveurs MCP
 USE_MCP_SERVERS=true
+
+# Serveur MCP pour les commandes terminal et système
+# Permet l'exécution sécurisée de commandes et la gestion de fichiers
 MCP_TERMINAL_SERVER=@aklo/mcp-terminal
+
+# Serveur MCP pour la documentation et les protocoles
+# Permet l'accès aux protocoles Aklo et la génération de contenu
 MCP_DOCUMENTATION_SERVER=@aklo/mcp-documentation
+
+# Timeout pour les opérations MCP (en millisecondes)
+# Augmentez si vos opérations sont lentes ou complexes
 MCP_TIMEOUT=30000
+
+#===============================================================================
+# 🛡️ SÉCURITÉ ET VALIDATION HUMAINE
+#===============================================================================
+
+# Exigence de validation humaine pour les opérations critiques
+# - true  : Demande confirmation avant les opérations sensibles (recommandé)
+# - false : Exécution automatique sans confirmation
 REQUIRE_HUMAN_VALIDATION=true
+
+# Sauvegarde automatique avant modifications importantes
+# - true  : Crée des backups avant les opérations destructives (recommandé)
+# - false : Pas de sauvegarde automatique
 AUTO_BACKUP=true
+
+#===============================================================================
+# 📝 NOTES D'UTILISATION
+#===============================================================================
+#
+# 🎯 NIVEAUX D'ASSISTANCE DÉTAILLÉS :
+#
+# • FULL (recommandé pour la productivité)
+#   - L'IA génère tout le contenu selon les protocoles
+#   - Idéal pour un workflow rapide et guidé
+#   - Contenu de haute qualité basé sur les meilleures pratiques
+#
+# • SKELETON (recommandé pour l'apprentissage)
+#   - Structure complète générée avec sections vides
+#   - Permet de comprendre l'organisation attendue
+#   - Vous remplissez le contenu selon vos besoins
+#
+# • MINIMAL (pour les experts)
+#   - Création des fichiers avec nommage correct uniquement
+#   - Aucun contenu généré, liberté totale
+#   - Nécessite une bonne connaissance des protocoles
+#
+# 🔄 WORKFLOW RECOMMANDÉ :
+#
+# 1. Commencez avec AGENT_ASSISTANCE=full pour découvrir
+# 2. Passez à skeleton quand vous maîtrisez les protocoles
+# 3. Utilisez minimal pour les projets avec contraintes spécifiques
+#
+# 📁 ORGANISATION DES RÉPERTOIRES :
+#
+# La structure proposée suit les meilleures pratiques :
+# - Numérotation logique (00, 01, 02...) pour l'ordre de workflow
+# - Noms explicites pour faciliter la navigation
+# - Séparation claire entre types d'artefacts
+#
+# Vous pouvez adapter cette structure selon vos besoins !
+#
+#===============================================================================
