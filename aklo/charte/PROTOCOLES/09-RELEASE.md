@@ -122,12 +122,67 @@ Avant toute procédure de release, l'agent **doit** présenter un plan détaill�
     -   Lancer l'intégralité de la suite de tests sur la branche de travail.
     -   Si tous les tests sont au vert, lancer le script de build de production.
 
-5.  **[PROCEDURE] Phase 5 : Finalisation et Tagging**
-    -   Si le build réussit, fusionner la branche de travail dans la **Branche de production**.
-    -   Créer un tag Git annoté en respectant le **Format du tag Git** défini (ex: `v1.2.0`).
-    -   Pousser le tag et les branches sur le dépôt distant.
-    -   Fusionner la **Branche de production** dans la **Branche de développement principale** pour synchroniser.
+5.  **[PROCEDURE] Phase 5 : Préparation du Commit Atomique**
+    -   Finaliser le rapport de release au statut `AWAITING_DEPLOYMENT`.
+    -   Mettre à jour le journal avec le processus de release.
+    -   Préparer tous les fichiers pour le commit atomique final.
 
-6.  **[CONCLUSION] Phase 6 : Prêt pour Déploiement**
-    -   Mettre à jour le rapport de release au statut `AWAITING_DEPLOYMENT`.
-    -   Informer le `Human_Developer` que la version est prête à être déployée.
+6.  **[ATTENTE_VALIDATION] Phase 6 : Validation du Commit Atomique**
+    -   Présenter le diff complet de la release au `Human_Developer`.
+    -   Attendre validation explicite avant le commit final.
+
+7.  **[CONCLUSION] Phase 7 : Finalisation et Tagging**
+    -   Créer le commit atomique de release.
+    -   Si configuré, fusionner dans la **Branche de production**.
+    -   Créer un tag Git annoté en respectant le **Format du tag Git** défini.
+    -   Pousser le tag et les branches sur le dépôt distant.
+
+## SECTION 4 : COMMIT ATOMIQUE DE RELEASE
+
+### 4.1. Principe du Commit Unique
+
+**Règle Fondamentale :** Une release produit un unique commit atomique qui inclut :
+
+1. **Rapport de release finalisé** : `RELEASE-[version]-AWAITING_DEPLOYMENT.md`
+2. **CHANGELOG.md mis à jour** : Avec toutes les nouvelles fonctionnalités
+3. **Version mise à jour** : Dans `package.json` ou fichiers équivalents
+4. **Mise à jour du journal** : Documentation du processus de release
+
+### 4.2. Workflow Séquentiel Sans Commits Intermédiaires
+
+**Principe :** Toutes les modifications sont préparées en local, validées ensemble, puis commitées atomiquement.
+
+**Séquence :**
+1. **Préparation locale :** Rapport + CHANGELOG + version (pas de commit)
+2. **Validation technique :** Tests + build (pas de commit)
+3. **Validation humaine :** Diff complet présenté au `Human_Developer`
+4. **Commit atomique :** Après validation explicite
+5. **Tagging :** Tag Git créé sur le commit atomique
+
+### 4.3. Contenu du Commit
+
+**Message de commit type :**
+```
+release: Version [version]
+
+[Résumé des principales fonctionnalités de cette version]
+
+- Rapport RELEASE-[version] finalisé
+- CHANGELOG.md mis à jour avec [N] nouvelles fonctionnalités
+- Version mise à jour : [ancienne] → [nouvelle]
+- Journal mis à jour avec le processus de release
+- Tous les tests passent, build de production validé
+
+Features included:
+- [Feature 1]
+- [Feature 2]
+- [...]
+
+Breaking changes: [None|Liste des breaking changes]
+```
+
+### 4.4. Gestion des Rollbacks
+
+**Règle :** En cas de problème détecté après release, utiliser le protocole HOTFIX plutôt que de modifier le commit de release.
+
+**Traçabilité :** Le commit de release reste inchangé pour préserver l'historique, les corrections sont apportées par des commits séparés.

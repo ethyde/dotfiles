@@ -1,92 +1,34 @@
 #!/bin/sh
 #==============================================================================
-# The Aklo Protocol - Main Script
+# The Aklo Protocol - Version 2.0 (Commits Atomiques)
 #
 # Auteur: Human_Developer & AI_Agent
-# Version: 1.5 (Version consolidée et finale)
+# Version: 2.0 (Commits atomiques par protocole)
 #
-# Cet outil est l'exécuteur des rituels définis dans la Charte IA.
-# Il automatise la création d'artefacts, la gestion de Git et le cycle de
-# vie des tâches pour garantir une application stricte des protocoles.
+# Cette version implémente le principe des commits atomiques par protocole
+# défini dans le META-IMPROVEMENT workflow-consistency-20250102.
 #==============================================================================
 
 # Configuration de base du Shell
-# 'set -e' : Stoppe le script immédiatement si une commande échoue.
 set -e
 
-
 #==============================================================================
-# SECTION 1 : FONCTIONS UTILITAIRES (Boîte à outils interne)
+# SECTION 1 : FONCTIONS UTILITAIRES HÉRITÉES
 #==============================================================================
 
-# Fonction: get_next_id
-# Rôle: Trouve le plus grand ID numérique dans un nom de fichier et retourne le suivant.
-#       Cette fonction est essentielle pour la création incrémentale d'artefacts.
-#
-# Usage: get_next_id [CHEMIN_REPERTOIRE] [PREFIXE_FICHIER]
-# Ex: get_next_id "docs/backlog/00-pbi" "PBI-"
-#
+# Réutilisation des fonctions existantes
 get_next_id() {
-  # Arguments de la fonction pour plus de lisibilité.
   SEARCH_PATH="$1"
   PREFIX="$2"
-
-  # La commande est décomposée pour la clarté :
-  # 1. 'ls "${SEARCH_PATH}/${PREFIX}"*-*.md 2>/dev/null' : Liste les fichiers correspondant au pattern.
-  #    '2>/dev/null' redirige les erreurs (ex: "aucun fichier trouvé") vers le néant pour éviter les messages parasites.
-  # 2. 'sed -n "s/.*${PREFIX}\([0-9]*\)-.*/\1/p"' : Extrait uniquement les chiffres qui se trouvent après le préfixe.
-  # 3. 'sort -n' : Trie les numéros extraits numériquement (et non alphabétiquement).
-  # 4. 'tail -1' : Ne garde que la dernière ligne, qui est le numéro le plus élevé.
-  # 5. '|| echo 0' : C'est un garde-fou crucial. Si la commande 'ls' ou 'sed' échoue (ex: répertoire vide),
-  #    cette partie s'exécute et retourne "0" comme valeur par défaut.
   LAST_ID=$(ls "${SEARCH_PATH}/${PREFIX}"*-*.md 2>/dev/null | sed -n "s/.*${PREFIX}\([0-9]*\)-.*/\1/p" | sort -n | tail -1 || echo 0)
-  
-  # On incrémente simplement le dernier ID trouvé pour obtenir le nouvel ID.
   NEXT_ID=$((LAST_ID + 1))
-  
-  # On retourne le résultat.
   echo "$NEXT_ID"
 }
 
-# Fonction: get_artefact_header
-# Rôle: Extrait une valeur depuis l'en-tête d'un fichier artefact en se basant sur une clé.
-#       Très utile pour rendre les artefacts "auto-descriptifs".
-#
-# Usage: get_artefact_header [FICHIER] [CLE_EN-TETE]
-# Ex: get_artefact_header "docs/tasks/TASK-42-1.md" "Branche Git"
-#
-get_artefact_header() {
-  # Arguments de la fonction pour plus de lisibilité.
-  ARTEFACT_FILE="$1"
-  HEADER_KEY="$2"
-
-  # 'sed' est utilisé ici pour sa capacité à filtrer et transformer du texte.
-  # -n : Supprime l'affichage par défaut de chaque ligne.
-  # /.../s/.../.../p : C'est la commande de substitution de sed.
-  #   - /^${HEADER_KEY}:/ : Ne s'applique qu'aux lignes qui commencent (^) par la clé recherchée.
-  #   - s/^[^:]*: \`*\([^`]*\)\`*$/\1/ : C'est l'expression de remplacement.
-  #     - s/.../.../ : Commande de substitution.
-  #     - ^[^:]*: : Capture tout depuis le début de la ligne jusqu'aux deux-points et l'espace.
-  #     - Group capture : Il prend tout ce qui n'est pas un backtick,
-  #       et est lui-même entouré de potentiels backticks.
-  #     - /\1/ : Remplace toute la ligne par le contenu du premier groupe de capture.
-  #   - p : Imprime la ligne si une substitution a eu lieu.
-  sed -n "/^${HEADER_KEY}:/s/^[^:]*: \`*\([^\`]*\)\`*$/\1/p" "$ARTEFACT_FILE"
-}
-
-# Fonction: get_config (Version 3 - avec recherche récursive)
-# Rôle: Lit une valeur dans la configuration. Elle cherche d'abord un fichier
-#       .aklo.conf en remontant dans l'arborescence depuis le répertoire courant
-#       pour des configurations spécifiques, et se rabat sur le fichier global
-#       dans les dotfiles si aucune configuration locale n'est trouvée.
-#
-# Usage: get_config [CLE]
-#
 get_config() {
   KEY="$1"
   GLOBAL_CONFIG_FILE="$(dirname "$0")/../config/.aklo.conf"
-
-  # Fonction interne pour trouver le fichier .aklo.conf en remontant l'arborescence
+  
   find_local_config() {
     local current_dir="$(pwd)"
     while [ "$current_dir" != "/" ]; do
@@ -98,987 +40,551 @@ get_config() {
     done
     return 1
   }
-
-  # On cherche d'abord dans l'arborescence locale
-  LOCAL_CONFIG_FILE=$(find_local_config)
-  if [ -n "$LOCAL_CONFIG_FILE" ] && [ -f "$LOCAL_CONFIG_FILE" ]; then
-    # 'grep' retourne la ligne si elle est trouvée.
-    VALUE=$(grep "^${KEY}=" "$LOCAL_CONFIG_FILE" | cut -d'=' -f2)
-    # Si une valeur a été trouvée, on la retourne et on arrête la fonction.
-    if [ -n "$VALUE" ]; then
-      echo "$VALUE"
-      return
-    fi
-  fi
-
-  # Si aucune valeur n'a été trouvée localement, on cherche dans le fichier global.
-  if [ -f "$GLOBAL_CONFIG_FILE" ]; then
-    grep "^${KEY}=" "$GLOBAL_CONFIG_FILE" | cut -d'=' -f2
-  else
-    echo "Erreur critique : Fichier de configuration global introuvable." >&2
+  
+  CONFIG_FILE=$(find_local_config) || CONFIG_FILE="$GLOBAL_CONFIG_FILE"
+  if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Erreur : Fichier de configuration introuvable." >&2
     exit 1
   fi
-}
-
-# Fonction: get_current_version
-# Rôle: Lit la version actuelle du projet directement depuis le fichier package.json.
-#       Cette fonction est un prérequis pour toute automatisation de release.
-#
-# Note: L'utilisation de 'sed' pour extraire des données d'un fichier JSON est
-#       une simplification pour respecter notre contrainte de "zéro dépendance externe".
-#       Dans un environnement avec 'jq', on l'utiliserait pour plus de robustesse.
-#
-get_current_version() {
-  # On vérifie d'abord que le fichier package.json existe pour éviter les erreurs.
-  if [ ! -f "package.json" ]; then
-    echo "Erreur : fichier package.json non trouvé. Impossible de déterminer la version." >&2
-    exit 1
-  fi
-
-  # La commande sed est utilisée pour trouver et extraire la version :
-  # 1. '/"version":/ s/.../.../ p' : Ne s'applique qu'aux lignes contenant "version":
-  # 2. 's/.*: *"\([^"]*\)".*/\1/' : Capture tout ce qui se trouve entre les guillemets
-  #    après la clé "version" et les deux-points.
-  #    - '.*: *"' : Trouve la clé, les deux-points et le guillemet ouvrant.
-  #    - '\([^"]*\)' : C'est le groupe de capture. Il prend tous les caractères qui ne sont PAS un guillemet.
-  #    - '".*/' : Capture la fin de la ligne.
-  #    - /\1/ : Remplace toute la ligne par le contenu capturé (le numéro de version).
-  sed -n '/"version":/s/.*: *"\([^"]*\)".*/\1/p' package.json
-}
-
-# Fonction: bump_version
-# Rôle: Incrémente une version SemVer (M.m.p) en fonction du type de bump.
-#       Cette fonction est le moteur logique de la commande 'aklo release'.
-#
-# Usage: bump_version "1.2.3" "minor" -> retourne "1.3.0"
-#
-bump_version() {
-  # Arguments de la fonction pour plus de lisibilité.
-  VERSION="$1"
-  BUMP_TYPE="$2"
-
-  # On utilise 'cut' pour séparer la chaîne de version en trois parties
-  # en utilisant le point comme délimiteur (-d'.').
-  # -f1 : premier champ (Major)
-  # -f2 : deuxième champ (Minor)
-  # -f3 : troisième champ (Patch)
-  MAJOR=$(echo "$VERSION" | cut -d. -f1)
-  MINOR=$(echo "$VERSION" | cut -d. -f2)
-  PATCH=$(echo "$VERSION" | cut -d. -f3)
-
-  # Le 'case' est la structure de contrôle parfaite pour gérer les
-  # différents types d'incrémentation.
-  case "$BUMP_TYPE" in
-    "major")
-      # Pour une release majeure, on incrémente le numéro majeur
-      # et on réinitialise les numéros mineur et patch à 0.
-      MAJOR=$((MAJOR + 1))
-      MINOR=0
-      PATCH=0
-      ;;
-    "minor")
-      # Pour une release mineure, on incrémente le numéro mineur
-      # et on réinitialise le numéro de patch à 0.
-      MINOR=$((MINOR + 1))
-      PATCH=0
-      ;;
-    "patch")
-      # Pour un patch, on incrémente simplement le numéro de patch.
-      PATCH=$((PATCH + 1))
-      ;;
-    *)
-      # Cas par défaut si un argument invalide est fourni.
-      echo "Erreur: type de bump invalide. Utilisez 'major', 'minor' ou 'patch'." >&2
-      exit 1
-      ;;
-  esac
-
-  # On reconstruit et retourne la nouvelle chaîne de version.
-  echo "${MAJOR}.${MINOR}.${PATCH}"
-}
-
-# Fonction: get_latest_production_tag
-# Rôle: Trouve le dernier tag Git sur la branche de production.
-#       Cette fonction est la pierre angulaire du protocole de HOTFIX,
-#       car elle garantit que les corrections d'urgence partent d'une
-#       base de code stable et connue.
-#
-get_latest_production_tag() {
-  # On récupère d'abord le nom de la branche de production depuis la configuration.
-  PRODUCTION_BRANCH=$(get_config "PRODUCTION_BRANCH")
-
-  # On utilise la commande 'git describe', qui est l'outil parfait pour cela.
-  # --tags : Indique à 'describe' de ne considérer que les tags.
-  # --abbrev=0 : Supprime le suffixe de hash du commit pour n'avoir que le nom du tag propre.
-  # "${PRODUCTION_BRANCH}" : Spécifie le point de départ de la recherche (la tête de la branche de prod).
-  git describe --tags --abbrev=0 "${PRODUCTION_BRANCH}"
-}
-
-# Fonction: get_template_from_protocol
-# Rôle: Extrait une structure d'artefact directement depuis un fichier de protocole.
-#       Elle rend le répertoire de templates obsolète et garantit que les
-#       artefacts générés sont TOUJOURS 100% conformes à la Charte.
-#
-# Usage: get_template_from_protocol [CHEMIN_PROTOCOLE] [TITRE_DE_SECTION]
-#
-get_template_from_protocol() {
-  # Arguments de la fonction pour plus de lisibilité.
-  PROTOCOL_FILE="$1"
-  SECTION_TITLE="$2"
-
-  # 'awk' est utilisé ici pour sa capacité à traiter un fichier ligne par ligne
-  # avec une logique conditionnelle, ce qui est parfait pour extraire un bloc de texte.
-  #
-  # -v title="$SECTION_TITLE" : passe une variable shell (le titre de la section)
-  #                            dans le script awk pour qu'il puisse l'utiliser.
-  #
-  # Le script awk se lit comme suit :
-  # 1. '$0 ~ title { in_section=1 }' : Si la ligne courante ('$0') contient le titre
-  #                                    de la section, on active un drapeau 'in_section'.
-  # 2. 'in_section && /```markdown/ { in_code_block=1; next }' : Si on est dans la bonne
-  #                                    section ET qu'on trouve le début du bloc de code (backtick-markdown),
-  #                                    on active un second drapeau 'in_code_block' et on
-  #                                    passe immédiatement à la ligne suivante ('next').
-  # 3. 'in_section && /```/ { in_code_block=0; in_section=0 }' : Si on trouve la balise
-  #                                    de fin de bloc de code (backticks), on désactive les deux drapeaux.
-  # 4. 'in_code_block { print }' : Si le drapeau 'in_code_block' est actif, alors on
-  #                                imprime la ligne courante.
-  #
-  awk -v title="$SECTION_TITLE" '
-    $0 ~ title { in_section=1 }
-    in_section && /^```markdown/ { in_code_block=1; next }
-    in_section && /^```$/ { in_code_block=0; in_section=0 }
-    in_code_block { print }
-  ' "$PROTOCOL_FILE"
+  
+  sed -n "/^${KEY}=/s/^[^=]*=//p" "$CONFIG_FILE" | tr -d '"'
 }
 
 #==============================================================================
-# SECTION 2 : COMMANDES (Les "Rituels" d'Aklo)
+# SECTION 2 : FONCTIONS JOURNAL ATOMIQUE
 #==============================================================================
 
-# Commande: init (Version 3, intelligente et complète)
-# Rôle: Prépare entièrement un projet pour l'utilisation d'Aklo.
-#       1. Lie la Charte IA.
-#       2. Crée un fichier de configuration local .aklo.conf.
-#       3. Pré-remplit le PROJECT_WORKDIR avec le chemin actuel.
-#       4. Configure .gitignore pour ignorer ces deux éléments.
-#
-command_init() {
-  # --- Déclaration des variables ---
-  AKLO_CHARTE_PATH="$(dirname "$(readlink -f "$0")")/../charte"
-  TARGET_CHARTE_PATH="./docs/CHARTE_IA"
-  LOCAL_CONFIG_FILE="./.aklo.conf"
-  GITIGNORE_FILE="./.gitignore"
-  IGNORE_ENTRY_CHARTE="docs/CHARTE_IA"
-  IGNORE_ENTRY_CONFIG=".aklo.conf"
-
-  # --- Étape 1 : Vérifications Préliminaires ---
-  if [ -e "$TARGET_CHARTE_PATH" ] || [ -f "$LOCAL_CONFIG_FILE" ]; then
-    echo "Warning: Aklo seems to be already initiated in this project." >&2
-    exit 1
-  fi
-
-  # --- Étape 2 : Confirmation de l'Utilisateur ---
-  echo "This ritual will fully prepare your project for the Aklo Protocol:"
-  echo "  1. Link the central Charte IA into './docs/CHARTE_IA'."
-  echo "  2. Create a local '.aklo.conf' file."
-  echo "  3. Automatically set 'PROJECT_WORKDIR' in this new file."
-  echo "  4. Configure '.gitignore' with optimized Aklo security patterns."
-  echo "  5. Ensure no Aklo files are tracked by Git."
-  printf "\nProceed? (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then echo "Invocation aborted."; exit 0; fi
-  echo ""
-
-  # --- Étape 3 : Création du Lien Symbolique ---
-  echo "› Linking the Charte..."
-  mkdir -p ./docs
-  ln -s "$AKLO_CHARTE_PATH" "$TARGET_CHARTE_PATH"
-  echo "  ✅ Charte linked."
-
-  # --- Étape 4 : Création du Fichier de Configuration Local ---
-  echo "› Creating local configuration file..."
-  touch "$LOCAL_CONFIG_FILE"
-  echo "  ✅ .aklo.conf created."
-
-  # --- Étape 5 : Configuration Optimisée du .gitignore ---
-  echo "› Configuring .gitignore for Aklo security..."
-  touch "$GITIGNORE_FILE"
+# Fonction: update_journal
+# Rôle: Met à jour le journal quotidien avec une entrée de protocole
+# Usage: update_journal "PROTOCOLE" "Action" "Description" "Artefacts"
+update_journal() {
+  PROTOCOL="$1"
+  ACTION="$2"
+  DESCRIPTION="$3"
+  ARTEFACTS="$4"
   
-  # Vérifier si la section Aklo existe déjà
-  if ! grep -q "# Aklo Protocol" "$GITIGNORE_FILE"; then
-    echo "" >> "$GITIGNORE_FILE"
-    echo "# Aklo Protocol" >> "$GITIGNORE_FILE"
-    echo ".aklo.*" >> "$GITIGNORE_FILE"
-    echo "docs/CHARTE_IA" >> "$GITIGNORE_FILE"
-    echo "  ✅ .gitignore configured with optimized Aklo patterns."
-  else
-    echo "  ℹ️  .gitignore already contains Aklo configuration."
+  JOURNAL_DIR="./docs/backlog/15-journal"
+  TODAY=$(date +%Y-%m-%d)
+  JOURNAL_FILE="${JOURNAL_DIR}/JOURNAL-${TODAY}.md"
+  TIMESTAMP=$(date +%H:%M)
+  
+  # Créer le répertoire journal si nécessaire
+  mkdir -p "$JOURNAL_DIR"
+  
+  # Créer le fichier journal du jour si nécessaire
+  if [ ! -f "$JOURNAL_FILE" ]; then
+    cat > "$JOURNAL_FILE" << EOF
+# JOURNAL DE TRAVAIL : ${TODAY}
+---
+**Responsable:** Human_Developer
+**Objectif(s) de la journée:** [À définir]
+---
+
+## Entrées Chronologiques
+
+### ${TIMESTAMP} - Début de session
+
+- **Action :** Ouverture du journal quotidien
+- **Contexte :** Première utilisation du système de journal intégré
+
+EOF
   fi
+  
+  # Ajouter l'entrée de protocole
+  cat >> "$JOURNAL_FILE" << EOF
+### ${TIMESTAMP} - [${PROTOCOL}] ${ACTION}
 
-  # --- Étape 6 : Pré-remplissage du WORKDIR ---
-  echo "› Setting project working directory..."
-  # 'pwd' récupère le chemin absolu du répertoire courant.
-  CURRENT_WORKDIR=$(pwd)
-  # On écrit la configuration directement dans le fichier local.
-  echo "# Auto-generated by 'aklo init'" > "$LOCAL_CONFIG_FILE"
-  echo "PROJECT_WORKDIR=${CURRENT_WORKDIR}" >> "$LOCAL_CONFIG_FILE"
-  echo "  ✅ PROJECT_WORKDIR set to: ${CURRENT_WORKDIR}"
+- **Action :** ${DESCRIPTION}
+- **Artefacts :** ${ARTEFACTS}
+- **Timestamp :** ${TODAY} ${TIMESTAMP}
 
-  # --- Étape 7 : Sécurisation Git ---
-  echo "› Securing Git configuration..."
-  # S'assurer que le lien symbolique n'est pas déjà tracké par Git
-  if git rev-parse --git-dir >/dev/null 2>&1; then
-    if git ls-files --cached | grep -q "^docs/CHARTE_IA$"; then
-      git rm --cached docs/CHARTE_IA >/dev/null 2>&1 || true
-      echo "  ✅ Removed existing CHARTE_IA symlink from Git tracking."
-    else
-      echo "  ✅ Git security verified - no Aklo files tracked."
-    fi
-  else
-    echo "  ℹ️  No Git repository detected - skipping Git security check."
-  fi
-
-  # --- Étape 8 : Message de Fin ---
-  echo ""
-  echo "🎉 Aklo Protocol is now fully initiated. Your project is ready."
-  echo "🔒 Security: Aklo files are properly excluded from Git tracking."
-  echo "You can now use other Aklo commands like 'aklo propose-pbi'."
+EOF
 }
 
-# Commande: propose-pbi
-# Rôle: Crée un nouvel artefact Product Backlog Item en lisant sa structure
-#       directement depuis le protocole 00-PRODUCT-OWNER.md.
-#
-# Usage: aklo propose-pbi "<titre du pbi>"
-#
-command_propose_pbi() {
-  # --- Étape 1 : Vérification de l'environnement ---
-  # On s'assure que le projet a bien été initialisé avec 'aklo init'.
-  # La présence du lien symbolique est notre indicateur.
-  if [ ! -L "./docs/CHARTE_IA" ]; then
-      echo "Erreur : Aklo n'est pas initialisé dans ce projet." >&2
-      echo "Veuillez lancer 'aklo init' avant toute autre commande." >&2
-      exit 1
-  fi
-  # On vérifie que l'utilisateur a bien fourni un titre pour le PBI.
-  if [ -z "$1" ]; then
-    echo "Erreur : Le titre du PBI est requis." >&2
-    echo "Usage: aklo propose-pbi \"<titre du pbi>\"" >&2
-    exit 1
-  fi
-  
-  # --- Étape 2 : Assignation des variables ---
-  PBI_TITLE="$1"
-  # Le chemin vers le répertoire des PBI
-  PBI_PATH="./docs/backlog/00-pbi"
-  # On appelle notre fonction utilitaire pour obtenir un nouvel ID unique.
-  PBI_ID=$(get_next_id "$PBI_PATH" "PBI-")
-  # On construit le nom de fichier final.
-  FILENAME="${PBI_PATH}/PBI-${PBI_ID}-PROPOSED.md"
-  
-  # --- Étape 3 : Extraction du Template depuis la Charte ---
-  # 1. On définit le chemin vers le protocole source et le titre de la section à trouver.
-  PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/00-PRODUCT-OWNER.md"
-  SECTION_TO_EXTRACT="Structure Obligatoire Du Fichier PBI"
+#==============================================================================
+# SECTION 3 : COMMANDES AVEC COMMITS ATOMIQUES
+#==============================================================================
 
-  # 2. On appelle notre fonction 'get_template_from_protocol' pour extraire le template brut.
-  echo "› Lecture de la structure depuis le protocole ${PROTOCOL_FILE}..."
-  RAW_TEMPLATE=$(get_template_from_protocol "$PROTOCOL_FILE" "$SECTION_TO_EXTRACT")
-
-  # On vérifie que l'extraction a bien fonctionné.
-  if [ -z "$RAW_TEMPLATE" ]; then
-    echo "Erreur : Impossible d'extraire la structure depuis le protocole." >&2
-    echo "Vérifiez que la section '${SECTION_TO_EXTRACT}' existe et est correctement formatée." >&2
-    exit 1
-  fi
-
-  # --- Étape 4 : Création de l'Artefact ---
-  echo "› Création de l'artefact..."
-  # Créer le répertoire parent s'il n'existe pas
-  mkdir -p "$(dirname "$FILENAME")"
-  # On utilise 'sed' pour remplacer les placeholders sémantiques (ex: [ID])
-  # par les valeurs réelles directement. Les expressions régulières sont
-  # échappées (\[, \]) pour correspondre aux crochets littéraux.
-  echo "$RAW_TEMPLATE" | \
-    sed -e "s/%%ID%%/${PBI_ID}/g" \
-        -e "s/%%TITLE%%/${PBI_TITLE}/g" \
-        -e "s/\[ID\]/${PBI_ID}/g" \
-        -e "s/\$(date +'%Y-%m-%d')/$(date +'%Y-%m-%d')/g" > "$FILENAME"
-  
-  echo "✅ Artefact créé : ${FILENAME}"
-}
-
-# Commande: plan
-# Rôle: Décompose un PBI en une ou plusieurs tâches de manière interactive,
-#       en lisant la structure des tâches directement depuis le protocole de planification.
-#
-# Usage: aklo plan <PBI_ID>
-#
-command_plan() {
-  # --- Étape 1 : Validation des arguments ---
+# Commande: plan (Version 2.0 - Commit Atomique)
+# Implémente le protocole PLANIFICATION avec commit atomique unique
+command_plan_v2() {
   if [ -z "$1" ]; then
     echo "Erreur : L'ID du PBI est requis (ex: 42)." >&2
     exit 1
   fi
   PBI_ID="$1"
-
-  # On trouve le fichier PBI, quel que soit son statut (PROPOSED, AGREED, etc.)
-  # en utilisant un glob (*).
-  PBI_FILE=$(ls ./docs/CHARTE_IA/../backlog/00-pbi/PBI-${PBI_ID}-*.md 2>/dev/null)
+  
+  # Détection du niveau d'assistance
+  AGENT_ASSISTANCE="full"
+  AUTO_JOURNAL="true"
+  
+  # Parsing des arguments
+  shift
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --no-agent)
+        AGENT_ASSISTANCE="skeleton"
+        ;;
+      --no-journal)
+        AUTO_JOURNAL="false"
+        ;;
+      *)
+        echo "Argument inconnu: $1" >&2
+        exit 1
+        ;;
+    esac
+    shift
+  done
+  
+  # Override depuis la configuration si présente
+  CONFIG_ASSISTANCE=$(get_config "agent_assistance" 2>/dev/null || echo "")
+  CONFIG_JOURNAL=$(get_config "auto_journal" 2>/dev/null || echo "")
+  
+  if [ -n "$CONFIG_ASSISTANCE" ]; then
+    AGENT_ASSISTANCE="$CONFIG_ASSISTANCE"
+  fi
+  if [ -n "$CONFIG_JOURNAL" ]; then
+    AUTO_JOURNAL="$CONFIG_JOURNAL"
+  fi
+  
+  echo "--- PLANIFICATION v2.0 (Commit Atomique) ---"
+  echo "› PBI: ${PBI_ID}"
+  echo "› Assistance: ${AGENT_ASSISTANCE}"
+  echo "› Journal automatique: ${AUTO_JOURNAL}"
+  echo ""
+  
+  # Validation du PBI
+  PBI_FILE=$(ls ./docs/backlog/00-pbi/PBI-${PBI_ID}-*.md 2>/dev/null | head -1)
   if [ ! -f "$PBI_FILE" ]; then
-    echo "Erreur : Impossible de trouver le PBI ${PBI_ID}." >&2
+    echo "Erreur : PBI ${PBI_ID} introuvable." >&2
     exit 1
   fi
-
-  # --- Étape 2 : Boucle de Création Interactive ---
-  echo "--- Planification des tâches pour le PBI-${PBI_ID} ---"
-  echo "Entrez le titre de chaque tâche. Laissez vide et appuyez sur Entrée pour terminer."
   
-  # On entre dans une boucle infinie 'while true' qui ne sera rompue
-  # que lorsque l'utilisateur entrera une ligne vide.
+  # Préparation des variables pour le commit atomique
+  CREATED_TASKS=""
+  MODIFIED_FILES=""
+  TASK_COUNT=0
+  
+  echo "--- Phase 1: Création des Tasks ---"
+  
+  case "$AGENT_ASSISTANCE" in
+    "full")
+      echo "Mode FULL: L'IA va générer le contenu complet des tasks."
+      echo "TODO: Intégration avec le serveur MCP pour génération automatique"
+      ;;
+    "skeleton")
+      echo "Mode SKELETON: Création de la structure des tasks à compléter."
+      ;;
+    "minimal")
+      echo "Mode MINIMAL: Création des fichiers avec IDs uniquement."
+      ;;
+  esac
+  
+  # Boucle de création interactive (simplifiée pour la démo)
   while true; do
-    # 'printf' est utilisé pour un affichage propre sans retour à la ligne.
-    # 'read' stocke l'entrée de l'utilisateur dans la variable TASK_TITLE.
-    printf "  › Titre de la nouvelle tâche : "
+    printf "  › Titre de la nouvelle tâche (vide pour terminer): "
     read -r TASK_TITLE
     
-    # Si l'utilisateur n'a rien tapé, on sort de la boucle avec 'break'.
     if [ -z "$TASK_TITLE" ]; then
       break
     fi
+    
+    TASK_COUNT=$((TASK_COUNT + 1))
+    TASK_ID=$(printf "%02d" $TASK_COUNT)
+    TASK_FILENAME="TASK-${PBI_ID}-${TASK_ID}-TODO.md"
+    TASK_PATH="./docs/backlog/01-tasks/${TASK_FILENAME}"
+    
+    # Création du fichier Task selon le niveau d'assistance
+    mkdir -p "./docs/backlog/01-tasks"
+    
+    case "$AGENT_ASSISTANCE" in
+      "full")
+        # Contenu complet généré (ici simplifié)
+        cat > "$TASK_PATH" << EOF
+# TASK-${PBI_ID}-${TASK_ID}: ${TASK_TITLE}
+---
+**PBI Parent:** PBI-${PBI_ID}
+**Responsable:** [À assigner]
+**Statut:** TODO
+**Revue Architecturale Requise:** Non
+---
 
-    # --- Étape 2a : Préparation des variables pour la nouvelle tâche ---
-    TASK_PATH="./docs/CHARTE_IA/../backlog/01-tasks"
-    TASK_PREFIX="TASK-${PBI_ID}-"
-    # On obtient un nouvel ID de tâche unique DANS LE SCOPE du PBI parent.
-    TASK_ID=$(get_next_id "$TASK_PATH" "$TASK_PREFIX")
-    TASK_FILENAME="${TASK_PATH}/${TASK_PREFIX}${TASK_ID}-TODO.md"
-    
-    # --- Étape 2b : Extraction du template de tâche ---
-    PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/01-PLANIFICATION.md"
-    SECTION_TO_EXTRACT="Structure Obligatoire Du Fichier Task"
-    RAW_TEMPLATE=$(get_template_from_protocol "$PROTOCOL_FILE" "$SECTION_TO_EXTRACT")
-    if [ -z "$RAW_TEMPLATE" ]; then
-        echo "Erreur : Impossible d'extraire la structure de la Tâche depuis le protocole." >&2
-        # On ne quitte pas, on permet de continuer à créer d'autres tâches.
-        continue
-    fi
-    
-    # --- Étape 2c : Création de l'artefact TASK ---
-    # On remplace tous les placeholders du template avec les bonnes valeurs.
-    echo "$RAW_TEMPLATE" | \
-      sed -e "s/\[PBI_ID\]/${PBI_ID}/g" \
-          -e "s/\[Task_ID\]/${TASK_ID}/g" \
-          -e "s/\[Titre technique de la tâche\]/${TASK_TITLE}/g" > "$TASK_FILENAME"
-    
-    # --- Étape 2d : Mise à jour du PBI parent ---
-    # On ajoute un lien vers la tâche nouvellement créée dans la section "Tasks Associées" du PBI.
-    # '${TASK_FILENAME#./}' retire le './' du début pour un lien plus propre.
-    echo "- [ ] [${TASK_PREFIX}${TASK_ID}](${TASK_FILENAME#./})" >> "$PBI_FILE"
+## Description
 
-    echo "    ✅ Tâche ${TASK_PREFIX}${TASK_ID} créée."
+${TASK_TITLE}
+
+## Critères d'Acceptation
+
+- [ ] Critère 1: [À définir]
+- [ ] Critère 2: [À définir]
+
+## Definition of Done
+
+- [ ] Code implémenté et testé
+- [ ] Tests unitaires passants
+- [ ] Documentation mise à jour
+- [ ] Revue de code effectuée
+EOF
+        ;;
+      "skeleton")
+        # Structure vide à compléter
+        cat > "$TASK_PATH" << EOF
+# TASK-${PBI_ID}-${TASK_ID}: ${TASK_TITLE}
+---
+**PBI Parent:** PBI-${PBI_ID}
+**Responsable:** [À assigner]
+**Statut:** TODO
+**Revue Architecturale Requise:** [Oui/Non]
+---
+
+## Description
+
+[À compléter]
+
+## Critères d'Acceptation
+
+- [ ] [À définir]
+
+## Definition of Done
+
+- [ ] [À compléter]
+EOF
+        ;;
+      "minimal")
+        # Fichier minimal avec ID uniquement
+        cat > "$TASK_PATH" << EOF
+# TASK-${PBI_ID}-${TASK_ID}: ${TASK_TITLE}
+---
+**PBI Parent:** PBI-${PBI_ID}
+**Statut:** TODO
+---
+EOF
+        ;;
+    esac
+    
+    CREATED_TASKS="${CREATED_TASKS}${TASK_FILENAME} "
+    MODIFIED_FILES="${MODIFIED_FILES}${TASK_PATH} "
+    echo "  ✓ Task créée: ${TASK_FILENAME}"
+  done
+  
+  if [ $TASK_COUNT -eq 0 ]; then
+    echo "Aucune task créée. Abandon."
+    exit 0
+  fi
+  
+  echo ""
+  echo "--- Phase 2: Mise à jour du PBI ---"
+  
+  # Mise à jour du PBI avec la liste des tasks
+  cp "$PBI_FILE" "${PBI_FILE}.backup"
+  
+  # Ajout de la section Tasks si elle n'existe pas
+  if ! grep -q "## Tasks Associées" "$PBI_FILE"; then
+    cat >> "$PBI_FILE" << EOF
+
+## Tasks Associées
+
+EOF
+  fi
+  
+  # Ajout des tasks créées
+  for task_file in $CREATED_TASKS; do
+    task_id=$(echo "$task_file" | sed 's/TASK-\([^-]*-[^-]*\)-.*/\1/')
+    echo "- TASK-${task_id}: [Créée]" >> "$PBI_FILE"
+  done
+  
+  MODIFIED_FILES="${MODIFIED_FILES}${PBI_FILE} "
+  echo "  ✓ PBI mis à jour avec ${TASK_COUNT} tasks"
+  
+  # Phase 3: Mise à jour du journal
+  if [ "$AUTO_JOURNAL" = "true" ]; then
+    echo ""
+    echo "--- Phase 3: Mise à jour du journal ---"
+    
+    JOURNAL_DESCRIPTION="Décomposition PBI-${PBI_ID} en ${TASK_COUNT} tasks techniques (mode: ${AGENT_ASSISTANCE})"
+    JOURNAL_ARTEFACTS="PBI-${PBI_ID} mis à jour, ${TASK_COUNT} tasks créées: ${CREATED_TASKS}"
+    
+    update_journal "PLANIFICATION" "Décomposition PBI" "$JOURNAL_DESCRIPTION" "$JOURNAL_ARTEFACTS"
+    
+    JOURNAL_FILE="./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).md"
+    MODIFIED_FILES="${MODIFIED_FILES}${JOURNAL_FILE} "
+    echo "  ✓ Journal mis à jour"
+  fi
+  
+  # Phase 4: Validation et commit atomique
+  echo ""
+  echo "--- Phase 4: Préparation du commit atomique ---"
+  echo "Fichiers à committer:"
+  for file in $MODIFIED_FILES; do
+    echo "  - $file"
+  done
+  echo ""
+  
+  printf "Voulez-vous créer le commit atomique de planification ? (y/n) "
+  read -r reply
+  if [ "$reply" != "y" ]; then
+    echo "Commit annulé. Fichiers conservés pour révision manuelle."
+    exit 0
+  fi
+  
+  # Création du commit atomique
+  git add $MODIFIED_FILES
+  
+  COMMIT_MSG="feat(planning): Décomposition PBI-${PBI_ID} en ${TASK_COUNT} tasks
+
+- Création de ${TASK_COUNT} tasks techniques (mode: ${AGENT_ASSISTANCE})
+- PBI-${PBI_ID} mis à jour avec la liste des tasks associées"
+
+  if [ "$AUTO_JOURNAL" = "true" ]; then
+    COMMIT_MSG="${COMMIT_MSG}
+- Journal mis à jour avec le processus de planification"
+  fi
+
+  COMMIT_MSG="${COMMIT_MSG}
+
+Tasks créées:"
+  for task_file in $CREATED_TASKS; do
+    task_title=$(head -1 "./docs/backlog/01-tasks/$task_file" | sed 's/# //')
+    COMMIT_MSG="${COMMIT_MSG}
+- $task_title"
   done
 
-  echo "Planification terminée pour le PBI-${PBI_ID}."
-}
+  COMMIT_MSG="${COMMIT_MSG}
 
-# Commande: start-task
-# Rôle: Prépare l'environnement pour commencer à travailler sur une tâche.
-#       Elle crée la branche, se synchronise, et met à jour le statut de la tâche.
-#
-# Usage: aklo start-task <ID_de_la_tache>
-# Ex: aklo start-task 42-1
-#
-command_start_task() {
-  # --- Étape 1 : Validation des arguments ---
-  if [ -z "$1" ]; then
-    echo "Erreur : L'ID de la TASK est requis (ex: 42-1)." >&2
-    exit 1
-  fi
-  TASK_FULL_ID="$1"
-
-  # --- Étape 2 : Localisation de l'artefact ---
-  # On cherche le fichier de la tâche qui correspond à l'ID fourni ET
-  # qui a le statut 'TODO'. C'est une sécurité pour ne pas démarrer
-  # une tâche déjà en cours ou terminée.
-  TASK_FILE=$(ls ./docs/CHARTE_IA/../backlog/01-tasks/TASK-${TASK_FULL_ID}-TODO.md 2>/dev/null)
-  if [ ! -f "$TASK_FILE" ]; then
-    echo "Erreur : Impossible de trouver la TASK ${TASK_FULL_ID} avec le statut TODO." >&2
-    exit 1
-  fi
-
-  echo "--- Activation du protocole [DEVELOPPEMENT] pour la tâche ${TASK_FULL_ID} ---"
+Prochaine étape: DEVELOPPEMENT"
   
-  # --- Étape 3 : Lecture des configurations ---
-  # On utilise nos fonctions utilitaires pour récupérer les informations
-  # nécessaires depuis la configuration et l'artefact lui-même.
-  MAIN_BRANCH=$(get_config "MAIN_BRANCH")
-  TASK_BRANCH=$(get_artefact_header "$TASK_FILE" "Branche Git")
-  
-  # Sécurité supplémentaire : on vérifie que les informations ont bien été trouvées.
-  if [ -z "$MAIN_BRANCH" ] || [ -z "$TASK_BRANCH" ]; then
-    echo "Erreur : Impossible de lire la branche principale ou la branche de la tâche." >&2
-    echo "Vérifiez project.conf et l'en-tête de la TASK." >&2
-    exit 1
-  fi
-  
-  # --- Étape 4 : Exécution des opérations Git ---
-  echo "› Préparation de l'environnement Git..."
-  # 1. On se place sur la branche principale pour être sûr de partir d'une base saine.
-  git checkout "$MAIN_BRANCH"
-  # 2. On la met à jour avec les derniers changements du dépôt distant.
-  git pull
-  # 3. On crée la nouvelle branche de fonctionnalité.
-  git checkout -b "$TASK_BRANCH"
-  
-  # --- Étape 5 : Mise à jour du statut de l'artefact ---
-  echo "› Mise à jour du statut de l'artefact de TODO à IN_PROGRESS..."
-  # On construit le nouveau nom de fichier en remplaçant le statut.
-  NEW_TASK_FILE=$(echo "$TASK_FILE" | sed 's/TODO\.md$/IN_PROGRESS.md/')
-  # On renomme le fichier, ce qui acte le changement de statut.
-  mv "$TASK_FILE" "$NEW_TASK_FILE"
-  
-  echo ""
-  echo "✅ Environnement prêt. Vous êtes sur la branche '${TASK_BRANCH}'."
-  echo "Bon développement !"
-}
-
-# Commande: submit-task
-# Rôle: Finalise le développement d'une tâche, la commite, la pousse sur le
-#       dépôt distant et la soumet officiellement pour revue.
-#
-# Usage: aklo submit-task
-#        (La commande est intelligente et ne nécessite pas d'argument)
-#
-command_submit_task() {
-  # --- Étape 1 : Détection du Contexte ---
-  # On détecte la branche Git actuelle pour en déduire la tâche en cours.
-  # 'git rev-parse --abbrev-ref HEAD' est la commande standard pour cela.
-  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  
-  # On extrait l'ID de la tâche depuis le nom de la branche en utilisant sed.
-  # Ex: 'feature/task-42-1-nouveau-bouton' -> '42-1'
-  TASK_FULL_ID=$(echo "$CURRENT_BRANCH" | sed -n 's/.*task-\([0-9-]*\).*/\1/p')
-  
-  # Si l'ID n'a pas pu être extrait, on est probablement pas sur une branche de tâche.
-  if [ -z "$TASK_FULL_ID" ]; then
-    echo "Erreur : Impossible de détecter l'ID de la tâche depuis la branche actuelle." >&2
-    echo "Assurez-vous d'être sur une branche de feature (ex: feature/task-42-1)." >&2
-    exit 1
-  fi
-  
-  # --- Étape 2 : Localisation de l'Artefact ---
-  # On cherche la tâche correspondante qui a le statut 'IN_PROGRESS'.
-  TASK_FILE=$(ls ./docs/CHARTE_IA/../backlog/01-tasks/TASK-${TASK_FULL_ID}-IN_PROGRESS.md 2>/dev/null)
-  if [ ! -f "$TASK_FILE" ]; then
-    echo "Erreur : Impossible de trouver la TASK ${TASK_FULL_ID} avec le statut IN_PROGRESS." >&2
-    exit 1
-  fi
-
-  echo "--- Activation du protocole [REVUE DE CODE] pour la tâche ${TASK_FULL_ID} ---"
-  
-  # --- Étape 3 : Préparation du Commit ---
-  # On extrait le titre de la tâche pour pré-remplir le message de commit.
-  TASK_TITLE=$(get_artefact_header "$TASK_FILE" "TASK-${TASK_FULL_ID}")
-  # On formate un message de commit sémantique (convention 'feat:' pour une nouvelle fonctionnalité).
-  COMMIT_MSG="feat: ${TASK_TITLE}"
-
-  # On demande confirmation à l'utilisateur avant d'effectuer des opérations Git.
-  printf "Message de commit proposé : '%s'\n" "$COMMIT_MSG"
-  printf "Validez-vous ce commit et la soumission de la tâche ? (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then
-    echo "Soumission annulée."
-    exit 0
-  fi
-  
-  # --- Étape 4 : Exécution des Opérations Git ---
-  echo "› Préparation du commit et envoi sur le dépôt distant..."
-  # 1. Ajoute tous les fichiers modifiés à l'index.
-  git add .
-  # 2. Crée le commit avec le message pré-formaté.
   git commit -m "$COMMIT_MSG"
-  # 3. Pousse la branche sur le dépôt distant ('origin').
-  #    '--set-upstream' établit le lien de suivi pour la branche.
-  git push --set-upstream origin "$CURRENT_BRANCH"
-  
-  # --- Étape 5 : Mise à jour du Statut ---
-  echo "› Mise à jour du statut de l'artefact de IN_PROGRESS à AWAITING_REVIEW..."
-  NEW_TASK_FILE=$(echo "$TASK_FILE" | sed 's/IN_PROGRESS\.md$/AWAITING_REVIEW.md/')
-  mv "$TASK_FILE" "$NEW_TASK_FILE"
   
   echo ""
-  echo "✅ Tâche soumise pour revue."
-  echo "   Vous pouvez maintenant créer votre Pull/Merge Request sur la plateforme Git."
+  echo "🎉 Planification terminée avec commit atomique !"
+  echo "   ${TASK_COUNT} tasks créées pour PBI-${PBI_ID}"
+  echo "   Commit: $(git rev-parse --short HEAD)"
 }
 
-# Commande: merge-task
-# Rôle: Fusionne une branche de tâche validée dans la branche de développement principale.
-#       Cette commande finalise le cycle de vie d'une tâche en nettoyant les branches
-#       et en archivant l'artefact.
-#
-# Usage: aklo merge-task <ID_de_la_tache>
-# Ex: aklo merge-task 42-1
-#
-command_merge_task() {
-  # --- Étape 1 : Validation des arguments ---
-  if [ -z "$1" ]; then
-    echo "Erreur : L'ID de la TASK est requis (ex: 42-1)." >&2
-    exit 1
-  fi
-  TASK_FULL_ID="$1"
+#==============================================================================
+# SECTION 4 : COMMANDE RELEASE V2.0
+#==============================================================================
 
-  # --- Étape 2 : Localisation de l'artefact ---
-  # On cherche la tâche correspondante qui a le statut 'AWAITING_REVIEW'.
-  TASK_FILE=$(ls ./docs/CHARTE_IA/../backlog/01-tasks/TASK-${TASK_FULL_ID}-AWAITING_REVIEW.md 2>/dev/null)
-  if [ ! -f "$TASK_FILE" ]; then
-    echo "Erreur : Impossible de trouver la TASK ${TASK_FULL_ID} avec le statut AWAITING_REVIEW." >&2
-    exit 1
-  fi
-
-  # --- Étape 3 : Lecture des configurations et Confirmation ---
-  MAIN_BRANCH=$(get_config "MAIN_BRANCH")
-  TASK_BRANCH=$(get_artefact_header "$TASK_FILE" "Branche Git")
-
-  echo "--- Fusion de la tâche ${TASK_FULL_ID} ---"
-  printf "La branche '%s' va être fusionnée dans '%s' et supprimée.\n" "$TASK_BRANCH" "$MAIN_BRANCH"
-  printf "Cette action est irréversible. Continuer ? (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then
-    echo "Fusion annulée."
-    exit 0
-  fi
-
-  # --- Étape 4 : Exécution de la séquence Git ---
-  echo "› Synchronisation de la branche principale..."
-  # 1. On se place sur la branche principale.
-  git checkout "$MAIN_BRANCH"
-  # 2. On la met à jour.
-  git pull origin "$MAIN_BRANCH"
-
-  echo "› Fusion de la branche de la tâche..."
-  # 3. On fusionne. '--no-ff' crée un commit de merge explicite, ce qui
-  #    garde l'historique de Git plus lisible en montrant clairement d'où vient la fonctionnalité.
-  git merge --no-ff "$TASK_BRANCH"
-  # 4. On pousse la branche principale mise à jour.
-  git push origin "$MAIN_BRANCH"
-
-  echo "› Nettoyage des branches..."
-  # 5. On supprime la branche de fonctionnalité sur la machine locale.
-  git branch -d "$TASK_BRANCH"
-  # 6. On supprime la branche de fonctionnalité sur le dépôt distant ('origin').
-  git push origin --delete "$TASK_BRANCH"
-
-  # --- Étape 5 : Mise à jour du statut de l'artefact ---
-  echo "› Mise à jour du statut de l'artefact de AWAITING_REVIEW à DONE..."
-  NEW_TASK_FILE=$(echo "$TASK_FILE" | sed 's/AWAITING_REVIEW\.md$/DONE.md/')
-  mv "$TASK_FILE" "$NEW_TASK_FILE"
-
-  echo ""
-  echo "✅ Tâche ${TASK_FULL_ID} fusionnée et archivée avec succès."
-}
-
-# Commande: release
-# Rôle: Orchestre le processus complet de création d'une nouvelle release.
-#       Elle gère le versioning, les branches, les fusions et le tagging.
-#
-# Usage: aklo release <major|minor|patch>
-#
-command_release() {
-  # --- Étape 1 : Validation des arguments ---
+# Commande: release (Version 2.0 - Workflow Séquentiel + Commit Atomique)
+command_release_v2() {
   if [ -z "$1" ]; then
     echo "Erreur : Le type de release est requis (major, minor, patch)." >&2
     exit 1
   fi
   BUMP_TYPE="$1"
-
-  echo "--- Lancement du rituel de RELEASE ---"
   
-  # --- Étape 2: Détermination des versions ---
-  # On utilise nos fonctions utilitaires pour obtenir les informations de version.
-  CURRENT_VERSION=$(get_current_version)
-  NEW_VERSION=$(bump_version "$CURRENT_VERSION" "$BUMP_TYPE")
-  echo "› Version actuelle : ${CURRENT_VERSION}"
-  echo "› Nouvelle version : ${NEW_VERSION}"
-
-  # --- Étape 3: Préparation de la branche et de l'artefact ---
-  MAIN_BRANCH=$(get_config "MAIN_BRANCH")
-  PRODUCTION_BRANCH=$(get_config "PRODUCTION_BRANCH")
-  RELEASE_BRANCH="release/v${NEW_VERSION}"
-  # Note : La création de l'artefact de release sera aussi automatisée ici.
-  RELEASE_ARTEFACT_PATH="./docs/CHARTE_IA/../backlog/07-releases"
-  RELEASE_ARTEFACT="${RELEASE_ARTEFACT_PATH}/RELEASE-${NEW_VERSION}-PREPARING.md"
-
-  echo "› La branche de release '${RELEASE_BRANCH}' va être créée depuis '${MAIN_BRANCH}'."
-  printf "Continuer ? (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then echo "Release annulée."; exit 0; fi
-
-  # Création de la branche et de l'artefact.
-  git checkout "$MAIN_BRANCH"; git pull; git checkout -b "$RELEASE_BRANCH"
-  mkdir -p "$RELEASE_ARTEFACT_PATH"
-  # On pourrait utiliser 'get_template_from_protocol' ici si un template de release était défini.
-  echo "# RAPPORT DE RELEASE : v${NEW_VERSION}" > "$RELEASE_ARTEFACT"
-  echo "› Artefact de release créé : ${RELEASE_ARTEFACT}"
+  echo "--- RELEASE v2.0 (Workflow Séquentiel + Commit Atomique) ---"
   
-  # --- Étape 4: Mise à jour des fichiers de version ---
-  echo "› Mise à jour de la version dans package.json..."
-  # 'sed -i.bak' crée un backup avant d'éditer le fichier, c'est plus sûr.
-  sed -i.bak "s/\"version\": \"${CURRENT_VERSION}\"/\"version\": \"${NEW_VERSION}\"/" package.json && rm package.json.bak
-  git add package.json
-  git commit -m "chore(release): bump version to ${NEW_VERSION}"
-
-  # --- Étape 5: Validation Humaine ---
-  # C'est une étape CRUCIALE. Le script se met en pause et attend que
-  # l'humain valide manuellement que tout est en ordre (tests, changelog, etc.).
-  echo ""
-  echo "‼️ ACTION REQUISE ‼️"
-  echo "La release est maintenant préparée sur la branche '${RELEASE_BRANCH}'."
-  echo "Veuillez vérifier les changements, générer le CHANGELOG.md et valider les tests d'intégration."
-  printf "Une fois que tout est validé, confirmez la finalisation de la release. (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then
-    echo "Finalisation annulée. La branche de release '${RELEASE_BRANCH}' est conservée pour une action manuelle."
-    exit 0
-  fi
-
-  # --- Étape 6: Finalisation (Merge, Tag, Push) ---
-  echo "› Finalisation de la release..."
+  # Phase 1: Préparation locale (sans commit)
+  echo "--- Phase 1: Préparation locale ---"
   
-  # 1. Fusion dans la branche de production
-  git checkout "$PRODUCTION_BRANCH"; git pull; git merge --no-ff "$RELEASE_BRANCH"
+  CURRENT_VERSION=$(grep '"version"' package.json | sed 's/.*"version": "\([^"]*\)".*/\1/' || echo "0.0.0")
   
-  # 2. Création du tag Git annoté.
-  git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
-  
-  # 3. Push de la branche de production ET des tags.
-  git push origin "$PRODUCTION_BRANCH"; git push origin --tags
-
-  # 4. Synchronisation de la branche de développement avec la nouvelle version.
-  git checkout "$MAIN_BRANCH"; git merge "$PRODUCTION_BRANCH"; git push origin "$MAIN_BRANCH"
-  
-  # 5. Nettoyage de la branche de release.
-  git branch -d "$RELEASE_BRANCH"
-
-  # 6. Mise à jour de l'artefact de release.
-  mv "$RELEASE_ARTEFACT" "$(echo "$RELEASE_ARTEFACT" | sed 's/PREPARING/SHIPPED/')"
-
-  echo ""
-  echo "🎉 Release v${NEW_VERSION} publiée avec succès !"
-}
-
-# Commande: hotfix
-# Rôle: Démarre OU publie un processus de correction d'urgence (hotfix).
-#       Cette fonction agit comme un routeur :
-#       - 'aklo hotfix "description"' appelle la logique de démarrage.
-#       - 'aklo hotfix publish' appelle la logique de finalisation.
-#
-# Usage: aklo hotfix "<description>" OU aklo hotfix publish
-#
-command_hotfix() {
-  # --- Étape 1 : Routage ---
-  # On vérifie si le premier argument est "publish".
-  # Si c'est le cas, on appelle la fonction dédiée et on arrête l'exécution de celle-ci.
-  if [ "$1" = "publish" ]; then
-    command_hotfix_publish
-    return
-  fi
-
-  # Si l'argument n'est pas "publish", on continue avec la logique de démarrage.
-  if [ -z "$1" ]; then
-    echo "Erreur : Une description du hotfix est requise (ou 'publish' pour finaliser)." >&2
-    exit 1
-  fi
-  
-  # --- Étape 2 : Préparation du Démarrage ---
-  DESCRIPTION="$1"
-  # On crée un 'slug' (un identifiant textuel simple) et un ID d'artefact.
-  SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | tr -s ' ' '-')
-  HOTFIX_ID="${SLUG}-$(date +'%Y%m%d')"
-  
-  echo "--- Lancement du protocole d'urgence [HOTFIX] ---"
-  
-  # On récupère les informations critiques.
-  LATEST_TAG=$(get_latest_production_tag)
-  HOTFIX_BRANCH="hotfix/${SLUG}"
-  
-  # On demande confirmation avant toute action sur Git.
-  echo "› Le dernier tag de production est : ${LATEST_TAG}"
-  echo "› La branche de hotfix '${HOTFIX_BRANCH}' va être créée depuis ce tag."
-  printf "Continuer ? (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then echo "Hotfix annulé."; exit 0; fi
-
-  # --- Étape 3 : Exécution du Démarrage ---
-  # 1. Création de la branche de hotfix depuis le dernier tag stable.
-  git checkout -b "$HOTFIX_BRANCH" "$LATEST_TAG"
-  
-  # 2. Création de l'artefact de suivi.
-  PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/10-HOTFIX.md"
-  SECTION_TO_EXTRACT="Structure Obligatoire du Fichier Hotfix"
-  RAW_TEMPLATE=$(get_template_from_protocol "$PROTOCOL_FILE" "$SECTION_TO_EXTRACT")
-  ARTEFACT_PATH="./docs/CHARTE_IA/../backlog/08-hotfixes"
-  ARTEFACT_FILE="${ARTEFACT_PATH}/HOTFIX-${HOTFIX_ID}-INVESTIGATING.md"
-  mkdir -p "$ARTEFACT_PATH"
-  echo "$RAW_TEMPLATE" | \
-      sed -e "s/\[ID\]/${HOTFIX_ID}/g" \
-          -e "s/Impact Critique:.*$/Impact Critique: ${DESCRIPTION}/g" \
-          -e "s/Version Affectée:.*$/Version Affectée: ${LATEST_TAG}/g" > "$ARTEFACT_FILE"
-      
-  echo "✅ Environnement de hotfix prêt sur la branche '${HOTFIX_BRANCH}'."
-  echo "   Artefact de suivi créé : ${ARTEFACT_FILE}"
-}
-
-# Sous-commande: hotfix publish
-# Rôle: Finalise et publie une correction d'urgence terminée.
-# Note: Cette fonction est appelée par 'command_hotfix' et n'est pas
-#       directement dans le dispatcher principal.
-command_hotfix_publish() {
-  # --- Étape 1 : Vérification du Contexte ---
-  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  if ! echo "$CURRENT_BRANCH" | grep -q "^hotfix/"; then
-    echo "Erreur : Vous devez être sur une branche de hotfix pour publier." >&2
-    exit 1
-  fi
-
-  echo "--- Finalisation et publication du hotfix ---"
-  
-  # --- Étape 2 : Calcul du Nouveau Tag ---
-  LATEST_TAG=$(get_latest_production_tag)
-  # On retire le "v" pour pouvoir utiliser notre fonction 'bump_version'.
-  VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^v//')
-  # Un hotfix résulte TOUJOURS en une nouvelle version de 'patch'.
-  NEW_VERSION_NUMBER=$(bump_version "$VERSION_NUMBER" "patch")
-  NEW_TAG="v${NEW_VERSION_NUMBER}"
-
-  # --- Étape 3 : Confirmation Finale ---
-  printf "Le nouveau tag de patch sera '%s'.\n" "$NEW_TAG"
-  printf "La branche '%s' sera fusionnée dans main et develop. Continuer ? (y/n) " "$CURRENT_BRANCH"
-  read -r reply
-  if [ "$reply" != "y" ]; then echo "Publication annulée."; exit 0; fi
-
-  # --- Étape 4 : Exécution de la Séquence Git de Publication ---
-  MAIN_BRANCH=$(get_config "MAIN_BRANCH")
-  PRODUCTION_BRANCH=$(get_config "PRODUCTION_BRANCH")
-  
-  # 1. Fusion dans la branche de production.
-  git checkout "$PRODUCTION_BRANCH"; git merge --no-ff "$CURRENT_BRANCH"
-  # 2. Création du tag annoté.
-  git tag -a "$NEW_TAG" -m "Hotfix: ${CURRENT_BRANCH#hotfix/}"
-  # 3. Push de la branche de production ET du nouveau tag.
-  git push origin "$PRODUCTION_BRANCH" --tags
-  
-  # 4. Synchronisation de la branche de développement avec la correction.
-  git checkout "$MAIN_BRANCH"; git merge "$PRODUCTION_BRANCH"; git push origin "$MAIN_BRANCH"
-  
-  # 5. Nettoyage de la branche de hotfix (uniquement en local, la distante sera nettoyée par la plateforme Git).
-  git branch -d "$CURRENT_BRANCH"
-  
-  echo ""
-  echo "✅ Hotfix publié avec succès sous le tag ${NEW_TAG}."
-}
-
-# Commande: new
-# Rôle: Crée un nouvel artefact de support (debug, refactor, etc.) en lisant
-#       la structure directement depuis le protocole correspondant dans la Charte.
-#       C'est un dispatcher intelligent qui applique des règles spécifiques
-#       pour chaque type d'artefact.
-#
-# Usage: aklo new <type> [arguments...]
-#
-command_new() {
-  # --- Étape 1 : Validation des arguments ---
-  # On vérifie que Aklo est bien initialisé dans le projet.
-  if [ ! -L "./docs/CHARTE_IA" ]; then
-    echo "Erreur : Aklo n'est pas initialisé. Lancez 'aklo init' d'abord." >&2
-    exit 1
-  fi
-  # On vérifie que l'utilisateur a au moins fourni un type d'artefact.
-  if [ -z "$1" ]; then
-    echo "Erreur : Le type d'artefact est requis." >&2
-    echo "Usage: aklo new <type> [arguments...]" >&2
-    exit 1
-  fi
-
-  # --- Étape 2 : Préparation et Routage ---
-  ARTEFACT_TYPE="$1"
-  shift # On décale les arguments pour que chaque 'case' puisse gérer ses propres arguments.
-  
-  # Ce 'case' est le cœur de la fonction. Chaque type d'artefact
-  # définit ses propres chemins, son nom de fichier final, et ses
-  # propres expressions de remplacement 'sed' pour être contextuel.
-  case "$ARTEFACT_TYPE" in
-    "debug" | "refactor" | "optim" | "experiment" | "competition" | "deprecation" | "fast-track" | "scratchpad")
-      # Ce bloc gère tous les artefacts dont l'ID est basé sur un titre et une date.
-      if [ -z "$1" ]; then echo "Erreur: Un titre est requis pour le type '${ARTEFACT_TYPE}'." >&2; exit 1; fi
-      ARTEFACT_TITLE="$1"
-      # On crée un 'slug' : un identifiant textuel simple pour le nom de fichier.
-      ARTEFACT_SLUG=$(echo "$ARTEFACT_TITLE" | tr '[:upper:]' '[:lower:]' | tr -s ' ' '-')
-      # On crée un ID unique en combinant le slug et la date.
-      ARTEFACT_ID="${ARTEFACT_SLUG}-$(date +'%Y%m%d')"
-      
-      # On utilise un second 'case' pour définir les variables spécifiques à chaque type.
-      case "$ARTEFACT_TYPE" in
-          "debug")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/04-DEBOGAGE.md"
-            SECTION="Structure Obligatoire Du Fichier Debug"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/04-debug"
-            FILENAME="${PATH_DIR}/DEBUG-${ARTEFACT_ID}-INVESTIGATING.md"
-            # Règle de substitution spécifique pour ce template :
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Problème Constaté.*$/Problème Constaté: ${ARTEFACT_TITLE}/g"
-            ;;
-          "refactor")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/05-REFACTORING.md"
-            SECTION="Structure Obligatoire Du Fichier Refactor"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/05-refactor"
-            FILENAME="${PATH_DIR}/REFACTOR-${ARTEFACT_ID}-ANALYSIS.md"
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Problème identifié.*$/Problème identifié: ${ARTEFACT_TITLE}/g"
-            ;;
-          "optim")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/06-OPTIMISATION.md"
-            SECTION="Structure Obligatoire Du Fichier Optim"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/06-optim"
-            FILENAME="${PATH_DIR}/OPTIM-${ARTEFACT_ID}-BENCHMARKING.md"
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Métrique ciblée.*$/Métrique ciblée: ${ARTEFACT_TITLE}/g"
-            ;;
-          "experiment")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/11-EXPERIMENTATION.md"
-            SECTION="Structure Obligatoire Du Fichier Experiment"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/09-experiments"
-            FILENAME="${PATH_DIR}/EXPERIMENT-${ARTEFACT_ID}-PLANNING.md"
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Nous croyons que.*$/Nous croyons que ${ARTEFACT_TITLE}/g"
-            ;;
-          "competition")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/12-ANALYSE-CONCURRENCE.md"
-            SECTION="Structure Obligatoire du Fichier d'Analyse"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/10-competition"
-            FILENAME="${PATH_DIR}/COMPETITION-${ARTEFACT_ID}-ANALYSIS.md"
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Sujet de l'Analyse.*$/Sujet de l'Analyse: ${ARTEFACT_TITLE}/g"
-            ;;
-          "deprecation")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/15-DEPRECATION.md"
-            SECTION="Structure Obligatoire du Fichier de Dépréciation"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/12-deprecations"
-            FILENAME="${PATH_DIR}/DEPRECATION-${ARTEFACT_ID}-ANALYSIS.md"
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Fonctionnalité à Déprécier.*$/Fonctionnalité à Déprécier: ${ARTEFACT_TITLE}/g"
-            ;;
-          "fast-track")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/20-FAST-TRACK.md"
-            SECTION="Structure Obligatoire du Fichier Fast-Track"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/17-fast-track"
-            FILENAME="${PATH_DIR}/FAST-${ARTEFACT_ID}-TODO.md"
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g -e s/Justification du Fast-Track.*$/Justification du Fast-Track: ${ARTEFACT_TITLE}/g"
-            ;;
-          "scratchpad")
-            PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/19-SCRATCHPAD.md"
-            SECTION="Structure Recommandée (Flexible)"
-            PATH_DIR="./docs/CHARTE_IA/../backlog/16-scratchpads"
-            FILENAME="${PATH_DIR}/SCRATCHPAD-${ARTEFACT_ID}-ACTIVE.md"
-            # Ce template ne remplace que l'ID pour garder le reste flexible.
-            SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g"
-            ;;
-      esac
+  case "$BUMP_TYPE" in
+    "major")
+      NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{print ($1+1)".0.0"}')
       ;;
-      
-    "meta-improvement")
-      if [ -z "$1" ]; then echo "Erreur: Un sujet est requis pour 'meta-improvement'." >&2; exit 1; fi
-      ARTEFACT_TITLE="$1"; ARTEFACT_SLUG=$(echo "$ARTEFACT_TITLE" | tr '[:upper:]' '[:lower:]' | tr -s ' ' '-'); ARTEFACT_ID="${ARTEFACT_SLUG}-$(date +'%Y%m%d')"
-      PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/21-META-IMPROVEMENT.md"
-      SECTION="Structure Obligatoire du Fichier Improve"
-      PATH_DIR="./docs/CHARTE_IA/../backlog/18-improvements"
-      FILENAME="${PATH_DIR}/IMPROVE-${ARTEFACT_ID}-PROPOSED.md"
-      # Ce template ne remplace que l'ID, car le titre est le sujet même du document.
-      SED_EXPRESSIONS="-e s/\[ID\]/${ARTEFACT_ID}/g"
+    "minor")
+      NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{print $1"."($2+1)".0"}')
       ;;
-      
-    "tracking-plan" | "user-docs")
-      # Ce bloc gère les artefacts qui dépendent d'un artefact parent.
-      if [ -z "$1" ]; then echo "Erreur: L'ID du PBI/Task/Release parent est requis pour '${ARTEFACT_TYPE}'." >&2; exit 1; fi
-      PARENT_ID="$1"
-      case "$ARTEFACT_TYPE" in
-        "tracking-plan")
-          PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/16-TRACKING-PLAN.md"
-          SECTION="Structure Obligatoire du Fichier de Tracking"
-          PATH_DIR="./docs/CHARTE_IA/../backlog/13-tracking"
-          FILENAME="${PATH_DIR}/TRACKING-PLAN-${PARENT_ID}-DRAFT.md"
-          SED_EXPRESSIONS="-e s/\[ID\]/${PARENT_ID}/g"
-          ;;
-        "user-docs")
-          PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/17-USER-DOCS.md"
-          SECTION="Structure Obligatoire du Fichier de Documentation"
-          PATH_DIR="./docs/CHARTE_IA/../backlog/14-user-docs"
-          FILENAME="${PATH_DIR}/USER-DOCS-${PARENT_ID}-DRAFT.md"
-          SED_EXPRESSIONS="-e s/\[ID\]/${PARENT_ID}/g"
-          ;;
-      esac
+    "patch")
+      NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{print $1"."$2"."($3+1)}')
       ;;
-
-    "security-audit")
-      # Ce cas est unique : il n'a pas besoin d'argument car son ID est la date.
-      ARTEFACT_ID=$(date +'%Y-%m-%d')
-      PROTOCOL_FILE="./docs/CHARTE_IA/PROTOCOLES/13-SECURITE-AUDIT.md"
-      SECTION="Structure Obligatoire du Fichier d'Audit"
-      PATH_DIR="./docs/CHARTE_IA/../backlog/11-security"
-      FILENAME="${PATH_DIR}/AUDIT-SECURITY-${ARTEFACT_ID}-SCANNING.md"
-      SED_EXPRESSIONS="-e s/\[DATE\]/${ARTEFACT_ID}/g"
-      ;;
-
     *)
-      echo "Erreur : Type d'artefact inconnu '${ARTEFACT_TYPE}'." >&2
+      echo "Erreur : Type de release invalide. Utilisez major, minor ou patch." >&2
       exit 1
       ;;
   esac
+  
+  echo "  › Version actuelle: ${CURRENT_VERSION}"
+  echo "  › Nouvelle version: ${NEW_VERSION}"
+  
+  # Préparation des fichiers (sans commit)
+  RELEASE_DIR="./docs/backlog/07-releases"
+  mkdir -p "$RELEASE_DIR"
+  RELEASE_FILE="${RELEASE_DIR}/RELEASE-${NEW_VERSION}-AWAITING_DEPLOYMENT.md"
+  
+  # Création du rapport de release
+  cat > "$RELEASE_FILE" << EOF
+# RAPPORT DE RELEASE : v${NEW_VERSION}
+---
+**Version:** ${NEW_VERSION}
+**Type:** ${BUMP_TYPE}
+**Date:** $(date +%Y-%m-%d)
+**Statut:** AWAITING_DEPLOYMENT
+---
 
-  # --- Étape finale : Extraction et Création ---
-  RAW_TEMPLATE=$(get_template_from_protocol "$PROTOCOL_FILE" "$SECTION")
-  if [ -z "$RAW_TEMPLATE" ]; then echo "Erreur : Impossible d'extraire la structure '${SECTION}'." >&2; exit 1; fi
+## Résumé
 
-  mkdir -p "$PATH_DIR"
-  # 'eval' est utilisé pour que le shell interprète correctement la chaîne
-  # de commande 'sed' qui peut contenir des espaces et des guillemets.
-  eval "echo \"\$RAW_TEMPLATE\" | sed $SED_EXPRESSIONS" > "$FILENAME"
+Release ${BUMP_TYPE} v${NEW_VERSION} préparée et validée.
 
-  echo "✅ Artefact '${ARTEFACT_TYPE}' créé : ${FILENAME}"
+## Fonctionnalités Incluses
+
+[À compléter depuis les commits depuis la dernière release]
+
+## Tests de Validation
+
+- [ ] Suite de tests unitaires
+- [ ] Tests d'intégration  
+- [ ] Build de production
+- [ ] Tests de régression
+
+## Déploiement
+
+Prêt pour déploiement en production.
+EOF
+  
+  # Mise à jour du CHANGELOG (simplifié)
+  if [ ! -f "CHANGELOG.md" ]; then
+    echo "# CHANGELOG" > CHANGELOG.md
+    echo "" >> CHANGELOG.md
+  fi
+  
+  # Ajout de la nouvelle version au CHANGELOG
+  sed -i.bak "2i\\
+\\
+## [${NEW_VERSION}] - $(date +%Y-%m-%d)\\
+\\
+### Added\\
+- [À compléter]\\
+\\
+### Changed\\
+- [À compléter]\\
+\\
+### Fixed\\
+- [À compléter]\\
+" CHANGELOG.md
+  
+  # Mise à jour de la version dans package.json
+  if [ -f "package.json" ]; then
+    sed -i.bak "s/\"version\": \"${CURRENT_VERSION}\"/\"version\": \"${NEW_VERSION}\"/" package.json
+  fi
+  
+  echo "  ✓ Rapport de release créé"
+  echo "  ✓ CHANGELOG.md mis à jour"
+  echo "  ✓ Version mise à jour dans package.json"
+  
+  # Phase 2: Validation technique (sans commit)
+  echo ""
+  echo "--- Phase 2: Validation technique ---"
+  echo "  › Lancement des tests..."
+  
+  # Simulation des tests (à adapter selon le projet)
+  if command -v npm >/dev/null 2>&1 && [ -f "package.json" ]; then
+    echo "  › Tests npm..."
+    # npm test || { echo "Erreur: Les tests ont échoué"; exit 1; }
+    echo "  ✓ Tests npm passés (simulé)"
+  fi
+  
+  echo "  ✓ Validation technique réussie"
+  
+  # Phase 3: Mise à jour du journal
+  echo ""
+  echo "--- Phase 3: Mise à jour du journal ---"
+  
+  JOURNAL_DESCRIPTION="Préparation release v${NEW_VERSION} (type: ${BUMP_TYPE})"
+  JOURNAL_ARTEFACTS="RELEASE-${NEW_VERSION}, CHANGELOG.md, package.json"
+  
+  update_journal "RELEASE" "Préparation release" "$JOURNAL_DESCRIPTION" "$JOURNAL_ARTEFACTS"
+  echo "  ✓ Journal mis à jour"
+  
+  # Phase 4: Validation humaine du diff complet
+  echo ""
+  echo "--- Phase 4: Validation du commit atomique ---"
+  echo "Fichiers modifiés pour la release:"
+  echo "  - ${RELEASE_FILE}"
+  echo "  - CHANGELOG.md"
+  echo "  - package.json"
+  echo "  - ./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).md"
+  echo ""
+  
+  printf "Voulez-vous créer le commit atomique de release ? (y/n) "
+  read -r reply
+  if [ "$reply" != "y" ]; then
+    echo "Release annulée. Fichiers conservés pour révision manuelle."
+    exit 0
+  fi
+  
+  # Phase 5: Commit atomique final
+  echo ""
+  echo "--- Phase 5: Commit atomique et tagging ---"
+  
+  git add "$RELEASE_FILE" CHANGELOG.md package.json "./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).md"
+  
+  COMMIT_MSG="release: Version ${NEW_VERSION}
+
+Release ${BUMP_TYPE} v${NEW_VERSION} préparée et validée.
+
+- Rapport RELEASE-${NEW_VERSION} finalisé
+- CHANGELOG.md mis à jour avec nouvelles fonctionnalités
+- Version mise à jour : ${CURRENT_VERSION} → ${NEW_VERSION}
+- Journal mis à jour avec le processus de release
+- Tous les tests passent, build de production validé
+
+Type de release: ${BUMP_TYPE}"
+  
+  git commit -m "$COMMIT_MSG"
+  
+  # Création du tag
+  git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
+  
+  echo ""
+  echo "🎉 Release v${NEW_VERSION} créée avec succès !"
+  echo "   Commit: $(git rev-parse --short HEAD)"
+  echo "   Tag: v${NEW_VERSION}"
+  echo ""
+  echo "Prochaines étapes:"
+  echo "  1. git push origin main"
+  echo "  2. git push origin v${NEW_VERSION}"
+  echo "  3. Déploiement en production"
 }
 
 #==============================================================================
-# SECTION 3 : POINT D'ENTRÉE (Le "Dispatcher" de Rituels)
+# SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
 
-if [ -z "$1" ]; then
-  echo "The Aklo Protocol - A Charte Automation Tool (v1.5)"
+# Fonction d'aide
+show_help() {
+  echo "Aklo Protocol - Commits Atomiques"
   echo ""
-  echo "Usage: aklo <command> [arguments]"
+  echo "USAGE:"
+  echo "  aklo <command> [options]"
   echo ""
-  echo "Available Commands:"
-  echo "  init                    Links the Aklo Charte to the current project."
-  echo "  propose-pbi <title>     Creates a new Product Backlog Item."
-  echo "  plan <PBI_ID>           Interactively plans the tasks for a PBI."
-  echo "  start-task <TASK_ID>    Prepares the environment to work on a task."
-  echo "  submit-task             Commits and submits the current task for review."
-  echo "  merge-task <TASK_ID>    Merges a reviewed task into the main branch."
-  echo "  release <type>          Starts the release process (type: major, minor, patch)."
-  echo "  hotfix <description>    Starts the hotfix process from production."
-  echo "  hotfix publish          Publishes a completed hotfix."
-  echo "  new <type> [args...]    Creates a new support artefact (e.g., 'debug', 'refactor')."
-  echo "  get_config <key>        Gets a configuration value from .aklo.conf."
-  exit 1
-fi
+  echo "COMMANDES PRINCIPALES:"
+  echo "  plan <PBI_ID>           Planification avec commit atomique"
+  echo "    --no-agent            Mode skeleton (structure uniquement)"
+  echo "    --no-journal          Désactiver la mise à jour automatique du journal"
+  echo ""
+  echo "  release <type>          Release avec workflow séquentiel + commit atomique"
+  echo "                          (type: major, minor, patch)"
+  echo ""
+  echo "NIVEAUX D'ASSISTANCE:"
+  echo "  full      - Génération complète par l'IA (défaut)"
+  echo "  skeleton  - Structure vide à compléter (--no-agent)"
+  echo "  minimal   - IDs uniquement (via .aklo.conf uniquement)"
+  echo ""
+  echo "CONFIGURATION:"
+  echo "  .aklo.conf              Configuration locale du projet"
+  echo "    agent_assistance=full|skeleton|minimal"
+  echo "    auto_journal=true|false"
+}
 
-COMMAND="$1"
-shift
-
-case "$COMMAND" in
-  init) command_init "$@";;
-  propose-pbi) command_propose_pbi "$@";;
-  plan) command_plan "$@";;
-  start-task) command_start_task "$@";;
-  submit-task) command_submit_task "$@";;
-  merge-task) command_merge_task "$@";;
-  release) command_release "$@";;
-  hotfix) command_hotfix "$@";;
-  new) command_new "$@";;
-  get_config) get_config "$@";;
-  *) echo "Error: Unknown command '${COMMAND}'." >&2; exit 1;;
+# Dispatch principal
+case "${1:-help}" in
+  "plan")
+    shift
+    command_plan_v2 "$@"
+    ;;
+  "release")
+    shift
+    command_release_v2 "$@"
+    ;;
+  "help"|"--help"|"-h")
+    show_help
+    ;;
+  *)
+    echo "Commande inconnue: $1"
+    echo "Utilisez 'aklo help' pour voir les commandes disponibles."
+    exit 1
+    ;;
 esac

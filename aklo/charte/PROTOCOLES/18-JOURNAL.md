@@ -4,17 +4,26 @@ modified: 2025-06-28 12:57
 ---
 # PROTOCOLE SPÉCIFIQUE : JOURNAL DE TRAVAIL
 
-Ce protocole a pour but de maintenir un journal de bord quotidien des activités, décisions et réflexions pour assurer la traçabilité du travail et faciliter la reprise de contexte.
+Ce protocole définit comment documenter de manière chronologique les activités pour assurer la traçabilité du travail, en s'intégrant parfaitement dans le principe des commits atomiques par protocole.
 
-## SECTION 1 : MISSION ET LIVRABLE
+## SECTION 1 : MISSION ET PRINCIPE D'INTÉGRATION
 
 ### 1.1. Mission
 
-Documenter de manière chronologique les actions entreprises, les hypothèses testées, les décisions prises et les obstacles rencontrés au cours d'une journée de travail.
+Documenter de manière chronologique les actions entreprises, les décisions prises et les obstacles rencontrés, en s'intégrant systématiquement dans les commits des autres protocoles.
 
-### 1.2. Livrable Attendu
+### 1.2. Principe d'Intégration aux Commits Atomiques
 
-1.  **Entrée de Journal Quotidien :** Un unique fichier `JOURNAL-[DATE].md` créé dans `/docs/backlog/15-journal/`.
+**Règle Fondamentale :** Le journal ne fait jamais l'objet de commits séparés. Chaque mise à jour du journal est incluse dans le commit atomique du protocole en cours.
+
+**Exemples d'intégration :**
+- **Finalisation TASK :** `commit(code + TASK-DONE + journal-update)`
+- **Planification PBI :** `commit(toutes-TASK-créées + journal-update)`
+- **Changement statut PBI :** `commit(PBI-AGREED + journal-update)`
+
+### 1.3. Livrable
+
+**Fichier Journal Quotidien :** Un unique fichier `JOURNAL-[DATE].md` dans `/docs/backlog/15-journal/`, mis à jour au fil des protocoles exécutés.
 
 ## SECTION 2 : ARTEFACT JOURNAL - GESTION ET STRUCTURE
 
@@ -25,7 +34,7 @@ Documenter de manière chronologique les actions entreprises, les hypothèses te
 
 ### 2.2. Statuts
 
--   Un journal a un statut unique et continu : **`IN_PROGRESS`** pendant la journée, et **`ARCHIVED`** à la fin de la journée.
+Le journal n'a pas de statuts formels car il évolue continuellement. Il est considéré comme **actif** tant que des protocoles sont en cours d'exécution.
 
 ### 2.3. Structure Obligatoire du Fichier Journal
 
@@ -66,19 +75,71 @@ Documenter de manière chronologique les actions entreprises, les hypothèses te
 - **Prochaine étape pour demain :** [Description de la prochaine action à entreprendre].
 ```
 
-## SECTION 3 : PROCÉDURE DE GESTION DU JOURNAL
+## SECTION 3 : PROCÉDURE D'INTÉGRATION DU JOURNAL
 
-1.  **[PROCEDURE] Phase 1 : Initialisation (Action Fiabilisée)**
-    -   **Étape 1.1 : Obtenir la Date Actuelle.** Exécuter une commande système fiable pour obtenir la date du jour.
-        -   *Exemple de commande pour l'agent :* `system.getCurrentDate(format='AAAA-MM-DD')`.
-    -   **Étape 1.2 : Construire le Chemin.** Utiliser la date **obtenue à l'étape précédente** pour construire le chemin complet du fichier journal (ex: `/docs/backlog/15-journal/2025-06-28.md`).
-    -   **Étape 1.3 : Création du Fichier.** Créer (ou ouvrir) le fichier à cet emplacement.
-    -   **Étape 1.4 : Remplir l'En-tête.** Remplir l'en-tête du journal, notamment les objectifs de la journée.
+### 3.1. Initialisation de Session
 
-2.  **[PROCEDURE] Phase 2 : Documentation Continue**
-    -   Tout au long de la journée, ajouter des entrées chronologiques dans le fichier du jour.
-    -   Faire des liens explicites vers les autres artefacts de la Charte.
+**[PROCEDURE] Phase 1 : Ouverture du Journal Quotidien**
+- **Étape 1.1 :** Obtenir la date actuelle au format `AAAA-MM-DD`
+- **Étape 1.2 :** Construire le chemin `/docs/backlog/15-journal/JOURNAL-[DATE].md`
+- **Étape 1.3 :** Créer ou ouvrir le fichier journal du jour
+- **Étape 1.4 :** Si nouveau fichier, remplir l'en-tête avec les objectifs de la journée
+- **Étape 1.5 :** Ajouter l'entrée "Début de session" avec timestamp
 
-3.  **[CONCLUSION] Phase 3 : Clôture**
-    -   À la fin de la journée, remplir une entrée finale "Fin de session".
-    -   Le fichier est automatiquement considéré comme `ARCHIVED`.
+### 3.2. Mise à Jour Intégrée aux Protocoles
+
+**[PROCEDURE] Phase 2 : Documentation au Fil des Protocoles**
+
+Chaque protocole qui modifie des artefacts **doit** inclure une mise à jour du journal dans son commit atomique :
+
+**Moments de mise à jour obligatoires :**
+1. **Début de protocole :** Entrée chronologique documentant le démarrage
+2. **Étapes importantes :** Décisions, obstacles, analyses significatives
+3. **Fin de protocole :** Résumé des actions accomplies et résultats
+
+**Format des entrées :**
+```markdown
+### HH:MM - [PROTOCOLE] [Étape/Action]
+
+- **Action :** Description de l'action entreprise
+- **Contexte :** Informations pertinentes pour la compréhension
+- **Résultat :** Outcome ou décision prise
+- **Artefacts :** Liens vers les artefacts créés/modifiés
+```
+
+### 3.3. Gestion des Protocoles Abandonnés
+
+**[PROCEDURE] Phase 3 : Documentation des Échecs**
+
+Si un protocole est abandonné en cours :
+1. **Obligation :** Documenter la raison de l'abandon dans le journal
+2. **Format :** Entrée explicite avec timestamp et explication
+3. **Commit :** Inclure cette mise à jour dans un commit de clôture
+
+**Exemple :**
+```markdown
+### HH:MM - [PLANIFICATION] Protocole abandonné
+
+- **Raison :** PBI mal défini, nécessite clarification avec le Product Owner
+- **Actions entreprises :** Analyse partielle, 2 TASK ébauchées
+- **Prochaine étape :** Demande de clarification via [SCRATCHPAD-XYZ]
+```
+
+### 3.4. Automatisation Aklo
+
+**[PROCEDURE] Phase 4 : Intégration dans les Commandes Aklo**
+
+Les commandes `aklo` mettent automatiquement à jour le journal selon leur niveau d'assistance :
+
+- **`full`** : Génération automatique des entrées détaillées
+- **`skeleton`** : Génération de la structure d'entrée à compléter
+- **`minimal`** : Simple mention de l'action avec timestamp
+
+**Configuration :**
+```bash
+# Journal automatique complet (défaut)
+aklo plan <PBI_ID>
+
+# Journal automatique minimal
+aklo plan <PBI_ID> --no-journal
+```
