@@ -414,3 +414,188 @@ Les contributions sont les bienvenues ! Voir le guide de contribution pour plus 
 ---
 
 **💡 Conseil** : Commencez par `dotfiles-config wizard` pour personnaliser le système selon vos besoins, puis explorez progressivement les fonctionnalités avancées avec `dotfiles-stats` et `dotfiles-insights`. 
+
+# 📊 Module 4 : Monitoring & Analytics
+
+Système de tracking et d'analyse de l'usage des commandes pour optimiser votre workflow.
+
+## Fonctionnalités
+
+### 📈 Tracking automatique
+- **Historique complet** : Toutes les commandes avec timestamp, durée, statut
+- **Contexte projet** : Détection automatique du type de projet
+- **Métriques performance** : Temps d'exécution et taux de succès
+
+### 📊 Dashboard statistiques
+```bash
+dotfiles-stats              # Vue d'ensemble
+dotfiles-stats --detailed   # Analyse approfondie
+dotfiles-stats --json      # Export données
+```
+
+### 🔍 Analyse performance
+```bash
+dotfiles-perf               # Temps d'exécution
+dotfiles-perf --slow       # Commandes les plus lentes
+```
+
+### 💡 Insights personnalisés
+```bash
+dotfiles-insights           # Recommandations
+dotfiles-insights --habits # Analyse des habitudes
+```
+
+---
+
+# ⚙️ Module 5 : Configuration Personnalisée
+
+Système de configuration flexible avec hooks et personnalisation avancée.
+
+## Configuration
+
+### 🎛️ Paramètres disponibles
+```bash
+dotfiles-config show       # Afficher configuration
+dotfiles-config wizard     # Assistant configuration
+```
+
+**Paramètres principaux :**
+- `EMOJI_ENABLED` : Émojis dans les messages
+- `AUTO_PUSH` : Push automatique après commit
+- `DEFAULT_BRANCH_TYPE` : Type de branche par défaut
+- `ANALYTICS_ENABLED` : Collecte de statistiques
+- `BACKUP_ENABLED` : Backups automatiques
+
+### 🪝 Système de hooks
+```bash
+dotfiles-config hook list          # Lister les hooks
+dotfiles-config hook enable pre-commit
+```
+
+**Hooks disponibles :**
+- `pre-commit` : Validation avant commit
+- `post-commit` : Actions après commit
+- `pre-push` : Vérifications avant push
+
+---
+
+# 🎯 Intégration Aklo + MCP
+
+## Vue d'ensemble
+
+L'intégration Aklo + MCP permet d'utiliser automatiquement les commandes Aklo quand un projet est configuré avec la Charte IA, tout en gardant un fallback sur les fonctions Git optimisées standard.
+
+## Fonctionnement automatique
+
+### 🔍 Détection intelligente
+
+Le système détecte automatiquement :
+- **Disponibilité d'Aklo** : `command -v aklo`
+- **Projet initialisé** : Présence de `docs/project.conf` et `docs/backlog/`
+- **Contexte tâche** : Branche au format `task-XX-X`
+
+### ⚡ Suggestions contextuelles
+
+Quand vous utilisez les commandes Git optimisées dans un contexte Aklo :
+
+```bash
+# Création de branche pour tâche Aklo
+gbs 42-1
+# 🎯 Pattern de tâche Aklo détecté: 42-1
+# 💡 Utilisation recommandée: aklo start-task 42-1
+# Utiliser aklo start-task ? (y/N):
+
+# Commit dans contexte tâche
+gac "Implémentation feature X"
+# 🎯 Contexte Aklo détecté (tâche 42-1)
+# 💡 Utilisation recommandée: aklo submit-task
+# Utiliser aklo submit-task ? (y/N):
+```
+
+### 🔧 Commandes utilitaires
+
+```bash
+aklo-suggest                # Vérifier contexte Aklo
+aklo-help                  # Assistant workflow Aklo
+```
+
+## Usage avec MCP
+
+### 📡 Fonctions MCP disponibles
+
+Le système expose des fonctions pour l'usage MCP :
+
+```javascript
+// Vérification contexte
+mcp_aklo_suggest("check-context")
+
+// Suggestion pour démarrer tâche
+mcp_aklo_suggest("start-task", "42-1")
+
+// Suggestion pour soumettre tâche
+mcp_aklo_suggest("submit-task")
+```
+
+### 🎯 Protocole DÉVELOPPEMENT automatisé
+
+Quand Claude suit le protocole DÉVELOPPEMENT (étape 6), il peut utiliser :
+
+```javascript
+// Au lieu de commandes Git manuelles
+mcp_desktop-commander_execute_command("git checkout -b feature/task-42-1")
+mcp_desktop-commander_move_file("TASK-42-1-TODO.md", "TASK-42-1-IN_PROGRESS.md")
+
+// Utilisation directe d'Aklo (recommandée)
+mcp_aklo-terminal_aklo_execute({
+  command: "start-task",
+  args: ["42-1"]
+})
+```
+
+### 🔄 Fallback automatique
+
+Si Aklo n'est pas disponible, le système utilise automatiquement les fonctions Git optimisées standard.
+
+## Bonnes pratiques MCP + Aklo
+
+### ✅ Recommandations
+
+1. **Toujours vérifier le contexte** :
+   ```javascript
+   // Avant toute opération Git dans MCP
+   mcp_aklo_suggest("check-context")
+   ```
+
+2. **Préférer Aklo quand disponible** :
+   - `aklo start-task` vs `git checkout -b`
+   - `aklo submit-task` vs `git commit + git push`
+
+3. **Utiliser les suggestions** :
+   - Les fonctions `mcp_aklo_suggest` guident l'usage optimal
+
+### 🚫 À éviter
+
+- Forcer l'usage d'Aklo sans vérification de disponibilité
+- Mélanger commandes Aklo et Git manuelles dans le même workflow
+- Ignorer les suggestions contextuelles
+
+## Indicateurs visuels
+
+### 🎨 Prompt Git amélioré
+
+Le prompt Git affiche un indicateur `⚡` quand vous êtes dans une branche de tâche Aklo :
+
+```bash
+git:task-42-1 (2) ⚡$    # Contexte Aklo actif
+git:feature/new-ui (1)$  # Branche standard
+```
+
+### 📊 Intégration analytics
+
+Les commandes Aklo sont trackées dans le système d'analytics pour optimiser votre workflow.
+
+---
+
+# 🚀 Installation et Configuration
+
+## Installation complète 

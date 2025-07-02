@@ -165,3 +165,103 @@ dotfiles-config get ANALYTICS_ENABLED
 **🎉 Félicitations !** Vous êtes maintenant prêt à utiliser un système Git ultra-optimisé. 
 
 **💡 Conseil** : Utilisez `dotfiles-insights` après quelques jours pour obtenir des recommandations personnalisées. 
+
+## 🎯 Cas d'usage pratiques
+
+### Workflow quotidien optimisé
+```bash
+# 1. Création branche avec validation
+gbs feature/new-login-ui
+
+# 2. Développement avec commits intelligents
+gac "Ajout formulaire de connexion"
+gac "Validation des champs"
+
+# 3. Nettoyage et finalisation
+gri  # Rebase interactif optimisé
+gbd old-feature  # Suppression sécurisée
+```
+
+### Gestion de projet avancée
+```bash
+# Templates et assistants
+gbw  # Assistant création branche
+dotfiles-stats  # Analyse de productivité
+dotfiles-config wizard  # Configuration personnalisée
+```
+
+---
+
+# 🎯 Intégration Aklo + MCP
+
+## Workflow automatisé avec la Charte IA
+
+Si votre projet utilise Aklo et la Charte IA, les commandes Git s'adaptent automatiquement :
+
+### 🚀 Démarrage d'une tâche
+
+```bash
+# Commande standard
+gbs 42-1
+
+# Détection automatique Aklo :
+# 🎯 Pattern de tâche Aklo détecté: 42-1
+# 💡 Utilisation recommandée: aklo start-task 42-1
+# Utiliser aklo start-task ? (y/N): y
+# 
+# ✅ Branche créée + statut tâche mis à jour automatiquement
+```
+
+### 📝 Soumission pour revue
+
+```bash
+# Dans une branche task-42-1
+gac "Implémentation terminée"
+
+# Détection automatique du contexte :
+# 🎯 Contexte Aklo détecté (tâche 42-1)
+# 💡 Utilisation recommandée: aklo submit-task
+# Utiliser aklo submit-task ? (y/N): y
+#
+# ✅ Commit + push + statut "AWAITING_REVIEW" automatique
+```
+
+### 🔍 Vérification du contexte
+
+```bash
+aklo-suggest
+# ✅ Aklo disponible
+# ✅ Projet Aklo initialisé  
+# ✅ Contexte tâche détecté: 42-1
+
+aklo-help
+# 🎯 Assistant Workflow Aklo
+# Commandes disponibles:
+#   aklo propose-pbi    - Créer un nouveau PBI
+#   aklo plan <PBI_ID>  - Planifier les tâches d'un PBI
+#   aklo start-task <ID> - Commencer une tâche
+#   aklo submit-task    - Soumettre pour revue
+```
+
+## Usage avec Claude/MCP
+
+Quand Claude suit le protocole DÉVELOPPEMENT, il utilise automatiquement Aklo quand disponible :
+
+### Avant (commandes Git manuelles)
+```javascript
+mcp_desktop-commander_execute_command("git checkout -b feature/task-42-1")
+mcp_desktop-commander_move_file("TASK-42-1-TODO.md", "TASK-42-1-IN_PROGRESS.md")
+```
+
+### Après (intégration Aklo)
+```javascript
+mcp_aklo-terminal_aklo_execute({
+  command: "start-task", 
+  args: ["42-1"]
+})
+// ✅ Branche + statut mis à jour en une commande
+```
+
+---
+
+# 💡 Conseils d'optimisation 
