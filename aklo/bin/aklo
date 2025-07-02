@@ -63,7 +63,7 @@ update_journal() {
   DESCRIPTION="$3"
   ARTEFACTS="$4"
   
-  JOURNAL_DIR="./docs/backlog/15-journal"
+  JOURNAL_DIR="./$(get_config "JOURNAL_DIR")"
   TODAY=$(date +%Y-%m-%d)
   JOURNAL_FILE="${JOURNAL_DIR}/JOURNAL-${TODAY}.md"
   TIMESTAMP=$(date +%H:%M)
@@ -115,8 +115,8 @@ command_plan() {
   PBI_ID="$1"
   
   # Détection du niveau d'assistance
-  AGENT_ASSISTANCE="full"
-  AUTO_JOURNAL="true"
+  AGENT_ASSISTANCE=$(get_config "AGENT_ASSISTANCE")
+  AUTO_JOURNAL=$(get_config "AUTO_JOURNAL")
   
   # Parsing des arguments
   shift
@@ -137,8 +137,8 @@ command_plan() {
   done
   
   # Override depuis la configuration si présente
-  CONFIG_ASSISTANCE=$(get_config "agent_assistance" 2>/dev/null || echo "")
-  CONFIG_JOURNAL=$(get_config "auto_journal" 2>/dev/null || echo "")
+  CONFIG_ASSISTANCE=$(get_config "AGENT_ASSISTANCE" 2>/dev/null || echo "")
+  CONFIG_JOURNAL=$(get_config "AUTO_JOURNAL" 2>/dev/null || echo "")
   
   if [ -n "$CONFIG_ASSISTANCE" ]; then
     AGENT_ASSISTANCE="$CONFIG_ASSISTANCE"
@@ -400,7 +400,7 @@ command_release() {
   echo "  › Nouvelle version: ${NEW_VERSION}"
   
   # Préparation des fichiers (sans commit)
-  RELEASE_DIR="./docs/backlog/07-releases"
+  RELEASE_DIR="./$(get_config "RELEASES_DIR")"
   mkdir -p "$RELEASE_DIR"
   RELEASE_FILE="${RELEASE_DIR}/RELEASE-${NEW_VERSION}-AWAITING_DEPLOYMENT.md"
   
@@ -757,8 +757,8 @@ command_install_ux() {
 command_propose_pbi() {
   local title="$1"
   local template="${2:-default}"
-  local agent_assistance=$(get_config "agent_assistance" || echo "full")
-  local auto_journal=$(get_config "auto_journal" || echo "true")
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
   
   case "$title" in
     "--help"|"help"|"")
@@ -800,7 +800,7 @@ command_propose_pbi() {
   fi
   
   # Génération de l'ID unique
-  PBI_DIR="./docs/backlog/00-pbi"
+  PBI_DIR="./$(get_config "PBI_DIR")"
   mkdir -p "$PBI_DIR"
   
   PBI_ID=$(get_next_id "$PBI_DIR" "PBI")
@@ -953,6 +953,304 @@ generate_pbi_minimal() {
 EOF
 }
 
+# Commande: arch - Conception d'architecture logicielle
+command_arch() {
+  local pbi_id="$1"
+  local review_flag="$2"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+  
+  case "$pbi_id" in
+    "--help"|"help"|"")
+      echo "Usage: aklo arch <PBI_ID> [--review]"
+      echo ""
+      echo "Conception d'architecture logicielle selon le protocole ARCHITECTURE."
+      echo ""
+      echo "Arguments:"
+      echo "  PBI_ID      ID du PBI nécessitant une architecture (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --review    Révision d'une architecture existante"
+      echo "  --no-agent  Mode skeleton (structure vide à compléter)"
+      echo "  --no-journal Pas de mise à jour automatique du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo arch 42            # Nouvelle architecture pour PBI-42"
+      echo "  aklo arch 42 --review   # Révision de l'architecture PBI-42"
+      echo "  aklo arch 42 --no-agent # Mode skeleton"
+      exit 0
+      ;;
+    --no-agent)
+      agent_assistance="skeleton"
+      pbi_id="$2"
+      review_flag="$3"
+      ;;
+    --no-journal)
+      auto_journal="false"
+      pbi_id="$2"
+      review_flag="$3"
+      ;;
+  esac
+  
+  if [ -z "$pbi_id" ]; then
+    echo "Erreur : L'ID du PBI est requis." >&2
+    echo "Usage: aklo arch <PBI_ID>"
+    echo "Utilisez 'aklo arch --help' pour plus d'informations."
+    exit 1
+  fi
+  
+  # Validation de l'existence du PBI
+  PBI_DIR="./$(get_config "PBI_DIR")"
+  PBI_FILE=$(find "$PBI_DIR" -name "PBI-${pbi_id}-*.md" 2>/dev/null | head -1)
+  
+  if [ -z "$PBI_FILE" ]; then
+    echo "Erreur : PBI-${pbi_id} introuvable dans $PBI_DIR" >&2
+    echo "Vérifiez que le PBI existe avant de créer son architecture."
+    exit 1
+  fi
+  
+  # Génération de l'ID d'architecture
+  ARCH_DIR="./$(get_config "ARCH_DIR")"
+  mkdir -p "$ARCH_DIR"
+  
+  # Trouver le prochain ID d'architecture pour ce PBI
+  ARCH_ID=1
+  while [ -f "${ARCH_DIR}/ARCH-${pbi_id}-${ARCH_ID}-"*".md" ]; do
+    ARCH_ID=$((ARCH_ID + 1))
+  done
+  
+  if [ "$review_flag" = "--review" ]; then
+    # Mode révision : chercher l'architecture existante
+    EXISTING_ARCH=$(find "$ARCH_DIR" -name "ARCH-${pbi_id}-*-VALIDATED.md" 2>/dev/null | head -1)
+    if [ -z "$EXISTING_ARCH" ]; then
+      echo "Erreur : Aucune architecture validée trouvée pour PBI-${pbi_id}" >&2
+      echo "Utilisez 'aklo arch ${pbi_id}' pour créer une nouvelle architecture."
+      exit 1
+    fi
+    echo "🔄 Révision de l'architecture existante : $(basename "$EXISTING_ARCH")"
+  fi
+  
+  ARCH_FILE="${ARCH_DIR}/ARCH-${pbi_id}-${ARCH_ID}-DRAFT.md"
+  TODAY=$(date +%Y-%m-%d)
+  
+  echo "🏗️  Création de l'architecture ARCH-${pbi_id}-${ARCH_ID} pour PBI-${pbi_id}"
+  
+  # Génération du contenu selon le niveau d'assistance
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète par l'IA..."
+      generate_arch_full "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE"
+      ;;
+    "skeleton")
+      echo "📝 Génération de la structure à compléter..."
+      generate_arch_skeleton "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE"
+      ;;
+    "minimal")
+      echo "🔧 Création minimale (structure de base)..."
+      generate_arch_minimal "$ARCH_FILE" "$pbi_id" "$ARCH_ID" "$TODAY" "$PBI_FILE"
+      ;;
+  esac
+  
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "ARCHITECTURE" "Création document" "Architecture ARCH-${pbi_id}-${ARCH_ID} pour PBI-${pbi_id}" "ARCH-${pbi_id}-${ARCH_ID}-DRAFT.md"
+  fi
+  
+  echo ""
+  echo "✅ ARCH-${pbi_id}-${ARCH_ID}-DRAFT.md créé avec succès !"
+  echo "📍 Fichier: $ARCH_FILE"
+  echo ""
+  echo "Prochaines étapes:"
+  echo "  1. Analyser le problème architectural"
+  echo "  2. Évaluer 2-3 options d'architecture"
+  echo "  3. Documenter les compromis (trade-offs)"
+  echo "  4. Soumettre pour validation"
+  echo "  5. Mettre à jour les Tasks après validation"
+}
+
+# Fonctions de génération ARCH
+generate_arch_full() {
+  local file="$1"
+  local pbi_id="$2"
+  local arch_id="$3"
+  local date="$4"
+  local pbi_file="$5"
+  
+  # Extraire le titre du PBI
+  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed 's/^# PBI-[0-9]* : //' || echo "Architecture pour PBI-${pbi_id}")
+  
+  cat > "$file" << EOF
+# ARCH-${pbi_id}-${arch_id} : Architecture pour ${pbi_title}
+
+---
+
+## DO NOT EDIT THIS SECTION MANUALLY
+**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
+**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
+**Assigné à:** \`Human_Developer\`
+**Date de création:** ${date}
+
+---
+
+## 1. Problème à Résoudre
+
+_À analyser : Description du défi technique qui nécessite cette architecture._
+
+_Basé sur l'analyse des Tasks du PBI-${pbi_id} identifiées comme présentant une complexité ou un risque élevé._
+
+## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
+
+### Option A : [Nom de l'approche A]
+
+- **Description :** _À définir : Description de cette approche_
+- **Avantages :** 
+  - _Avantage 1_
+  - _Avantage 2_
+- **Inconvénients :** 
+  - _Inconvénient 1_
+  - _Inconvénient 2_
+
+### Option B : [Nom de l'approche B]
+
+- **Description :** _À définir : Description de cette approche alternative_
+- **Avantages :** 
+  - _Avantage 1_
+  - _Avantage 2_
+- **Inconvénients :** 
+  - _Inconvénient 1_
+  - _Inconvénient 2_
+
+### Option C : [Nom de l'approche C] (Optionnel)
+
+- **Description :** _À définir : Description d'une troisième approche si pertinente_
+- **Avantages :** 
+  - _Avantage 1_
+- **Inconvénients :** 
+  - _Inconvénient 1_
+
+## 3. Décision et Justification
+
+_À compléter après analyse : Annonce de l'option retenue et justification détaillée._
+
+_Critères de décision : performance, maintenabilité, coût, complexité, time-to-market, etc._
+
+## 4. Schéma de la Solution (Optionnel)
+
+\`\`\`
+[Diagramme ou schéma ASCII de la solution retenue]
+\`\`\`
+
+## 5. Impact sur les Tâches
+
+_À définir après validation de l'architecture :_
+
+**Tasks à modifier :**
+- TASK-${pbi_id}-XX : _Modification nécessaire_
+
+**Nouvelles tasks à créer :**
+- _Nouvelle task 1 : Description_
+- _Nouvelle task 2 : Description_
+
+**Tasks à supprimer :**
+- _Task obsolète : Raison de suppression_
+
+EOF
+}
+
+generate_arch_skeleton() {
+  local file="$1"
+  local pbi_id="$2"
+  local arch_id="$3"
+  local date="$4"
+  local pbi_file="$5"
+  
+  cat > "$file" << EOF
+# ARCH-${pbi_id}-${arch_id} : [À compléter : Titre de l'architecture]
+
+---
+
+## DO NOT EDIT THIS SECTION MANUALLY
+**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
+**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
+**Assigné à:** \`Human_Developer\`
+**Date de création:** ${date}
+
+---
+
+## 1. Problème à Résoudre
+
+_À compléter : Quel défi technique nécessite cette architecture ?_
+
+## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
+
+### Option A : [À compléter]
+
+- **Description :** 
+- **Avantages :** 
+- **Inconvénients :** 
+
+### Option B : [À compléter]
+
+- **Description :** 
+- **Avantages :** 
+- **Inconvénients :** 
+
+## 3. Décision et Justification
+
+_À compléter après analyse_
+
+## 4. Schéma de la Solution (Optionnel)
+
+## 5. Impact sur les Tâches
+
+_À définir_
+
+EOF
+}
+
+generate_arch_minimal() {
+  local file="$1"
+  local pbi_id="$2"
+  local arch_id="$3"
+  local date="$4"
+  local pbi_file="$5"
+  
+  cat > "$file" << EOF
+# ARCH-${pbi_id}-${arch_id} : 
+
+---
+
+## DO NOT EDIT THIS SECTION MANUALLY
+**PBI Parent:** [PBI-${pbi_id}.md](../00-pbi/$(basename "$pbi_file"))
+**Document d'Architecture:** [ARCH-${pbi_id}-${arch_id}.md](../02-architecture/ARCH-${pbi_id}-${arch_id}-DRAFT.md)
+**Assigné à:** \`Human_Developer\`
+**Date de création:** ${date}
+
+---
+
+## 1. Problème à Résoudre
+
+
+
+## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
+
+
+
+## 3. Décision et Justification
+
+
+
+## 4. Schéma de la Solution (Optionnel)
+
+
+
+## 5. Impact sur les Tâches
+
+
+
+EOF
+}
+
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
@@ -975,6 +1273,7 @@ show_help() {
   echo "  propose-pbi \"<titre>\" [--template]  Création d'un Product Backlog Item"
   echo "  pbi \"<titre>\"                       Alias pour propose-pbi"
   echo "  plan <PBI_ID> [--no-agent]          Planification avec commit atomique"
+  echo "  arch <PBI_ID> [--review]            Conception d'architecture logicielle"
   echo "  release <type> [--dry-run]          Release (major|minor|patch)"
   echo ""
   echo "📚 AIDE ET INFORMATION:"
@@ -1033,6 +1332,10 @@ case "${1:-help}" in
   "propose-pbi"|"pbi")
     shift
     command_propose_pbi "$@"
+    ;;
+  "arch")
+    shift
+    command_arch "$@"
     ;;
   "help"|"--help"|"-h")
     show_help

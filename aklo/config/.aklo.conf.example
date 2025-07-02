@@ -31,7 +31,7 @@
 #            → Création des fichiers avec métadonnées de base uniquement
 #            → Tout le contenu à créer manuellement
 #            → Idéal pour : utilisateurs expérimentés, workflows spécifiques
-agent_assistance=full
+AGENT_ASSISTANCE=full
 
 # 📝 Mise à jour automatique du journal lors des opérations
 # 
@@ -43,7 +43,7 @@ agent_assistance=full
 # false : Pas de mise à jour automatique du journal
 #         → Mise à jour manuelle requise
 #         → Risque d'oubli et de perte de traçabilité
-auto_journal=true
+AUTO_JOURNAL=true
 
 #==============================================================================
 # SECTION 2 : CONFIGURATION GIT ET VERSIONING
@@ -162,26 +162,26 @@ AUTO_BACKUP=true
 #==============================================================================
 
 # 🚀 PROJET PROTOTYPE / EXPLORATION RAPIDE :
-# agent_assistance=full
-# auto_journal=true
+# AGENT_ASSISTANCE=full
+# AUTO_JOURNAL=true
 # VALIDATE_LINTER=false
 # VALIDATE_TESTS=false
 
 # 🏭 PROJET PRODUCTION / ÉQUIPE :
-# agent_assistance=skeleton
-# auto_journal=true
+# AGENT_ASSISTANCE=skeleton
+# AUTO_JOURNAL=true
 # VALIDATE_LINTER=true
 # VALIDATE_TESTS=true
 # REQUIRE_HUMAN_VALIDATION=true
 
 # 🎯 PROJET PERSONNEL / CONTRÔLE TOTAL :
-# agent_assistance=minimal
-# auto_journal=false
+# AGENT_ASSISTANCE=minimal
+# AUTO_JOURNAL=false
 # USE_MCP_SERVERS=false
 
 # 📚 PROJET DOCUMENTATION / CONTENU :
-# agent_assistance=full
-# auto_journal=true
+# AGENT_ASSISTANCE=full
+# AUTO_JOURNAL=true
 # VALIDATE_BUILD=false
 # VALIDATE_TESTS=false
 
