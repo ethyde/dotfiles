@@ -36,6 +36,15 @@ L'outil `aklo` est installé en même temps que le reste de vos `dotfiles` via l
 
 Voici le grimoire complet des commandes disponibles.
 
+### Commandes Système et Diagnostic
+
+| Commande | Arguments | Description |
+| :--- | :--- | :--- |
+| `aklo status` | `[--brief\|--detailed\|--json]` | **Tableau de bord du projet** avec état des PBI, tâches et configuration. |
+| `aklo get_config` | `[<clé>] [--all]` | **Affiche la configuration** effective (debugging, scripts, validation). |
+| `aklo config` | `<clé>` | **Alias court** pour get_config avec une clé spécifique. |
+| `aklo validate` | `[path]` | **Validation du projet** (linter, tests, build selon configuration). |
+
 ### Commandes de Workflow Principal
 
 | Commande | Arguments | Description |
@@ -55,19 +64,22 @@ Voici le grimoire complet des commandes disponibles.
 | `aklo hotfix` | `"<description>"` | Démarre le processus d'urgence pour une **correction critique** en production depuis le dernier tag. |
 | `aklo hotfix publish`| - | **Publie le hotfix** une fois la correction effectuée (merge, tag de patch, etc.). |
 
-### Commande de Création d'Artefacts ("Scaffolding")
+### Commandes de Création d'Artefacts Spécialisés
 
 | Commande | Arguments | Description |
 | :--- | :--- | :--- |
-| `aklo new` | `<type> [args...]` | Crée rapidement un artefact de support. Le deuxième argument dépend du `type`. |
-
-**Types disponibles pour `aklo new` :**
-* **Basés sur un titre :** `debug`, `refactor`, `optim`, `experiment`, `competition`, `deprecation`, `fast-track`, `scratchpad`, `meta-improvement`.
-    * *Exemple :* `aklo new debug "Erreur 500 lors du login"`
-* **Basés sur un ID parent :** `tracking-plan`, `user-docs`.
-    * *Exemple :* `aklo new tracking-plan 42-1`
-* **Sans argument :** `security-audit` (utilise la date courante).
-    * *Exemple :* `aklo new security-audit`
+| `aklo debug` | `"<titre>"` | Crée un rapport de débogage pour diagnostiquer un problème. |
+| `aklo refactor` | `"<description>"` | Planifie une session de refactoring sécurisé. |
+| `aklo optimize` | `"<objectif>"` | Lance une optimisation de performance ciblée. |
+| `aklo experiment` | `"<hypothèse>"` | Démarre une expérimentation A/B ou test d'hypothèse. |
+| `aklo analyze` | `"<sujet>"` | Analyse concurrentielle ou étude de marché. |
+| `aklo deprecate` | `"<fonctionnalité>"` | Planifie la dépréciation d'une fonctionnalité. |
+| `aklo fast` | `"<tâche>"` | Procédure accélérée pour petites modifications. |
+| `aklo scratch` | `"<sujet>"` | Brainstorming et scratchpad temporaire. |
+| `aklo meta` | `"<amélioration>"` | Amélioration du protocole Aklo lui-même. |
+| `aklo track` | `<PBI_ID>` | Plan de tracking et analytics pour une fonctionnalité. |
+| `aklo docs` | `"<sujet>"` | Documentation utilisateur ou développeur. |
+| `aklo security` | `[<périmètre>]` | Audit de sécurité (utilise la date courante si sans argument). |
 
 ## 4. Un Cycle de Vie Complet (Exemple de Workflow)
 
@@ -76,6 +88,8 @@ Voici le grimoire complet des commandes disponibles.
     git clone mon-super-projet.git
     cd mon-super-projet
     aklo init
+    aklo status                    # Vérifier l'état du projet
+    aklo get_config --all          # Vérifier la configuration
     ```
 
 2.  **Définition et Planification :**
@@ -103,6 +117,21 @@ Voici le grimoire complet des commandes disponibles.
     *Une fois plusieurs tâches fusionnées...*
     ```bash
     aklo release minor
+    ```
+
+6.  **Maintenance et Support :**
+    ```bash
+    # Débogage d'un problème
+    aklo debug "Erreur 500 lors du login"
+    
+    # Optimisation de performance
+    aklo optimize "Temps de chargement page d'accueil"
+    
+    # Audit de sécurité
+    aklo security
+    
+    # Refactoring du code
+    aklo refactor "Simplification de l'architecture auth"
     ```
 
 ## 5. Configuration (`.aklo.conf`)
@@ -155,4 +184,12 @@ Lorsque vous lancerez `aklo start-task` dans ce projet, il utilisera `main` comm
 ## 6. Faire évoluer le Protocole
 
 Ce système est conçu pour être un document vivant. Toute proposition d'amélioration de la Charte ou de l'outil `aklo` lui-même doit suivre le **protocole [META-IMPROVEMENT]**, qui peut être initié via la commande :
-`aklo new meta-improvement "Rendre la commande 'plan' non-interactive"`
+```bash
+aklo meta "Rendre la commande 'plan' non-interactive"
+```
+
+**Autres exemples d'amélioration :**
+```bash
+aklo meta "Ajouter support pour les templates personnalisés"
+aklo meta "Intégration avec les webhooks Git"
+```
