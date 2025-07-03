@@ -1,4 +1,4 @@
-# PBI-1 : Test No Cache Creation
+# PBI-1 : Test cache validation
 
 ---
 **Statut:** PROPOSED
