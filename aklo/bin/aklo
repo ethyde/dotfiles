@@ -12,10 +12,11 @@
 # Configuration de base du Shell
 set -e
 
-# Source des fonctions de cache (TASK-6-3)
+# Source des fonctions de cache (TASK-6-3 et TASK-6-4)
 script_dir="$(dirname "$0")"
 source "${script_dir}/aklo_cache_functions.sh" 2>/dev/null || echo "⚠️  Fonctions cache non disponibles - fallback uniquement" >&2
 source "${script_dir}/aklo_extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non disponibles - fallback uniquement" >&2
+source "${script_dir}/aklo_cache_monitoring.sh" 2>/dev/null || echo "⚠️  Fonctions monitoring cache non disponibles" >&2
 
 #==============================================================================
 # PARSER GÉNÉRIQUE DE PROTOCOLES - SOURCE UNIQUE DE VÉRITÉ
@@ -97,6 +98,8 @@ parse_and_generate_artefact() {
             log_cache_event "HIT" "Cache valide trouvé: $cache_file"
             if artefact_structure=$(cat "$cache_file" 2>/dev/null); then
               log_cache_event "SUCCESS" "Cache lu avec succès"
+              # TASK-6-4: Enregistrer métrique cache hit
+              record_cache_metric "hit" 2>/dev/null || true
             else
               log_cache_event "ERROR" "Échec lecture cache - fallback vers extraction"
               artefact_structure=""
@@ -109,6 +112,8 @@ parse_and_generate_artefact() {
               mkdir -p "/tmp/aklo_cache"
               echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
               log_cache_event "CACHED" "Structure extraite et mise en cache"
+              # TASK-6-4: Enregistrer métrique cache miss
+              record_cache_metric "miss" 2>/dev/null || true
             else
               log_cache_event "ERROR" "Échec extraction avec cache - fallback"
               artefact_structure=""
@@ -126,6 +131,8 @@ parse_and_generate_artefact() {
         mkdir -p "/tmp/aklo_cache"
         echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
         log_cache_event "CACHED" "Structure extraite et mise en cache"
+        # TASK-6-4: Enregistrer métrique cache miss
+        record_cache_metric "miss" 2>/dev/null || true
       else
         log_cache_event "ERROR" "Échec extraction - fallback"
         artefact_structure=""
@@ -1385,6 +1392,48 @@ command_validate() {
         echo "Erreur : Script validation.sh introuvable." >&2
         exit 1
       fi
+      ;;
+  esac
+}
+
+# Commande: cache - Gestion du cache intelligent (TASK-6-4)
+command_cache() {
+  local action="$1"
+  
+  case "$action" in
+    "status")
+      show_cache_status
+      ;;
+    "clear")
+      clear_cache
+      ;;
+    "benchmark")
+      benchmark_cache
+      ;;
+    "--help"|"help"|"")
+      echo "Usage: aklo cache <action>"
+      echo ""
+      echo "Gestion du cache intelligent du parser aklo."
+      echo ""
+      echo "Actions:"
+      echo "  status      Affiche les statistiques du cache"
+      echo "  clear       Vide complètement le cache"
+      echo "  benchmark   Teste les performances avec/sans cache"
+      echo "  --help      Affiche cette aide"
+      echo ""
+      echo "Configuration:"
+      echo "  Le cache est configuré dans .aklo.conf"
+      echo "  Section [cache] avec enabled, cache_dir, ttl_days, etc."
+      echo ""
+      echo "Exemples:"
+      echo "  aklo cache status      # Voir les statistiques"
+      echo "  aklo cache clear       # Vider le cache"
+      echo "  aklo cache benchmark   # Tester les performances"
+      ;;
+    *)
+      echo "Action inconnue: $action" >&2
+      echo "Utilisez 'aklo cache --help' pour voir les actions disponibles."
+      exit 1
       ;;
   esac
 }
@@ -4649,6 +4698,7 @@ show_help() {
   echo "  config <clé>                        Alias pour get_config"
   echo "  validate [path]                     Validation projet/artefacts"
   echo "  mcp setup|restart|watch             Gestion serveurs MCP"
+  echo "  cache status|clear|benchmark        Gestion cache intelligent"
   echo "  template list|create|apply          Gestion des templates"
   echo "  install-ux                          Installation améliorations UX"
   echo ""
@@ -4726,6 +4776,10 @@ case "${1:-help}" in
   "validate")
     shift
     command_validate "$@"
+    ;;
+  "cache")
+    shift
+    command_cache "$@"
     ;;
   "template")
     shift
