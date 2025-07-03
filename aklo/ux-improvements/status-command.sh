@@ -376,6 +376,44 @@ show_status_detailed() {
         echo "   📂 Répertoire journal inexistant"
     fi
     
+    # Performance & Monitoring (TASK-7-4, TASK-7-5)
+    echo ""
+    echo "⚡ Performance & Monitoring"
+    echo "──────────────────────────────"
+    if command -v get_memory_diagnostics >/dev/null 2>&1; then
+        # Diagnostic mémoire condensé
+        local cache_dir="${AKLO_CACHE_DIR:-$HOME/.aklo/cache}"
+        if [ -d "$cache_dir" ]; then
+            local cache_size_kb=$(du -sk "$cache_dir" 2>/dev/null | cut -f1)
+            local cache_size_mb=$((cache_size_kb / 1024))
+            echo "   💾 Cache total: ${cache_size_mb}MB"
+            
+            # Compter les fichiers de cache par type
+            local regex_files=$(find "$cache_dir/regex" -type f 2>/dev/null | wc -l | tr -d ' ')
+            local id_files=$(find "$cache_dir/id" -type f 2>/dev/null | wc -l | tr -d ' ')
+            local batch_files=$(find "$cache_dir/batch" -type f 2>/dev/null | wc -l | tr -d ' ')
+            echo "   📊 Caches: Regex($regex_files) ID($id_files) Batch($batch_files)"
+        else
+            echo "   💾 Cache: Non initialisé"
+        fi
+        
+        # Environnement de performance
+        if [ -n "$DETECTED_ENVIRONMENT" ]; then
+            echo "   🎯 Environnement: $DETECTED_ENVIRONMENT"
+        fi
+        
+        # Monitoring I/O si disponible
+        if command -v show_io_dashboard >/dev/null 2>&1; then
+            local monitoring_dir="${AKLO_CACHE_DIR:-$HOME/.aklo/cache}/monitoring"
+            if [ -d "$monitoring_dir" ]; then
+                local session_count=$(find "$monitoring_dir" -name "session_*" -type f 2>/dev/null | wc -l | tr -d ' ')
+                echo "   📈 Sessions I/O: $session_count"
+            fi
+        fi
+    else
+        echo "   ⚠️  Système de monitoring non disponible"
+    fi
+    
     echo ""
     echo "$(printf '%.0s═' {1..60})"
 }
