@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #==============================================================================
 # The Aklo Protocol - Interface Unifiée
 #
@@ -30,6 +30,9 @@ source "${script_dir}/aklo_id_cache.sh" 2>/dev/null || echo "⚠️  Cache des I
 # Source du système de monitoring I/O (TASK-7-4)
 source "${script_dir}/aklo_io_monitoring.sh" 2>/dev/null || echo "⚠️  Monitoring I/O non disponible" >&2
 
+# Source du système de tuning de performance (TASK-7-5)
+source "${script_dir}/aklo_performance_tuning.sh" 2>/dev/null || echo "⚠️  Tuning de performance non disponible" >&2
+
 # Initialisation du cache regex au démarrage
 if command -v init_regex_cache >/dev/null 2>&1; then
     init_regex_cache
@@ -48,6 +51,11 @@ fi
 # Initialisation du monitoring I/O
 if command -v start_io_monitoring >/dev/null 2>&1; then
     start_io_monitoring
+fi
+
+# Initialisation du tuning de performance
+if command -v load_performance_config >/dev/null 2>&1; then
+    load_performance_config
 fi
 
 #==============================================================================
@@ -1543,6 +1551,87 @@ command_cache() {
     *)
       echo "Action inconnue: $action" >&2
       echo "Utilisez 'aklo cache --help' pour voir les actions disponibles."
+      exit 1
+      ;;
+  esac
+}
+
+# Commande: config - Gestion de la configuration de performance
+command_config() {
+  local action="$1"
+  
+  case "$action" in
+    "tune")
+      echo "🔧 Auto-tuning des paramètres de performance..."
+      if command -v auto_tune_performance >/dev/null 2>&1; then
+        auto_tune_performance
+        echo "✅ Auto-tuning terminé"
+        echo "📊 Utiliser 'aklo config diagnose' pour voir les résultats"
+      else
+        echo "❌ Système de tuning non disponible" >&2
+        exit 1
+      fi
+      ;;
+    "profile")
+      local profile="$2"
+      if [[ -z "$profile" ]]; then
+        echo "❌ Profil requis: dev, test, ou prod" >&2
+        echo "Usage: aklo config profile <dev|test|prod>"
+        exit 1
+      fi
+      echo "🎯 Application du profil: $profile"
+      if command -v apply_performance_profile >/dev/null 2>&1; then
+        apply_performance_profile "$profile"
+        echo "✅ Profil $profile appliqué"
+      else
+        echo "❌ Système de profils non disponible" >&2
+        exit 1
+      fi
+      ;;
+    "diagnose")
+      echo "🔍 Diagnostic mémoire et performance..."
+      if command -v get_memory_diagnostics >/dev/null 2>&1; then
+        get_memory_diagnostics
+      else
+        echo "❌ Système de diagnostic non disponible" >&2
+        exit 1
+      fi
+      ;;
+    "validate")
+      echo "✅ Validation de la configuration..."
+      if command -v validate_performance_config >/dev/null 2>&1; then
+        if validate_performance_config; then
+          echo "✅ Configuration valide"
+        else
+          echo "❌ Configuration invalide"
+          exit 1
+        fi
+      else
+        echo "❌ Système de validation non disponible" >&2
+        exit 1
+      fi
+      ;;
+    "--help"|"help"|"")
+      echo "Usage: aklo config <action>"
+      echo ""
+      echo "Gestion de la configuration de performance et tuning."
+      echo ""
+      echo "Actions:"
+      echo "  tune              Auto-tuning selon l'environnement"
+      echo "  profile <env>     Appliquer un profil (dev|test|prod)"
+      echo "  diagnose          Diagnostic mémoire et performance"
+      echo "  validate          Valider la configuration actuelle"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo config tune"
+      echo "  aklo config profile prod"
+      echo "  aklo config diagnose"
+      echo "  aklo config validate"
+      exit 0
+      ;;
+    *)
+      echo "Action inconnue: $action" >&2
+      echo "Utilisez 'aklo config --help' pour voir les actions disponibles."
       exit 1
       ;;
   esac
@@ -4820,6 +4909,7 @@ show_help() {
   echo "  validate [path]                     Validation projet/artefacts"
   echo "  mcp setup|restart|watch             Gestion serveurs MCP"
   echo "  cache status|clear|benchmark        Gestion cache intelligent"
+  echo "  config tune|profile|diagnose        Configuration performance"
   echo "  template list|create|apply          Gestion des templates"
   echo "  install-ux                          Installation améliorations UX"
   echo ""
@@ -4902,6 +4992,10 @@ case "${1:-help}" in
   "cache")
     shift
     command_cache "$@"
+    ;;
+  "config")
+    shift
+    command_config "$@"
     ;;
   "template")
     shift
