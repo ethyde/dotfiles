@@ -1,4 +1,4 @@
-# PBI-1 : Test Regression PBI
+# PBI-1 : Test cache validation
 
 ---
 **Statut:** PROPOSED
