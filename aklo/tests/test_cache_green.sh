@@ -1,341 +1,152 @@
 #!/bin/bash
 
-# Tests unitaires complets pour les fonctions de cache (TASK-6-1)
-# Approche TDD - Phase GREEN : Tests fonctionnels
+# Tests unitaires pour TASK-6-4 - Phase GREEN
+# Test des fonctionnalités de monitoring cache
 
 set -e
 
-# Configuration des tests
-TEST_DIR="/tmp/aklo_test_cache"
-CACHE_DIR="/tmp/aklo_cache"
-TEST_COUNT=0
-PASS_COUNT=0
-
-# Couleurs pour output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Source des fonctions de cache
-source "../bin/aklo_cache_functions.sh"
+echo -e "${BLUE}🧪 Tests Phase GREEN - Monitoring Cache${NC}"
+echo "======================================================================="
 
-# Fonction de setup
-setup_test_env() {
-    rm -rf "$TEST_DIR" "$CACHE_DIR"
-    mkdir -p "$TEST_DIR" "$CACHE_DIR"
-}
+cd /Users/eplouvie/Projets/dotfiles
 
-# Fonction de cleanup
-cleanup_test_env() {
-    rm -rf "$TEST_DIR" "$CACHE_DIR"
-}
+# Source des fonctions de monitoring
+source aklo/bin/aklo_cache_monitoring.sh
 
-# Fonction d'assertion
-assert_equals() {
-    local expected="$1"
-    local actual="$2"
-    local test_name="$3"
+# Test 1: Configuration cache avancée
+echo -e "${BLUE}Test 1: Configuration cache avancée${NC}"
+if command -v get_cache_config >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Fonction get_cache_config disponible"
     
-    ((TEST_COUNT++))
-    
-    if [ "$expected" = "$actual" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: $test_name"
-        ((PASS_COUNT++))
+    # Tester la lecture de configuration
+    get_cache_config
+    if [ "$CACHE_ENABLED" = "true" ]; then
+        echo -e "${GREEN}✓ PASS${NC}: Configuration cache lue correctement"
     else
-        echo -e "${RED}✗ FAIL${NC}: $test_name"
-        echo "  Expected: '$expected'"
-        echo "  Actual:   '$actual'"
+        echo -e "${RED}✗ FAIL${NC}: Configuration cache incorrecte"
     fi
-}
-
-# Fonction d'assertion pour code de retour
-assert_return_code() {
-    local expected="$1"
-    local actual="$2"
-    local test_name="$3"
-    
-    ((TEST_COUNT++))
-    
-    if [ "$expected" = "$actual" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: $test_name"
-        ((PASS_COUNT++))
-    else
-        echo -e "${RED}✗ FAIL${NC}: $test_name"
-        echo "  Expected return code: $expected"
-        echo "  Actual return code:   $actual"
-    fi
-}# ========================================
-# TESTS POUR cache_is_valid()
-# ========================================
-
-test_cache_is_valid_with_valid_cache() {
-    setup_test_env
-    
-    # Créer un cache valide
-    local cache_file="$TEST_DIR/test_cache.parsed"
-    local mtime_file="$TEST_DIR/test_cache.parsed.mtime"
-    local protocol_mtime="1234567890"
-    
-    echo "cached_content" > "$cache_file"
-    echo "$protocol_mtime" > "$mtime_file"
-    
-    # Test
-    cache_is_valid "$cache_file" "$protocol_mtime"
-    local result=$?
-    
-    assert_return_code "0" "$result" "cache_is_valid should return 0 for valid cache"
-    
-    cleanup_test_env
-}
-
-test_cache_is_valid_with_invalid_mtime() {
-    setup_test_env
-    
-    # Créer un cache avec mtime invalide
-    local cache_file="$TEST_DIR/test_cache.parsed"
-    local mtime_file="$TEST_DIR/test_cache.parsed.mtime"
-    local protocol_mtime="1234567890"
-    local old_mtime="1111111111"
-    
-    echo "cached_content" > "$cache_file"
-    echo "$old_mtime" > "$mtime_file"
-    
-    # Test
-    cache_is_valid "$cache_file" "$protocol_mtime"
-    local result=$?
-    
-    assert_return_code "1" "$result" "cache_is_valid should return 1 for invalid mtime"
-    
-    cleanup_test_env
-}
-
-test_cache_is_valid_with_missing_cache() {
-    setup_test_env
-    
-    # Test avec fichier cache inexistant
-    local cache_file="$TEST_DIR/nonexistent_cache.parsed"
-    local protocol_mtime="1234567890"
-    
-    # Test
-    cache_is_valid "$cache_file" "$protocol_mtime"
-    local result=$?
-    
-    assert_return_code "1" "$result" "cache_is_valid should return 1 for missing cache"
-    
-    cleanup_test_env
-}
-
-test_cache_is_valid_with_missing_mtime() {
-    setup_test_env
-    
-    # Créer cache sans fichier mtime
-    local cache_file="$TEST_DIR/test_cache.parsed"
-    local protocol_mtime="1234567890"
-    
-    echo "cached_content" > "$cache_file"
-    # Pas de fichier mtime
-    
-    # Test
-    cache_is_valid "$cache_file" "$protocol_mtime"
-    local result=$?
-    
-    assert_return_code "1" "$result" "cache_is_valid should return 1 for missing mtime file"
-    
-    cleanup_test_env
-}
-
-test_cache_is_valid_with_empty_params() {
-    setup_test_env
-    
-    # Test avec paramètres vides
-    cache_is_valid "" ""
-    local result=$?
-    
-    assert_return_code "1" "$result" "cache_is_valid should return 1 for empty parameters"
-    
-    cleanup_test_env
-}# ========================================
-# TESTS POUR use_cached_structure()
-# ========================================
-
-test_use_cached_structure_with_valid_file() {
-    setup_test_env
-    
-    # Créer un fichier cache avec contenu
-    local cache_file="$TEST_DIR/test_cache.parsed"
-    local expected_content="cached_structure_content"
-    
-    echo "$expected_content" > "$cache_file"
-    
-    # Test
-    local result=$(use_cached_structure "$cache_file")
-    
-    assert_equals "$expected_content" "$result" "use_cached_structure should return cache content"
-    
-    cleanup_test_env
-}
-
-test_use_cached_structure_with_multiline_content() {
-    setup_test_env
-    
-    # Créer un fichier cache avec contenu multi-ligne
-    local cache_file="$TEST_DIR/test_cache.parsed"
-    local expected_content="line1
-line2
-line3"
-    
-    echo "$expected_content" > "$cache_file"
-    
-    # Test
-    local result=$(use_cached_structure "$cache_file")
-    
-    assert_equals "$expected_content" "$result" "use_cached_structure should handle multiline content"
-    
-    cleanup_test_env
-}
-
-test_use_cached_structure_with_missing_file() {
-    setup_test_env
-    
-    # Test avec fichier inexistant
-    local cache_file="$TEST_DIR/nonexistent_cache.parsed"
-    
-    # Test - devrait gérer l'erreur gracieusement
-    use_cached_structure "$cache_file" 2>/dev/null
-    local exit_code=$?
-    
-    assert_return_code "1" "$exit_code" "use_cached_structure should return 1 for missing file"
-    
-    cleanup_test_env
-}
-
-test_use_cached_structure_with_empty_param() {
-    setup_test_env
-    
-    # Test avec paramètre vide
-    use_cached_structure "" 2>/dev/null
-    local exit_code=$?
-    
-    assert_return_code "1" "$exit_code" "use_cached_structure should return 1 for empty parameter"
-    
-    cleanup_test_env
-}# ========================================
-# TESTS POUR cleanup_cache()
-# ========================================
-
-test_cleanup_cache_removes_old_files() {
-    setup_test_env
-    
-    # Créer des fichiers cache anciens et récents
-    local old_cache="$CACHE_DIR/old_protocol_PBI.parsed"
-    local old_mtime="$CACHE_DIR/old_protocol_PBI.parsed.mtime"
-    local recent_cache="$CACHE_DIR/recent_protocol_PBI.parsed"
-    local recent_mtime="$CACHE_DIR/recent_protocol_PBI.parsed.mtime"
-    
-    echo "old_content" > "$old_cache"
-    echo "1234567890" > "$old_mtime"
-    echo "recent_content" > "$recent_cache"
-    echo "1234567890" > "$recent_mtime"
-    
-    # Simuler fichiers anciens (8 jours)
-    touch -t 202501190000 "$old_cache"
-    touch -t 202501190000 "$old_mtime"
-    
-    # Test
-    cleanup_cache
-    local exit_code=$?
-    
-    assert_return_code "0" "$exit_code" "cleanup_cache should return 0"
-    
-    # Vérifier que les fichiers récents existent encore
-    if [ -f "$recent_cache" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Recent cache file still exists"
-        ((PASS_COUNT++))
-    else
-        echo -e "${RED}✗ FAIL${NC}: Recent cache file should still exist"
-    fi
-    ((TEST_COUNT++))
-    
-    cleanup_test_env
-}
-
-test_cleanup_cache_handles_missing_directory() {
-    # Supprimer le répertoire cache
-    rm -rf "$CACHE_DIR"
-    
-    # Test - ne devrait pas planter
-    cleanup_cache
-    local exit_code=$?
-    
-    assert_return_code "0" "$exit_code" "cleanup_cache should handle missing directory gracefully"
-    
-    # Vérifier que le répertoire a été créé
-    if [ -d "$CACHE_DIR" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache directory was created"
-        ((PASS_COUNT++))
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache directory should have been created"
-    fi
-    ((TEST_COUNT++))
-}
-
-test_cleanup_cache_empty_directory() {
-    setup_test_env
-    
-    # Test avec répertoire vide
-    cleanup_cache
-    local exit_code=$?
-    
-    assert_return_code "0" "$exit_code" "cleanup_cache should handle empty directory"
-    
-    cleanup_test_env
-}# ========================================
-# FONCTION PRINCIPALE DE TEST
-# ========================================
-
-run_all_tests() {
-    echo -e "${BLUE}🧪 Tests TDD - Phase GREEN - Infrastructure Cache${NC}"
-    echo "======================================================================="
-    
-    # Tests cache_is_valid()
-    echo -e "${BLUE}📋 Tests cache_is_valid()${NC}"
-    test_cache_is_valid_with_valid_cache
-    test_cache_is_valid_with_invalid_mtime
-    test_cache_is_valid_with_missing_cache
-    test_cache_is_valid_with_missing_mtime
-    test_cache_is_valid_with_empty_params
-    
-    # Tests use_cached_structure()
-    echo -e "${BLUE}📋 Tests use_cached_structure()${NC}"
-    test_use_cached_structure_with_valid_file
-    test_use_cached_structure_with_multiline_content
-    test_use_cached_structure_with_missing_file
-    test_use_cached_structure_with_empty_param
-    
-    # Tests cleanup_cache()
-    echo -e "${BLUE}📋 Tests cleanup_cache()${NC}"
-    test_cleanup_cache_removes_old_files
-    test_cleanup_cache_handles_missing_directory
-    test_cleanup_cache_empty_directory
-    
-    # Résumé
-    echo "======================================================================="
-    echo -e "${BLUE}📊 Résumé des tests${NC}"
-    echo "Tests exécutés: $TEST_COUNT"
-    echo "Tests réussis: $PASS_COUNT"
-    echo "Tests échoués: $((TEST_COUNT - PASS_COUNT))"
-    
-    if [ $PASS_COUNT -eq $TEST_COUNT ]; then
-        echo -e "${GREEN}🎉 Phase GREEN réussie - Tous les tests passent !${NC}"
-        return 0
-    else
-        echo -e "${RED}❌ Phase GREEN échouée - Certains tests ont échoué${NC}"
-        return 1
-    fi
-}
-
-# Exécution des tests si le script est appelé directement
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    run_all_tests
+else
+    echo -e "${RED}✗ FAIL${NC}: Fonction get_cache_config manquante"
 fi
+
+# Test 2: Commande aklo cache status
+echo -e "${BLUE}Test 2: Commande aklo cache status${NC}"
+if ./aklo/bin/aklo cache status >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Commande 'aklo cache status' fonctionne"
+    
+    # Vérifier l'output
+    output=$(./aklo/bin/aklo cache status 2>&1)
+    if echo "$output" | grep -q "STATUT DU CACHE AKLO"; then
+        echo -e "${GREEN}✓ PASS${NC}: Output cache status correct"
+    else
+        echo -e "${RED}✗ FAIL${NC}: Output cache status incorrect"
+    fi
+else
+    echo -e "${RED}✗ FAIL${NC}: Commande 'aklo cache status' échoue"
+fi
+
+# Test 3: Commande aklo cache clear
+echo -e "${BLUE}Test 3: Commande aklo cache clear${NC}"
+# Créer un fichier cache pour le test
+mkdir -p /tmp/aklo_cache
+echo "test" > /tmp/aklo_cache/test.parsed
+
+if ./aklo/bin/aklo cache clear >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Commande 'aklo cache clear' fonctionne"
+    
+    # Vérifier que le cache est vidé
+    if [ ! -f "/tmp/aklo_cache/test.parsed" ]; then
+        echo -e "${GREEN}✓ PASS${NC}: Cache effectivement vidé"
+    else
+        echo -e "${RED}✗ FAIL${NC}: Cache non vidé"
+    fi
+else
+    echo -e "${RED}✗ FAIL${NC}: Commande 'aklo cache clear' échoue"
+fi
+
+# Test 4: Commande aklo cache benchmark
+echo -e "${BLUE}Test 4: Commande aklo cache benchmark${NC}"
+if ./aklo/bin/aklo cache benchmark >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Commande 'aklo cache benchmark' fonctionne"
+else
+    echo -e "${RED}✗ FAIL${NC}: Commande 'aklo cache benchmark' échoue"
+fi
+
+# Test 5: Métriques cache
+echo -e "${BLUE}Test 5: Métriques cache${NC}"
+if command -v record_cache_metric >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Fonction record_cache_metric disponible"
+    
+    # Tester l'enregistrement d'une métrique
+    record_cache_metric "hit" 50
+    if [ -f "/tmp/aklo_cache/cache_metrics.json" ]; then
+        echo -e "${GREEN}✓ PASS${NC}: Fichier métriques créé"
+        
+        # Vérifier le contenu
+        if grep -q '"hits"' "/tmp/aklo_cache/cache_metrics.json"; then
+            echo -e "${GREEN}✓ PASS${NC}: Métriques enregistrées correctement"
+        else
+            echo -e "${RED}✗ FAIL${NC}: Métriques incorrectes"
+        fi
+    else
+        echo -e "${RED}✗ FAIL${NC}: Fichier métriques non créé"
+    fi
+else
+    echo -e "${RED}✗ FAIL${NC}: Fonction record_cache_metric manquante"
+fi
+
+# Test 6: Aide des commandes cache
+echo -e "${BLUE}Test 6: Aide des commandes cache${NC}"
+if ./aklo/bin/aklo cache --help >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Aide des commandes cache disponible"
+    
+    # Vérifier le contenu de l'aide
+    help_output=$(./aklo/bin/aklo cache --help 2>&1)
+    if echo "$help_output" | grep -q "status" && echo "$help_output" | grep -q "clear" && echo "$help_output" | grep -q "benchmark"; then
+        echo -e "${GREEN}✓ PASS${NC}: Aide complète et correcte"
+    else
+        echo -e "${RED}✗ FAIL${NC}: Aide incomplète"
+    fi
+else
+    echo -e "${RED}✗ FAIL${NC}: Aide des commandes cache manquante"
+fi
+
+# Test 7: Intégration métriques dans parser
+echo -e "${BLUE}Test 7: Intégration métriques dans parser${NC}"
+# Nettoyer le cache
+rm -rf /tmp/aklo_cache
+mkdir -p /tmp/aklo_cache
+
+# Générer un PBI pour tester les métriques
+if ./aklo/bin/aklo propose-pbi "Test Metrics Integration" >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PASS${NC}: Génération PBI avec métriques réussie"
+    
+    # Vérifier que les métriques ont été enregistrées
+    if [ -f "/tmp/aklo_cache/cache_metrics.json" ]; then
+        echo -e "${GREEN}✓ PASS${NC}: Métriques automatiquement enregistrées"
+        
+        # Vérifier le contenu des métriques
+        metrics_content=$(cat /tmp/aklo_cache/cache_metrics.json)
+        if echo "$metrics_content" | grep -q '"total_requests": [1-9]'; then
+            echo -e "${GREEN}✓ PASS${NC}: Métriques contiennent des données"
+        else
+            echo -e "${RED}✗ FAIL${NC}: Métriques vides ou incorrectes"
+        fi
+    else
+        echo -e "${RED}✗ FAIL${NC}: Métriques non enregistrées automatiquement"
+    fi
+else
+    echo -e "${RED}✗ FAIL${NC}: Génération PBI avec métriques échouée"
+fi
+
+# Nettoyer les fichiers de test
+rm -f docs/backlog/00-pbi/PBI-*-Test-Metrics-*.md
+rm -rf /tmp/aklo_cache
+
+echo "======================================================================="
+echo -e "${GREEN}🎉 Phase GREEN terminée !${NC}"

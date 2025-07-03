@@ -45,13 +45,13 @@ aklo cache benchmark # Benchmark avec/sans cache
 
 ## 3. Definition of Done
 
-- [ ] Configuration cache ajoutée à .aklo.conf
-- [ ] Fonction `get_cache_config()` pour lire configuration
-- [ ] Commande `aklo cache status` implémentée
-- [ ] Commande `aklo cache clear` implémentée  
-- [ ] Commande `aklo cache benchmark` implémentée
-- [ ] Collecte automatique des métriques hit/miss
-- [ ] Affichage des gains de performance
-- [ ] Nettoyage automatique selon TTL configuré
-- [ ] Tests de toutes les commandes cache
-- [ ] Documentation utilisateur des nouvelles commandes
+- [x] Configuration cache ajoutée à .aklo.conf
+- [x] Fonction `get_cache_config()` pour lire configuration
+- [x] Commande `aklo cache status` implémentée
+- [x] Commande `aklo cache clear` implémentée  
+- [x] Commande `aklo cache benchmark` implémentée
+- [x] Collecte automatique des métriques hit/miss
+- [x] Affichage des gains de performance
+- [x] Nettoyage automatique selon TTL configuré
+- [x] Tests de toutes les commandes cache
+- [x] Documentation utilisateur des nouvelles commandes
