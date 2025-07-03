@@ -46,11 +46,11 @@ get_next_id() {
 
 ## 4. Définition de "Terminé" (Definition of Done)
 
-- [ ] Cache des IDs implémenté avec clés composites
-- [ ] Fonction get_next_id_cached() créée et fonctionnelle
-- [ ] Système d'invalidation du cache implémenté
-- [ ] Détection de changements externes pour invalidation
-- [ ] Métriques de performance intégrées
-- [ ] Tests unitaires écrits et passent avec succès
-- [ ] Performance améliorée de 50-70% sur opérations répétitives
-- [ ] Compatibilité avec la fonction existante maintenue
+- [x] Cache des IDs implémenté avec clés composites
+- [x] Fonction get_next_id_cached() créée et fonctionnelle
+- [x] Système d'invalidation du cache implémenté
+- [x] Détection de changements externes pour invalidation
+- [x] Métriques de performance intégrées
+- [x] Tests unitaires écrits et passent avec succès
+- [x] Performance améliorée de 50-70% sur opérations répétitives
+- [x] Compatibilité avec la fonction existante maintenue
