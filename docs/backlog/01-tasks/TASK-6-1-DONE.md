@@ -1,7 +1,7 @@
 # TASK-6-1 : Infrastructure de base du système de cache
 
 ---
-**Statut:** TODO
+**Statut:** DONE
 **Date de création:** 2025-01-27
 **PBI Parent:** PBI-6 - Cache intelligent du parser générique
 **Effort estimé:** 1 point

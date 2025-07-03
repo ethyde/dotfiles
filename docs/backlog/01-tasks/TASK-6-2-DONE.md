@@ -1,7 +1,7 @@
 # TASK-6-2 : Fonction de mise en cache des structures protocoles
 
 ---
-**Statut:** TODO
+**Statut:** DONE
 **Date de création:** 2025-01-27
 **PBI Parent:** PBI-6 - Cache intelligent du parser générique
 **Effort estimé:** 2 points
