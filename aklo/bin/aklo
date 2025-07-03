@@ -27,6 +27,9 @@ source "${script_dir}/aklo_batch_io.sh" 2>/dev/null || echo "⚠️  Fonctions b
 # Source du cache des IDs (TASK-7-3)
 source "${script_dir}/aklo_id_cache.sh" 2>/dev/null || echo "⚠️  Cache des IDs non disponible - fallback uniquement" >&2
 
+# Source du système de monitoring I/O (TASK-7-4)
+source "${script_dir}/aklo_io_monitoring.sh" 2>/dev/null || echo "⚠️  Monitoring I/O non disponible" >&2
+
 # Initialisation du cache regex au démarrage
 if command -v init_regex_cache >/dev/null 2>&1; then
     init_regex_cache
@@ -40,6 +43,11 @@ fi
 # Initialisation des métriques de cache des IDs
 if command -v reset_id_cache_metrics >/dev/null 2>&1; then
     reset_id_cache_metrics
+fi
+
+# Initialisation du monitoring I/O
+if command -v start_io_monitoring >/dev/null 2>&1; then
+    start_io_monitoring
 fi
 
 #==============================================================================
@@ -199,6 +207,19 @@ extract_artefact_structure() {
   local protocol_file="$1"
   local artefact_type="$2"
   
+  # TASK-7-4: Tracking I/O pour monitoring
+  local start_time=$(date +%s%3N 2>/dev/null || echo $(($(date +%s) * 1000)))
+  
+  # Vérifier l'existence du fichier
+  if [ ! -f "$protocol_file" ]; then
+    # TASK-7-4: Tracker l'échec
+    if command -v track_io_operation >/dev/null 2>&1; then
+      local duration=$(($(date +%s%3N 2>/dev/null || echo $(($(date +%s) * 1000))) - start_time))
+      track_io_operation "file_read" "$protocol_file" "$duration" "error"
+    fi
+    return 1
+  fi
+  
   # Patterns de recherche selon le type d'artefact
   local start_pattern=""
   local end_pattern=""
@@ -292,6 +313,17 @@ extract_artefact_structure() {
   
   # Extraire la section entre les patterns
   local structure=$(sed -n "/$start_pattern/,/$end_pattern/p" "$protocol_file")
+  
+  # TASK-7-4: Tracker l'opération de lecture
+  if command -v track_io_operation >/dev/null 2>&1; then
+    local end_time=$(date +%s%3N 2>/dev/null || echo $(($(date +%s) * 1000)))
+    local duration=$((end_time - start_time))
+    if [ -n "$structure" ]; then
+      track_io_operation "file_read" "$protocol_file" "$duration" "success"
+    else
+      track_io_operation "file_read" "$protocol_file" "$duration" "no_match"
+    fi
+  fi
   
   # Si aucune section trouvée, retourner vide
   if [ -z "$structure" ]; then
@@ -1477,6 +1509,15 @@ command_cache() {
     "benchmark")
       benchmark_cache
       ;;
+    "dashboard")
+      # TASK-7-4: Dashboard I/O monitoring
+      if command -v show_io_dashboard >/dev/null 2>&1; then
+        show_io_dashboard
+      else
+        echo "❌ Dashboard I/O non disponible - module monitoring non chargé" >&2
+        exit 1
+      fi
+      ;;
     "--help"|"help"|"")
       echo "Usage: aklo cache <action>"
       echo ""
@@ -1486,6 +1527,7 @@ command_cache() {
       echo "  status      Affiche les statistiques du cache"
       echo "  clear       Vide complètement le cache"
       echo "  benchmark   Teste les performances avec/sans cache"
+      echo "  dashboard   Affiche le dashboard de monitoring I/O"
       echo "  --help      Affiche cette aide"
       echo ""
       echo "Configuration:"
@@ -1496,6 +1538,7 @@ command_cache() {
       echo "  aklo cache status      # Voir les statistiques"
       echo "  aklo cache clear       # Vider le cache"
       echo "  aklo cache benchmark   # Tester les performances"
+      echo "  aklo cache dashboard   # Dashboard monitoring I/O"
       ;;
     *)
       echo "Action inconnue: $action" >&2
