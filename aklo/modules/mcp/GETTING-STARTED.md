@@ -4,7 +4,7 @@
 
 ```bash
 # 1. Allez dans le répertoire
-cd aklo/mcp-servers
+cd aklo/modules/mcp
 
 # 2. Installation automatique
 ./aklo-mcp.sh install
@@ -55,14 +55,14 @@ Une fois configuré, dans votre client MCP :
 ./aklo-mcp.sh help
 ```
 
-## 🎭 Logique Intelligente
+## 🎭 Logique Native-First
 
-Le système détecte automatiquement votre environnement :
+Le système privilégie la simplicité et la robustesse :
 
-- ✅ **Node.js disponible** → Serveurs complets (9 outils)
-- 🔄 **Node.js absent** → Serveurs shell natifs (5 outils)
+- ✅ **Shell bash/sh natif** → Serveurs légers universels (5 outils)
+- ⭐ **Node.js disponible** → Serveurs étendus optionnels (9 outils)
 
-**Résultat** : Ça marche toujours ! 🎯
+**Résultat** : Ça marche toujours, partout ! 🎯
 
 ## 🆘 Dépannage Express
 
