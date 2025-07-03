@@ -86,7 +86,7 @@ Avant toute optimisation de performance, l'agent **doit** présenter un plan dé
 - Fichiers de configuration (cache, base de données, etc.)
 
 **Commandes système :**
-- `aklo new optim "<Titre>"` : automatisation création rapport (optionnel)
+- `aklo optimize "<Titre>"` : automatisation création rapport (optionnel)
 - Outils de benchmark (k6, JMeter, console.time, etc.)
 - Outils de profiling et analyse de performance
 - Exécution de tests de non-régression
@@ -101,7 +101,7 @@ Avant toute optimisation de performance, l'agent **doit** présenter un plan dé
 
 1. **[PROCEDURE] Phase 1 : Mesurer (Non négociable)**
     - **Action Requise :** Créer un fichier `OPTIM-[ID]-BENCHMARKING.md` dans `/docs/backlog/06-optim/`.
-    - **⚡ Automatisation `aklo` :** `aklo new debug "<Titre d'optimisation'>"`
+    - **⚡ Automatisation `aklo` :** `aklo optimize "<Titre d'optimisation>"`
     - Remplir les sections "Objectif de Performance" et "Protocole de Benchmark".
     - Exécuter le benchmark sur le code **actuel** et remplir la section "Mesures Initiales".
 

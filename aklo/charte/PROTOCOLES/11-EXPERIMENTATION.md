@@ -84,7 +84,7 @@ Définir, implémenter, exécuter et analyser une expérience A/B de manière sc
 
 1. **[ANALYSE] Phase 1 : Planification et Définition de l'Hypothèse**
       - **Action Requise :** Créer un nouveau fichier `EXPERIMENT-[ID]-PLANNING.md` dans `/docs/backlog/09-experiments/`.
-      - **⚡ Automatisation `aklo` :** `aklo new experiment "<Titre de l'experience>"`
+      - **⚡ Automatisation `aklo` :** `aklo experiment "<Titre de l'experience>"`
       - Remplir les sections "Hypothèse" et "Description des Variantes".
       - Rédiger une première version du "Plan d'Implémentation Technique".
       - **[ATTENTE\_VALIDATION]** Soumettre ce plan pour validation au `Human_Developer` pour s'assurer que l'hypothèse est solide et mesurable.

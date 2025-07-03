@@ -74,7 +74,7 @@ Collecter, synthétiser et analyser des informations sur la concurrence pour ide
 
 1.  **[ANALYSE] Phase 1 : Cadrage de l'Analyse**
       - **Action Requise :** Créer un nouveau fichier `COMPETITION-[ID]-ANALYSIS.md` dans `/docs/backlog/10-competition/`.
-      - **⚡ Automatisation `aklo` :** `aklo new competition "<Titre de l'analyse>"`
+      - **⚡ Automatisation `aklo` :** `aklo analyze "<Titre de l'analyse>"`
       - Remplir complètement l'en-tête (Responsable, Statut, Sujet, etc.).
       - Définir clairement le "Sujet de l'Analyse" et la liste des "Concurrents Analysés".
 

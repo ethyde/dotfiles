@@ -73,7 +73,7 @@ Avant tout refactoring de code, l'agent **doit** présenter un plan détaillé :
 - Fichiers de tests existants (validation de non-régression)
 
 **Commandes système :**
-- `aklo new refactor "<Titre>"` : automatisation création rapport (optionnel)
+- `aklo refactor "<Titre>"` : automatisation création rapport (optionnel)
 - Exécution de la suite de tests avant/pendant/après refactoring
 - Outils d'analyse de couverture de code
 - Outils de linting et validation qualité
@@ -88,7 +88,7 @@ Avant tout refactoring de code, l'agent **doit** présenter un plan détaillé :
 
 1. **[ANALYSE] Phase 1 : Cadrage et Sécurisation**
     - **Action Requise :** Créer un fichier `REFACTOR-[ID]-ANALYSIS.md` dans `/docs/backlog/05-refactor/`.
-    - **⚡ Automatisation `aklo` :** `aklo new refactor "<Titre de la refactorisation>"`
+    - **⚡ Automatisation `aklo` :** `aklo refactor "<Titre de la refactorisation>"`
     - Remplir les sections "Diagnostic du Code Smell" et "Stratégie de Refactoring".
     - **Vérifier la couverture de tests.** Si elle est insuffisante, la première action doit être d'écrire les tests manquants en suivant le protocole [DEVELOPPEMENT]. **C'est un prérequis non négociable.**
     - [ATTENTE_VALIDATION] Soumettre le rapport et le plan pour validation au `Human_Developer`.

@@ -74,7 +74,7 @@ Définir de manière structurée et intentionnelle les événements, logs et mé
 1.  **[ANALYSE] Phase 1 : Définition des Objectifs**
       - Lors de la phase de [PLANIFICATION] d'un `PBI`, si de nouvelles données doivent être collectées, 
       **Action Requise :** Créer un fichier `TRACKING-PLAN-[ID]-DRAFT.md`, où [ID] est celui du PBI ou de la Task concernée, dans `/docs/backlog/13-tracking/`.
-      - **⚡ Automatisation `aklo` :** `aklo new tracking-plan <ID_du_PBI_ou_Task>`
+      - **⚡ Automatisation `aklo` :** `aklo track <ID_du_PBI_ou_Task>`
       - Remplir l'en-tête et la section "Objectifs de la Collecte" en collaboration avec le `Human_Developer`.
 
 2.  **[PROCEDURE] Phase 2 : Définition des Événements et Métriques**
