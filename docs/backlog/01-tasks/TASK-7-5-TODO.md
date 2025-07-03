@@ -7,8 +7,10 @@
 **PBI Parent:** [PBI-7](../00-pbi/PBI-7-PROPOSED.md)
 **Revue Architecturale Requise:** Non
 **Document d'Architecture (si applicable):** N/A
-**Assigné à:** `[Nom du Human_Developer]`
+**Assigné à:** `eplouvie`
 **Branche Git:** `feature/task-7-5`
+**Statut:** `IN_PROGRESS`
+**Date de début:** `2025-01-28`
 
 ---
 
