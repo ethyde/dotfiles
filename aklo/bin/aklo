@@ -18,6 +18,14 @@ source "${script_dir}/aklo_cache_functions.sh" 2>/dev/null || echo "⚠️  Fonc
 source "${script_dir}/aklo_extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non disponibles - fallback uniquement" >&2
 source "${script_dir}/aklo_cache_monitoring.sh" 2>/dev/null || echo "⚠️  Fonctions monitoring cache non disponibles" >&2
 
+# Source du cache regex (TASK-7-1)
+source "${script_dir}/aklo_regex_cache.sh" 2>/dev/null || echo "⚠️  Cache regex non disponible - fallback uniquement" >&2
+
+# Initialisation du cache regex au démarrage
+if command -v init_regex_cache >/dev/null 2>&1; then
+    init_regex_cache
+fi
+
 #==============================================================================
 # PARSER GÉNÉRIQUE DE PROTOCOLES - SOURCE UNIQUE DE VÉRITÉ
 #==============================================================================
@@ -1770,8 +1778,10 @@ generate_arch_from_protocol() {
   local pbi_file="$5"
   local assistance_level="$6"
   
-  # Extraire le titre du PBI (nettoyer les caractères spéciaux)
-  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed 's/^# PBI-[0-9]* : //' | tr -d '\n\r' || echo "Architecture pour PBI-${pbi_id}")
+  # Extraire le titre du PBI (nettoyer les caractères spéciaux) - TASK-7-1: Cache regex
+  local pbi_pattern
+  pbi_pattern=$(use_regex_pattern "PBI_ID" "PBI-[0-9]*")
+  local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed "s/^# ${pbi_pattern} : //" | tr -d '\n\r' || echo "Architecture pour PBI-${pbi_id}")
   
   # Variables contextuelles pour le parser générique
   local arch_full_id="${pbi_id}-${arch_id}"
@@ -4584,7 +4594,10 @@ command_get_config() {
       if [ -f "$config_file" ]; then
         echo "📝 Contenu de la configuration:"
         echo "------------------------------"
-        cat "$config_file" | grep -E "^[A-Z_]+=.*" | sort
+        # TASK-7-1: Utilisation du cache regex pour les lignes de configuration
+        local config_pattern
+        config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        cat "$config_file" | grep -E "$config_pattern" | sort
       else
         echo "❌ Fichier de configuration introuvable"
       fi
@@ -4605,7 +4618,10 @@ command_get_config() {
       local local_config=$(find_local_config)
       if [ -n "$local_config" ]; then
         echo "📁 Configuration locale: $local_config"
-        cat "$local_config" | grep -E "^[A-Z_]+=.*" | sort
+        # TASK-7-1: Utilisation du cache regex pour les lignes de configuration
+        local config_pattern
+        config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        cat "$local_config" | grep -E "$config_pattern" | sort
       else
         echo "❌ Aucune configuration locale trouvée"
       fi
@@ -4614,7 +4630,10 @@ command_get_config() {
       local global_config="$(dirname "$0")/../config/.aklo.conf"
       echo "📁 Configuration globale: $global_config"
       if [ -f "$global_config" ]; then
-        cat "$global_config" | grep -E "^[A-Z_]+=.*" | sort
+        # TASK-7-1: Utilisation du cache regex pour les lignes de configuration  
+        local config_pattern
+        config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        cat "$global_config" | grep -E "$config_pattern" | sort
       else
         echo "❌ Configuration globale introuvable"
       fi
@@ -4748,6 +4767,7 @@ show_help() {
   echo "📖 EXEMPLES:"
   echo "  aklo status             # Tableau de bord complet"
   echo "  aklo mcp restart        # Redémarrer les serveurs MCP"
+  echo "  aklo cache_stats        # Statistiques du cache regex (TASK-7-1)"
   echo "  aklo plan 42            # Planifier le PBI 42"
   echo "  aklo dev 1-2            # Développer la Task 1-2 en TDD"
   echo "  aklo validate           # Valider le projet"
@@ -4872,6 +4892,13 @@ case "${1:-help}" in
   "get_config"|"config")
     shift
     command_get_config "$@"
+    ;;
+  "cache_stats"|"regex_stats")
+    # TASK-7-1: Affichage des statistiques du cache regex
+    echo "🚀 Aklo - Statistiques du Cache Regex"
+    echo "======================================="
+    echo ""
+    show_regex_cache_stats
     ;;
   "help"|"--help"|"-h")
     show_help
