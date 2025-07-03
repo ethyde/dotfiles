@@ -4371,6 +4371,161 @@ generate_meta_from_protocol() {
   fi
 }
 
+# Commande: get_config - Affichage de configuration
+command_get_config() {
+  local key="$1"
+  
+  case "$key" in
+    "--help"|"help"|"")
+      echo "Usage: aklo get_config [<clé>] [--all]"
+      echo ""
+      echo "Affiche la configuration aklo effective."
+      echo ""
+      echo "Arguments:"
+      echo "  clé          Clé de configuration spécifique (optionnel)"
+      echo ""
+      echo "Options:"
+      echo "  --all        Affiche toute la configuration"
+      echo "  --local      Affiche uniquement la config locale (.aklo.conf projet)"
+      echo "  --global     Affiche uniquement la config globale"
+      echo "  --paths      Affiche les chemins des fichiers de configuration"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo get_config PROJECT_WORKDIR     # Affiche une clé spécifique"
+      echo "  aklo config AGENT_ASSISTANCE        # Alias court"
+      echo "  aklo get_config --all               # Affiche toute la config"
+      echo "  aklo get_config --paths             # Affiche les chemins des fichiers"
+      echo ""
+      echo "Clés principales:"
+      echo "  PROJECT_WORKDIR, AGENT_ASSISTANCE, AUTO_JOURNAL"
+      echo "  MAIN_BRANCH, PBI_DIR, TASKS_DIR, ARCH_DIR"
+      echo "  VALIDATE_LINTER, TEST_COMMAND, BUILD_COMMAND"
+      echo ""
+      echo "🔧 UTILE POUR: Debugging, scripts, validation de setup"
+      exit 0
+      ;;
+    "--all")
+      echo "📋 Configuration Aklo Effective"
+      echo "================================"
+      echo ""
+      
+      # Déterminer quel fichier de config est utilisé
+      find_local_config() {
+        local current_dir="$(pwd)"
+        while [ "$current_dir" != "/" ]; do
+          if [ -f "$current_dir/.aklo.conf" ]; then
+            echo "$current_dir/.aklo.conf"
+            return 0
+          fi
+          current_dir="$(dirname "$current_dir")"
+        done
+        return 1
+      }
+      
+      local config_file=$(find_local_config) || config_file="$(dirname "$0")/../config/.aklo.conf"
+      echo "📁 Fichier de configuration utilisé: $config_file"
+      echo ""
+      
+      if [ -f "$config_file" ]; then
+        echo "📝 Contenu de la configuration:"
+        echo "------------------------------"
+        cat "$config_file" | grep -E "^[A-Z_]+=.*" | sort
+      else
+        echo "❌ Fichier de configuration introuvable"
+      fi
+      ;;
+    "--local")
+      find_local_config() {
+        local current_dir="$(pwd)"
+        while [ "$current_dir" != "/" ]; do
+          if [ -f "$current_dir/.aklo.conf" ]; then
+            echo "$current_dir/.aklo.conf"
+            return 0
+          fi
+          current_dir="$(dirname "$current_dir")"
+        done
+        return 1
+      }
+      
+      local local_config=$(find_local_config)
+      if [ -n "$local_config" ]; then
+        echo "📁 Configuration locale: $local_config"
+        cat "$local_config" | grep -E "^[A-Z_]+=.*" | sort
+      else
+        echo "❌ Aucune configuration locale trouvée"
+      fi
+      ;;
+    "--global")
+      local global_config="$(dirname "$0")/../config/.aklo.conf"
+      echo "📁 Configuration globale: $global_config"
+      if [ -f "$global_config" ]; then
+        cat "$global_config" | grep -E "^[A-Z_]+=.*" | sort
+      else
+        echo "❌ Configuration globale introuvable"
+      fi
+      ;;
+    "--paths")
+      echo "📁 Chemins des fichiers de configuration:"
+      echo "========================================="
+      
+      find_local_config() {
+        local current_dir="$(pwd)"
+        while [ "$current_dir" != "/" ]; do
+          if [ -f "$current_dir/.aklo.conf" ]; then
+            echo "$current_dir/.aklo.conf"
+            return 0
+          fi
+          current_dir="$(dirname "$current_dir")"
+        done
+        return 1
+      }
+      
+      local local_config=$(find_local_config)
+      local global_config="$(dirname "$0")/../config/.aklo.conf"
+      
+      echo "🏠 Configuration locale:"
+      if [ -n "$local_config" ]; then
+        echo "   ✅ $local_config"
+      else
+        echo "   ❌ Aucune (recherché dans $(pwd) et parents)"
+      fi
+      
+      echo "🌍 Configuration globale:"
+      if [ -f "$global_config" ]; then
+        echo "   ✅ $global_config"
+      else
+        echo "   ❌ $global_config (introuvable)"
+      fi
+      
+      echo ""
+      echo "🔍 Fichier utilisé actuellement:"
+      if [ -n "$local_config" ]; then
+        echo "   📋 $local_config (locale prioritaire)"
+      elif [ -f "$global_config" ]; then
+        echo "   📋 $global_config (globale par défaut)"
+      else
+        echo "   ❌ Aucun fichier de configuration valide"
+      fi
+      ;;
+    *)
+      # Affichage d'une clé spécifique
+      if [ -n "$key" ]; then
+        local value=$(get_config "$key" 2>/dev/null)
+        if [ -n "$value" ]; then
+          echo "$key=$value"
+        else
+          echo "❌ Clé '$key' non trouvée ou vide"
+          echo "💡 Utilisez 'aklo get_config --all' pour voir toutes les clés disponibles"
+          exit 1
+        fi
+      else
+        echo "❌ Clé requise. Utilisez 'aklo get_config --help' pour l'aide."
+        exit 1
+      fi
+      ;;
+  esac
+}
+
 #==============================================================================
 # SECTION 5 : DISPATCH DES COMMANDES
 #==============================================================================
@@ -4384,6 +4539,8 @@ show_help() {
   echo ""
   echo "🔧 COMMANDES SYSTÈME:"
   echo "  status [--brief|--detailed|--json]  Tableau de bord du projet"
+  echo "  get_config [<clé>] [--all]          Affichage de configuration"
+  echo "  config <clé>                        Alias pour get_config"
   echo "  validate [path]                     Validation projet/artefacts"
   echo "  mcp setup|restart|watch             Gestion serveurs MCP"
   echo "  template list|create|apply          Gestion des templates"
@@ -4551,6 +4708,10 @@ case "${1:-help}" in
   "scratch")
     shift
     command_scratch "$@"
+    ;;
+  "get_config"|"config")
+    shift
+    command_get_config "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
