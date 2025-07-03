@@ -498,6 +498,176 @@ EOF
 }
 
 #==============================================================================
+# SECTION 2.5 : FONCTIONS TDD ET COMMITS ATOMIQUES
+#==============================================================================
+
+# Fonction centralisée de validation TDD
+validate_tdd() {
+  local validation_level="$1"  # "full", "basic", "optional"
+  local protocol_name="$2"     # Pour les logs
+  
+  echo "🔍 Validation TDD ($validation_level) pour protocole $protocol_name..."
+  
+  local validation_failed=false
+  local validate_linter=$(get_config "VALIDATE_LINTER")
+  local validate_tests=$(get_config "VALIDATE_TESTS") 
+  local validate_build=$(get_config "VALIDATE_BUILD")
+  
+  # Validation linter (si activée et commande disponible)
+  if [ "$validate_linter" = "true" ]; then
+    local linter_cmd=$(get_config "LINTER_COMMAND")
+    if command -v ${linter_cmd%% *} >/dev/null 2>&1; then
+      echo "  📋 Validation linter..."
+      if ! eval "$linter_cmd" >/dev/null 2>&1; then
+        if [ "$validation_level" = "optional" ]; then
+          echo "  ⚠️  Linter échoué (ignoré en mode optional)"
+        else
+          echo "  ❌ Linter échoué"
+          validation_failed=true
+        fi
+      else
+        echo "  ✅ Linter validé"
+      fi
+    else
+      echo "  ⚠️  Commande linter non trouvée: $linter_cmd"
+    fi
+  fi
+  
+  # Validation tests (si activée et commande disponible)
+  if [ "$validate_tests" = "true" ]; then
+    local test_cmd=$(get_config "TEST_COMMAND")
+    if command -v ${test_cmd%% *} >/dev/null 2>&1; then
+      echo "  🧪 Validation tests..."
+      if ! eval "$test_cmd" >/dev/null 2>&1; then
+        if [ "$validation_level" = "optional" ]; then
+          echo "  ⚠️  Tests échoués (ignorés en mode optional)"
+        else
+          echo "  ❌ Tests échoués"
+          validation_failed=true
+        fi
+      else
+        echo "  ✅ Tests validés"
+      fi
+    else
+      echo "  ⚠️  Commande tests non trouvée: $test_cmd"
+    fi
+  fi
+  
+  # Validation build (uniquement pour niveau "full")
+  if [ "$validation_level" = "full" ] && [ "$validate_build" = "true" ]; then
+    local build_cmd=$(get_config "BUILD_COMMAND")
+    if command -v ${build_cmd%% *} >/dev/null 2>&1; then
+      echo "  🏗️  Validation build..."
+      if ! eval "$build_cmd" >/dev/null 2>&1; then
+        echo "  ❌ Build échoué"
+        validation_failed=true
+      else
+        echo "  ✅ Build validé"
+      fi
+    else
+      echo "  ⚠️  Commande build non trouvée: $build_cmd"
+    fi
+  fi
+  
+  if [ "$validation_failed" = "true" ]; then
+    echo "❌ Validation TDD échouée pour $protocol_name"
+    return 1
+  else
+    echo "✅ Validation TDD réussie pour $protocol_name"
+    return 0
+  fi
+}
+
+# Fonction centralisée pour les commits atomiques
+handle_auto_backup() {
+  local commit_message="$1"
+  local protocol_name="$2"
+  local auto_backup="${PARSED_AUTO_BACKUP:-$(get_config "AUTO_BACKUP")}"
+  
+  echo "🔍 DEBUG: PARSED_AUTO_BACKUP='$PARSED_AUTO_BACKUP', auto_backup='$auto_backup'"
+  
+  if [ "$auto_backup" = "true" ]; then
+    echo "🤖 Mode automatique activé - Commit atomique en cours..."
+    git add .
+    if git commit -m "$commit_message"; then
+      echo "✅ Commit atomique effectué automatiquement"
+      echo "   Message: $commit_message"
+      return 0
+    else
+      echo "❌ Échec du commit automatique"
+      return 1
+    fi
+  else
+    echo "👤 Mode validation humaine - Présentation du diff..."
+    echo ""
+    echo "📋 DIFF À VALIDER :"
+    echo "=================="
+    git add .
+    git diff --cached
+    echo ""
+    echo "💬 Message de commit proposé :"
+    echo "   $commit_message"
+    echo ""
+    echo "❓ Voulez-vous procéder au commit ? (y/N)"
+    read -r response
+    case "$response" in
+      [yY]|[yY][eE][sS])
+        if git commit -m "$commit_message"; then
+          echo "✅ Commit atomique validé et effectué"
+          return 0
+        else
+          echo "❌ Échec du commit"
+          return 1
+        fi
+        ;;
+      *)
+        echo "❌ Commit annulé par l'utilisateur"
+        git reset HEAD .
+        return 1
+        ;;
+    esac
+  fi
+}
+
+# Fonction pour parser les arguments de validation et backup
+parse_validation_args() {
+  local default_validation="$1"  # "full", "basic", "optional", "none"
+  local validation_level="$default_validation"
+  local auto_backup=$(get_config "AUTO_BACKUP")
+  local skip_validation=false
+  
+  # Parser les arguments CLI
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --no-validation)
+        skip_validation=true
+        validation_level="none"
+        ;;
+      --force-validation)
+        skip_validation=false
+        validation_level="full"
+        ;;
+      --auto-commit)
+        auto_backup="true"
+        ;;
+      --manual-commit)
+        auto_backup="false"
+        ;;
+      *)
+        # Argument non reconnu, le laisser pour le parsing principal
+        break
+        ;;
+    esac
+    shift
+  done
+  
+  # Exporter les variables pour utilisation dans les commandes
+  export PARSED_VALIDATION_LEVEL="$validation_level"
+  export PARSED_AUTO_BACKUP="$auto_backup"
+  export PARSED_SKIP_VALIDATION="$skip_validation"
+}
+
+#==============================================================================
 # SECTION 3 : COMMANDES AVEC COMMITS ATOMIQUES
 #==============================================================================
 
@@ -717,6 +887,9 @@ command_release() {
   fi
   BUMP_TYPE="$1"
   
+  # Parser les arguments de validation et backup
+  parse_validation_args "full" "$@"
+  
   echo "--- RELEASE v2.0 (Workflow Séquentiel + Commit Atomique) ---"
   
   # Phase 1: Préparation locale (sans commit)
@@ -790,19 +963,23 @@ command_release() {
   echo "  ✓ CHANGELOG.md mis à jour"
   echo "  ✓ Version mise à jour dans package.json"
   
-  # Phase 2: Validation technique (sans commit)
+  # Phase 2: Validation technique TDD (sans commit)
   echo ""
-  echo "--- Phase 2: Validation technique ---"
-  echo "  › Lancement des tests..."
+  echo "--- Phase 2: Validation technique TDD ---"
   
-  # Simulation des tests (à adapter selon le projet)
-  if command -v npm >/dev/null 2>&1 && [ -f "package.json" ]; then
-    echo "  › Tests npm..."
-    # npm test || { echo "Erreur: Les tests ont échoué"; exit 1; }
-    echo "  ✓ Tests npm passés (simulé)"
+  # Validation TDD complète pour release (obligatoire)
+  if [ "$PARSED_VALIDATION_LEVEL" != "none" ]; then
+    if ! validate_tdd "$PARSED_VALIDATION_LEVEL" "RELEASE"; then
+      echo "❌ Validation TDD échouée pour la release"
+      echo "   La release ne peut pas continuer sans validation complète"
+      exit 1
+    fi
+  else
+    echo "⚠️  Validation TDD désactivée (--no-validation)"
+    echo "   ATTENTION: Release sans validation complète"
   fi
   
-  echo "  ✓ Validation technique réussie"
+  echo "  ✓ Validation technique TDD réussie"
   
   # Phase 3: Mise à jour du journal
   echo ""
@@ -814,28 +991,9 @@ command_release() {
   update_journal "RELEASE" "Préparation release" "$JOURNAL_DESCRIPTION" "$JOURNAL_ARTEFACTS"
   echo "  ✓ Journal mis à jour"
   
-  # Phase 4: Validation humaine du diff complet
+  # Phase 4: Commit atomique intelligent
   echo ""
-  echo "--- Phase 4: Validation du commit atomique ---"
-  echo "Fichiers modifiés pour la release:"
-  echo "  - ${RELEASE_FILE}"
-  echo "  - CHANGELOG.md"
-  echo "  - package.json"
-  echo "  - ./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).md"
-  echo ""
-  
-  printf "Voulez-vous créer le commit atomique de release ? (y/n) "
-  read -r reply
-  if [ "$reply" != "y" ]; then
-    echo "Release annulée. Fichiers conservés pour révision manuelle."
-    exit 0
-  fi
-  
-  # Phase 5: Commit atomique final
-  echo ""
-  echo "--- Phase 5: Commit atomique et tagging ---"
-  
-  git add "$RELEASE_FILE" CHANGELOG.md package.json "./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).md"
+  echo "--- Phase 4: Commit atomique de release ---"
   
   COMMIT_MSG="release: Version ${NEW_VERSION}
 
@@ -847,11 +1005,16 @@ Release ${BUMP_TYPE} v${NEW_VERSION} préparée et validée.
 - Journal mis à jour avec le processus de release
 - Tous les tests passent, build de production validé
 
-Type de release: ${BUMP_TYPE}"
+Type de release: ${BUMP_TYPE}
+- Validation TDD: ${PARSED_VALIDATION_LEVEL}"
+
+  # Utiliser la fonction centralisée pour le commit atomique
+  if ! handle_auto_backup "$COMMIT_MSG" "RELEASE"; then
+    echo "❌ Échec du commit atomique de release"
+    exit 1
+  fi
   
-  git commit -m "$COMMIT_MSG"
-  
-  # Création du tag
+  # Création du tag (après commit réussi)
   git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
   
   echo ""
@@ -863,6 +1026,136 @@ Type de release: ${BUMP_TYPE}"
   echo "  1. git push origin main"
   echo "  2. git push origin v${NEW_VERSION}"
   echo "  3. Déploiement en production"
+}
+
+# Commande: scratch - Création de scratchpad pour brainstorming
+command_scratch() {
+  local topic="$1"
+  local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
+  local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
+  
+  case "$topic" in
+    "--help"|"help"|"")
+      echo "Usage: aklo scratch \"<sujet>\" [--template=TYPE]"
+      echo ""
+      echo "Création de scratchpad pour brainstorming selon le protocole SCRATCHPAD."
+      echo ""
+      echo "Arguments:"
+      echo "  sujet        Sujet du brainstorming (requis)"
+      echo ""
+      echo "Options:"
+      echo "  --template=TYPE    Type de template (brainstorm|analysis|problem)"
+      echo "  --no-agent         Assistance minimale (skeleton)"
+      echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo scratch \"Optimisation performance login\""
+      echo "  aklo scratch \"Architecture microservices\" --template=analysis"
+      echo "  aklo scratch \"Bug intermittent cache\" --template=problem"
+      echo ""
+      echo "Templates disponibles:"
+      echo "  brainstorm - Session de brainstorming libre"
+      echo "  analysis   - Analyse structurée d'un problème"
+      echo "  problem    - Résolution de problème complexe"
+      echo ""
+      echo "Workflow:"
+      echo "  1. Création du fichier SCRATCHPAD-[ID]-[TOPIC].md"
+      echo "  2. Structure selon template choisi"
+      echo "  3. Brainstorming et documentation"
+      echo "  4. Extraction d'actions concrètes (PBI/TASK)"
+      return 0
+      ;;
+  esac
+
+  # Parsing des arguments
+  shift
+  local template_type="brainstorm"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --template=*)
+        template_type="${1#--template=}"
+        ;;
+      --no-agent)
+        agent_assistance="skeleton"
+        ;;
+      --no-journal)
+        auto_journal="false"
+        ;;
+      *)
+        echo "Argument inconnu: $1" >&2
+        return 1
+        ;;
+    esac
+    shift
+  done
+
+  # Validation du template
+  case "$template_type" in
+    brainstorm|analysis|problem)
+      # Templates valides
+      ;;
+    *)
+      echo "❌ Template invalide: $template_type"
+      echo "   Templates disponibles: brainstorm, analysis, problem"
+      return 1
+      ;;
+  esac
+
+  # Configuration et génération d'ID
+  local scratchpad_dir="./$(get_config "SCRATCHPAD_DIR")"
+  local date_id=$(date +%Y%m%d)
+  local topic_clean=$(echo "$topic" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+  local scratchpad_id="${date_id}-${topic_clean}"
+  local scratchpad_file="${scratchpad_dir}/SCRATCHPAD-${scratchpad_id}.md"
+  
+  # Créer le répertoire si nécessaire
+  mkdir -p "$scratchpad_dir"
+  
+  if [ -f "$scratchpad_file" ]; then
+    echo "⚠️  Le scratchpad existe déjà: $scratchpad_file"
+    echo "   Ouverture du fichier existant..."
+    return 0
+  fi
+
+  echo "🧠 Création du scratchpad: SCRATCHPAD-${scratchpad_id}"
+  echo "📋 Sujet: $topic"
+  echo "🎯 Template: $template_type"
+
+  # Génération du contenu selon template et niveau d'assistance
+  local today=$(date +%Y-%m-%d)
+  local context_vars="id=${scratchpad_id},topic=${topic},template=${template_type},date=${today}"
+  
+  case "$agent_assistance" in
+    "full")
+      echo "🤖 Génération complète selon protocole SCRATCHPAD..."
+      parse_and_generate_artefact "19-SCRATCHPAD" "SCRATCHPAD" "full" "$scratchpad_file" "$context_vars"
+      ;;
+    "skeleton")
+      echo "📝 Structure protocole à compléter..."
+      parse_and_generate_artefact "19-SCRATCHPAD" "SCRATCHPAD" "skeleton" "$scratchpad_file" "$context_vars"
+      ;;
+    "minimal")
+      echo "🧠 Structure minimale selon protocole..."
+      parse_and_generate_artefact "19-SCRATCHPAD" "SCRATCHPAD" "minimal" "$scratchpad_file" "$context_vars"
+      ;;
+  esac
+
+  # Mise à jour du journal si activée
+  if [ "$auto_journal" = "true" ]; then
+    update_journal "SCRATCHPAD" "Brainstorming: $topic" "Template: $template_type" "SCRATCHPAD-${scratchpad_id}.md"
+  fi
+
+  echo ""
+  echo "✅ SCRATCHPAD-${scratchpad_id}.md créé avec succès !"
+  echo "📍 Fichier: $scratchpad_file"
+  echo ""
+  echo "🧠 Prochaines étapes:"
+  echo "  1. Ouvrir le fichier: $scratchpad_file"
+  echo "  2. Documenter vos réflexions et idées"
+  echo "  3. Identifier les actions concrètes"
+  echo "  4. Créer des PBI/TASK pour les actions retenues"
+  echo ""
+  echo "💡 RAPPEL: Le scratchpad est temporaire, extrayez les actions importantes !"
 }
 
 #==============================================================================
@@ -1349,6 +1642,10 @@ generate_arch_from_protocol() {
 # Commande: dev - Développement TDD d'une Task
 command_dev() {
   local task_id="$1"
+  
+  # Parser les arguments de validation et backup
+  parse_validation_args "full" "$@"
+  
   local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
   local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
   
@@ -1362,8 +1659,12 @@ command_dev() {
       echo "  TASK_ID    ID de la task (format: PBI_ID-TASK_ID, ex: 1-2)"
       echo ""
       echo "Options:"
-      echo "  --no-agent     Assistance minimale (skeleton)"
-      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo "  --no-agent         Assistance minimale (skeleton)"
+      echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo "  --no-validation    Désactiver validation TDD (linter/tests/build)"
+      echo "  --force-validation Forcer validation TDD même si désactivée"
+      echo "  --auto-commit      Commit automatique sans validation humaine"
+      echo "  --manual-commit    Demander validation humaine avant commit"
       echo ""
       echo "Exemples:"
       echo "  aklo dev 1-1              # Développer TASK-1-1"
@@ -1719,6 +2020,10 @@ command_review() {
 # Commande: refactor - Refactoring sécurisé de code
 command_refactor() {
   local scope="$1"
+  
+  # Parser les arguments de validation et backup
+  parse_validation_args "basic" "$@"
+  
   local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
   local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
 
@@ -1732,9 +2037,13 @@ command_refactor() {
       echo "  description  Description du refactoring à effectuer (requis)"
       echo ""
       echo "Options:"
-      echo "  --safe         Mode sécurisé avec validation continue"
-      echo "  --no-agent     Assistance minimale (skeleton)"
-      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo "  --safe             Mode sécurisé avec validation continue"
+      echo "  --no-agent         Assistance minimale (skeleton)"
+      echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo "  --no-validation    Désactiver validation TDD (tests de non-régression)"
+      echo "  --force-validation Forcer validation TDD même si désactivée"
+      echo "  --auto-commit      Commit automatique sans validation humaine"
+      echo "  --manual-commit    Demander validation humaine avant commit"
       echo ""
       echo "Exemples:"
       echo "  aklo refactor \"Extraire logique métier en service\""
@@ -1835,6 +2144,10 @@ command_refactor() {
 # Commande: hotfix - Correction d'urgence en production
 command_hotfix() {
   local issue="$1"
+  
+  # Parser les arguments de validation et backup (hotfix = validation full obligatoire)
+  parse_validation_args "full" "$@"
+  
   local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
   local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
 
@@ -1848,9 +2161,13 @@ command_hotfix() {
       echo "  description  Description du bug critique en production (requis)"
       echo ""
       echo "Options:"
-      echo "  --emergency    Mode urgence avec validation accélérée"
-      echo "  --no-agent     Assistance minimale (skeleton)"
-      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo "  --emergency        Mode urgence avec validation accélérée"
+      echo "  --no-agent         Assistance minimale (skeleton)"
+      echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo "  --auto-commit      Commit automatique sans validation humaine"
+      echo "  --manual-commit    Demander validation humaine avant commit"
+      echo ""
+      echo "⚠️  IMPORTANT: Validation TDD obligatoire pour hotfix (sécurité production)"
       echo ""
       echo "Exemples:"
       echo "  aklo hotfix \"Login impossible pour nouveaux utilisateurs\""
@@ -1950,13 +2267,47 @@ command_hotfix() {
       ;;
   esac
 
+  # Validation TDD critique pour hotfix (obligatoire)
+  echo ""
+  echo "🔍 Validation TDD critique pour HOTFIX..."
+  if [ "$PARSED_VALIDATION_LEVEL" = "none" ]; then
+    echo "⚠️  ATTENTION: Validation TDD désactivée pour un HOTFIX critique !"
+    echo "   Ceci est fortement déconseillé en production"
+    read -p "Continuer malgré tout ? (y/N): " force_continue
+    if [[ ! "$force_continue" =~ ^[Yy]$ ]]; then
+      echo "❌ Hotfix annulé pour sécurité"
+      exit 1
+    fi
+  else
+    if ! validate_tdd "$PARSED_VALIDATION_LEVEL" "HOTFIX"; then
+      echo "❌ Validation TDD échouée pour HOTFIX critique"
+      echo "   La sécurité production exige une validation complète"
+      exit 1
+    fi
+  fi
+
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
     update_journal "HOTFIX" "URGENCE: $issue" "HOTFIX-${hotfix_id}.md"
   fi
 
+  # Commit atomique pour traçabilité d'urgence
+  local commit_msg="hotfix: ${issue}
+
+HOTFIX critique HOTFIX-${hotfix_id}
+
+- Urgence production confirmée
+- Validation TDD: ${PARSED_VALIDATION_LEVEL}
+- Artefact: HOTFIX-${hotfix_id}.md
+- Protocole: HOTFIX"
+
+  if ! handle_auto_backup "$commit_msg" "HOTFIX"; then
+    echo "❌ Échec du commit atomique hotfix"
+    exit 1
+  fi
+
   echo ""
-  echo "✅ HOTFIX-${hotfix_id}.md créé avec succès !"
+  echo "✅ HOTFIX-${hotfix_id} créé et committé avec succès !"
   echo "📍 Fichier: $HOTFIX_FILE"
   echo ""
   echo "🚨 PROCÉDURE D'URGENCE - Prochaines étapes:"
@@ -1974,6 +2325,10 @@ command_hotfix() {
 # Commande: optimize - Optimisation de performance
 command_optimize() {
   local scope="$1"
+  
+  # Parser les arguments de validation et backup (optimize = validation basic par défaut)
+  parse_validation_args "basic" "$@"
+  
   local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
   local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
 
@@ -1987,9 +2342,13 @@ command_optimize() {
       echo "  objectif     Objectif de performance à atteindre (requis)"
       echo ""
       echo "Options:"
-      echo "  --profile      Mode profiling avec outils d'analyse"
-      echo "  --no-agent     Assistance minimale (skeleton)"
-      echo "  --no-journal   Désactiver la mise à jour du journal"
+      echo "  --profile          Mode profiling avec outils d'analyse"
+      echo "  --no-agent         Assistance minimale (skeleton)"
+      echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo "  --no-validation    Désactiver validation TDD (déconseillé)"
+      echo "  --force-validation Forcer validation TDD complète"
+      echo "  --auto-commit      Commit automatique sans validation humaine"
+      echo "  --manual-commit    Demander validation humaine avant commit"
       echo ""
       echo "Exemples:"
       echo "  aklo optimize \"Réduire temps de réponse API users < 100ms\""
@@ -2071,13 +2430,42 @@ command_optimize() {
       ;;
   esac
 
+  # Validation TDD pour optimisation (tests de performance)
+  if [ "$PARSED_VALIDATION_LEVEL" != "none" ]; then
+    echo ""
+    echo "🧪 Validation TDD pour optimisation..."
+    if ! validate_tdd "$PARSED_VALIDATION_LEVEL" "OPTIMISATION"; then
+      echo "❌ Validation TDD échouée pour optimisation"
+      echo "   Les tests de performance sont recommandés"
+      read -p "Continuer sans validation ? (y/N): " continue_without
+      if [[ ! "$continue_without" =~ ^[Yy]$ ]]; then
+        exit 1
+      fi
+    fi
+  fi
+
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
     update_journal "OPTIM" "Optimisation: $scope" "OPTIM-${optim_id}-BENCHMARKING.md"
   fi
 
+  # Commit atomique pour traçabilité de l'optimisation
+  local commit_msg="optimize: ${scope}
+
+Optimisation OPTIM-${optim_id} initialisée
+
+- Objectif: ${scope}
+- Validation TDD: ${PARSED_VALIDATION_LEVEL}
+- Artefact: OPTIM-${optim_id}-BENCHMARKING.md
+- Protocole: OPTIMISATION"
+
+  if ! handle_auto_backup "$commit_msg" "OPTIMISATION"; then
+    echo "❌ Échec du commit atomique optimisation"
+    exit 1
+  fi
+
   echo ""
-  echo "✅ OPTIM-${optim_id}-BENCHMARKING.md créé avec succès !"
+  echo "✅ OPTIM-${optim_id} créé et committé avec succès !"
   echo "📍 Fichier: $OPTIM_FILE"
   echo ""
   echo "🔬 Prochaines étapes (méthode scientifique):"
@@ -3429,6 +3817,10 @@ EOF
 # Commande: fast - Fast Track
 command_fast() {
   local task="$1"
+  
+  # Parser les arguments de validation et backup (sans le premier argument qui est la tâche)
+  shift
+  parse_validation_args "optional" "$@"
   local agent_assistance=$(get_config "AGENT_ASSISTANCE" || echo "full")
   local auto_journal=$(get_config "AUTO_JOURNAL" || echo "true")
 
@@ -3445,6 +3837,10 @@ command_fast() {
       echo "  --skip-validation  Validation minimale (à utiliser avec précaution)"
       echo "  --no-agent         Assistance minimale (skeleton)"
       echo "  --no-journal       Désactiver la mise à jour du journal"
+      echo "  --no-validation    Désactiver validation TDD (linter/tests optionnels)"
+      echo "  --force-validation Forcer validation TDD complète"
+      echo "  --auto-commit      Commit automatique sans validation humaine"
+      echo "  --manual-commit    Demander validation humaine avant commit"
       echo ""
       echo "Exemples:"
       echo "  aklo fast \"Corriger faute de frappe dans le titre\""
@@ -3470,19 +3866,19 @@ command_fast() {
       exit 0
       ;;
     *)
-      # Parsing des arguments
+      # Les arguments sont déjà parsés par parse_validation_args
+      # On récupère les arguments restants pour les options spécifiques à fast
       shift
-      local skip_validation=false
       while [ $# -gt 0 ]; do
         case "$1" in
-          --skip-validation)
-            skip_validation=true
-            ;;
           --no-agent)
             agent_assistance="skeleton"
             ;;
           --no-journal)
             auto_journal="false"
+            ;;
+          --no-validation|--force-validation|--auto-commit|--manual-commit)
+            # Déjà traités par parse_validation_args, ignorer
             ;;
           *)
             echo "Argument inconnu: $1" >&2
@@ -3528,6 +3924,16 @@ command_fast() {
       ;;
   esac
 
+  # Validation TDD si activée et non skip_validation
+  if [ "$PARSED_SKIP_VALIDATION" != "true" ] && [ "$PARSED_VALIDATION_LEVEL" != "none" ]; then
+    echo ""
+    echo "🔍 Validation TDD pour FAST-TRACK..."
+    if ! validate_tdd "$PARSED_VALIDATION_LEVEL" "FAST-TRACK"; then
+      echo "❌ Validation TDD échouée. Arrêt du processus."
+      return 1
+    fi
+  fi
+
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
     update_journal "FAST" "Fast-track: $task" "FAST-${fast_id}-TODO.md"
@@ -3537,14 +3943,23 @@ command_fast() {
   echo "✅ FAST-${fast_id}-TODO.md créé avec succès !"
   echo "📍 Fichier: $FAST_FILE"
   echo ""
-  echo "⚡ Prochaines étapes (fast-track):"
-  echo "  1. Créer une branche: git checkout -b fast/$(echo "$fast_id" | tr '[:upper:]' '[:lower:]')"
-  echo "  2. Implémenter la modification"
-  echo "  3. Compléter le diff proposé dans l'artefact"
-  echo "  4. Valider avec Human_Developer"
-  echo "  5. Commit sémantique et merge"
+  
+  # Commit atomique selon configuration AUTO_BACKUP
+  local commit_msg="feat(fast): ${task}
+
+Fast-track FAST-${fast_id} - Modification mineure
+
+- Artefact: FAST-${fast_id}-TODO.md
+- Protocole: FAST-TRACK
+- Validation: ${PARSED_VALIDATION_LEVEL}"
+
+  if ! handle_auto_backup "$commit_msg" "FAST-TRACK"; then
+    echo "❌ Échec du commit atomique"
+    return 1
+  fi
+  
   echo ""
-  echo "🚀 RAPPEL: Rapidité avec traçabilité complète !"
+  echo "🚀 FAST-TRACK terminé avec succès !"
 }
 
 # Commande: meta - Meta Improvement
@@ -4001,6 +4416,7 @@ show_help() {
   echo "  kb <action> [args]                    Knowledge base (search/add)"
   echo "  fast \"<tâche>\" [--skip-validation]   Procédure accélérée"
   echo "  meta \"<amélioration>\" [--analyze]    Amélioration de la charte"
+  echo "  scratch \"<sujet>\" [--template]       Brainstorming et scratchpad"
   echo ""
   echo "📚 AIDE ET INFORMATION:"
   echo "  help                                Affiche cette aide"
@@ -4131,6 +4547,10 @@ case "${1:-help}" in
   "meta")
     shift
     command_meta "$@"
+    ;;
+  "scratch")
+    shift
+    command_scratch "$@"
     ;;
   "help"|"--help"|"-h")
     show_help
