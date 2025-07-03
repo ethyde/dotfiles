@@ -21,9 +21,17 @@ source "${script_dir}/aklo_cache_monitoring.sh" 2>/dev/null || echo "⚠️  Fon
 # Source du cache regex (TASK-7-1)
 source "${script_dir}/aklo_regex_cache.sh" 2>/dev/null || echo "⚠️  Cache regex non disponible - fallback uniquement" >&2
 
+# Source des fonctions d'optimisation I/O par batch (TASK-7-2)
+source "${script_dir}/aklo_batch_io.sh" 2>/dev/null || echo "⚠️  Fonctions batch I/O non disponibles - fallback uniquement" >&2
+
 # Initialisation du cache regex au démarrage
 if command -v init_regex_cache >/dev/null 2>&1; then
     init_regex_cache
+fi
+
+# Initialisation des métriques I/O
+if command -v reset_io_metrics >/dev/null 2>&1; then
+    reset_io_metrics
 fi
 
 #==============================================================================
@@ -1302,13 +1310,26 @@ command_status() {
       ;;
     *)
       # Déléguer au script spécialisé pour tous les modes
-      if [ -f "$script_dir/../ux-improvements/status-command.sh" ]; then
-        . "$script_dir/../ux-improvements/status-command.sh"
-        # Passer le mode ou "standard" si vide
-        aklo_status "${mode:-standard}"
+      # Optimisation TASK-7-2: Utiliser batch_check_existence pour vérifier les scripts UX
+      local status_script="$script_dir/../ux-improvements/status-command.sh"
+      if command -v batch_check_existence >/dev/null 2>&1; then
+        local check_result=$(batch_check_existence "$status_script")
+        if echo "$check_result" | grep -q "exists"; then
+          . "$status_script"
+          aklo_status "${mode:-standard}"
+        else
+          echo "Erreur : Script status-command.sh introuvable." >&2
+          exit 1
+        fi
       else
-        echo "Erreur : Script status-command.sh introuvable." >&2
-        exit 1
+        # Fallback classique si batch I/O non disponible
+        if [ -f "$status_script" ]; then
+          . "$status_script"
+          aklo_status "${mode:-standard}"
+        else
+          echo "Erreur : Script status-command.sh introuvable." >&2
+          exit 1
+        fi
       fi
       ;;
   esac
@@ -1319,11 +1340,25 @@ command_mcp() {
   local action="$1"
   local script_dir="$(dirname "$0")"
   
+  # Optimisation TASK-7-2: Vérification batch des scripts MCP
+  local mcp_scripts=(
+    "$script_dir/../mcp-servers/setup-mcp.sh"
+    "$script_dir/../mcp-servers/restart-mcp.sh"
+    "$script_dir/../mcp-servers/watch-mcp.sh"
+  )
+  
+  local mcp_check_result=""
+  if command -v batch_check_existence >/dev/null 2>&1; then
+    mcp_check_result=$(batch_check_existence "${mcp_scripts[@]}")
+  fi
+
   case "$action" in
     "setup")
       echo "🔧 Configuration des serveurs MCP..."
-      if [ -f "$script_dir/../mcp-servers/setup-mcp.sh" ]; then
-        "$script_dir/../mcp-servers/setup-mcp.sh"
+      if [ -n "$mcp_check_result" ] && echo "$mcp_check_result" | grep -q "setup-mcp.sh exists"; then
+        "${mcp_scripts[0]}"
+      elif [ -f "${mcp_scripts[0]}" ]; then
+        "${mcp_scripts[0]}"
       else
         echo "Erreur : Script setup-mcp.sh introuvable." >&2
         exit 1
@@ -1331,8 +1366,10 @@ command_mcp() {
       ;;
     "restart")
       echo "🔄 Redémarrage des serveurs MCP..."
-      if [ -f "$script_dir/../mcp-servers/restart-mcp.sh" ]; then
-        "$script_dir/../mcp-servers/restart-mcp.sh"
+      if [ -n "$mcp_check_result" ] && echo "$mcp_check_result" | grep -q "restart-mcp.sh exists"; then
+        "${mcp_scripts[1]}"
+      elif [ -f "${mcp_scripts[1]}" ]; then
+        "${mcp_scripts[1]}"
       else
         echo "Erreur : Script restart-mcp.sh introuvable." >&2
         exit 1
@@ -1340,8 +1377,10 @@ command_mcp() {
       ;;
     "watch")
       echo "👁️ Surveillance des serveurs MCP..."
-      if [ -f "$script_dir/../mcp-servers/watch-mcp.sh" ]; then
-        "$script_dir/../mcp-servers/watch-mcp.sh"
+      if [ -n "$mcp_check_result" ] && echo "$mcp_check_result" | grep -q "watch-mcp.sh exists"; then
+        "${mcp_scripts[2]}"
+      elif [ -f "${mcp_scripts[2]}" ]; then
+        "${mcp_scripts[2]}"
       else
         echo "Erreur : Script watch-mcp.sh introuvable." >&2
         exit 1
