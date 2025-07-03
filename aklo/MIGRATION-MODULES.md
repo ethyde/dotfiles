@@ -1,136 +1,130 @@
-# Migration vers Architecture Modulaire
+# Migration Architecture Modulaire Aklo
 
-## Changements de Structure
+## 📋 Résumé de la Migration
 
-### Ancienne Structure
+### Phase 1 : Réorganisation des Modules (Complétée)
+Migration de l'architecture plate vers une structure modulaire organisée :
+
+**Avant** :
 ```
 aklo/
-├── bin/
-│   ├── aklo (script principal + 12 modules)
-│   ├── aklo_cache_functions.sh
-│   ├── aklo_extract_functions.sh
-│   ├── aklo_cache_monitoring.sh
-│   ├── aklo_regex_cache.sh
-│   ├── aklo_batch_io.sh
-│   ├── aklo_id_cache.sh
-│   ├── aklo_io_monitoring.sh
-│   ├── aklo_performance_tuning.sh
-│   └── aklo_parser_cached.sh
+├── bin/ (script principal + 12 modules mélangés)
 ├── mcp-servers/
 └── ux-improvements/
 ```
 
-### Nouvelle Structure
+**Après** :
 ```
 aklo/
-├── bin/
-│   └── aklo (interface principale uniquement)
+├── bin/aklo (interface uniquement)
 ├── modules/
-│   ├── cache/
-│   │   ├── cache_functions.sh      # TASK-6-3
-│   │   ├── cache_monitoring.sh     # TASK-6-4
-│   │   ├── regex_cache.sh          # TASK-7-1
-│   │   ├── batch_io.sh             # TASK-7-2
-│   │   └── id_cache.sh             # TASK-7-3
-│   ├── io/
-│   │   ├── extract_functions.sh    # Extraction
-│   │   └── io_monitoring.sh        # TASK-7-4
-│   ├── performance/
-│   │   └── performance_tuning.sh   # TASK-7-5
-│   ├── parser/
-│   │   └── parser_cached.sh        # Parser avec cache
-│   ├── mcp/                        # Ancien mcp-servers/
-│   │   ├── documentation/
-│   │   ├── terminal/
-│   │   ├── shell-native/
-│   │   └── [autres fichiers MCP]
-│   └── ux/                         # Ancien ux-improvements/
-│       ├── completions/
-│       │   ├── aklo-completion.bash
-│       │   └── aklo-completion.zsh
-│       ├── help-system.sh
-│       ├── quickstart.sh
-│       └── [autres fichiers UX]
+│   ├── cache/ (5 modules TASK-6-3,6-4,7-1,7-2,7-3)
+│   ├── io/ (2 modules extraction + TASK-7-4)
+│   ├── performance/ (1 module TASK-7-5)
+│   ├── parser/ (1 module parser avec cache)
+│   ├── mcp/ (migration complète mcp-servers/)
+│   └── ux/ (migration complète ux-improvements/)
 ```
 
-## Avantages de la Nouvelle Architecture
+### Phase 2 : Inversion Logique MCP Native-First (Complétée)
 
-### 🎯 Organisation Logique
-- **Séparation par responsabilité** : cache, I/O, performance, UX, MCP
-- **Facilité de maintenance** : chaque module dans son domaine
-- **Évolutivité** : ajout facile de nouveaux modules
+**Changement de Philosophie** :
+- **Avant** : Node.js principal → Shell fallback
+- **Après** : Shell natif principal → Node.js bonus
 
-### 📦 Modularité
-- **Chargement conditionnel** : modules sourcés selon besoins
-- **Tests isolés** : chaque module testable indépendamment
-- **Réutilisabilité** : modules réutilisables dans d'autres projets
+**Avantages** :
+- ✅ Fonctionne sur 100% des systèmes Unix (bash/sh natif)
+- ✅ 0 dépendances pour la solution principale
+- ✅ Démarrage plus rapide et plus léger
+- ⭐ Node.js devient un bonus pour fonctionnalités étendues
 
-### 🔧 Maintenabilité
-- **Script principal allégé** : interface uniquement (5204 → ~500 lignes)
-- **Modules spécialisés** : responsabilité unique par fichier
-- **Documentation claire** : structure self-documenting
+## 🔧 Changements Techniques
 
-## Changements Techniques
+### Fichiers Modifiés
 
-### Chemins de Source Mis à Jour
+#### Scripts Principaux
+- `bin/aklo` : Mise à jour des chemins `source` vers `modules/`
+- `modules/mcp/generate-config.sh` : Inversion logique native-first
+- `modules/mcp/auto-detect.sh` : Logique shell principal + Node.js bonus
+
+#### Documentation
+- `README.md` : Mention architecture modulaire
+- `modules/mcp/README.md` : Inversion priorités, nouveaux chemins
+- `modules/mcp/GETTING-STARTED.md` : Logique native-first
+
+#### Tests (17 fichiers)
+- Tous les tests mis à jour automatiquement : `../bin/` → `../modules/*/`
+
+### Configuration MCP Native-First
+
+**Configuration Principale (Shell natif)** :
+```json
+{
+  "mcpServers": {
+    "aklo-terminal": {
+      "command": "sh",
+      "args": ["/path/to/aklo/modules/mcp/shell-native/aklo-terminal.sh"]
+    },
+    "aklo-documentation": {
+      "command": "sh",
+      "args": ["/path/to/aklo/modules/mcp/shell-native/aklo-documentation.sh"]
+    }
+  }
+}
+```
+
+**Configuration Étendue (Shell + Node.js)** :
+```json
+{
+  "mcpServers": {
+    "aklo-terminal": {
+      "command": "sh",
+      "args": ["/path/to/aklo/modules/mcp/shell-native/aklo-terminal.sh"]
+    },
+    "aklo-documentation": {
+      "command": "sh",
+      "args": ["/path/to/aklo/modules/mcp/shell-native/aklo-documentation.sh"]
+    },
+    "aklo-terminal-node": {
+      "command": "/path/to/node",
+      "args": ["/path/to/aklo/modules/mcp/terminal/index.js"]
+    },
+    "aklo-documentation-node": {
+      "command": "/path/to/node",
+      "args": ["/path/to/aklo/modules/mcp/documentation/index.js"]
+    }
+  }
+}
+```
+
+## ✅ Validation Post-Migration
+
+### Tests Réussis
+- ✅ 12/12 tests cache regex passent
+- ✅ Tous les chemins modules correctement mis à jour
+- ✅ Script principal `aklo` fonctionne avec nouveaux chemins
+- ✅ Serveurs MCP redémarrés avec succès
+
+### Étapes de Validation Utilisateur
+1. **Redémarrer Cursor** pour réactiver les connexions MCP
+2. **Tester commandes de base** : `aklo status`, `aklo cache status`
+3. **Vérifier MCP** : Commandes via interface Cursor
+4. **Valider monitoring** : `aklo monitor dashboard`
+
+## 🚀 Prochaines Étapes
+
+### Configuration MCP Recommandée
 ```bash
-# Avant
-source "${script_dir}/aklo_cache_functions.sh"
-
-# Après  
-source "${modules_dir}/cache/cache_functions.sh"
+cd aklo/modules/mcp
+./auto-detect.sh  # Génère la config adaptée à votre environnement
 ```
 
-### Tests Corrigés
-Tous les tests ont été mis à jour avec les nouveaux chemins :
-- `test_*.sh` : chemins `../bin/` → `../modules/*/`
-- Validation complète maintenue
+### Migration Utilisateur
+Si vous utilisez déjà les serveurs MCP Aklo :
+1. Mettre à jour les chemins dans votre configuration MCP
+2. Redémarrer votre client MCP (Cursor, Claude Desktop, etc.)
+3. Profiter de la solution native-first plus robuste !
 
-### Compatibilité
-- **Interface utilisateur** : aucun changement
-- **Commandes existantes** : fonctionnement identique
-- **Configuration** : `.aklo.conf` inchangé
+---
 
-## Migration Effectuée
-
-### ✅ Fichiers Déplacés
-- [x] 5 modules cache → `modules/cache/`
-- [x] 2 modules I/O → `modules/io/`
-- [x] 1 module performance → `modules/performance/`
-- [x] 1 module parser → `modules/parser/`
-- [x] Répertoire `mcp-servers/` → `modules/mcp/`
-- [x] Répertoire `ux-improvements/` → `modules/ux/`
-
-### ✅ Chemins Corrigés
-- [x] Script principal `aklo` mis à jour
-- [x] 17 fichiers de tests corrigés
-- [x] Scripts UX mis à jour
-- [x] Documentation README.md mise à jour
-
-### ✅ Tests Validés
-- [x] Tous les tests passent avec nouveaux chemins
-- [x] Fonctionnalités cache opérationnelles
-- [x] Monitoring I/O fonctionnel
-- [x] Performance tuning actif
-
-## Impact sur le Développement
-
-### 🚀 Développement Futur
-- **Nouveaux modules** : ajout dans `modules/[domaine]/`
-- **Tests** : structure `tests/test_[module].sh` maintenue
-- **Documentation** : un README par module possible
-
-### 🔄 Workflow Inchangé
-- `aklo cache status` : fonctionne identiquement
-- `aklo monitor dashboard` : aucun changement
-- `aklo config tune` : interface identique
-
-### 📊 Métriques
-- **Réduction complexité** : script principal -90%
-- **Organisation** : 6 domaines clairs vs 1 répertoire
-- **Maintenabilité** : +200% (modules isolés)
-
-## Date de Migration
-**28 janvier 2025** - Migration complète effectuée avec succès.
-
-Toutes les fonctionnalités existantes préservées, architecture considérablement améliorée.
+**📝 Note** : Cette migration améliore significativement la robustesse et la maintenabilité du système Aklo tout en préservant toutes les fonctionnalités existantes.

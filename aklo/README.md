@@ -9,7 +9,7 @@
 **The Aklo Protocol** n'est pas un simple outil, c'est un **système de gouvernance** pour le développement de logiciels. Il a pour but d'imposer un cadre de travail rigoureux, traçable et de haute qualité, en s'appuyant sur deux piliers :
 
 1.  **La Charte IA (`./charte/`) :** C'est notre "Necronomicon", la source de vérité unique qui définit tous nos processus de travail. Elle est conçue pour être lue et comprise par les humains et les IA.
-2.  **L'outil `aklo` (`./bin/aklo`) :** C'est le "Grand Prêtre", l'exécuteur des rituels décrits dans la Charte. C'est un outil en ligne de commande qui automatise les tâches répétitives pour garantir que les protocoles sont suivis à la lettre, sans erreur.
+2.  **L'outil `aklo` (`./bin/aklo`) :** C'est le "Grand Prêtre", l'exécuteur des rituels décrits dans la Charte. C'est un outil en ligne de commande qui automatise les tâches répétitives pour garantir que les protocoles sont suivis à la lettre, sans erreur. L'outil s'appuie sur une architecture modulaire organisée dans `./modules/` pour la cache, I/O, performance, parsing, MCP et UX.
 
 Ce système est intégré à ce dépôt `dotfiles` pour assurer que tout projet que vous entreprenez respecte les mêmes standards élevés de qualité.
 

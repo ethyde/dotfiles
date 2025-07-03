@@ -1,19 +1,20 @@
 # 🤖 Serveurs MCP Aklo
 
-Serveurs MCP (Model Context Protocol) pour l'écosystème Aklo avec **fallback intelligent** automatique.
+Serveurs MCP (Model Context Protocol) pour l'écosystème Aklo avec **logique native intelligente**.
 
 ## 🎯 Philosophie
 
-**Logique de Fallback Intelligent** :
-- ✅ **Node.js détecté + compatible** → Serveurs Node.js complets
-- 🔄 **Node.js absent/incompatible** → Serveurs Shell natifs (fallback)
+**Logique Native-First** :
+- ✅ **Shell bash/sh natif** → Serveurs légers et universels (solution principale)
+- 🔄 **Node.js disponible** → Serveurs étendus avec fonctionnalités avancées (bonus)
 
-Cette approche garantit que les serveurs MCP Aklo fonctionnent **toujours**, même sans Node.js.
+Cette approche garantit que les serveurs MCP Aklo fonctionnent **toujours** nativement sur tout système Unix, avec Node.js comme amélioration optionnelle.
 
 ## 🚀 Installation Rapide
 
 ```bash
 # Installation automatique avec détection intelligente
+cd aklo/modules/mcp
 ./setup-mcp.sh
 
 # Ou génération de configuration uniquement
@@ -22,20 +23,20 @@ Cette approche garantit que les serveurs MCP Aklo fonctionnent **toujours**, mê
 
 ## 📋 Serveurs Disponibles
 
-### Version Node.js (Complète)
-- **aklo-terminal** : Exécution commandes aklo, statut projet, shell sécurisé
-- **aklo-documentation** : Lecture protocoles, recherche documentation, validation artefacts
+### Version Shell Native (Principale) 🥇
+- **aklo-terminal** : Commandes aklo, statut projet - **0 dépendances**
+- **aklo-documentation** : Lecture protocoles, recherche documentation - **0 dépendances**
 
-### Version Shell Native (Fallback)
-- **aklo-terminal-shell** : Commandes aklo de base, statut projet
-- **aklo-documentation-shell** : Lecture protocoles, recherche simple
+### Version Node.js (Étendue) ⭐
+- **aklo-terminal-node** : Fonctionnalités avancées + shell sécurisé
+- **aklo-documentation-node** : Validation artefacts + recherche complexe
 
 ## 🔧 Configuration Manuelle
 
 ### Détection Automatique
 ```bash
 # Génère automatiquement la bonne configuration
-cd aklo/mcp-servers
+cd aklo/modules/mcp
 ./auto-detect.sh
 ```
 
@@ -44,28 +45,28 @@ cd aklo/mcp-servers
 {
   "mcpServers": {
     "aklo-terminal": {
-      "command": "/path/to/node",
-      "args": ["/path/to/aklo/mcp-servers/terminal/index.js"]
+      "command": "sh",
+      "args": ["/path/to/aklo/modules/mcp/shell-native/aklo-terminal.sh"]
     },
     "aklo-documentation": {
-      "command": "/path/to/node",
-      "args": ["/path/to/aklo/mcp-servers/documentation/index.js"]
+      "command": "sh",
+      "args": ["/path/to/aklo/modules/mcp/shell-native/aklo-documentation.sh"]
     }
   }
 }
 ```
 
-### Configuration Shell Natif
+### Configuration Node.js (Étendue)
 ```json
 {
   "mcpServers": {
-    "aklo-terminal-shell": {
-      "command": "sh",
-      "args": ["/path/to/aklo/mcp-servers/shell-native/aklo-terminal.sh"]
+    "aklo-terminal-node": {
+      "command": "/path/to/node",
+      "args": ["/path/to/aklo/modules/mcp/terminal/index.js"]
     },
-    "aklo-documentation-shell": {
-      "command": "sh",
-      "args": ["/path/to/aklo/mcp-servers/shell-native/aklo-documentation.sh"]
+    "aklo-documentation-node": {
+      "command": "/path/to/node",
+      "args": ["/path/to/aklo/modules/mcp/documentation/index.js"]
     }
   }
 }
@@ -129,11 +130,11 @@ Le système détecte automatiquement :
 - `lts/iron` (Node.js 20)  
 - `lts/jod` (Node.js 22)
 
-### Fallback Automatique
-- ❌ Node.js absent → Shell natif
-- ❌ Version trop ancienne → Shell natif
-- ❌ npm manquant → Shell natif
-- ❌ Dépendances cassées → Shell natif
+### Logique Native-First
+- ✅ Shell natif → Solution principale (toujours disponible)
+- ⭐ Node.js détecté → Serveurs étendus en bonus
+- 🔄 Node.js problématique → Shell natif uniquement
+- 🎯 Résultat → Fonctionne toujours, partout
 
 ## 🛠️ Scripts Utilitaires
 
@@ -142,12 +143,12 @@ Le système détecte automatiquement :
 | `setup-mcp.sh` | Installation complète avec tests |
 | `auto-detect.sh` | Détection environnement et génération config |
 | `generate-config.sh` | Génération configuration JSON pure |
-| `test-fallback.sh` | Tests complets du système fallback |
+| `test-fallback.sh` | Tests complets du système native-first |
 | `install-node.sh` | Assistant installation Node.js |
 | `restart-mcp.sh` | Redémarrage des serveurs après modification |
 | `watch-mcp.sh` | Surveillance automatique et redémarrage |
 | `aklo-mcp.sh` | Script principal de gestion des serveurs |
-| `demo-fallback.sh` | Démonstration du système de fallback |
+| `demo-fallback.sh` | Démonstration de la logique native-first |
 | `demo-multi-clients.sh` | Démonstration multi-clients |
 | `generate-config-universal.sh` | Configuration universelle multi-environnements |
 | `install.sh` | Installation simple des dépendances npm |
@@ -176,7 +177,7 @@ Le système détecte automatiquement :
 
 ### Démonstrations
 ```bash
-# Démonstration du système de fallback
+# Démonstration de la logique native-first
 ./demo-fallback.sh
 
 # Démonstration multi-clients
@@ -219,7 +220,7 @@ npm --version
 cd terminal && npm install
 cd ../documentation && npm install
 
-# Forcer fallback shell
+# Forcer shell natif uniquement
 export PATH="/usr/bin:/bin" && ./auto-detect.sh
 ```
 
@@ -244,28 +245,28 @@ python3 -m json.tool config.json
 ## 🏗️ Architecture
 
 ```
-aklo/mcp-servers/
+aklo/modules/mcp/
 ├── setup-mcp.sh           # Installation automatique
-├── auto-detect.sh         # Détection intelligente
-├── generate-config.sh     # Génération config pure
+├── auto-detect.sh         # Détection intelligente native-first
+├── generate-config.sh     # Génération config native-first
 ├── test-fallback.sh       # Tests système
 ├── install-node.sh        # Assistant Node.js
-├── restart-mcp.sh        # Redémarrage serveurs
+├── restart-mcp.sh         # Redémarrage serveurs
 ├── watch-mcp.sh          # Surveillance automatique  
 ├── aklo-mcp.sh           # Gestion avancée
-├── demo-fallback.sh      # Démonstration fallback
+├── demo-fallback.sh      # Démonstration logique native
 ├── demo-multi-clients.sh # Démonstration multi-clients
 ├── generate-config-universal.sh # Config universelle
 ├── install.sh            # Installation simple
-├── terminal/              # Serveur Node.js terminal
+├── terminal/              # Serveur Node.js étendu
 │   ├── index.js
 │   ├── package.json
 │   └── node_modules/
-├── documentation/         # Serveur Node.js documentation
+├── documentation/         # Serveur Node.js étendu
 │   ├── index.js
 │   ├── package.json
 │   └── node_modules/
-└── shell-native/          # Serveurs shell fallback
+└── shell-native/          # Serveurs shell natifs (principaux)
     ├── aklo-terminal.sh
     └── aklo-documentation.sh
 ```
@@ -278,19 +279,19 @@ aklo/mcp-servers/
 - Tests intégrés et validation
 
 ### ✅ Performance  
-- Serveurs Node.js pour fonctionnalités complètes
-- Shell natif léger pour cas basiques
-- Pas de dépendances externes pour fallback
+- Shell natif léger pour solution principale
+- Serveurs Node.js pour fonctionnalités étendues
+- 0 dépendances pour la solution de base
 
 ### ✅ Simplicité
 - Installation en une commande
-- Configuration automatique
-- Fallback transparent
+- Configuration automatique native-first
+- Fonctionnement universel garanti
 
 ### ✅ Compatibilité
 - macOS, Linux, Windows WSL
-- Bash, Zsh, Shell POSIX
-- Node.js 16+ ou aucune dépendance
+- Bash, Zsh, Shell POSIX natifs
+- Node.js 16+ optionnel pour fonctionnalités étendues
 
 ---
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #==============================================================================
-# Auto-détection et fallback intelligent pour serveurs MCP Aklo
-# Logique : Node.js (si compatible) → Shell natif (fallback)
+# Auto-détection et logique native-first pour serveurs MCP Aklo
+# Logique : Shell natif (principal) + Node.js (bonus si disponible)
 #==============================================================================
 
 set -e
@@ -147,36 +147,16 @@ test_node_servers() {
     fi
 }
 
-# Fonction de génération de config MCP Node.js
-generate_node_config() {
-    local node_path=$(which node)
-    
-    cat << EOF
-{
-  "mcpServers": {
-    "aklo-terminal": {
-      "command": "$node_path",
-      "args": ["$SCRIPT_DIR/terminal/index.js"]
-    },
-    "aklo-documentation": {
-      "command": "$node_path", 
-      "args": ["$SCRIPT_DIR/documentation/index.js"]
-    }
-  }
-}
-EOF
-}
-
-# Fonction de génération de config MCP Shell
+# Fonction de génération de config MCP Shell (principale)
 generate_shell_config() {
     cat << EOF
 {
   "mcpServers": {
-    "aklo-terminal-shell": {
+    "aklo-terminal": {
       "command": "sh",
       "args": ["$SCRIPT_DIR/shell-native/aklo-terminal.sh"]
     },
-    "aklo-documentation-shell": {
+    "aklo-documentation": {
       "command": "sh", 
       "args": ["$SCRIPT_DIR/shell-native/aklo-documentation.sh"]
     }
@@ -185,57 +165,89 @@ generate_shell_config() {
 EOF
 }
 
+# Fonction de génération de config MCP étendue (Shell + Node.js)
+generate_extended_config() {
+    local node_path=$(which node)
+    
+    cat << EOF
+{
+  "mcpServers": {
+    "aklo-terminal": {
+      "command": "sh",
+      "args": ["$SCRIPT_DIR/shell-native/aklo-terminal.sh"]
+    },
+    "aklo-documentation": {
+      "command": "sh", 
+      "args": ["$SCRIPT_DIR/shell-native/aklo-documentation.sh"]
+    },
+    "aklo-terminal-node": {
+      "command": "$node_path",
+      "args": ["$SCRIPT_DIR/terminal/index.js"]
+    },
+    "aklo-documentation-node": {
+      "command": "$node_path", 
+      "args": ["$SCRIPT_DIR/documentation/index.js"]
+    }
+  }
+}
+EOF
+}
+
 # Fonction principale de détection et configuration
 main() {
-    echo "🔍 Auto-détection environnement MCP Aklo"
-    echo "========================================"
+    echo "🔍 Configuration MCP Aklo - Logique Native-First"
+    echo "================================================="
     
-    local use_node=false
+    local has_node_bonus=false
     local detection_log=""
     
-    # Étape 1: Détection Node.js direct
+    # Toujours utiliser Shell natif comme base
+    log_success "Shell bash/sh natif disponible (solution principale)"
+    
+    # Étape 1: Détection Node.js pour bonus
     if detect_node; then
-        use_node=true
-        detection_log="✅ Node.js système compatible détecté"
+        has_node_bonus=true
+        detection_log="⭐ Node.js détecté - serveurs étendus disponibles"
     else
-        # Étape 2: Tentative NVM + LTS
-        log_info "Tentative détection via NVM..."
+        # Étape 2: Tentative NVM + LTS pour bonus
+        log_info "Tentative détection via NVM pour serveurs étendus..."
         if detect_nvm_lts; then
-            use_node=true
-            detection_log="✅ Node.js via NVM/LTS détecté et configuré"
+            has_node_bonus=true
+            detection_log="⭐ Node.js via NVM/LTS détecté - serveurs étendus disponibles"
         else
-            detection_log="⚠️  Node.js non disponible ou incompatible"
+            detection_log="ℹ️  Node.js non disponible - serveurs shell uniquement"
         fi
     fi
     
-    # Étape 3: Test des serveurs si Node.js disponible
-    if [ "$use_node" = true ]; then
+    # Étape 3: Test des serveurs Node.js si disponibles (pour bonus)
+    if [ "$has_node_bonus" = true ]; then
         if test_node_servers; then
-            log_success "🎯 Configuration : Serveurs Node.js MCP"
+            log_success "🎯 Configuration : Shell natif + serveurs Node.js étendus"
             echo ""
             echo "📋 Configuration MCP à ajouter :"
             echo "================================"
-            generate_node_config
+            generate_extended_config
             echo ""
             echo "💡 Détails de détection :"
             echo "   $detection_log"
             echo "   Node.js: $(node --version)"
             echo "   npm: $(npm --version)"
             echo "   Chemin: $(which node)"
+            echo "   → Serveurs shell natifs + serveurs Node.js étendus"
         else
-            log_warning "Serveurs Node.js non fonctionnels, fallback vers shell"
-            use_node=false
+            log_warning "Serveurs Node.js non fonctionnels, shell natif uniquement"
+            has_node_bonus=false
         fi
     fi
     
-    # Étape 4: Fallback shell natif
-    if [ "$use_node" = false ]; then
-        log_warning "🐚 Configuration : Serveurs Shell natifs (fallback)"
+    # Étape 4: Configuration shell natif (toujours présente)
+    if [ "$has_node_bonus" = false ]; then
+        log_success "🐚 Configuration : Serveurs Shell natifs (solution complète)"
         
         # Vérifier que les serveurs shell existent
         if [ ! -f "$SCRIPT_DIR/shell-native/aklo-terminal.sh" ]; then
-            log_error "Serveur shell natif manquant, création..."
-            # Ici on pourrait recréer le serveur si nécessaire
+            log_error "Serveur shell natif manquant"
+            exit 1
         fi
         
         echo ""
@@ -243,25 +255,26 @@ main() {
         echo "================================"
         generate_shell_config
         echo ""
-        echo "💡 Raison du fallback :"
+        echo "💡 Configuration native :"
         echo "   $detection_log"
-        echo "   → Utilisation des serveurs shell natifs (fonctionnalités limitées)"
+        echo "   → Serveurs shell natifs universels (0 dépendances)"
     fi
     
     echo ""
     echo "🔧 Prochaines étapes :"
     echo "====================="
-    if [ "$use_node" = true ]; then
-        echo "1. Copiez la configuration MCP ci-dessus"
+    if [ "$has_node_bonus" = true ]; then
+        echo "1. Copiez la configuration MCP ci-dessus (shell + Node.js)"
         echo "2. Ajoutez-la à votre fichier de configuration Cursor/MCP"
         echo "3. Redémarrez Cursor pour activer les serveurs"
         echo "4. Testez avec une commande aklo dans le chat"
+        echo "5. Vous avez accès aux serveurs natifs ET étendus ! 🎉"
     else
-        echo "1. Copiez la configuration MCP ci-dessus (version shell)"
+        echo "1. Copiez la configuration MCP ci-dessus (shell natif)"
         echo "2. Ajoutez-la à votre fichier de configuration Cursor/MCP"  
         echo "3. Redémarrez Cursor pour activer les serveurs"
-        echo "4. Pour plus de fonctionnalités, installez Node.js >= v$MIN_NODE_MAJOR"
-        echo "   puis relancez ce script"
+        echo "4. Testez avec une commande aklo dans le chat"
+        echo "5. Optionnel: Installez Node.js >= v$MIN_NODE_MAJOR pour serveurs étendus"
     fi
 }
 
