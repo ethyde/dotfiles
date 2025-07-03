@@ -162,6 +162,133 @@ test_summary() {
     fi
 }
 
+# Fonction: assert_directory_exists
+# Vérifie qu'un répertoire existe
+assert_directory_exists() {
+    local dir_path="$1"
+    local test_name="${2:-Directory exists: $dir_path}"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if [ -d "$dir_path" ]; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  Répertoire introuvable: '$dir_path'"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_file_not_exists
+# Vérifie qu'un fichier n'existe pas
+assert_file_not_exists() {
+    local file_path="$1"
+    local test_name="${2:-File should not exist: $file_path}"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if [ ! -f "$file_path" ]; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  Fichier existe alors qu'il ne devrait pas: '$file_path'"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_file_contains
+# Vérifie qu'un fichier contient une chaîne
+assert_file_contains() {
+    local file_path="$1"
+    local needle="$2"
+    local test_name="${3:-File contains: $needle}"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if [ ! -f "$file_path" ]; then
+        echo "${RED}✗${NC} $test_name"
+        echo "  Fichier introuvable: '$file_path'"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+    
+    if grep -q "$needle" "$file_path" 2>/dev/null; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  '$file_path' ne contient pas '$needle'"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_file_not_contains
+# Vérifie qu'un fichier ne contient pas une chaîne
+assert_file_not_contains() {
+    local file_path="$1"
+    local needle="$2"
+    local test_name="${3:-File does not contain: $needle}"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if [ ! -f "$file_path" ]; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    fi
+    
+    if ! grep -q "$needle" "$file_path" 2>/dev/null; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  '$file_path' contient '$needle' alors qu'il ne devrait pas"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_command_success
+# Vérifie qu'une commande s'exécute avec succès
+assert_command_success() {
+    local test_name="$1"
+    local last_exit_code=$?
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if [ "$last_exit_code" -eq 0 ]; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  Commande échouée avec le code: $last_exit_code"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: fail
+# Force un échec de test avec un message
+fail() {
+    local message="$1"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    
+    echo "${RED}✗${NC} $message"
+    return 1
+}
+
 # Fonction: run_tests
 # Point d'entrée principal pour exécuter tous les tests
 run_tests() {
