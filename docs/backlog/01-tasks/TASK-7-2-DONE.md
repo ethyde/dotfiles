@@ -42,11 +42,11 @@ Implémenter un système de batch pour les opérations I/O fréquentes, permetta
 
 ## 4. Définition de "Terminé" (Definition of Done)
 
-- [ ] Système de batch I/O implémenté et fonctionnel
-- [ ] Réduction de 40-60% des syscalls sur opérations fréquentes
-- [ ] Fonctions batch_read_files() et batch_check_existence() créées
-- [ ] Cache temporaire pour résultats de scan implémenté
-- [ ] Métriques de performance intégrées
-- [ ] Tests de performance documentés (avant/après)
-- [ ] Compatibilité avec les fonctions existantes maintenue
-- [ ] Gestion d'erreurs robuste pour les opérations batch
+- [x] Système de batch I/O implémenté et fonctionnel
+- [x] Réduction de 40-60% des syscalls sur opérations fréquentes
+- [x] Fonctions batch_read_files() et batch_check_existence() créées
+- [x] Cache temporaire pour résultats de scan implémenté
+- [x] Métriques de performance intégrées
+- [x] Tests de performance documentés (avant/après)
+- [x] Compatibilité avec les fonctions existantes maintenue
+- [x] Gestion d'erreurs robuste pour les opérations batch
