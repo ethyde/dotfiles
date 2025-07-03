@@ -78,7 +78,7 @@ Implémenter rapidement une modification mineure (ex: correction de faute de fra
 
 1.  **[PROCEDURE] Phase 1 : Initialisation par le Human\_Developer**
       - **Action Requise :**  Créer un fichier `FAST-[ID]-TODO.md` dans `/docs/backlog/17-fast-track/`.
-      - **⚡ Automatisation `aklo` :** `aklo new fast-track "<Titre de la tâche>"`
+      - **⚡ Automatisation `aklo` :** `aklo fast "<Titre de la tâche>"`
       - Remplir la section "Description du Besoin".
       - Créer une branche de travail (ex: `fast/fix-typo-homepage`).
 

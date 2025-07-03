@@ -73,7 +73,7 @@ Identifier les frictions dans les processus de travail, proposer des améliorati
 
       - Le `Human_Developer` ou l'`AI_Agent` identifie une friction dans les opérations quotidiennes.
       - **Action Requise :**  Créer un fichier `IMPROVE-[ID]-PROPOSED.md` dans `/docs/backlog/18-improvements/`.
-      - **⚡ Automatisation `aklo` :** `aklo new meta-improvement "<Titre de l'amélioration>"`
+      - **⚡ Automatisation `aklo` :** `aklo meta "<Titre de l'amélioration>"`
       - Remplir les sections "Diagnostic" et "Proposition de Solution".
 
 2.  **[ATTENTE\_VALIDATION] Phase 2 : Validation**

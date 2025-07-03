@@ -68,7 +68,7 @@ Mener une analyse de sécurité systématique pour identifier les failles potent
 
 1.  **[PROCEDURE] Phase 1 : Scan Automatisé**
       - **Action Requise :** Créer un fichier `AUDIT-SECURITY-[DATE]-SCANNING.md` dans `/docs/backlog/11-security/`.
-      - **⚡ Automatisation `aklo` :** `aklo new security-audit`
+      - **⚡ Automatisation `aklo` :** `aklo security`
       - Exécuter les outils d'analyse de sécurité automatisés (ex: `npm audit`, `Snyk`, scanners de code statique).
       - Compiler les résultats bruts dans le rapport.
 

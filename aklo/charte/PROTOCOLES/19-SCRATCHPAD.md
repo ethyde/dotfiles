@@ -86,7 +86,7 @@ Un `Scratchpad` est libre par nature. La structure suivante est une suggestion, 
 1.  **[PROCEDURE] Phase 1 : Initialisation**
       - Lorsqu'une `Task` ou une réflexion dans le [JOURNAL] s'avère complexe
       - **Action Requise :** Créer un nouveau fichier `SCRATCHPAD-[ID]-ACTIVE.md` dans `/docs/backlog/16-scratchpads/`.
-      - **⚡ Automatisation `aklo` :** `aklo new scratchpad "<Titre de la dépréciation>"`
+      - **⚡ Automatisation `aklo` :** `aklo scratch "<Titre de la dépréciation>"`
       - Créer une entrée dans le [JOURNAL] pour indiquer le début de l'exploration et lier le `Scratchpad`.
       - Remplir l'en-tête du `Scratchpad` et la section "Problème à Résoudre".
 

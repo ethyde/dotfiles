@@ -89,7 +89,7 @@ Avant tout diagnostic de bug, l'agent **doit** présenter un plan détaillé :
 - Possibles fichiers de correction selon diagnostic
 
 **Commandes système :**
-- `aklo new debug "<Titre>"` : automatisation création rapport (optionnel)
+- `aklo debug "<Titre>"` : automatisation création rapport (optionnel)
 - Exécution de tests pour reproduction du bug
 - Ajout de logs temporaires pour investigation
 - Exécution d'outils de debugging selon stack technique
@@ -104,7 +104,7 @@ Avant tout diagnostic de bug, l'agent **doit** présenter un plan détaillé :
 
 1. **[PROCEDURE] Phase 1 : Initialisation**
       - **Action Requise :** Créer un nouveau fichier `DEBUG-[ID]-INVESTIGATING.md` dans `/docs/backlog/04-debug/`.
-      - **⚡ Automatisation `aklo` :** `aklo new debug "<Titre du problème>"`
+      - **⚡ Automatisation `aklo` :** `aklo debug "<Titre du problème>"`
       - Remplir les sections "1. Description du Problème et Étapes de Reproduction" et "2. Hypothèses Initiales".
 
 2. **[PROCEDURE] Phase 2 : Diagnostic Itératif**

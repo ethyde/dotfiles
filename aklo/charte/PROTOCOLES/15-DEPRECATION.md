@@ -73,7 +73,7 @@ Planifier et exécuter le retrait d'une fonctionnalité de manière sécurisée 
 
 1.  **[ANALYSE] Phase 1 : Analyse et Planification**
       - **Action Requise :** Créer un nouveau fichier `DEPRECATION-[ID]-ANALYSIS.md` dans `/docs/backlog/12-deprecations/`.
-      - **⚡ Automatisation `aklo` :** `aklo new deprecation "<Titre de la dépréciation>"`
+      - **⚡ Automatisation `aklo` :** `aklo deprecate "<Titre de la dépréciation>"`
       - Remplir les sections "Justification" et "Analyse d'Impact".
       - Proposer un "Plan d'Action Technique" et un "Plan de Communication".
       - [ATTENTE\_VALIDATION] Soumettre le plan complet pour validation au `Human_Developer`.

@@ -72,7 +72,7 @@ Assurer que la documentation destinée aux utilisateurs finaux est claire, préc
 1.  **[ANALYSE] Phase 1 : Identification du Besoin**
       - Lors de la phase de [PLANIFICATION] d'un `PBI` ou de [RELEASE], identifier si une documentation utilisateur est nécessaire.
       - **Action Requise :** Créer un fichier `USER-DOCS-[ID]-DRAFT.md`, où [ID] est celui du PBI ou de la Release concernée, dans `/docs/backlog/14-user-docs/`.
-      - **⚡ Automatisation `aklo` :** `aklo new user-docs <ID_du_PBI_ou_Release>`
+      - **⚡ Automatisation `aklo` :** `aklo docs <ID_du_PBI_ou_Release>`
       - Remplir l'en-tête et la section "Objectif de la Documentation".
 
 2.  **[PROCEDURE] Phase 2 : Rédaction du Contenu**
