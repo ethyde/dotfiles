@@ -40,10 +40,17 @@ Voici le grimoire complet des commandes disponibles.
 
 | Commande | Arguments | Description |
 | :--- | :--- | :--- |
-| `aklo status` | `[--brief\|--detailed\|--json]` | **Tableau de bord du projet** avec état des PBI, tâches et configuration. |
+| `aklo status` | `[--brief\|--detailed\|--json]` | **Tableau de bord du projet** avec état des PBI, tâches et configuration. Inclut métriques de performance et monitoring. |
 | `aklo get_config` | `[<clé>] [--all]` | **Affiche la configuration** effective (debugging, scripts, validation). |
-| `aklo config` | `<clé>` | **Alias court** pour get_config avec une clé spécifique. |
+| `aklo config` | `tune\|profile\|diagnose\|validate` | **Configuration de performance.** Auto-tuning, profils d'environnement, diagnostic mémoire. |
 | `aklo validate` | `[path]` | **Validation du projet** (linter, tests, build selon configuration). |
+
+### Commandes Cache et Performance
+
+| Commande | Arguments | Description |
+| :--- | :--- | :--- |
+| `aklo cache` | `status\|clear\|benchmark\|dashboard` | **Gestion du cache intelligent.** Statistiques, nettoyage, tests de performance, dashboard I/O. |
+| `aklo monitor` | `dashboard\|memory\|performance\|cleanup` | **Monitoring et métriques.** Dashboard I/O temps réel, diagnostic mémoire, vue complète. |
 
 ### Commandes de Workflow Principal
 
@@ -134,6 +141,30 @@ Voici le grimoire complet des commandes disponibles.
     aklo refactor "Simplification de l'architecture auth"
     ```
 
+7.  **Monitoring et Performance :**
+    ```bash
+    # Dashboard I/O en temps réel
+    aklo monitor dashboard
+    
+    # Diagnostic mémoire et caches
+    aklo monitor memory
+    
+    # Vue complète performance
+    aklo monitor performance
+    
+    # Configuration auto-tuning
+    aklo config tune
+    
+    # Appliquer profil production
+    aklo config profile prod
+    
+    # Statistiques cache
+    aklo cache status
+    
+    # Tests de performance cache
+    aklo cache benchmark
+    ```
+
 ## 5. Configuration (`.aklo.conf`)
 
 L'outil `aklo` est configurable pour s'adapter aux conventions de chaque projet. La configuration est gérée par un système à deux niveaux.
@@ -157,11 +188,14 @@ Pour un projet qui utilise `main` comme branche principale, votre fichier `.aklo
 MAIN_BRANCH=main
 ```
 
-### c) Clé de Configuration Essentielle (AJOUTÉ)
+### c) Clés de Configuration Essentielles
 
-Il y a une clé de configuration qui est particulièrement importante pour le bon fonctionnement de l'IA :
+Il y a plusieurs clés de configuration importantes pour le bon fonctionnement :
 
   * **`PROJECT_WORKDIR`** : Définit le chemin absolu vers la racine du projet. L'IA lit cette clé au début de chaque session pour savoir où elle travaille.
+  * **`cache_enabled`** : Active/désactive le système de cache intelligent (défaut: true).
+  * **`cache_max_size_mb`** : Taille maximale du cache en MB (défaut: configurable selon environnement).
+  * **`auto_tune_enabled`** : Active l'auto-tuning des performances selon l'environnement (défaut: true).
 
 Il est **fortement recommandé** de définir cette clé dans un fichier `.aklo.conf` local à la racine de chaque projet sur lequel vous travaillez.
 
@@ -170,11 +204,21 @@ Il est **fortement recommandé** de définir cette clé dans un fichier `.aklo.c
 ```sh
 # Fichier : /chemin/vers/mon/projet/.aklo.conf
 
-# On surcharge la branche principale pour ce projet spécifique.
+# Configuration Git
 MAIN_BRANCH=main
-
-# On définit le contexte de travail pour l'IA.
 PROJECT_WORKDIR=/chemin/vers/mon/projet
+
+# Configuration Cache et Performance
+[cache]
+enabled=true
+cache_dir=.aklo/cache
+ttl_days=7
+
+[performance]
+cache_max_size_mb=100
+auto_tune_enabled=true
+environment=auto
+monitoring_level=normal
 ```
 
 Lorsque vous lancerez `aklo start-task` dans ce projet, il utilisera `main` comme branche de base, sans affecter vos autres projets. N'oubliez pas d'ajouter `.aklo.conf` à votre `.gitignore` si vous ne souhaitez pas versionner cette configuration spécifique au projet.
