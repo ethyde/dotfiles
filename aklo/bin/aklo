@@ -24,6 +24,9 @@ source "${script_dir}/aklo_regex_cache.sh" 2>/dev/null || echo "⚠️  Cache re
 # Source des fonctions d'optimisation I/O par batch (TASK-7-2)
 source "${script_dir}/aklo_batch_io.sh" 2>/dev/null || echo "⚠️  Fonctions batch I/O non disponibles - fallback uniquement" >&2
 
+# Source du cache des IDs (TASK-7-3)
+source "${script_dir}/aklo_id_cache.sh" 2>/dev/null || echo "⚠️  Cache des IDs non disponible - fallback uniquement" >&2
+
 # Initialisation du cache regex au démarrage
 if command -v init_regex_cache >/dev/null 2>&1; then
     init_regex_cache
@@ -32,6 +35,11 @@ fi
 # Initialisation des métriques I/O
 if command -v reset_io_metrics >/dev/null 2>&1; then
     reset_io_metrics
+fi
+
+# Initialisation des métriques de cache des IDs
+if command -v reset_id_cache_metrics >/dev/null 2>&1; then
+    reset_id_cache_metrics
 fi
 
 #==============================================================================
@@ -535,12 +543,24 @@ detect_id_pattern() {
 #==============================================================================
 
 # Réutilisation des fonctions existantes
+# TASK-7-3: Version optimisée avec cache intelligent
 get_next_id() {
-  SEARCH_PATH="$1"
-  PREFIX="$2"
-  LAST_ID=$(ls "${SEARCH_PATH}/${PREFIX}"*-*.md 2>/dev/null | sed -n "s/.*${PREFIX}\([0-9]*\)-.*/\1/p" | sort -n | tail -1 || echo 0)
-  NEXT_ID=$((LAST_ID + 1))
-  echo "$NEXT_ID"
+  local search_path="$1"
+  local prefix="$2"
+  
+  # Utiliser la version cachée si disponible, sinon fallback vers l'ancienne
+  if command -v get_next_id_cached >/dev/null 2>&1; then
+    get_next_id_cached "$search_path" "$prefix"
+  else
+    # Fallback vers l'ancienne implémentation
+    local last_id
+    last_id=$(ls "${search_path}/${prefix}"*-*.md 2>/dev/null | sed -n "s/.*${prefix}-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
+    if [ -z "$last_id" ]; then
+      last_id=0
+    fi
+    local next_id=$((last_id + 1))
+    echo "$next_id"
+  fi
 }
 
 get_config() {
