@@ -25,8 +25,8 @@ IO_DASHBOARD_ENABLED=true
 EOF
     
     # Source du module de monitoring (sera créé)
-    if [[ -f "$(dirname "$0")/../bin/aklo_io_monitoring.sh" ]]; then
-        source "$(dirname "$0")/../bin/aklo_io_monitoring.sh"
+    if [[ -f "$(dirname "$0")/../modules/io/io_monitoring.sh" ]]; then
+        source "$(dirname "$0")/../modules/io/io_monitoring.sh"
     fi
     
     export AKLO_TEST_MODE=1

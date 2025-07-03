@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Source des fonctions
-source "../bin/aklo_cache_functions.sh"
+source "../modules/cache/cache_functions.sh"
 
 # Setup
 setup_test() {

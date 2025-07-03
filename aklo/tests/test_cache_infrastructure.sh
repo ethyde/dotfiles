@@ -18,7 +18,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Source des fonctions à tester (sera créé dans la phase GREEN)
-source "../bin/aklo_cache_functions.sh" 2>/dev/null || echo "⚠️  Fonctions cache non trouvées (normal en phase RED)"
+source "../modules/cache/cache_functions.sh" 2>/dev/null || echo "⚠️  Fonctions cache non trouvées (normal en phase RED)"
 
 # Fonction de setup
 setup_test_env() {

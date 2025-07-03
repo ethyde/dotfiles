@@ -35,8 +35,8 @@ monitoring_level=normal
 EOF
     
     # Source du module de tuning (sera créé)
-    if [[ -f "$(dirname "$0")/../bin/aklo_performance_tuning.sh" ]]; then
-        source "$(dirname "$0")/../bin/aklo_performance_tuning.sh"
+    if [[ -f "$(dirname "$0")/../modules/performance/performance_tuning.sh" ]]; then
+        source "$(dirname "$0")/../modules/performance/performance_tuning.sh"
     fi
     
     export AKLO_TEST_MODE=1

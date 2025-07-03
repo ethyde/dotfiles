@@ -18,10 +18,10 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Source des fonctions de cache (TASK-6-1)
-source "../bin/aklo_cache_functions.sh"
+source "../modules/cache/cache_functions.sh"
 
 # Source des fonctions d'extraction (sera créé dans cette task)
-source "../bin/aklo_extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non trouvées (normal en phase RED)"
+source "../modules/io/extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non trouvées (normal en phase RED)"
 
 # Fonction de setup
 setup_test_env() {

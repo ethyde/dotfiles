@@ -12,26 +12,21 @@
 # Configuration de base du Shell
 set -e
 
-# Source des fonctions de cache (TASK-6-3 et TASK-6-4)
+# Configuration de base - Chemins des modules
 script_dir="$(dirname "$0")"
-source "${script_dir}/aklo_cache_functions.sh" 2>/dev/null || echo "⚠️  Fonctions cache non disponibles - fallback uniquement" >&2
-source "${script_dir}/aklo_extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non disponibles - fallback uniquement" >&2
-source "${script_dir}/aklo_cache_monitoring.sh" 2>/dev/null || echo "⚠️  Fonctions monitoring cache non disponibles" >&2
+modules_dir="${script_dir}/../modules"
 
-# Source du cache regex (TASK-7-1)
-source "${script_dir}/aklo_regex_cache.sh" 2>/dev/null || echo "⚠️  Cache regex non disponible - fallback uniquement" >&2
+# Source des modules cache (TASK-6-3, TASK-6-4, TASK-7-1, TASK-7-2, TASK-7-3)
+source "${modules_dir}/cache/cache_functions.sh" 2>/dev/null || echo "⚠️  Fonctions cache non disponibles - fallback uniquement" >&2
+source "${modules_dir}/io/extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non disponibles - fallback uniquement" >&2
+source "${modules_dir}/cache/cache_monitoring.sh" 2>/dev/null || echo "⚠️  Fonctions monitoring cache non disponibles" >&2
+source "${modules_dir}/cache/regex_cache.sh" 2>/dev/null || echo "⚠️  Cache regex non disponible - fallback uniquement" >&2
+source "${modules_dir}/cache/batch_io.sh" 2>/dev/null || echo "⚠️  Fonctions batch I/O non disponibles - fallback uniquement" >&2
+source "${modules_dir}/cache/id_cache.sh" 2>/dev/null || echo "⚠️  Cache des IDs non disponible - fallback uniquement" >&2
 
-# Source des fonctions d'optimisation I/O par batch (TASK-7-2)
-source "${script_dir}/aklo_batch_io.sh" 2>/dev/null || echo "⚠️  Fonctions batch I/O non disponibles - fallback uniquement" >&2
-
-# Source du cache des IDs (TASK-7-3)
-source "${script_dir}/aklo_id_cache.sh" 2>/dev/null || echo "⚠️  Cache des IDs non disponible - fallback uniquement" >&2
-
-# Source du système de monitoring I/O (TASK-7-4)
-source "${script_dir}/aklo_io_monitoring.sh" 2>/dev/null || echo "⚠️  Monitoring I/O non disponible" >&2
-
-# Source du système de tuning de performance (TASK-7-5)
-source "${script_dir}/aklo_performance_tuning.sh" 2>/dev/null || echo "⚠️  Tuning de performance non disponible" >&2
+# Source des modules I/O et performance (TASK-7-4, TASK-7-5)
+source "${modules_dir}/io/io_monitoring.sh" 2>/dev/null || echo "⚠️  Monitoring I/O non disponible" >&2
+source "${modules_dir}/performance/performance_tuning.sh" 2>/dev/null || echo "⚠️  Tuning de performance non disponible" >&2
 
 # Initialisation du cache regex au démarrage
 if command -v init_regex_cache >/dev/null 2>&1; then
