@@ -12,7 +12,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Source des fonctions
-source "../bin/aklo_extract_functions.sh"
+source "../modules/io/extract_functions.sh"
 
 echo -e "${BLUE}🧪 Tests simples - Extract and Cache${NC}"
 echo "======================================================================="

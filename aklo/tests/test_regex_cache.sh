@@ -9,7 +9,7 @@
 #==============================================================================
 
 # Chargement du système de cache
-source "$(dirname "$0")/../bin/aklo_regex_cache.sh"
+source "$(dirname "$0")/../modules/cache/regex_cache.sh"
 
 # Variables de test
 TEST_COUNT=0

@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Source des fonctions avec cache
-source "../bin/aklo_parser_cached.sh"
+source "../modules/parser/parser_cached.sh"
 
 # Fonction pour simuler apply_intelligent_filtering (nécessaire pour les tests)
 apply_intelligent_filtering() {

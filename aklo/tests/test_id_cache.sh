@@ -5,8 +5,8 @@
 
 # Source des fonctions à tester
 script_dir="$(dirname "$0")"
-source "${script_dir}/../bin/aklo_cache_functions.sh"
-source "${script_dir}/../bin/aklo_id_cache.sh"
+source "${script_dir}/../modules/cache/cache_functions.sh"
+source "${script_dir}/../modules/cache/id_cache.sh"
 
 # Couleurs pour les tests
 RED='\033[0;31m'

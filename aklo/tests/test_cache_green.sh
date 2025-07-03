@@ -16,7 +16,7 @@ echo "======================================================================="
 cd /Users/eplouvie/Projets/dotfiles
 
 # Source des fonctions de monitoring
-source aklo/bin/aklo_cache_monitoring.sh
+source ak../modules/cache/cache_monitoring.sh
 
 # Test 1: Configuration cache avancée
 echo -e "${BLUE}Test 1: Configuration cache avancée${NC}"

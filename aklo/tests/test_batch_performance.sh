@@ -5,7 +5,7 @@
 
 # Source des fonctions
 script_dir="$(dirname "$0")"
-source "${script_dir}/../bin/aklo_batch_io.sh"
+source "${script_dir}/../modules/cache/batch_io.sh"
 
 # Couleurs pour les tests
 RED='\033[0;31m'

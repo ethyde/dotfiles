@@ -18,8 +18,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Source des fonctions de cache et extraction
-source "../bin/aklo_cache_functions.sh"
-source "../bin/aklo_extract_functions.sh"
+source "../modules/cache/cache_functions.sh"
+source "../modules/io/extract_functions.sh"
 
 # Source de la fonction parser originale (sera modifiée dans cette task)
 source "../bin/aklo" 2>/dev/null || echo "⚠️  Script aklo non sourcé (normal en phase RED)"

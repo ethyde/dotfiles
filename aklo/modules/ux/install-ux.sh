@@ -15,8 +15,8 @@ NC='\033[0m'
 BOLD='\033[1m'
 
 # Configuration
-AKLO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-UX_DIR="$AKLO_DIR/ux-improvements"
+AKLO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+UX_DIR="$AKLO_DIR/modules/ux"
 AKLO_SCRIPT="$AKLO_DIR/bin/aklo"
 
 # Fonction de bannière
