@@ -1637,6 +1637,98 @@ command_config() {
   esac
 }
 
+# Commande: monitor - Monitoring et métriques de performance
+command_monitor() {
+  local action="$1"
+  
+  case "$action" in
+    "dashboard"|"dash")
+      echo "📊 Dashboard I/O Monitoring..."
+      if command -v show_io_dashboard >/dev/null 2>&1; then
+        show_io_dashboard
+      else
+        echo "❌ Dashboard I/O non disponible - module monitoring non chargé" >&2
+        exit 1
+      fi
+      ;;
+    "memory"|"mem")
+      echo "🧠 Diagnostic mémoire..."
+      if command -v get_memory_diagnostics >/dev/null 2>&1; then
+        get_memory_diagnostics
+      else
+        echo "❌ Diagnostic mémoire non disponible" >&2
+        exit 1
+      fi
+      ;;
+    "performance"|"perf")
+      echo "⚡ Métriques de performance..."
+      # Combinaison dashboard + mémoire
+      if command -v show_io_dashboard >/dev/null 2>&1 && command -v get_memory_diagnostics >/dev/null 2>&1; then
+        echo ""
+        echo "═══ I/O MONITORING ═══"
+        show_io_dashboard
+        echo ""
+        echo "═══ MEMORY DIAGNOSTICS ═══"
+        get_memory_diagnostics
+      else
+        echo "❌ Modules de monitoring non disponibles" >&2
+        exit 1
+      fi
+      ;;
+    "cleanup")
+      echo "🧹 Nettoyage des métriques anciennes..."
+      if command -v cleanup_old_metrics >/dev/null 2>&1; then
+        cleanup_old_metrics
+        echo "✅ Nettoyage terminé"
+      else
+        echo "❌ Fonction de nettoyage non disponible" >&2
+        exit 1
+      fi
+      ;;
+    "reset")
+      echo "🔄 Reset complet du monitoring..."
+      local monitoring_dir="${AKLO_CACHE_DIR:-$HOME/.aklo/cache}/monitoring"
+      if [ -d "$monitoring_dir" ]; then
+        rm -rf "$monitoring_dir"
+        echo "✅ Monitoring reset"
+        if command -v start_io_monitoring >/dev/null 2>&1; then
+          start_io_monitoring
+          echo "✅ Monitoring redémarré"
+        fi
+      else
+        echo "⚠️  Aucun monitoring à reset"
+      fi
+      ;;
+    "--help"|"help"|"")
+      echo "Usage: aklo monitor <action>"
+      echo ""
+      echo "Monitoring et métriques de performance du système aklo."
+      echo ""
+      echo "Actions:"
+      echo "  dashboard     Dashboard I/O en temps réel"
+      echo "  memory        Diagnostic mémoire et caches"
+      echo "  performance   Vue complète (I/O + mémoire)"
+      echo "  cleanup       Nettoyer les métriques anciennes"
+      echo "  reset         Reset complet du monitoring"
+      echo ""
+      echo "Alias:"
+      echo "  dash, mem, perf peuvent être utilisés"
+      echo ""
+      echo "Exemples:"
+      echo "  aklo monitor dashboard    # Dashboard I/O"
+      echo "  aklo monitor mem         # Diagnostic mémoire"
+      echo "  aklo monitor perf        # Vue complète"
+      echo "  aklo monitor cleanup     # Nettoyage"
+      exit 0
+      ;;
+    *)
+      echo "Action inconnue: $action" >&2
+      echo "Utilisez 'aklo monitor --help' pour voir les actions disponibles."
+      exit 1
+      ;;
+  esac
+}
+
 # Commande: template - Gestion des templates
 command_template() {
   local action="$1"
@@ -4910,6 +5002,7 @@ show_help() {
   echo "  mcp setup|restart|watch             Gestion serveurs MCP"
   echo "  cache status|clear|benchmark        Gestion cache intelligent"
   echo "  config tune|profile|diagnose        Configuration performance"
+  echo "  monitor dashboard|memory|perf       Monitoring et métriques"
   echo "  template list|create|apply          Gestion des templates"
   echo "  install-ux                          Installation améliorations UX"
   echo ""
@@ -4996,6 +5089,10 @@ case "${1:-help}" in
   "config")
     shift
     command_config "$@"
+    ;;
+  "monitor")
+    shift
+    command_monitor "$@"
     ;;
   "template")
     shift
