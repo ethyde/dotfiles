@@ -50,11 +50,11 @@ TARGET_TIME="<1.000s"
 
 ## 4. Définition de "Terminé" (Definition of Done)
 
-- [ ] Module `performance_profiles.sh` créé avec 3 profils
-- [ ] Configuration automatique du profil optimal fonctionnelle
-- [ ] Override manuel via `AKLO_PROFILE` implémenté
-- [ ] Validation et métriques de profils intégrées
-- [ ] Configuration `.aklo.conf` étendue pour les profils
-- [ ] Tests unitaires pour chaque profil
-- [ ] Documentation complète des profils et de leur usage
-- [ ] Temps cibles respectés pour chaque profil
+- [x] Module `performance_profiles.sh` créé avec 3 profils
+- [x] Configuration automatique du profil optimal fonctionnelle
+- [x] Override manuel via `AKLO_PROFILE` implémenté
+- [x] Validation et métriques de profils intégrées
+- [x] Configuration `.aklo.conf` étendue pour les profils
+- [x] Tests unitaires pour chaque profil
+- [x] Documentation complète des profils et de leur usage
+- [x] Temps cibles respectés pour chaque profil
