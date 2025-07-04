@@ -8,7 +8,7 @@
 
 # Source des fonctions aklo à tester  
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-AKLO_SCRIPT="$SCRIPT_DIR/../bin/aklo"
+AKLO_SCRIPT="$(cd "$SCRIPT_DIR/../bin" && pwd)/aklo"
 
 # Fonction pour extraire et tester les fonctions utilitaires d'aklo
 # (on simule le sourcing des fonctions)
@@ -68,11 +68,14 @@ test_aklo_init() {
     echo '{"name": "test", "version": "1.0.0"}' > package.json
     git init >/dev/null 2>&1
     
+    TEST_DIR=$(mktemp -d)
+    cd "$TEST_DIR"
+    echo "=== Suite de tests: Commande aklo init ==="
+    echo "Environnement de test: $TEST_DIR"
+
     # Tester aklo init
-    echo "y" | "$AKLO_SCRIPT" init >/dev/null 2>&1
-    exit_code=$?
-    
-    assert_exit_code "0" "echo 'y' | '$AKLO_SCRIPT' init" "aklo init s'exécute sans erreur"
+    assert_exit_code 0 "echo \"y\" | \"$AKLO_SCRIPT\" init" "aklo init s'exécute sans erreur"
+
     assert_file_exists ".aklo.conf" "aklo init crée le fichier .aklo.conf"
     assert_file_exists ".gitignore" "aklo init crée/met à jour .gitignore"
     
