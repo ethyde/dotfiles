@@ -1,0 +1,16 @@
+# Usage Database - Learning Patterns
+# Format: timestamp|command|profile|context|execution_time|success
+# Created: 2025-01-28 19:30:00
+# TASK-13-6: Système d'apprentissage automatique pour nouvelles commandes
+
+# Patterns d'apprentissage initiaux pour démarrage
+2025-01-28 19:30:01|get_config|MINIMAL|cli|0.025|true
+2025-01-28 19:30:02|status|MINIMAL|cli|0.040|true
+2025-01-28 19:30:03|help|MINIMAL|cli|0.020|true
+2025-01-28 19:30:04|version|MINIMAL|cli|0.015|true
+2025-01-28 19:30:05|plan|NORMAL|cli|0.150|true
+2025-01-28 19:30:06|dev|NORMAL|cli|0.180|true
+2025-01-28 19:30:07|debug|NORMAL|cli|0.200|true
+2025-01-28 19:30:08|optimize|FULL|cli|0.800|true
+2025-01-28 19:30:09|benchmark|FULL|cli|0.950|true
+2025-01-28 19:30:10|monitor|FULL|cli|0.750|true
