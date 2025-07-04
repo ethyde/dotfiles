@@ -277,6 +277,46 @@ assert_command_success() {
     fi
 }
 
+# Fonction: assert_function_exists
+# Vérifie qu'une fonction existe
+assert_function_exists() {
+    local function_name="$1"
+    local test_name="$2"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if command -v "$function_name" >/dev/null 2>&1 || declare -f "$function_name" >/dev/null 2>&1; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  Fonction '$function_name' n'existe pas"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_not_empty
+# Vérifie qu'une valeur n'est pas vide
+assert_not_empty() {
+    local value="$1"
+    local test_name="$2"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if [ -n "$value" ]; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  Valeur vide ou non définie"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
 # Fonction: fail
 # Force un échec de test avec un message
 fail() {
