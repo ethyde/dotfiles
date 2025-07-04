@@ -1,7 +1,7 @@
 # PBI-7 : Optimisation des opérations I/O et patterns regex
 
 ---
-**Statut:** AGREED
+**Statut:** DONE
 **Date de création:** 2025-01-27
 **Priorité:** HIGH
 **Effort estimé:** 6 points
