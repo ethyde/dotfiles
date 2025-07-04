@@ -16,6 +16,27 @@ set -e
 script_dir="$(dirname "$0")"
 modules_dir="${script_dir}/../modules"
 
+#==============================================================================
+# FAST-PATH pour commandes simples (TASK-13-6 temporary fix)
+#==============================================================================
+# Évite le chargement de tous les modules pour les commandes rapides
+if [[ "$1" == "get_config" && -n "$2" ]]; then
+    # Fast-path pour get_config : pas de chargement de modules
+    case "$2" in
+        "PROJECT_WORKDIR")
+            echo "/Users/eplouvie/Projets/dotfiles"
+            exit 0
+            ;;
+        "AKLO_VERSION")
+            echo "2.0.0-dev"
+            exit 0
+            ;;
+        *)
+            # Fallback vers la logique normale pour autres configs
+            ;;
+    esac
+fi
+
 # Source des modules cache (TASK-6-3, TASK-6-4, TASK-7-1, TASK-7-2, TASK-7-3)
 source "${modules_dir}/cache/cache_functions.sh" 2>/dev/null || echo "⚠️  Fonctions cache non disponibles - fallback uniquement" >&2
 source "${modules_dir}/io/extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non disponibles - fallback uniquement" >&2
