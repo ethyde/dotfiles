@@ -1,8 +1,9 @@
 # PBI-13 : Architecture lazy loading et profils adaptatifs pour optimisations aklo
 
 ---
-**Statut:** PROPOSED
+**Statut:** IN_PROGRESS
 **Date de création:** 2025-01-28
+**Date de démarrage:** 2025-01-28
 **Priorité:** HIGH
 **Effort estimé:** 13 points
 ---
@@ -24,6 +25,8 @@ _En tant que **développeur utilisant aklo**, je veux **une architecture de char
 - [ ] **Rétrocompatibilité** : Aucune régression sur fonctionnalités existantes
 - [ ] **Validation préalable** : Vérification de tous les modules avant chargement
 - [ ] **Chargement progressif** : Escalation automatique Minimal → Normal → Full selon besoins
+- [ ] **`aklo get_config` opérationnel** : Commande `aklo get_config PROJECT_WORKDIR` fonctionne parfaitement via MCP et CLI sans fast-path temporaire
+- [ ] **Suppression fast-path temporaire** : Le fast-path ajouté dans TASK-13-6 doit être supprimé et remplacé par l'architecture lazy loading native
 
 ## 3. Spécifications Techniques Préliminaires & Contraintes
 
@@ -54,9 +57,13 @@ load_modules_for_command() {
 - Maintenir la compatibilité avec les commandes MCP
 - Gestion gracieuse des dépendances entre modules
 - Fallback robuste en cas d'échec de chargement
+- Supprimer le fast-path temporaire ajouté pour `aklo get_config` dans TASK-13-6
 
 **Problème résolu :**
 Paradoxe identifié où les optimisations de performance (TASK-7-1 à TASK-7-5) ralentissent le système pour les cas d'usage simples à cause du chargement systématique de tous les modules.
+
+**Note importante :**
+Un fast-path temporaire a été ajouté dans `aklo/bin/aklo` lors de TASK-13-6 pour résoudre immédiatement le problème `aklo get_config PROJECT_WORKDIR` via MCP. Ce fast-path doit être supprimé une fois l'architecture lazy loading complètement implémentée dans TASK-13-4.
 
 ## 4. Documents d'Architecture Associés
 
