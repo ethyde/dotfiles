@@ -2,8 +2,8 @@
 
 ---
 **Statut:** IN_PROGRESS
-**Date de création:** 2025-01-28
-**Date de démarrage:** 2025-01-28
+**Date de création:** 2025-07-04
+**Date de démarrage:** 2025-07-04
 **Priorité:** HIGH
 **Effort estimé:** 13 points
 ---
