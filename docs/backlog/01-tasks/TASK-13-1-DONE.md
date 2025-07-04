@@ -56,14 +56,14 @@ Classification automatique avec apprentissage intelligent des nouvelles commande
 
 ## 4. Définition de "Terminé" (Definition of Done)
 
-- [ ] Module `command_classifier.sh` créé et fonctionnel
-- [ ] Module `learning_engine.sh` créé avec apprentissage automatique
-- [ ] Fonction `classify_command()` implémentée avec 4 profils (MINIMAL, NORMAL, FULL, AUTO)
-- [ ] Classification correcte de toutes les commandes aklo existantes
-- [ ] Système d'apprentissage automatique pour nouvelles commandes
-- [ ] Base de données d'apprentissage fonctionnelle
-- [ ] Algorithme de classification automatique opérationnel
-- [ ] Tests unitaires écrits et passent avec succès
-- [ ] Documentation complète des profils et de l'apprentissage automatique
-- [ ] Code respecte les standards bash et les conventions aklo
-- [ ] Aucune régression sur les commandes existantes
+- [x] Module `command_classifier.sh` créé et fonctionnel
+- [x] Module `learning_engine.sh` créé avec apprentissage automatique
+- [x] Fonction `classify_command()` implémentée avec 4 profils (MINIMAL, NORMAL, FULL, AUTO)
+- [x] Classification correcte de toutes les commandes aklo existantes
+- [x] Système d'apprentissage automatique pour nouvelles commandes
+- [x] Base de données d'apprentissage fonctionnelle
+- [x] Algorithme de classification automatique opérationnel
+- [x] Tests unitaires écrits et passent avec succès
+- [x] Documentation complète des profils et de l'apprentissage automatique
+- [x] Code respecte les standards bash et les conventions aklo
+- [x] Aucune régression sur les commandes existantes
