@@ -34,8 +34,8 @@ AKLO_FALLBACK_MODE=false
 get_command_profile() {
     local command="$1"
     case "$command" in
-        "get_config"|"help"|"version"|"cache_stats") echo "MINIMAL" ;;
-        "plan"|"dev"|"debug"|"review"|"propose-pbi"|"arch") echo "NORMAL" ;;
+        "get_config"|"help"|"version") echo "MINIMAL" ;;
+        "cache_stats"|"plan"|"dev"|"debug"|"review"|"propose-pbi"|"arch") echo "NORMAL" ;;
         "optimize"|"monitor"|"benchmark"|"security") echo "FULL" ;;
         *) echo "NORMAL" ;;
     esac
@@ -44,10 +44,18 @@ get_command_profile() {
 # Fonction pour obtenir les modules d'un profil
 get_profile_modules() {
     local profile="$1"
+    local command="$2"
+    
     case "$profile" in
         "MINIMAL") echo "" ;;
-        "NORMAL") echo "cache/cache_functions.sh" ;;
-        "FULL") echo "cache/cache_functions.sh" ;;
+        "NORMAL") 
+            if [[ "$command" == "cache_stats" ]]; then
+                echo "cache/cache_functions.sh,cache/regex_cache.sh"
+            else
+                echo "cache/cache_functions.sh"
+            fi
+            ;;
+        "FULL") echo "cache/cache_functions.sh,cache/regex_cache.sh" ;;
         *) echo "cache/cache_functions.sh" ;;
     esac
 }
@@ -55,7 +63,7 @@ get_profile_modules() {
 # Fonction de chargement intelligent des modules
 load_modules_for_profile() {
     local profile="$1"
-    local modules_list=$(get_profile_modules "$profile")
+    local modules_list=$(get_profile_modules "$profile" "$AKLO_COMMAND")
     
     # Pas de vérification car modules_list peut être vide pour MINIMAL
     
@@ -126,23 +134,42 @@ collect_startup_metrics() {
 }
 
 # EXÉCUTION DE L'ARCHITECTURE INTELLIGENTE
-echo "🚀 Aklo - Architecture intelligente activée" >&2
 
 # 1. Classification de la commande
 AKLO_PROFILE=$(classify_command "$AKLO_COMMAND")
-echo "📊 Commande: $AKLO_COMMAND | Profil: $AKLO_PROFILE" >&2
 
-# 2. Chargement conditionnel des modules
+# 2. Mode de debug conditionnel (silencieux pour MINIMAL)
+AKLO_DEBUG_MODE="${AKLO_DEBUG:-false}"
+if [[ "$AKLO_PROFILE" != "MINIMAL" || "$AKLO_DEBUG_MODE" == "true" ]]; then
+    echo "🚀 Aklo - Architecture intelligente activée" >&2
+    echo "📊 Commande: $AKLO_COMMAND | Profil: $AKLO_PROFILE" >&2
+fi
+
+# 3. Chargement conditionnel des modules
 load_modules_for_profile "$AKLO_PROFILE"
-echo "📦 Modules chargés: ${#AKLO_MODULES_LOADED[@]} (${AKLO_MODULES_LOADED[*]})" >&2
 
-# 3. Initialisation des modules chargés
+if [[ "$AKLO_PROFILE" != "MINIMAL" || "$AKLO_DEBUG_MODE" == "true" ]]; then
+    if [[ ${#AKLO_MODULES_LOADED[@]} -eq 0 ]]; then
+        echo "📦 Profil MINIMAL - aucun module à charger" >&2
+    else
+        echo "📦 Modules chargés: ${#AKLO_MODULES_LOADED[@]} (${AKLO_MODULES_LOADED[*]})" >&2
+    fi
+fi
+
+# 4. Initialisation des modules chargés
 initialize_loaded_modules
 
-# 4. Collecte des métriques de démarrage
-collect_startup_metrics "$AKLO_COMMAND" "$AKLO_PROFILE" "$AKLO_START_TIME"
+# 5. Collecte des métriques de démarrage (uniquement si module disponible)
+if [[ "$AKLO_PROFILE" != "MINIMAL" ]] && command -v collect_startup_metrics >/dev/null 2>&1; then
+    collect_startup_metrics "$AKLO_COMMAND" "$AKLO_PROFILE" "$AKLO_START_TIME"
+fi
 
-echo "✅ Initialisation terminée en $(echo "$(date +%s.%N) - $AKLO_START_TIME" | bc -l 2>/dev/null || echo "0.0")s" >&2
+# Message de fin uniquement pour profils non-MINIMAL ou en mode debug
+if [[ "$AKLO_PROFILE" != "MINIMAL" || "$AKLO_DEBUG_MODE" == "true" ]]; then
+    AKLO_END_TIME=$(date +%s.%N)
+    AKLO_DURATION=$(echo "$AKLO_END_TIME - $AKLO_START_TIME" | bc -l 2>/dev/null || echo "0.0")
+    echo "✅ Initialisation terminée en ${AKLO_DURATION}s" >&2
+fi
 
 #==============================================================================
 # PARSER GÉNÉRIQUE DE PROTOCOLES - SOURCE UNIQUE DE VÉRITÉ

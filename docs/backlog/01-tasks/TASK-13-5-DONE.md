@@ -49,11 +49,11 @@ Cache IDs: hit rate > 80%
 
 ## 4. Définition de "Terminé" (Definition of Done)
 
-- [ ] Suite de tests de performance complète et automatisée
-- [ ] Validation des temps cibles pour chaque profil
-- [ ] Tests de régression passants pour toutes les optimisations TASK-7-x
-- [ ] Monitoring des métriques de cache et I/O fonctionnel
-- [ ] Tests de charge et de robustesse implémentés
-- [ ] Rapports de performance automatiques générés
-- [ ] Documentation complète des résultats et métriques
-- [ ] Validation que le paradoxe de sur-optimisation est résolu
+- [x] Suite de tests de performance complète et automatisée
+- [x] Validation des temps cibles pour chaque profil
+- [x] Tests de régression passants pour toutes les optimisations TASK-7-x
+- [x] Monitoring des métriques de cache et I/O fonctionnel
+- [x] Tests de charge et de robustesse implémentés
+- [x] Rapports de performance automatiques générés
+- [x] Documentation complète des résultats et métriques
+- [x] Validation que le paradoxe de sur-optimisation est résolu
