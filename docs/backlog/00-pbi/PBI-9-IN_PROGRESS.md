@@ -95,8 +95,36 @@ execute_with_timeout() {
 **Complexité** : Moyenne (3-4 jours)
 **Priorité** : Haute (cohérence architecture native-first)
 
+## 5. Tasks Associées
+
+- [ ] **[TASK-9-1](../01-tasks/TASK-9-1-TODO.md)** : Implémentation outil `safe_shell` en shell natif
+  - *Revue Architecturale Requise : OUI*
+  - *Complexité : MOYENNE - Sécurité et validation*
+
+- [ ] **[TASK-9-2](../01-tasks/TASK-9-2-TODO.md)** : Implémentation outil `project_info` avec parsing JSON natif
+  - *Revue Architecturale Requise : OUI*
+  - *Complexité : HAUTE - Parsing JSON critique*
+
+- [ ] **[TASK-9-3](../01-tasks/TASK-9-3-TODO.md)** : Extension outil `aklo_execute` avec validation avancée
+  - *Revue Architecturale Requise : NON*
+  - *Complexité : MOYENNE - Extension fonctionnelle*
+
+- [ ] **[TASK-9-4](../01-tasks/TASK-9-4-TODO.md)** : Extension outil `aklo_status` avec métriques détaillées
+  - *Revue Architecturale Requise : NON*
+  - *Complexité : MOYENNE - Métriques et analyse*
+
+- [ ] **[TASK-9-5](../01-tasks/TASK-9-5-TODO.md)** : Tests d'intégration et validation de performance
+  - *Revue Architecturale Requise : NON*
+  - *Complexité : MOYENNE - Tests et benchmarks*
+
+- [ ] **[TASK-9-6](../01-tasks/TASK-9-6-TODO.md)** : Configuration et documentation de l'architecture hybride
+  - *Revue Architecturale Requise : NON*
+  - *Complexité : FAIBLE - Documentation et configuration*
+
+**Recommandation :** 2 tasks (9-1, 9-2) nécessitent une revue architecturale avant développement.
+
 ---
 
-**Status** : PROPOSED
+**Status** : IN_PROGRESS
 **Created** : 2025-01-28
 **Owner** : Architecture Team

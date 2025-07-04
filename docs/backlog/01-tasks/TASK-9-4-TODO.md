@@ -1,0 +1,110 @@
+# TASK-9-4 : Extension outil `aklo_status` avec métriques détaillées
+
+---
+
+## DO NOT EDIT THIS SECTION MANUALLY
+
+**PBI Parent:** [PBI-9](../00-pbi/PBI-9-PROPOSED.md)
+**Revue Architecturale Requise:** Non
+**Document d'Architecture (si applicable):** [ARCH-9-1.md](../02-architecture/ARCH-9-1.md)
+**Assigné à:** `Non assigné`
+**Branche Git:** `feature/task-9-4`
+
+---
+
+## 1. Objectif Technique
+
+Étendre l'outil `aklo_status_shell` existant pour inclure des métriques détaillées du projet, l'analyse des artefacts et un rapport complet, atteignant la parité avec `aklo_status` du serveur Node.js.
+
+**Fichiers à modifier :**
+- `/aklo/modules/mcp/shell-native/aklo-terminal.sh`
+
+**Résultat attendu :**
+- Statut projet détaillé avec métriques complètes
+- Analyse des artefacts par type et statut
+- Rapport de santé du projet
+- Parité fonctionnelle avec le serveur Node.js
+
+## 2. Contexte et Fichiers Pertinents
+
+### Serveur Node.js de référence
+```javascript
+// aklo/modules/mcp/terminal/index.js - Lignes 56-66
+{
+  name: 'aklo_status',
+  description: 'Affiche le statut actuel du projet Aklo (PBI, Tasks, configuration)',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      workdir: {
+        type: 'string',
+        description: 'Répertoire du projet à analyser',
+      },
+    },
+  },
+}
+```
+
+### Serveur shell natif actuel
+```bash
+# aklo/modules/mcp/shell-native/aklo-terminal.sh - Fonction actuelle
+handle_aklo_status() {
+    # Implémentation basique existante à étendre
+    # Nécessite ajout de métriques détaillées
+}
+```
+
+### Métriques à calculer
+```bash
+# Structure des métriques détaillées
+calculate_project_metrics() {
+    local workdir="$1"
+    
+    # PBI par statut
+    local pbi_proposed=$(ls "$workdir/docs/backlog/00-pbi/"*-PROPOSED.md 2>/dev/null | wc -l)
+    local pbi_done=$(ls "$workdir/docs/backlog/00-pbi/"*-DONE.md 2>/dev/null | wc -l)
+    
+    # Tasks par statut
+    local tasks_todo=$(ls "$workdir/docs/backlog/01-tasks/"*-TODO.md 2>/dev/null | wc -l)
+    local tasks_done=$(ls "$workdir/docs/backlog/01-tasks/"*-DONE.md 2>/dev/null | wc -l)
+    
+    # Configuration aklo
+    local aklo_config="Non configuré"
+    if [ -f "$workdir/.aklo.conf" ]; then
+        aklo_config="Configuré"
+    fi
+    
+    # Dernière activité
+    local last_activity=$(find "$workdir/docs/backlog" -name "*.md" -type f -exec stat -f "%m %N" {} \; 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2- | xargs basename)
+    
+    echo "PBI_PROPOSED:$pbi_proposed"
+    echo "PBI_DONE:$pbi_done"
+    echo "TASKS_TODO:$tasks_todo"
+    echo "TASKS_DONE:$tasks_done"
+    echo "AKLO_CONFIG:$aklo_config"
+    echo "LAST_ACTIVITY:$last_activity"
+}
+```
+
+## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
+
+1. **Analyser la fonction `handle_aklo_status` existante** dans le serveur shell natif
+2. **Implémenter le calcul des métriques** détaillées du projet
+3. **Ajouter l'analyse des artefacts** par type et statut
+4. **Créer un rapport de santé** du projet avec indicateurs
+5. **Améliorer le formatage** de la réponse JSON
+6. **Ajouter la gestion des projets** non initialisés avec aklo
+7. **Tester sur différents types** de projets (avec/sans aklo)
+8. **Valider la parité** avec le serveur Node.js
+
+## 4. Définition de "Terminé" (Definition of Done)
+
+- [ ] Les métriques détaillées du projet sont calculées correctement
+- [ ] L'analyse des artefacts par type et statut fonctionne
+- [ ] Le rapport de santé du projet est informatif et complet
+- [ ] La gestion des projets non initialisés est robuste
+- [ ] Le formatage JSON est propre et structuré
+- [ ] Tests manuels réussis sur projets avec et sans aklo
+- [ ] Parité fonctionnelle atteinte avec le serveur Node.js
+- [ ] Documentation mise à jour dans les commentaires du code
+- [ ] Performance acceptable sur gros projets (>100 artefacts)
