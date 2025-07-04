@@ -2175,8 +2175,10 @@ generate_arch_from_protocol() {
   local assistance_level="$6"
   
   # Extraire le titre du PBI (nettoyer les caractères spéciaux) - TASK-7-1: Cache regex
-  local pbi_pattern
-  pbi_pattern=$(use_regex_pattern "PBI_ID" "PBI-[0-9]*")
+  local pbi_pattern="PBI-[0-9]*"
+  if command -v use_regex_pattern >/dev/null 2>&1; then
+    pbi_pattern=$(use_regex_pattern "PBI_ID" "PBI-[0-9]*")
+  fi
   local pbi_title=$(grep "^# PBI-${pbi_id}" "$pbi_file" 2>/dev/null | sed "s/^# ${pbi_pattern} : //" | tr -d '\n\r' || echo "Architecture pour PBI-${pbi_id}")
   
   # Variables contextuelles pour le parser générique
@@ -4983,7 +4985,10 @@ command_get_config() {
         return 1
       }
       
-      local config_file=$(find_local_config) || config_file="$(dirname "$(realpath "$0")")/../config/.aklo.conf"
+      local config_file=$(find_local_config)
+      if [ -z "$config_file" ]; then
+        config_file="$(dirname "$(realpath "$0")")/../config/.aklo.conf"
+      fi
       echo "📁 Fichier de configuration utilisé: $config_file"
       echo ""
       
@@ -4991,8 +4996,10 @@ command_get_config() {
         echo "📝 Contenu de la configuration:"
         echo "------------------------------"
         # TASK-7-1: Utilisation du cache regex pour les lignes de configuration
-        local config_pattern
-        config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        local config_pattern="^[A-Z_]+=.*"
+        if command -v use_regex_pattern >/dev/null 2>&1; then
+          config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        fi
         cat "$config_file" | grep -E "$config_pattern" | sort
       else
         echo "❌ Fichier de configuration introuvable"
@@ -5015,8 +5022,10 @@ command_get_config() {
       if [ -n "$local_config" ]; then
         echo "📁 Configuration locale: $local_config"
         # TASK-7-1: Utilisation du cache regex pour les lignes de configuration
-        local config_pattern
-        config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        local config_pattern="^[A-Z_]+=.*"
+        if command -v use_regex_pattern >/dev/null 2>&1; then
+          config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        fi
         cat "$local_config" | grep -E "$config_pattern" | sort
       else
         echo "❌ Aucune configuration locale trouvée"
@@ -5027,8 +5036,10 @@ command_get_config() {
       echo "📁 Configuration globale: $global_config"
       if [ -f "$global_config" ]; then
         # TASK-7-1: Utilisation du cache regex pour les lignes de configuration  
-        local config_pattern
-        config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        local config_pattern="^[A-Z_]+=.*"
+        if command -v use_regex_pattern >/dev/null 2>&1; then
+          config_pattern=$(use_regex_pattern "CONFIG_KEY_VALUE" "^[A-Z_]+=.*")
+        fi
         cat "$global_config" | grep -E "$config_pattern" | sort
       else
         echo "❌ Configuration globale introuvable"
