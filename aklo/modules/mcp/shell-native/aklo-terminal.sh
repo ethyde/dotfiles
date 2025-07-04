@@ -1,162 +1,95 @@
-#!/bin/sh
+#!/bin/bash
 #==============================================================================
-# Serveur MCP Terminal Aklo - Version Shell Native
-# Alternative sans dépendance Node.js
+# Aklo Terminal - Serveur de commandes shell sécurisé pour MCP
+#
+# Reçoit des requêtes JSON sur stdin pour exécuter des commandes shell
+# de manière sécurisée et retourne le résultat sur stdout.
 #==============================================================================
 
-# Protocole MCP simplifié en shell
-# Lit les requêtes JSON depuis stdin et retourne des réponses JSON
-
-handle_request() {
-    local request="$1"
-    
-    # Parser basique JSON en shell (limité mais fonctionnel)
-    local method=$(echo "$request" | grep -o '"method":"[^"]*"' | cut -d'"' -f4)
-    local tool_name=$(echo "$request" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
-    
-    case "$method" in
-        "tools/list")
-            cat << 'EOF'
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "tools": [
-      {
-        "name": "aklo_execute_shell",
-        "description": "Execute aklo commands via shell",
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "command": {"type": "string"},
-            "args": {"type": "array", "items": {"type": "string"}}
-          }
-        }
-      },
-      {
-        "name": "aklo_status_shell", 
-        "description": "Get project status via shell",
-        "inputSchema": {"type": "object", "properties": {}}
-      }
-    ]
-  }
+# Fonction pour logger les erreurs et quitter
+log_error() {
+    local message="$1"
+    # Formatte l'erreur en JSON et l'envoie sur stderr
+    jq -n --arg msg "$message" '{"status": "error", "message": $msg}' >&2
+    exit 1
 }
-EOF
-            ;;
-        "tools/call")
-            case "$tool_name" in
-                "aklo_execute_shell")
-                    handle_aklo_execute "$request"
-                    ;;
-                "aklo_status_shell")
-                    handle_aklo_status "$request"
-                    ;;
-                *)
-                    echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"Unknown tool"}}'
-                    ;;
-            esac
+
+# Fonction principale pour exécuter une commande shell sécurisée
+safe_shell() {
+    # Déterminer le chemin du script pour un accès fiable aux fichiers de config
+    local script_dir
+    script_dir=$(cd "$(dirname "$0")" && pwd)
+    local whitelist_file="$script_dir/../../../config/commands.whitelist"
+
+    # Lire l'entrée JSON depuis stdin
+    local input
+    input=$(cat)
+    
+    # Valider que l'entrée n'est pas vide
+    if [ -z "$input" ]; then
+        log_error "Input JSON is empty"
+    fi
+
+    # Parser l'entrée JSON avec jq
+    local command
+    command=$(echo "$input" | jq -r '.command')
+    local workdir
+    workdir=$(echo "$input" | jq -r '.workdir // "."') # Défaut au répertoire courant
+    local timeout_ms
+    timeout_ms=$(echo "$input" | jq -r '.timeout')
+    
+    # Valider les entrées
+    if [ "$command" = "null" ] || [ -z "$command" ]; then
+        log_error "Missing 'command' in input JSON"
+    fi
+
+    # Extraire la commande de base (ex: 'ls' de 'ls -l')
+    local base_cmd
+    base_cmd=$(echo "$command" | awk '{print $1}')
+
+    # Vérifier si la commande est dans la liste autorisée du fichier
+    if [ ! -f "$whitelist_file" ]; then
+        log_error "Whitelist file not found at: $whitelist_file"
+    fi
+
+    if ! grep -Fxq "$base_cmd" "$whitelist_file"; then
+        log_error "Command '$base_cmd' is not in the allowed list."
+    fi
+
+    # Exécuter la commande avec un timeout dans le bon répertoire
+    local stdout stderr exit_code
+    local output
+    
+    # Convertir timeout en secondes pour la commande `timeout`
+    local timeout_sec
+    timeout_sec=$(echo "$timeout_ms / 1000" | bc -l)
+
+    # Exécution dans un sous-shell pour isoler le `cd`
+    output=$( (cd "$workdir" && timeout "$timeout_sec" bash -c "$command") 2> >(stderr=$(cat); echo "$stderr" >&2) )
+    exit_code=$?
+    stdout=$output
+
+    # Formatter la sortie en JSON
+    jq -n \
+      --arg status "success" \
+      --arg stdout "$stdout" \
+      --arg stderr "$stderr" \
+      --argjson exit_code "$exit_code" \
+      '{"status": $status, "stdout": $stdout, "stderr": $stderr, "exit_code": $exit_code}'
+}
+
+# Routeur de commande principal
+main() {
+    local tool_name="$1"
+    case "$tool_name" in
+        "safe_shell")
+            safe_shell
             ;;
         *)
-            echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"Unknown method"}}'
+            log_error "Unknown tool: $tool_name"
             ;;
     esac
 }
 
-handle_aklo_execute() {
-    local request="$1"
-    
-    # Extraire la commande (parsing JSON basique)
-    local command=$(echo "$request" | grep -o '"command":"[^"]*"' | cut -d'"' -f4)
-    
-    if [ -z "$command" ]; then
-        echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"Missing command"}}'
-        return
-    fi
-    
-    # Exécuter la commande aklo
-    local aklo_path="$(dirname "$0")/../../bin/aklo"
-    local output
-    
-    if [ -x "$aklo_path" ]; then
-        output=$("$aklo_path" "$command" 2>&1)
-        local exit_code=$?
-        
-        # Échapper les guillemets et retours à la ligne pour JSON
-        output=$(echo "$output" | sed 's/"/\\"/g' | tr '\n' '\\' | sed 's/\\/\\n/g')
-        
-        cat << EOF
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "Command: aklo $command\\nExit code: $exit_code\\n\\nOutput:\\n$output"
-      }
-    ]
-  }
-}
-EOF
-    else
-        echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32603,"message":"Aklo script not found"}}'
-    fi
-}
-
-handle_aklo_status() {
-    local status="Project Status:\\n"
-    
-    # Vérifier si aklo est initialisé
-    if [ -f ".aklo.conf" ]; then
-        status="${status}✅ Aklo initialized\\n"
-        
-        # Lire la config
-        local workdir=$(grep "PROJECT_WORKDIR=" .aklo.conf | cut -d'=' -f2)
-        status="${status}📁 Workdir: $workdir\\n"
-    else
-        status="${status}❌ Aklo not initialized\\n"
-    fi
-    
-    # Vérifier Git
-    if git rev-parse --git-dir >/dev/null 2>&1; then
-        local branch=$(git branch --show-current 2>/dev/null || echo "unknown")
-        status="${status}🌿 Git branch: $branch\\n"
-    else
-        status="${status}🌿 Git: Not initialized\\n"
-    fi
-    
-    # Compter les PBI
-    if [ -d "docs/backlog/00-pbi" ]; then
-        local pbi_count=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
-        status="${status}📋 PBI count: $pbi_count\\n"
-    else
-        status="${status}📋 PBI: No backlog found\\n"
-    fi
-    
-    cat << EOF
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "$status"
-      }
-    ]
-  }
-}
-EOF
-}
-
-# Boucle principale pour lire les requêtes
-main() {
-    while IFS= read -r line; do
-        if [ -n "$line" ]; then
-            handle_request "$line"
-        fi
-    done
-}
-
-# Démarrer le serveur
-main
+# Exécuter le routeur principal
+main "$@"
