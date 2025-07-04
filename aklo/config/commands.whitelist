@@ -1,0 +1,6 @@
+# Liste des commandes autorisées pour l'outil safe_shell.
+# Une commande par ligne. Seule la commande de base est vérifiée (ex: "ls" pour "ls -l").
+
+ls
+echo
+sleep
