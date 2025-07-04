@@ -1484,7 +1484,7 @@ command_status() {
     *)
       # Déléguer au script spécialisé pour tous les modes
       # Optimisation TASK-7-2: Utiliser batch_check_existence pour vérifier les scripts UX
-      local status_script="$script_dir/../ux-improvements/status-command.sh"
+      local status_script="$script_dir/../modules/ux/status-command.sh"
       if command -v batch_check_existence >/dev/null 2>&1; then
         local check_result=$(batch_check_existence "$status_script")
         if echo "$check_result" | grep -q "exists"; then
@@ -1515,9 +1515,9 @@ command_mcp() {
   
   # Optimisation TASK-7-2: Vérification batch des scripts MCP
   local mcp_scripts=(
-    "$script_dir/../mcp-servers/setup-mcp.sh"
-    "$script_dir/../mcp-servers/restart-mcp.sh"
-    "$script_dir/../mcp-servers/watch-mcp.sh"
+    "$script_dir/../modules/mcp/setup-mcp.sh"
+    "$script_dir/../modules/mcp/restart-mcp.sh"
+    "$script_dir/../modules/mcp/watch-mcp.sh"
   )
   
   local mcp_check_result=""
@@ -1606,8 +1606,8 @@ command_validate() {
       ;;
     *)
       echo "🔍 Validation du projet aklo..."
-      if [ -f "$script_dir/../ux-improvements/validation.sh" ]; then
-        "$script_dir/../ux-improvements/validation.sh" "$target"
+      if [ -f "$script_dir/../modules/ux/validation.sh" ]; then
+        "$script_dir/../modules/ux/validation.sh" "$target"
       else
         echo "Erreur : Script validation.sh introuvable." >&2
         exit 1
@@ -1850,8 +1850,8 @@ command_template() {
   case "$action" in
     "list")
       echo "📋 Templates disponibles..."
-      if [ -f "$script_dir/../ux-improvements/templates.sh" ]; then
-        . "$script_dir/../ux-improvements/templates.sh"
+      if [ -f "$script_dir/../modules/ux/templates.sh" ]; then
+        . "$script_dir/../modules/ux/templates.sh"
         list_templates
       else
         echo "Erreur : Script templates.sh introuvable." >&2
@@ -1861,8 +1861,8 @@ command_template() {
     "create")
       shift
       echo "🆕 Création d'un nouveau template..."
-      if [ -f "$script_dir/../ux-improvements/templates.sh" ]; then
-        . "$script_dir/../ux-improvements/templates.sh"
+      if [ -f "$script_dir/../modules/ux/templates.sh" ]; then
+        . "$script_dir/../modules/ux/templates.sh"
         create_template "$@"
       else
         echo "Erreur : Script templates.sh introuvable." >&2
@@ -1872,8 +1872,8 @@ command_template() {
     "apply")
       shift
       echo "📝 Application d'un template..."
-      if [ -f "$script_dir/../ux-improvements/templates.sh" ]; then
-        . "$script_dir/../ux-improvements/templates.sh"
+      if [ -f "$script_dir/../modules/ux/templates.sh" ]; then
+        . "$script_dir/../modules/ux/templates.sh"
         apply_template "$@"
       else
         echo "Erreur : Script templates.sh introuvable." >&2
@@ -1921,8 +1921,8 @@ command_install_ux() {
       ;;
     *)
       echo "🎨 Installation des améliorations UX..."
-      if [ -f "$script_dir/../ux-improvements/install-ux.sh" ]; then
-        "$script_dir/../ux-improvements/install-ux.sh"
+      if [ -f "$script_dir/../modules/ux/install-ux.sh" ]; then
+        "$script_dir/../modules/ux/install-ux.sh"
       else
         echo "Erreur : Script install-ux.sh introuvable." >&2
         exit 1
