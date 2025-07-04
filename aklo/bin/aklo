@@ -13,7 +13,7 @@
 set -e
 
 # Configuration de base - Chemins des modules
-script_dir="$(dirname "$0")"
+script_dir="$(dirname "$(realpath "$0")")"
 modules_dir="${script_dir}/../modules"
 
 #==============================================================================
@@ -191,7 +191,7 @@ parse_and_generate_artefact() {
   # Lire la configuration cache depuis .aklo.conf
   local config_file=".aklo.conf"
   if [ ! -f "$config_file" ]; then
-    local script_dir="$(dirname "$0")"
+    local script_dir="$(dirname "$(realpath "$0")")"
     config_file="${script_dir}/../config/.aklo.conf"
   fi
   
@@ -218,7 +218,7 @@ parse_and_generate_artefact() {
   
   # Si pas trouvé en relatif, essayer le chemin absolu depuis le script
   if [ ! -f "$protocol_file" ]; then
-    local script_dir="$(dirname "$0")"
+    local script_dir="$(dirname "$(realpath "$0")")"
     protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.md"
   fi
   
@@ -718,7 +718,7 @@ get_next_id() {
 
 get_config() {
   KEY="$1"
-  GLOBAL_CONFIG_FILE="$(dirname "$0")/../config/.aklo.conf"
+  GLOBAL_CONFIG_FILE="$(dirname "$(realpath "$0")")/../config/.aklo.conf"
   
   find_local_config() {
     local current_dir="$(pwd)"
@@ -1467,7 +1467,7 @@ command_scratch() {
 # Commande: status - Tableau de bord complet du projet
 command_status() {
   local mode="${1:-standard}"
-  local script_dir="$(dirname "$0")"
+  local script_dir="$(dirname "$(realpath "$0")")"
   
   case "$mode" in
     "--help")
@@ -1511,7 +1511,7 @@ command_status() {
 # Commande: mcp - Gestion des serveurs MCP
 command_mcp() {
   local action="$1"
-  local script_dir="$(dirname "$0")"
+  local script_dir="$(dirname "$(realpath "$0")")"
   
   # Optimisation TASK-7-2: Vérification batch des scripts MCP
   local mcp_scripts=(
@@ -1586,7 +1586,7 @@ command_mcp() {
 # Commande: validate - Validation de projets et artefacts
 command_validate() {
   local target="${1:-.}"
-  local script_dir="$(dirname "$0")"
+  local script_dir="$(dirname "$(realpath "$0")")"
   
   case "$target" in
     "--help")
@@ -1845,7 +1845,7 @@ command_monitor() {
 # Commande: template - Gestion des templates
 command_template() {
   local action="$1"
-  local script_dir="$(dirname "$0")"
+  local script_dir="$(dirname "$(realpath "$0")")"
   
   case "$action" in
     "list")
@@ -1906,7 +1906,7 @@ command_template() {
 
 # Commande: install-ux - Installation des améliorations UX
 command_install_ux() {
-  local script_dir="$(dirname "$0")"
+  local script_dir="$(dirname "$(realpath "$0")")"
   
   case "${1:-}" in
     "--help")
@@ -4983,7 +4983,7 @@ command_get_config() {
         return 1
       }
       
-      local config_file=$(find_local_config) || config_file="$(dirname "$0")/../config/.aklo.conf"
+      local config_file=$(find_local_config) || config_file="$(dirname "$(realpath "$0")")/../config/.aklo.conf"
       echo "📁 Fichier de configuration utilisé: $config_file"
       echo ""
       
@@ -5023,7 +5023,7 @@ command_get_config() {
       fi
       ;;
     "--global")
-      local global_config="$(dirname "$0")/../config/.aklo.conf"
+      local global_config="$(dirname "$(realpath "$0")")/../config/.aklo.conf"
       echo "📁 Configuration globale: $global_config"
       if [ -f "$global_config" ]; then
         # TASK-7-1: Utilisation du cache regex pour les lignes de configuration  
@@ -5051,7 +5051,7 @@ command_get_config() {
       }
       
       local local_config=$(find_local_config)
-      local global_config="$(dirname "$0")/../config/.aklo.conf"
+      local global_config="$(dirname "$(realpath "$0")")/../config/.aklo.conf"
       
       echo "🏠 Configuration locale:"
       if [ -n "$local_config" ]; then

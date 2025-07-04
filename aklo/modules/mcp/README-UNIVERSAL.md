@@ -65,11 +65,11 @@ Serveurs MCP (Model Context Protocol) pour l'écosystème Aklo avec **support mu
   "mcpServers": {
     "aklo-terminal": {
       "command": "/path/to/node",
-      "args": ["/path/to/aklo/mcp-servers/terminal/index.js"]
+      "args": ["/path/to/aklo/modules/mcp/terminal/index.js"]
     },
     "aklo-documentation": {
       "command": "/path/to/node", 
-      "args": ["/path/to/aklo/mcp-servers/documentation/index.js"]
+      "args": ["/path/to/aklo/modules/mcp/documentation/index.js"]
     }
   }
 }

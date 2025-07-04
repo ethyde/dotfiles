@@ -46,7 +46,7 @@ kill_mcp_processes() {
     log_step "Recherche des processus MCP en cours..."
     
     # Chercher les processus MCP Aklo (Node.js et shell)
-    local mcp_pids=$(ps aux | grep -E "(aklo/mcp-servers|mcp-servers.*aklo)" | grep -v grep | awk '{print $2}' || true)
+    local mcp_pids=$(ps aux | grep -E "(aklo/modules/mcp|modules/mcp.*aklo)" | grep -v grep | awk '{print $2}' || true)
     
     if [ -n "$mcp_pids" ]; then
         log_info "Processus MCP trouvés : $mcp_pids"
@@ -54,7 +54,7 @@ kill_mcp_processes() {
         sleep 2
         
         # Vérifier si des processus résistent
-        local remaining_pids=$(ps aux | grep -E "(aklo/mcp-servers|mcp-servers.*aklo)" | grep -v grep | awk '{print $2}' || true)
+        local remaining_pids=$(ps aux | grep -E "(aklo/modules/mcp|modules/mcp.*aklo)" | grep -v grep | awk '{print $2}' || true)
         if [ -n "$remaining_pids" ]; then
             log_warning "Processus résistants, force kill..."
             echo "$remaining_pids" | xargs kill -KILL 2>/dev/null || true
@@ -99,7 +99,7 @@ wait_for_servers() {
     local wait_count=0
     
     while [ $wait_count -lt $max_wait ]; do
-        local new_pids=$(ps aux | grep -E "(aklo/mcp-servers|mcp-servers.*aklo)" | grep -v grep | awk '{print $2}' || true)
+        local new_pids=$(ps aux | grep -E "(aklo/modules/mcp|modules/mcp.*aklo)" | grep -v grep | awk '{print $2}' || true)
         if [ -n "$new_pids" ]; then
             log_success "Nouveaux serveurs MCP démarrés (PIDs: $new_pids)"
             return 0
@@ -189,9 +189,9 @@ main() {
     
     echo "Ce script redémarre les serveurs MCP après modification du code."
     echo "Utilisation recommandée après chaque modification des fichiers :"
-    echo "  • aklo/mcp-servers/documentation/index.js"
-    echo "  • aklo/mcp-servers/terminal/index.js"
-    echo "  • aklo/mcp-servers/shell-native/*.sh"
+    echo "  • aklo/modules/mcp/documentation/index.js"
+    echo "  • aklo/modules/mcp/terminal/index.js"
+    echo "  • aklo/modules/mcp/shell-native/*.sh"
     echo ""
     
     kill_mcp_processes
@@ -215,9 +215,9 @@ main() {
     # Conseil pour éviter le problème à l'avenir
     echo ""
     echo -e "${YELLOW}💡 Conseil :${NC}"
-    echo "Pour éviter ce problème à l'avenir, utilisez :"
-    echo "  • ${CYAN}./restart-mcp.sh${NC} après chaque modification ponctuelle"
-    echo "  • ${CYAN}./watch-mcp.sh${NC} en mode développement (surveillance automatique)"
+    echo -e "Pour éviter ce problème à l'avenir, utilisez :"
+    echo -e "  • ${CYAN}./restart-mcp.sh${NC} après chaque modification ponctuelle"
+    echo -e "  • ${CYAN}./watch-mcp.sh${NC} en mode développement (surveillance automatique)"
 }
 
 # Vérifier si le script est exécuté directement
