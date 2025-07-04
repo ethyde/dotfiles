@@ -9,6 +9,7 @@
 # (puis modifiez les valeurs selon votre projet)
 #
 # ⚠️  IMPORTANT: Les chemins relatifs sont calculés depuis la racine du projet
+# ⚠️  CONVENTIONS: Voir aklo/config/CONVENTIONS.md pour les règles de nommage
 # ===============================================================================
 
 #===============================================================================
@@ -43,75 +44,75 @@ USE_RELEASE_BRANCHES=false
 
 # Format des branches de release (utilisé si USE_RELEASE_BRANCHES=true)
 # %s sera remplacé par le numéro de version (ex: release/1.2.3)
-RELEASE_BRANCH_FORMAT=release/%s
+RELEASE_BRANCH_FORMAT="release/%s"
 
 # Format des tags Git pour les versions
 # %s sera remplacé par le numéro de version (ex: v1.2.3)
-GIT_TAG_FORMAT=v%s
+GIT_TAG_FORMAT="v%s"
 
 #===============================================================================
 # 📁 STRUCTURE D'ARTEFACTS - RÉPERTOIRES DE TRAVAIL
 #===============================================================================
 
 # Répertoire racine du projet (chemin absolu recommandé)
-PROJECT_WORKDIR=/path/to/your/project
+PROJECT_WORKDIR="/path/to/your/project"
 
 # 📋 Product Backlog Items - Fonctionnalités et user stories
-PBI_DIR=docs/backlog/00-pbi
+PBI_DIR="docs/backlog/00-pbi"
 
 # 📝 Tasks - Tâches techniques décomposées depuis les PBI
-TASKS_DIR=docs/backlog/01-tasks
+TASKS_DIR="docs/backlog/01-tasks"
 
 # 🏗️ Architecture - Documents de conception technique
-ARCH_DIR=docs/backlog/02-architecture
+ARCH_DIR="docs/backlog/02-architecture"
 
 # 🐛 Debug - Rapports de bugs et corrections
-DEBUG_DIR=docs/backlog/03-debug
+DEBUG_DIR="docs/backlog/03-debug"
 
 # 👀 Reviews - Revues de code et analyses
-REVIEWS_DIR=docs/backlog/03-reviews
+REVIEWS_DIR="docs/backlog/03-reviews"
 
 # ♻️ Refactoring - Améliorations de code sans changement fonctionnel
-REFACTOR_DIR=docs/backlog/05-refactor
+REFACTOR_DIR="docs/backlog/05-refactor"
 
 # ⚡ Optimisation - Améliorations de performance
-OPTIM_DIR=docs/backlog/06-optim
+OPTIM_DIR="docs/backlog/06-optim"
 
 # 🚀 Releases - Gestion des versions et déploiements
-RELEASES_DIR=docs/backlog/07-releases
+RELEASES_DIR="docs/backlog/07-releases"
 
 # 🚨 Hotfixes - Corrections d'urgence en production
-HOTFIX_DIR=docs/backlog/08-hotfixes
+HOTFIX_DIR="docs/backlog/08-hotfixes"
 
 # 🧪 Expérimentations - Tests A/B et hypothèses
-EXPERIMENTS_DIR=docs/backlog/09-experiments
+EXPERIMENTS_DIR="docs/backlog/09-experiments"
 
 # 📊 Analyse concurrentielle - Études de marché et benchmarks
-COMPETITION_DIR=docs/backlog/10-competition
+COMPETITION_DIR="docs/backlog/10-competition"
 
 # 🔐 Sécurité - Audits et corrections de sécurité
-SECURITY_DIR=docs/backlog/11-security
+SECURITY_DIR="docs/backlog/11-security"
 
 # ⚠️ Dépréciations - Suppression progressive de fonctionnalités
-DEPRECATION_DIR=docs/backlog/12-deprecations
+DEPRECATION_DIR="docs/backlog/12-deprecations"
 
 # 📈 Tracking - Plans de suivi et analytics
-TRACKING_DIR=docs/backlog/13-tracking
+TRACKING_DIR="docs/backlog/13-tracking"
 
 # 📖 Documentation utilisateur - Guides et tutoriels
-USER_DOCS_DIR=docs/backlog/14-user-docs
+USER_DOCS_DIR="docs/backlog/14-user-docs"
 
 # 📓 Journal - Entrées quotidiennes de travail
-JOURNAL_DIR=docs/backlog/15-journal
+JOURNAL_DIR="docs/backlog/15-journal"
 
 # 📝 Scratchpads - Brouillons et réflexions temporaires
-SCRATCHPAD_DIR=docs/backlog/16-scratchpads
+SCRATCHPAD_DIR="docs/backlog/16-scratchpads"
 
 # ⚡ Fast-track - Procédures accélérées pour petits changements
-FAST_DIR=docs/backlog/17-fast-track
+FAST_DIR="docs/backlog/17-fast-track"
 
 # 🔄 Meta-improvements - Améliorations de la charte et processus
-META_DIR=docs/backlog/18-improvements
+META_DIR="docs/backlog/18-improvements"
 
 #===============================================================================
 # 📚 FICHIERS SPÉCIAUX ET DOCUMENTATION PROJET
@@ -119,11 +120,11 @@ META_DIR=docs/backlog/18-improvements
 
 # Base de connaissances centralisée (fichier unique)
 # Contient les apprentissages et solutions réutilisables
-KB_FILE=docs/KNOWLEDGE-BASE.md
+KB_FILE="docs/KNOWLEDGE-BASE.md"
 
 # Répertoire pour la documentation d'onboarding
 # Contient les guides d'accueil pour nouveaux développeurs
-ONBOARDING_DIR=docs/project
+ONBOARDING_DIR="docs/project"
 
 #===============================================================================
 # ✅ VALIDATION ET QUALITÉ
@@ -146,15 +147,55 @@ VALIDATE_BUILD=true
 
 # Commande pour exécuter le linter (adaptez selon votre stack)
 # Exemples: "npm run lint", "flake8 .", "golangci-lint run"
-LINTER_COMMAND=npm run lint
+LINTER_COMMAND="npm run lint"
 
 # Commande pour exécuter les tests (adaptez selon votre stack)
 # Exemples: "npm test", "pytest", "go test ./..."
-TEST_COMMAND=npm test
+TEST_COMMAND="npm test"
 
 # Commande pour builder le projet (adaptez selon votre stack)
 # Exemples: "npm run build", "make build", "go build"
-BUILD_COMMAND=npm run build
+BUILD_COMMAND="npm run build"
+
+#===============================================================================
+# 🚀 PERFORMANCE ET CACHE (TASK-6-3, TASK-6-4, TASK-13-3)
+#===============================================================================
+
+# Configuration cache intelligent
+CACHE_ENABLED=true
+CACHE_DEBUG=false
+
+# Configuration cache avancée
+[cache]
+enabled=true
+cache_dir="/tmp/aklo_cache"
+max_size_mb=100
+ttl_days=7
+cleanup_on_start=true
+
+# Configuration des profils de performance (TASK-13-3)
+[performance_profiles]
+default_profile="NORMAL"
+auto_detection=true
+override_enabled=true
+
+# Profil MINIMAL: Commandes de configuration rapides
+[profile.minimal]
+modules="core/basic_functions"
+target_time="0.050"
+description="Commandes de configuration rapides"
+
+# Profil NORMAL: Commandes de développement standard
+[profile.normal]
+modules="core/basic_functions cache/regex_cache cache/id_cache"
+target_time="0.200"
+description="Commandes de développement standard"
+
+# Profil FULL: Commandes d'optimisation et monitoring
+[profile.full]
+modules="all_modules"
+target_time="1.000"
+description="Commandes d'optimisation et monitoring"
 
 #===============================================================================
 # 🔌 SERVEURS MCP ET INTÉGRATIONS
@@ -167,11 +208,11 @@ USE_MCP_SERVERS=true
 
 # Serveur MCP pour les commandes terminal et système
 # Permet l'exécution sécurisée de commandes et la gestion de fichiers
-MCP_TERMINAL_SERVER=@aklo/mcp-terminal
+MCP_TERMINAL_SERVER="@aklo/mcp-terminal"
 
 # Serveur MCP pour la documentation et les protocoles
 # Permet l'accès aux protocoles Aklo et la génération de contenu
-MCP_DOCUMENTATION_SERVER=@aklo/mcp-documentation
+MCP_DOCUMENTATION_SERVER="@aklo/mcp-documentation"
 
 # Timeout pour les opérations MCP (en millisecondes)
 # Augmentez si vos opérations sont lentes ou complexes
@@ -226,5 +267,38 @@ AUTO_BACKUP=true
 # - Séparation claire entre types d'artefacts
 #
 # Vous pouvez adapter cette structure selon vos besoins !
+#
+# 🚀 PROFILS DE PERFORMANCE (TASK-13-3) :
+#
+# • MINIMAL (0.050s)
+#   - Commandes rapides : config, status, help
+#   - Modules essentiels uniquement
+#   - Idéal pour les opérations fréquentes
+#
+# • NORMAL (0.200s) - Profil par défaut
+#   - Commandes de développement standard
+#   - Cache intelligent activé
+#   - Équilibre performance/fonctionnalités
+#
+# • FULL (1.000s)
+#   - Toutes les fonctionnalités disponibles
+#   - Monitoring et optimisation complets
+#   - Utilisé pour les tâches complexes
+#
+# 🔧 OVERRIDE MANUEL :
+#
+# Vous pouvez forcer un profil avec :
+# export AKLO_PROFILE=MINIMAL
+# export AKLO_PROFILE=NORMAL
+# export AKLO_PROFILE=FULL
+#
+# 📊 CONVENTIONS DE NOMMAGE :
+#
+# • Variables globales : UPPERCASE (ex: PROJECT_WORKDIR, CACHE_ENABLED)
+# • Variables de section : lowercase (ex: enabled, cache_dir, modules)
+# • Valeurs textuelles : toujours entre guillemets doubles
+# • Noms de sections : lowercase avec points pour hiérarchie
+#
+# Voir aklo/config/CONVENTIONS.md pour plus de détails.
 #
 #===============================================================================
