@@ -334,3 +334,115 @@ run_tests() {
     # Afficher le résumé
     test_summary
 }
+
+# Fonction: assert_true
+# Vérifie qu'une commande réussit (code de sortie 0)
+assert_true() {
+    local command_to_run="$1"
+    local test_name="$2"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if eval "$command_to_run"; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_false
+# Vérifie qu'une commande échoue (code de sortie non-0)
+assert_false() {
+    local command_to_run="$1"
+    local test_name="$2"
+    
+    TESTS_RUN=$((TESTS_RUN + 1))
+    
+    if ! eval "$command_to_run"; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Fonction: assert_function_exists
+# Vérifie qu'une fonction est déclarée
+assert_function_exists() {
+    local function_name="$1"
+    local test_name="${2:-Fonction '$function_name' doit exister}"
+
+    TESTS_RUN=$((TESTS_RUN + 1))
+
+    if command -v "$function_name" >/dev/null 2>&1; then
+        echo "${GREEN}✓${NC} $test_name"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "${RED}✗${NC} $test_name"
+        echo "  Fonction '$function_name' n'existe pas"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+#==============================================================================
+# Fonctions de gestion d'environnement de test pour les artefacts
+#==============================================================================
+
+# Variables globales pour l'environnement de test d'artefacts
+TEST_PROJECT_DIR=""
+ORIGINAL_PWD=""
+
+# Prépare un environnement de test isolé pour les commandes créant des artefacts
+setup_artefact_test_env() {
+    TEST_PROJECT_DIR=$(mktemp -d "/tmp/aklo_artefact_test.XXXXXX")
+    ORIGINAL_PWD=$(pwd)
+
+    # AKLO_PROJECT_ROOT doit être défini par le lanceur de tests (run_tests.sh)
+    if [ -z "$AKLO_PROJECT_ROOT" ]; then
+        echo "${RED}✗ FATAL: AKLO_PROJECT_ROOT is not set. Please run tests via run_tests.sh.${NC}"
+        exit 1
+    fi
+
+    # Copier l'application et ses dépendances depuis la racine du projet
+    mkdir -p "$TEST_PROJECT_DIR/aklo/bin"
+    cp "$AKLO_PROJECT_ROOT/aklo/bin/aklo" "$TEST_PROJECT_DIR/aklo/bin/"
+    cp -r "$AKLO_PROJECT_ROOT/aklo/modules" "$TEST_PROJECT_DIR/aklo/"
+    cp -r "$AKLO_PROJECT_ROOT/aklo/charte" "$TEST_PROJECT_DIR/aklo/"
+    
+    # Isoler le test dans le nouveau projet
+    cd "$TEST_PROJECT_DIR" || exit 1
+    
+    # Créer les répertoires pour les artefacts de test
+    mkdir -p pbi tasks arch debug journal
+    
+    # Créer une configuration .aklo.conf locale et temporaire
+    cat > .aklo.conf << EOF
+PBI_DIR=pbi
+TASKS_DIR=tasks
+ARCH_DIR=arch
+DEBUG_DIR=debug
+JOURNAL_DIR=journal
+CACHE_ENABLED=true
+CACHE_DEBUG=false
+AUTO_BACKUP=true
+EOF
+}
+
+# Nettoie l'environnement de test des artefacts
+teardown_artefact_test_env() {
+    if [ -n "$ORIGINAL_PWD" ]; then
+        cd "$ORIGINAL_PWD"
+    fi
+    if [ -n "$TEST_PROJECT_DIR" ] && [ -d "$TEST_PROJECT_DIR" ]; then
+        rm -rf "$TEST_PROJECT_DIR"
+    fi
+}

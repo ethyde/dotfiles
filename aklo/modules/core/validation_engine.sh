@@ -9,7 +9,6 @@
 #==============================================================================
 
 # Configuration de base
-set -e
 
 # Variables globales de validation
 VALIDATION_CACHE_FILE="${AKLO_CACHE_DIR:-/tmp}/validation_cache.json"
@@ -249,9 +248,10 @@ log_validation_event() {
     local event_type="$1"
     local function_name="$2"
     local message="$3"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     
-    echo "[$timestamp] [$event_type] [$function_name] $message" >> "$VALIDATION_LOG_FILE" 2>/dev/null || true
+    echo "[$timestamp] [$event_type] [$function_name] $message" >> "$VALIDATION_LOG_FILE"
 }
 
 #==============================================================================

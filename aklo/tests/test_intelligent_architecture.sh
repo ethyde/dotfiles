@@ -9,13 +9,15 @@
 #==============================================================================
 
 # Configuration des tests
-set -e
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-AKLO_SCRIPT="${PROJECT_ROOT}/aklo/bin/aklo"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+AKLO_SCRIPT="$PROJECT_ROOT/aklo/bin/aklo"
+source "$PROJECT_ROOT/aklo/tests/test_framework.sh"
 
-# Chargement du framework de test
-source "${SCRIPT_DIR}/test_framework.sh"
+# S'assurer que le script est exécutable
+chmod +x "$AKLO_SCRIPT"
+
+# Activer le mode debug pour les tests
+export AKLO_DEBUG=true
 
 #==============================================================================
 # Test 1: Classification des commandes
@@ -48,16 +50,17 @@ test_conditional_loading() {
     echo "=== Test: Chargement conditionnel des modules ==="
     
     # Test MINIMAL - 0 modules
-    local output=$("${AKLO_SCRIPT}" get_config PROJECT_WORKDIR 2>&1)
+    local output
+    output=$("${AKLO_SCRIPT}" get_config PROJECT_WORKDIR 2>&1)
     echo "$output" | grep -q "Modules chargés: 0" || fail "MINIMAL devrait charger 0 modules"
     
     # Test NORMAL - 1 module
-    output=$("${AKLO_SCRIPT}" plan 2>&1 | head -5)
+    output=$("${AKLO_SCRIPT}" plan 2>&1)
     echo "$output" | grep -q "Modules chargés: 1" || fail "NORMAL devrait charger 1 module"
     
-    # Test FULL - 1 module
-    output=$("${AKLO_SCRIPT}" optimize 2>&1 | head -5)
-    echo "$output" | grep -q "Modules chargés: 1" || fail "FULL devrait charger 1 module"
+    # Test FULL - 2 modules
+    output=$("${AKLO_SCRIPT}" optimize 2>&1)
+    echo "$output" | grep -q "Modules chargés: 2" || fail "FULL devrait charger 2 modules"
     
     echo "✓ Chargement conditionnel validé"
 }

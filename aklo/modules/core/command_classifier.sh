@@ -8,9 +8,6 @@
 # Module de classification automatique des commandes aklo avec profils adaptatifs
 #==============================================================================
 
-# Configuration de base
-set -e
-
 # Variables de configuration
 CLASSIFIER_CONFIG_FILE="${AKLO_CONFIG_DIR:-/tmp}/classifier_config.json"
 CLASSIFIER_CACHE_FILE="${AKLO_CACHE_DIR:-/tmp}/classifier_cache.json"

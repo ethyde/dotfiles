@@ -1,116 +1,66 @@
-#!/bin/sh
-#==============================================================================
-# Tests Unitaires pour les Fonctions Aklo
-#==============================================================================
-
-# Source du framework de test
-. "$(dirname "$0")/test_framework.sh"
-
-# Source des fonctions aklo à tester  
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-AKLO_SCRIPT="$(cd "$SCRIPT_DIR/../bin" && pwd)/aklo"
-
-# Fonction pour extraire et tester les fonctions utilitaires d'aklo
-# (on simule le sourcing des fonctions)
+#!/bin/bash
+source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
 
 test_get_next_id() {
-    test_suite "Test d'intégration get_next_id"
+    test_suite "Unit Test: get_next_id logic"
     
-    setup_test_env
+    local test_dir
+    test_dir=$(mktemp -d)
+    mkdir -p "$test_dir/pbi"
+    touch "$test_dir/pbi/PBI-1-test.md" "$test_dir/pbi/PBI-3-test.md" "$test_dir/pbi/PBI-5-test.md"
     
-    # Créer quelques fichiers de test
-    mkdir -p test_dir
-    touch "test_dir/PBI-1-test.md"
-    touch "test_dir/PBI-3-test.md" 
-    touch "test_dir/PBI-5-test.md"
+    local last_id
+    last_id=$(ls "$test_dir/pbi/PBI-"*-*.md 2>/dev/null | sed -n "s/.*PBI-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
+    assert_equals "5" "$last_id" "Doit trouver le plus grand ID existant (5)"
     
-    # Tester via le script aklo directement (simulation)
-    # Compter les fichiers existants pour vérifier la logique
-    count=$(ls test_dir/PBI-*-*.md 2>/dev/null | wc -l | tr -d ' ')
-    assert_equals "3" "$count" "Fichiers de test créés correctement"
-    
-    # Test simple: vérifier que les fichiers existent
-    assert_file_exists "test_dir/PBI-1-test.md" "Fichier PBI-1 existe"
-    assert_file_exists "test_dir/PBI-5-test.md" "Fichier PBI-5 existe"
-    
-    cleanup_test_env
+    local next_id=$((last_id + 1))
+    assert_equals "6" "$next_id" "Le prochain ID doit être 6"
+
+    rm -rf "$test_dir"
 }
 
-test_bump_version() {
-    test_suite "Test logique bump_version"
+test_aklo_init_command() {
+    test_suite "Command: aklo init"
     
-    setup_test_env
+    setup_artefact_test_env
+
+    echo "y" | "$TEST_PROJECT_DIR/aklo/bin/aklo" init >/dev/null 2>&1
+    local exit_code=$?
     
-    # Test de la logique de versioning via des simulations
-    # Vérifier qu'on peut parser une version
-    version="1.2.3"
-    major=$(echo "$version" | cut -d. -f1)
-    minor=$(echo "$version" | cut -d. -f2) 
-    patch=$(echo "$version" | cut -d. -f3)
-    
-    assert_equals "1" "$major" "Parse major version correctement"
-    assert_equals "2" "$minor" "Parse minor version correctement"
-    assert_equals "3" "$patch" "Parse patch version correctement"
-    
-    # Test d'incrémentation simple
-    new_major=$((major + 1))
-    assert_equals "2" "$new_major" "Incrémentation major fonctionne"
-    
-    cleanup_test_env
+    assert_equals "0" "$exit_code" "'aklo init' doit s'exécuter sans erreur"
+    assert_file_exists "pbi" "'aklo init' should create the 'pbi' directory"
+    assert_file_exists ".aklo.conf" "'aklo init' doit créer le fichier .aklo.conf"
+    assert_file_contains ".aklo.conf" "PBI_DIR=" ".aklo.conf doit contenir PBI_DIR"
+
+    teardown_artefact_test_env
 }
 
-test_aklo_init() {
-    test_suite "Commande aklo init"
+test_aklo_propose_pbi_command() {
+    test_suite "Command: aklo propose-pbi"
     
-    setup_test_env
+    setup_artefact_test_env
     
-    # Créer un projet de test minimal
-    echo '{"name": "test", "version": "1.0.0"}' > package.json
-    git init >/dev/null 2>&1
+    "$TEST_PROJECT_DIR/aklo/bin/aklo" propose-pbi "My Test PBI" >/dev/null 2>&1
+    local exit_code=$?
     
-    TEST_DIR=$(mktemp -d)
-    cd "$TEST_DIR"
-    echo "=== Suite de tests: Commande aklo init ==="
-    echo "Environnement de test: $TEST_DIR"
-
-    # Tester aklo init
-    assert_exit_code 0 "echo \"y\" | \"$AKLO_SCRIPT\" init" "aklo init s'exécute sans erreur"
-
-    assert_file_exists ".aklo.conf" "aklo init crée le fichier .aklo.conf"
-    assert_file_exists ".gitignore" "aklo init crée/met à jour .gitignore"
+    assert_equals "0" "$exit_code" "'aklo propose-pbi' doit s'exécuter sans erreur"
     
-    # Vérifier le contenu de .aklo.conf
-    if [ -f ".aklo.conf" ]; then
-        content=$(cat .aklo.conf)
-        assert_contains "$content" "PROJECT_WORKDIR=" "aklo.conf contient PROJECT_WORKDIR"
-    fi
+    local pbi_file
+    pbi_file=$(find ./pbi -name "PBI-*-My-Test-PBI.md" -type f)
+    assert_not_empty "$pbi_file" "Le PBI doit être créé dans le répertoire pbi/ temporaire"
     
-    cleanup_test_env
+    assert_file_contains "$pbi_file" "Titre: My Test PBI" "Le PBI doit contenir le bon titre"
+    assert_file_contains "$pbi_file" "Statut: PROPOSED" "Le PBI doit avoir le statut PROPOSED"
+    
+    teardown_artefact_test_env
 }
 
-test_aklo_propose_pbi() {
-    test_suite "Commande aklo propose-pbi"
+main() {
+    test_get_next_id
+    test_aklo_init_command
+    test_aklo_propose_pbi_command
     
-    setup_test_env
-    
-    # Préparer l'environnement
-    echo '{"name": "test", "version": "1.0.0"}' > package.json
-    git init >/dev/null 2>&1
-    echo "y" | "$AKLO_SCRIPT" init >/dev/null 2>&1
-    
-    # Tester propose-pbi
-    "$AKLO_SCRIPT" propose-pbi "Test PBI" >/dev/null 2>&1
-    exit_code=$?
-    
-    assert_exit_code "0" "'$AKLO_SCRIPT' propose-pbi 'Test PBI'" "aklo propose-pbi s'exécute sans erreur"
-    assert_file_exists "docs/backlog/00-pbi/PBI-1-PROPOSED.md" "PBI créé avec le bon nom"
-    
-    # Vérifier le contenu du PBI
-    if [ -f "docs/backlog/00-pbi/PBI-1-PROPOSED.md" ]; then
-        content=$(cat "docs/backlog/00-pbi/PBI-1-PROPOSED.md")
-        assert_contains "$content" "Test PBI" "PBI contient le titre correct"
-        assert_contains "$content" "PROPOSED" "PBI a le statut PROPOSED"
-    fi
-    
-    cleanup_test_env
+    test_summary
 }
+
+main

@@ -9,7 +9,6 @@
 #==============================================================================
 
 # Configuration de base pour les tests
-set -e
 script_dir="$(dirname "$0")"
 modules_dir="${script_dir}/../modules"
 

@@ -9,13 +9,9 @@
 #==============================================================================
 
 # Configuration des tests
-set -e
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-AKLO_SCRIPT="${PROJECT_ROOT}/aklo/bin/aklo"
-
-# Chargement du framework de test
-source "${SCRIPT_DIR}/test_framework.sh"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+AKLO_SCRIPT="$PROJECT_ROOT/aklo/bin/aklo"
+source "$PROJECT_ROOT/aklo/tests/test_framework.sh"
 
 # Variables de configuration
 PERFORMANCE_LOG="/tmp/aklo_performance_test.log"

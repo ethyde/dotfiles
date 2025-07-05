@@ -1,12 +1,16 @@
 #!/bin/bash
 
+# shellcheck disable=SC2148
+#
+# Module Parser avec gestion de cache
+# TASK-6-3
+
 # Version avec cache de la fonction parse_and_generate_artefact
 # TASK-6-3: Intégration cache dans parse_and_generate_artefact
 # Phase GREEN: Implémentation minimale
 
-# Source des fonctions de cache (TASK-6-1 et TASK-6-2)
-source "$(dirname "${BASH_SOURCE[0]}")/aklo_cache_functions.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/aklo_extract_functions.sh"
+# Source des fonctions de cache
+source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh"
 
 # Configuration cache par défaut
 AKLO_CACHE_ENABLED="${AKLO_CACHE_ENABLED:-true}"
@@ -56,17 +60,22 @@ parse_and_generate_artefact_cached() {
     # Lire la configuration cache
     get_cache_config
     
-    # Construire le chemin du protocole (relatif au répertoire racine)
-    local protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.md"
+    # Construire le chemin du protocole en priorité depuis la variable d'environnement
+    local protocol_dir="${AKLO_PROTOCOLS_PATH:-./aklo/charte/PROTOCOLES}"
+    local protocol_file="${protocol_dir}/${protocol_name}.md"
     
-    # Si pas trouvé en relatif, essayer le chemin absolu depuis le script
+    # Si pas trouvé, essayer les chemins legacy pour la compatibilité
     if [ ! -f "$protocol_file" ]; then
-        local script_dir="$(dirname "$0")"
-        protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.md"
+        protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.md"
+        if [ ! -f "$protocol_file" ]; then
+            local script_dir
+            script_dir="$(dirname "$0")"
+            protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.md"
+        fi
     fi
     
     if [ ! -f "$protocol_file" ]; then
-        echo "❌ Erreur : Protocole $protocol_name non trouvé dans la charte." >&2
+        echo "❌ Erreur : Protocole $protocol_name non trouvé." >&2
         echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.md" >&2
         echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.md" >&2
         return 1

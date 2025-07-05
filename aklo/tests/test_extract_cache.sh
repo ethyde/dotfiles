@@ -1,153 +1,74 @@
 #!/bin/bash
 
-# Tests unitaires pour extract_and_cache_structure (TASK-6-2)
-# Approche TDD - Phase RED : Tests qui échouent
+# Test d'intégration pour l'extraction et la mise en cache (TASK-6-2)
 
-set -e
+# Définition du test
+test_extract_and_cache_integration() {
+    # 1. Préparation
+    test_suite "Integration Test: extract_and_cache_structure"
+    source_test_helpers "cache/cache_functions.sh" "io/extract_functions.sh"
 
-# Configuration des tests
-TEST_DIR="/tmp/aklo_test_cache"
-CACHE_DIR="/tmp/aklo_cache"
-TEST_COUNT=0
-PASS_COUNT=0
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    # Assurer le nettoyage à la fin du test
+    add_cleanup "rm -rf '$temp_dir'"
 
-# Couleurs pour output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+    # Créer un faux fichier de protocole
+    local protocol_file="$temp_dir/PROTOCOLE-TEST.md"
+    cat > "$protocol_file" << 'EOF'
+# Protocole de Test
 
-# Source des fonctions de cache (TASK-6-1)
-source "../modules/cache/cache_functions.sh"
+## SECTION 2: Structures
 
-# Source des fonctions d'extraction (sera créé dans cette task)
-source "../modules/io/extract_functions.sh" 2>/dev/null || echo "⚠️  Fonctions extraction non trouvées (normal en phase RED)"
-
-# Fonction de setup
-setup_test_env() {
-    rm -rf "$TEST_DIR" "$CACHE_DIR"
-    mkdir -p "$TEST_DIR" "$CACHE_DIR"
-    
-    # Créer un fichier protocole de test
-    cat > "$TEST_DIR/test_protocol.md" << 'EOF'
-# TEST PROTOCOL
-
-## Structure PBI
-
-```
+### 2.3. Structure Obligatoire Du Fichier PBI
+```markdown
 # PBI-{{ID}} : {{TITLE}}
 
----
-**Statut:** {{STATUS}}
-**Date de création:** {{DATE}}
-**Priorité:** {{PRIORITY}}
-**Effort estimé:** {{EFFORT}} points
----
-
-## 1. Description de la User Story
-
-_En tant que **{{USER_ROLE}}**, je veux **{{FEATURE}}**, afin de **{{BENEFIT}}**._
-
-## 2. Critères d'Acceptation
-
-{{ACCEPTANCE_CRITERIA}}
-
-## 3. Spécifications Techniques
-
-{{TECHNICAL_SPECS}}
+**As a** [user type]
+**I want to** [goal]
+**So that** [reason]
 ```
 
-## Structure TASK
-
-```
-# TASK-{{PBI_ID}}-{{TASK_ID}} : {{TITLE}}
-
----
-**Statut:** {{STATUS}}
-**Date de création:** {{DATE}}
-**PBI Parent:** {{PBI_PARENT}}
-**Effort estimé:** {{EFFORT}} points
----
-
-## 1. Description Technique
-
-{{DESCRIPTION}}
-
-## 2. Definition of Done
-
-{{DOD_ITEMS}}
-```
+## SECTION 3: Processus
 EOF
-}
 
-# Fonction de cleanup
-cleanup_test_env() {
-    rm -rf "$TEST_DIR" "$CACHE_DIR"
-}
+    # Définir les variables pour la fonction à tester
+    local artefact_type="PBI"
+    local protocol_name
+    protocol_name=$(basename "$protocol_file" .md)
+    local cache_file
+    cache_file=$(generate_cache_filename "$protocol_name" "$artefact_type")
+    # Rediriger le cache vers notre répertoire temporaire
+    cache_file="$temp_dir/$(basename "$cache_file")"
+    local mtime_file="${cache_file}.mtime"
 
-# Fonction d'assertion
-assert_equals() {
-    local expected="$1"
-    local actual="$2"
-    local test_name="$3"
-    
-    ((TEST_COUNT++))
-    
-    if [ "$expected" = "$actual" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: $test_name"
-        ((PASS_COUNT++))
-    else
-        echo -e "${RED}✗ FAIL${NC}: $test_name"
-        echo "  Expected: '$expected'"
-        echo "  Actual:   '$actual'"
-    fi
-}
 
-# Fonction principale de test
-run_all_tests() {
-    echo -e "${BLUE}🧪 Tests TDD - Phase RED - Extract and Cache${NC}"
-    echo "Les tests suivants DOIVENT échouer car les fonctions n'existent pas encore"
-    echo "======================================================================="
-    
-    setup_test_env
-    
-    echo -e "${BLUE}📋 Test: extract_and_cache_structure function exists${NC}"
-    if command -v extract_and_cache_structure >/dev/null 2>&1; then
-        echo -e "${RED}✗ FAIL${NC}: extract_and_cache_structure function should not exist yet"
-    else
-        echo -e "${GREEN}✓ PASS${NC}: extract_and_cache_structure function does not exist (expected in RED phase)"
-        ((PASS_COUNT++))
-    fi
-    ((TEST_COUNT++))
-    
-    echo -e "${BLUE}📋 Test: extract_artefact_structure function exists${NC}"
-    if command -v extract_artefact_structure >/dev/null 2>&1; then
-        echo -e "${RED}✗ FAIL${NC}: extract_artefact_structure function should not exist yet"
-    else
-        echo -e "${GREEN}✓ PASS${NC}: extract_artefact_structure function does not exist (expected in RED phase)"
-        ((PASS_COUNT++))
-    fi
-    ((TEST_COUNT++))
-    
-    cleanup_test_env
-    
-    # Résumé
-    echo "======================================================================="
-    echo -e "${BLUE}📊 Résumé Phase RED${NC}"
-    echo "Tests exécutés: $TEST_COUNT"
-    echo "Tests réussis: $PASS_COUNT"
-    echo "Tests échoués: $((TEST_COUNT - PASS_COUNT))"
-    
-    if [ $PASS_COUNT -eq $TEST_COUNT ]; then
-        echo -e "${GREEN}🎉 Phase RED réussie - Prêt pour phase GREEN !${NC}"
-        return 0
-    else
-        echo -e "${RED}❌ Phase RED échouée${NC}"
-        return 1
-    fi
-}
+    # 2. Exécution
+    local extracted_structure
+    extracted_structure=$(extract_and_cache_structure "$protocol_file" "$artefact_type" "$cache_file")
+    local exit_code=$?
 
-# Exécution des tests si le script est appelé directement
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    run_all_tests
-fi
+    # 3. Assertions
+    assert_exit_code 0 $exit_code "extract_and_cache_structure doit réussir"
+
+    # Vérifier le contenu extrait
+    local expected_structure
+    expected_structure=$(cat << 'EOF'
+# PBI-{{ID}} : {{TITLE}}
+
+**As a** [user type]
+**I want to** [goal]
+**So that** [reason]
+EOF
+)
+    assert_equals "$expected_structure" "$extracted_structure" "La structure extraite est correcte"
+
+    # Vérifier la création des fichiers de cache
+    assert_file_exists "$cache_file" "Le fichier de cache .parsed doit être créé"
+    assert_file_exists "$mtime_file" "Le fichier de cache .mtime doit être créé"
+
+    # Vérifier le contenu du fichier de cache
+    local cached_content
+    cached_content=$(cat "$cache_file")
+    assert_equals "$expected_structure" "$cached_content" "Le contenu du fichier de cache est correct"
+} 

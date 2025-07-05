@@ -1,83 +1,67 @@
 #!/bin/bash
+source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
 
-# Test d'intégration finale pour TASK-6-3
-# Vérifier que le cache fonctionne avec le vrai script aklo
+setup() {
+    setup_artefact_test_env
+    # Le script aklo est maintenant dans le répertoire de test
+    AKLO_EXEC="${TEST_PROJECT_DIR}/aklo/bin/aklo"
+}
 
-set -e
+teardown() {
+    teardown_artefact_test_env
+}
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+test_pbi_generation_cache_behavior() {
+    test_suite "PBI Generation with Cache"
 
-echo -e "${BLUE}🧪 Test d'intégration finale - Cache dans aklo${NC}"
-echo "======================================================================="
+    # 1. Exécution avec cache MISS
+    local pbi_title_miss="Test Cache Integration Miss"
+    local miss_output
+    miss_output=$($AKLO_EXEC propose-pbi "$pbi_title_miss" 2>&1)
+    local exit_code_miss=$?
 
-# Test avec une vraie commande aklo
-cd /Users/eplouvie/Projets/dotfiles
+    assert_equals "0" "$exit_code_miss" "La génération PBI (miss) doit réussir"
+    assert_contains "$miss_output" "MISS" "Le log doit indiquer un cache MISS"
 
-# Nettoyer le cache
-rm -rf /tmp/aklo_cache
-mkdir -p /tmp/aklo_cache
+    local pbi_file_miss
+    pbi_file_miss=$(find ./pbi -type f -name "PBI-*-Test-Cache-Integration-Miss.md")
+    assert_not_empty "$pbi_file_miss" "Le fichier PBI doit être créé sur un cache miss"
 
-# Activer le debug cache
-echo "CACHE_DEBUG=true" >> aklo/config/.aklo.conf
+    # Vérifier que le cache a bien été créé
+    local cache_file
+    cache_file=$(find . -path "./.aklo_cache/protocol_*.parsed" -type f 2>/dev/null)
+    assert_not_empty "$cache_file" "Un fichier cache doit être créé après un miss"
 
-# Test 1: Générer un PBI avec cache miss
-echo -e "${BLUE}Test 1: Génération PBI avec cache miss${NC}"
-start_time=$(date +%s%N)
-result=$(./aklo/bin/aklo propose-pbi "Test Cache Integration" 2>&1)
-end_time=$(date +%s%N)
-duration_miss=$((($end_time - $start_time) / 1000000))
+    # 2. Exécution avec cache HIT
+    local pbi_title_hit="Test Cache Integration Miss" # Utilise le même titre pour un HIT
+    local hit_output
+    hit_output=$($AKLO_EXEC propose-pbi "$pbi_title_hit" 2>&1)
+    local exit_code_hit=$?
 
-if echo "$result" | grep -q "PBI créé"; then
-    echo -e "${GREEN}✓ PASS${NC}: PBI généré avec succès"
-    echo "  Durée (cache miss): ${duration_miss}ms"
+    assert_equals "0" "$exit_code_hit" "La génération PBI (hit) doit réussir"
+    assert_contains "$hit_output" "HIT" "Le log doit indiquer un cache HIT"
+}
+
+test_other_commands_compatibility() {
+    test_suite "Other Commands Compatibility"
+
+    # Vérifier qu'une commande qui n'utilise pas le parser fonctionne
+    local status_output
+    status_output=$($AKLO_EXEC status --brief 2>&1)
+    local exit_code=$?
     
-    # Vérifier qu'un cache a été créé
-    if ls /tmp/aklo_cache/protocol_*_PBI.parsed 1> /dev/null 2>&1; then
-        echo -e "${GREEN}✓ PASS${NC}: Fichier cache créé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Aucun fichier cache créé"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Échec génération PBI"
-fi
+    assert_equals "0" "$exit_code" "La commande 'status' doit fonctionner"
+    assert_contains "$status_output" "Aklo project status" "La sortie de 'status' est correcte"
+}
 
-# Test 2: Générer un autre PBI avec cache hit
-echo -e "${BLUE}Test 2: Génération PBI avec cache hit${NC}"
-start_time=$(date +%s%N)
-result=$(./aklo/bin/aklo propose-pbi "Test Cache Hit" 2>&1)
-end_time=$(date +%s%N)
-duration_hit=$((($end_time - $start_time) / 1000000))
+main() {
+    setup
+    trap teardown EXIT
 
-if echo "$result" | grep -q "PBI créé"; then
-    echo -e "${GREEN}✓ PASS${NC}: PBI généré avec succès"
-    echo "  Durée (cache hit): ${duration_hit}ms"
-    
-    # Comparer les performances
-    if [ $duration_hit -lt $duration_miss ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache hit plus rapide (gain: $((duration_miss - duration_hit))ms)"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache hit pas plus rapide"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Échec génération PBI avec cache hit"
-fi
+    test_pbi_generation_cache_behavior
+    test_other_commands_compatibility
 
-# Test 3: Vérifier que les autres commandes fonctionnent toujours
-echo -e "${BLUE}Test 3: Compatibilité avec autres commandes${NC}"
-if ./aklo/bin/aklo status --brief >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Commande status fonctionne"
-else
-    echo -e "${RED}✗ FAIL${NC}: Commande status échoue"
-fi
+    test_summary
+}
 
-# Restaurer la config
-sed -i '' '/^CACHE_DEBUG=true$/d' aklo/config/.aklo.conf
-
-# Nettoyer les PBIs de test
-rm -f docs/backlog/00-pbi/PBI-*-Test-Cache-*.md
-
-echo "======================================================================="
-echo -e "${GREEN}🎉 Tests d'intégration terminés !${NC}"
+main

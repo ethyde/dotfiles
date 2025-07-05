@@ -1,89 +1,43 @@
-#!/bin/bash
+test_cache_green_simple() {
+    test_suite "Phase GREEN - Infrastructure Cache simple (TASK-6-1)"
 
-# Tests unitaires pour les fonctions de cache (TASK-6-1)
-# Phase GREEN - Tests simples
+    # Source des fonctions
+    local script_dir
+    script_dir="$(dirname "$0")"
+    source "${script_dir}/../modules/cache/cache_functions.sh"
 
-set -e
+    # Setup
+    local test_dir
+    local cache_dir
+    test_dir=$(mktemp -d)
+    cache_dir=$(mktemp -d)
+    export CACHE_DIR="$cache_dir"
 
-# Configuration
-TEST_DIR="/tmp/aklo_test_cache"
-CACHE_DIR="/tmp/aklo_cache"
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+    # Test 1: cache_is_valid avec cache valide
+    local cache_file="$test_dir/test.parsed"
+    local mtime_file="${cache_file}.mtime"
+    echo "content" > "$cache_file"
+    echo "1234567890" > "$mtime_file"
+    cache_is_valid "$cache_file" "1234567890"
+    assert_command_success "cache_is_valid fonctionne avec un cache valide"
 
-# Source des fonctions
-source "../modules/cache/cache_functions.sh"
+    # Test 2: cache_is_valid avec mtime invalide
+    echo "1111111111" > "$mtime_file"
+    ! cache_is_valid "$cache_file" "1234567890"
+    assert_command_success "cache_is_valid échoue correctement avec un mtime invalide"
 
-# Setup
-setup_test() {
-    rm -rf "$TEST_DIR" "$CACHE_DIR"
-    mkdir -p "$TEST_DIR" "$CACHE_DIR"
-}
+    # Test 3: use_cached_structure
+    local expected="test_content"
+    echo "$expected" > "$cache_file"
+    local result
+    result=$(use_cached_structure "$cache_file")
+    assert_equals "$expected" "$result" "use_cached_structure retourne le bon contenu"
 
-# Cleanup
-cleanup_test() {
-    rm -rf "$TEST_DIR" "$CACHE_DIR"
-}
+    # Test 4: cleanup_cache
+    cleanup_cache
+    assert_command_success "cleanup_cache s'exécute sans erreur"
 
-echo -e "${BLUE}🧪 Tests Phase GREEN - Infrastructure Cache${NC}"
-echo "======================================================================="
-
-# Test 1: cache_is_valid avec cache valide
-echo -e "${BLUE}Test 1: cache_is_valid avec cache valide${NC}"
-setup_test
-cache_file="$TEST_DIR/test.parsed"
-mtime_file="$TEST_DIR/test.parsed.mtime"
-echo "content" > "$cache_file"
-echo "1234567890" > "$mtime_file"
-
-if cache_is_valid "$cache_file" "1234567890"; then
-    echo -e "${GREEN}✓ PASS${NC}: cache_is_valid fonctionne avec cache valide"
-else
-    echo -e "${RED}✗ FAIL${NC}: cache_is_valid devrait retourner 0 pour cache valide"
-fi
-cleanup_test
-
-# Test 2: cache_is_valid avec mtime invalide
-echo -e "${BLUE}Test 2: cache_is_valid avec mtime invalide${NC}"
-setup_test
-cache_file="$TEST_DIR/test.parsed"
-mtime_file="$TEST_DIR/test.parsed.mtime"
-echo "content" > "$cache_file"
-echo "1111111111" > "$mtime_file"
-
-if ! cache_is_valid "$cache_file" "1234567890"; then
-    echo -e "${GREEN}✓ PASS${NC}: cache_is_valid retourne 1 pour mtime invalide"
-else
-    echo -e "${RED}✗ FAIL${NC}: cache_is_valid devrait retourner 1 pour mtime invalide"
-fi
-cleanup_test
-
-# Test 3: use_cached_structure
-echo -e "${BLUE}Test 3: use_cached_structure${NC}"
-setup_test
-cache_file="$TEST_DIR/test.parsed"
-expected="test_content"
-echo "$expected" > "$cache_file"
-
-result=$(use_cached_structure "$cache_file")
-if [ "$result" = "$expected" ]; then
-    echo -e "${GREEN}✓ PASS${NC}: use_cached_structure retourne le bon contenu"
-else
-    echo -e "${RED}✗ FAIL${NC}: use_cached_structure contenu incorrect"
-fi
-cleanup_test
-
-# Test 4: cleanup_cache
-echo -e "${BLUE}Test 4: cleanup_cache${NC}"
-setup_test
-if cleanup_cache; then
-    echo -e "${GREEN}✓ PASS${NC}: cleanup_cache s'exécute sans erreur"
-else
-    echo -e "${RED}✗ FAIL${NC}: cleanup_cache a échoué"
-fi
-cleanup_test
-
-echo "======================================================================="
-echo -e "${GREEN}🎉 Phase GREEN terminée !${NC}"
+    # Cleanup
+    rm -rf "$test_dir" "$cache_dir"
+    unset CACHE_DIR
+} 

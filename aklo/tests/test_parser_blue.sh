@@ -1,92 +1,98 @@
 #!/bin/bash
 
-# Tests unitaires pour la phase BLUE (TASK-6-3)
-# Refactorisation et optimisation
+# Source des dépendances
+# Pour accéder aux fonctions internes si nécessaire
 
-set -e
+# Variables globales
+TEST_PROJECT_DIR=""
+ORIGINAL_PWD=""
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+setup() {
+    TEST_PROJECT_DIR=$(mktemp -d "/tmp/aklo_parser_blue_test.XXXXXX")
+    ORIGINAL_PWD=$(pwd)
+    
+    # Isoler le test dans un nouveau projet
+    cd "$TEST_PROJECT_DIR"
+    
+    # Copier l'application
+    mkdir -p aklo/bin
+    cp "$ORIGINAL_PWD/aklo/bin/aklo" aklo/bin/
+    cp -r "$ORIGINAL_PWD/aklo/modules" aklo/
+    cp -r "$ORIGINAL_PWD/aklo/charte" aklo/
+    
+    # Créer les répertoires pour les artefacts de test
+    mkdir -p pbi tasks arch debug journal
+    
+    # Créer une configuration .aklo.conf locale et temporaire
+    cat > .aklo.conf << EOF
+PBI_DIR=pbi
+TASKS_DIR=tasks
+ARCH_DIR=arch
+DEBUG_DIR=debug
+JOURNAL_DIR=journal
+CACHE_ENABLED=true
+CACHE_DEBUG=true
+EOF
+    
+    # Créer le répertoire de cache
+    mkdir -p .aklo_cache
+    export AKLO_CACHE_DIR="$TEST_PROJECT_DIR/.aklo_cache"
+}
 
-echo -e "${BLUE}🧪 Tests Phase BLUE - Refactorisation et Performance${NC}"
-echo "======================================================================="
+teardown() {
+    cd "$ORIGINAL_PWD"
+    rm -rf "$TEST_PROJECT_DIR"
+    unset AKLO_CACHE_DIR
+}
 
-# Test des performances cache
-echo -e "${BLUE}Test Performance: Cache vs No Cache${NC}"
-cd /Users/eplouvie/Projets/dotfiles
+# NOTE: Les tests de performance réels sont peu fiables dans un environnement CI.
+# Ces tests vérifient principalement le comportement (hit/miss) plutôt que des ms précises.
+test_parser_performance_behavior() {
+    # 1. Exécution sans cache pour établir une baseline comportementale
+    echo "CACHE_ENABLED=false" > .aklo.conf
+    local no_cache_log
+    no_cache_log=$(./aklo/bin/aklo propose-pbi "Test Perf No Cache" 2>&1)
+    assert_contains "Le log (sans cache) doit indiquer que le cache est désactivé" "$no_cache_log" "DISABLED"
 
-# Nettoyer le cache
-rm -rf /tmp/aklo_cache
-mkdir -p /tmp/aklo_cache
+    # 2. Exécution avec cache (miss)
+    echo "CACHE_ENABLED=true" > .aklo.conf
+    local miss_log
+    miss_log=$(./aklo/bin/aklo propose-pbi "Test Perf Cache Miss" 2>&1)
+    assert_contains "Le log (miss) doit indiquer un cache miss" "$miss_log" "MISS"
 
-# Test sans cache (première fois)
-echo "CACHE_ENABLED=false" > aklo/config/.aklo.conf.tmp
-mv aklo/config/.aklo.conf aklo/config/.aklo.conf.backup
-mv aklo/config/.aklo.conf.tmp aklo/config/.aklo.conf
+    # 3. Exécution avec cache (hit)
+    local hit_log
+    hit_log=$(./aklo/bin/aklo propose-pbi "Test Perf Cache Hit" 2>&1)
+    assert_contains "Le log (hit) doit indiquer un cache hit" "$hit_log" "HIT"
+}
 
-start_time=$(date +%s%N)
-./aklo/bin/aklo propose-pbi "Test Performance No Cache" >/dev/null 2>&1
-end_time=$(date +%s%N)
-duration_no_cache=$((($end_time - $start_time) / 1000000))
+test_parser_robustness_invalid_protocol() {
+    local result
+    result=$(./aklo/bin/aklo propose-pbi "Test Invalid Protocol" --protocol="INEXISTANT" 2>&1)
+    local exit_code=$?
+    
+    assert_exit_code "Doit échouer avec un protocole inexistant" 1 ${exit_code}
+    assert_contains "Le message d'erreur pour protocole invalide est incorrect" "$result" "Protocole 'INEXISTANT' non trouvé"
+}
 
-# Restaurer config avec cache
-mv aklo/config/.aklo.conf.backup aklo/config/.aklo.conf
+test_parser_robustness_corrupted_cache() {
+    # Pré-condition: Créer un cache corrompu
+    local cache_dir
+    cache_dir=$(find . -type d -name "aklo_cache")
+    local pbi_protocol_name="00-PRODUCT-OWNER" # Nom basé sur la config par défaut
+    local cache_file="$cache_dir/protocol_${pbi_protocol_name}_PBI.parsed"
+    
+    # On crée le cache via une première exécution
+    ./aklo/bin/aklo propose-pbi "Dummy pour créer cache" >/dev/null 2>&1
+    
+    # On corrompt le fichier cache
+    echo "CACHE_CORRUPTED_DATA" > "$cache_file"
 
-# Test avec cache miss
-start_time=$(date +%s%N)
-./aklo/bin/aklo propose-pbi "Test Performance Cache Miss" >/dev/null 2>&1
-end_time=$(date +%s%N)
-duration_cache_miss=$((($end_time - $start_time) / 1000000))
+    # Exécution: devrait utiliser le fallback
+    local result
+    result=$(./aklo/bin/aklo propose-pbi "Test Corrupted Cache" 2>&1)
+    local exit_code=$?
 
-# Test avec cache hit
-start_time=$(date +%s%N)
-./aklo/bin/aklo propose-pbi "Test Performance Cache Hit" >/dev/null 2>&1
-end_time=$(date +%s%N)
-duration_cache_hit=$((($end_time - $start_time) / 1000000))
-
-echo "Résultats de performance:"
-echo "  Sans cache:     ${duration_no_cache}ms"
-echo "  Cache miss:     ${duration_cache_miss}ms"
-echo "  Cache hit:      ${duration_cache_hit}ms"
-
-# Vérifier les améliorations
-if [ $duration_cache_hit -lt $duration_cache_miss ]; then
-    gain_miss=$((duration_cache_miss - duration_cache_hit))
-    echo -e "${GREEN}✓ PASS${NC}: Cache hit plus rapide que cache miss (gain: ${gain_miss}ms)"
-else
-    echo -e "${RED}✗ FAIL${NC}: Cache hit pas plus rapide que cache miss"
-fi
-
-if [ $duration_cache_hit -lt $duration_no_cache ]; then
-    gain_no_cache=$((duration_no_cache - duration_cache_hit))
-    echo -e "${GREEN}✓ PASS${NC}: Cache hit plus rapide que sans cache (gain: ${gain_no_cache}ms)"
-else
-    echo -e "${RED}✗ FAIL${NC}: Cache hit pas plus rapide que sans cache"
-fi
-
-# Test de robustesse
-echo -e "${BLUE}Test Robustesse: Gestion des erreurs${NC}"
-
-# Test avec protocole inexistant
-if ./aklo/bin/aklo propose-pbi "Test Inexistant" --protocol="INEXISTANT" 2>/dev/null; then
-    echo -e "${RED}✗ FAIL${NC}: Devrait échouer avec protocole inexistant"
-else
-    echo -e "${GREEN}✓ PASS${NC}: Gestion erreur protocole inexistant"
-fi
-
-# Test avec cache corrompu
-echo "CACHE_CORRUPTED" > /tmp/aklo_cache/protocol_00-PRODUCT-OWNER_PBI.parsed
-if ./aklo/bin/aklo propose-pbi "Test Cache Corrompu" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Fallback fonctionne avec cache corrompu"
-else
-    echo -e "${RED}✗ FAIL${NC}: Fallback échoue avec cache corrompu"
-fi
-
-# Nettoyer les fichiers de test
-rm -f docs/backlog/00-pbi/PBI-*-Test-*.md
-rm -rf /tmp/aklo_cache
-
-echo "======================================================================="
-echo -e "${GREEN}🎉 Phase BLUE terminée !${NC}"
+    assert_exit_code "Doit réussir en utilisant le fallback" 0 ${exit_code}
+    assert_contains "Le log doit indiquer un fallback suite au cache corrompu" "$result" "FALLBACK"
+} 

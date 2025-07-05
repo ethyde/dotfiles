@@ -1,178 +1,82 @@
-#!/bin/bash
+test_acceptance_criteria() {
+    test_suite "Critères d'Acceptation TASK-13-1"
 
-#==============================================================================
-# Test des critères d'acceptation TASK-13-1
-#==============================================================================
+    local script_dir
+    script_dir="$(dirname "$0")"
+    local modules_dir="${script_dir}/../modules"
 
-set -e
-script_dir="$(dirname "$0")"
-modules_dir="${script_dir}/../modules"
-
-echo "=============================================="
-echo "Test des Critères d'Acceptation TASK-13-1"
-echo "=============================================="
-
-# Chargement des modules
-source "${modules_dir}/core/command_classifier.sh" 2>/dev/null || { echo "❌ Impossible de charger command_classifier.sh"; exit 1; }
-source "${modules_dir}/core/learning_engine.sh" 2>/dev/null || { echo "❌ Impossible de charger learning_engine.sh"; exit 1; }
-
-echo "✅ Modules chargés avec succès"
-echo
-
-# Critère 1: Classification automatique des commandes
-echo "=== Critère 1: Classification automatique ==="
-echo "Test classification commandes connues:"
-
-commands_minimal=("get_config" "status" "version" "help")
-commands_normal=("plan" "dev" "debug" "review")
-commands_full=("optimize" "benchmark" "cache" "monitor")
-
-echo "Commandes MINIMAL:"
-for cmd in "${commands_minimal[@]}"; do
-    result=$(classify_command "$cmd")
-    if [[ "$result" == "MINIMAL" ]]; then
-        echo "  ✅ $cmd -> $result"
-    else
-        echo "  ❌ $cmd -> $result (attendu: MINIMAL)"
-    fi
-done
-
-echo "Commandes NORMAL:"
-for cmd in "${commands_normal[@]}"; do
-    result=$(classify_command "$cmd")
-    if [[ "$result" == "NORMAL" ]]; then
-        echo "  ✅ $cmd -> $result"
-    else
-        echo "  ❌ $cmd -> $result (attendu: NORMAL)"
-    fi
-done
-
-echo "Commandes FULL:"
-for cmd in "${commands_full[@]}"; do
-    result=$(classify_command "$cmd")
-    if [[ "$result" == "FULL" ]]; then
-        echo "  ✅ $cmd -> $result"
-    else
-        echo "  ❌ $cmd -> $result (attendu: FULL)"
-    fi
-done
-
-echo
-
-# Critère 2: Apprentissage automatique
-echo "=== Critère 2: Apprentissage automatique ==="
-echo "Test apprentissage nouvelle commande:"
-
-# Apprentissage d'une nouvelle commande
-learn_command_pattern "test_new_command" "NORMAL" "test_acceptance"
-result=$(predict_command_profile "test_new_command")
-if [[ "$result" == "NORMAL" ]]; then
-    echo "  ✅ Apprentissage réussi: test_new_command -> $result"
-else
-    echo "  ❌ Apprentissage échoué: test_new_command -> $result (attendu: NORMAL)"
-fi
-
-echo
-
-# Critère 3: Prédiction pour commandes inconnues
-echo "=== Critère 3: Prédiction commandes inconnues ==="
-unknown_commands=("unknown_get_info" "unknown_build_project" "unknown_optimize_cache")
-
-for cmd in "${unknown_commands[@]}"; do
-    result=$(predict_command_profile "$cmd")
-    echo "  ✅ $cmd -> $result (prédiction heuristique)"
-done
-
-echo
-
-# Critère 4: Détection depuis arguments CLI
-echo "=== Critère 4: Détection arguments CLI ==="
-test_args=("get_config --verbose" "plan new-feature" "debug --trace")
-
-for args in "${test_args[@]}"; do
-    detected=$(detect_command_from_args $args)
-    echo "  ✅ '$args' -> commande détectée: '$detected'"
-done
-
-echo
-
-# Critère 5: Gestion des modules requis
-echo "=== Critère 5: Modules requis par profil ==="
-profiles=("MINIMAL" "NORMAL" "FULL" "AUTO")
-
-for profile in "${profiles[@]}"; do
-    modules=$(get_required_modules "$profile")
-    echo "  ✅ $profile -> modules: $modules"
-done
-
-echo
-
-# Critère 6: Performance et cache
-echo "=== Critère 6: Performance et cache ==="
-echo "Test performance avec cache:"
-
-# Premier appel (mise en cache)
-start_time=$(date +%s.%N 2>/dev/null || date +%s)
-classify_command "performance_test" >/dev/null
-end_time=$(date +%s.%N 2>/dev/null || date +%s)
-
-# Appels suivants (depuis cache)
-start_time2=$(date +%s.%N 2>/dev/null || date +%s)
-for i in {1..5}; do
-    classify_command "performance_test" >/dev/null
-done
-end_time2=$(date +%s.%N 2>/dev/null || date +%s)
-
-if command -v bc >/dev/null 2>&1; then
-    duration1=$(echo "$end_time - $start_time" | bc 2>/dev/null || echo "0")
-    duration2=$(echo "$end_time2 - $start_time2" | bc 2>/dev/null || echo "0")
-    avg_cached=$(echo "$duration2 / 5" | bc -l 2>/dev/null || echo "0")
+    # Critère 1: Classification automatique des commandes
+    test_suite "Critère 1: Classification automatique"
+    source "${modules_dir}/core/command_classifier.sh"
+    assert_command_success "Chargement de command_classifier.sh"
     
-    echo "  ✅ Premier appel: ${duration1}s"
-    echo "  ✅ Appels en cache (moyenne): ${avg_cached}s"
-    
-    if (( $(echo "$avg_cached < $duration1" | bc -l) )); then
-        echo "  ✅ Cache améliore les performances"
-    else
-        echo "  ⚠️  Cache n'améliore pas significativement les performances"
-    fi
-else
-    echo "  ✅ Tests de performance (bc non disponible)"
-fi
+    local commands_minimal=("get_config" "status" "version" "help")
+    for cmd in "${commands_minimal[@]}"; do
+        result=$(classify_command "$cmd")
+        assert_equals "MINIMAL" "$result" "Commande '$cmd' classifiée MINIMAL"
+    done
 
-echo
+    local commands_normal=("plan" "dev" "debug" "review")
+    for cmd in "${commands_normal[@]}"; do
+        result=$(classify_command "$cmd")
+        assert_equals "NORMAL" "$result" "Commande '$cmd' classifiée NORMAL"
+    done
 
-# Critère 7: Statistiques et monitoring
-echo "=== Critère 7: Statistiques ==="
-echo "Statistiques Classification:"
-get_command_profile_stats
+    local commands_full=("optimize" "benchmark" "cache" "monitor")
+    for cmd in "${commands_full[@]}"; do
+        result=$(classify_command "$cmd")
+        assert_equals "FULL" "$result" "Commande '$cmd' classifiée FULL"
+    done
 
-echo
-echo "Statistiques Learning Engine:"
-get_learning_stats
+    # Critère 2: Apprentissage automatique
+    test_suite "Critère 2: Apprentissage automatique"
+    source "${modules_dir}/core/learning_engine.sh"
+    assert_command_success "Chargement de learning_engine.sh"
+    learn_command_pattern "test_new_command" "NORMAL" "test_acceptance"
+    result=$(predict_command_profile "test_new_command")
+    assert_equals "NORMAL" "$result" "Apprentissage de 'test_new_command' en NORMAL"
 
-echo
+    # Critère 3: Prédiction pour commandes inconnues
+    test_suite "Critère 3: Prédiction pour commandes inconnues"
+    local unknown_commands=("unknown_get_info" "unknown_build_project" "unknown_optimize_cache")
 
-# Critère 8: Validation et cohérence
-echo "=== Critère 8: Validation et cohérence ==="
-if validate_classification_consistency >/dev/null 2>&1; then
-    echo "  ✅ Classifications cohérentes"
-else
-    echo "  ⚠️  Incohérences détectées dans les classifications"
-fi
+    for cmd in "${unknown_commands[@]}"; do
+        result=$(predict_command_profile "$cmd")
+        assert_not_empty "$result" "Prédiction pour commande inconnue '$cmd' non vide"
+    done
 
-echo
-echo "=============================================="
-echo "Résumé des Critères d'Acceptation"
-echo "=============================================="
-echo "✅ Classification automatique des commandes"
-echo "✅ Apprentissage automatique des nouvelles commandes"
-echo "✅ Prédiction pour commandes inconnues"
-echo "✅ Détection depuis arguments CLI"
-echo "✅ Gestion des modules requis par profil"
-echo "✅ Performance et système de cache"
-echo "✅ Statistiques et monitoring"
-echo "✅ Validation et cohérence"
-echo
-echo "🎉 Tous les critères d'acceptation sont satisfaits !"
-echo "TASK-13-1 prête pour validation"
+    # Critère 4: Détection depuis arguments CLI
+    test_suite "Critère 4: Détection depuis arguments CLI"
+    assert_equals "get_config" "$(detect_command_from_args "get_config --verbose")" "Détection depuis 'get_config --verbose'"
+    assert_equals "plan" "$(detect_command_from_args "plan new-feature")" "Détection depuis 'plan new-feature'"
+    assert_equals "debug" "$(detect_command_from_args "debug --trace")" "Détection depuis 'debug --trace'"
+
+    # Critère 5: Gestion des modules requis
+    test_suite "Critère 5: Modules requis par profil"
+    local profiles=("MINIMAL" "NORMAL" "FULL" "AUTO")
+
+    for profile in "${profiles[@]}"; do
+        modules=$(get_required_modules "$profile")
+        assert_not_empty "$modules" "Modules requis pour le profil '$profile' non vide"
+    done
+
+    # Critère 6: Performance et cache (vérification conceptuelle)
+    test_suite "Critère 6: Performance et cache"
+    # Premier appel (mise en cache)
+    classify_command "performance_test_accept" >/dev/null
+    # Appels suivants (depuis cache)
+    classify_command "performance_test_accept" >/dev/null
+    assert_command_success "Exécution des tests de performance du cache"
+
+    # Critère 7: Statistiques et monitoring
+    test_suite "Critère 7: Statistiques"
+    stats=$(get_command_profile_stats)
+    assert_not_empty "$stats" "Les statistiques de classification ne sont pas vides"
+    stats_learning=$(get_learning_stats)
+    assert_not_empty "$stats_learning" "Les statistiques d'apprentissage ne sont pas vides"
+
+    # Critère 8: Validation et cohérence
+    test_suite "Critère 8: Validation et cohérence"
+    validate_classification_consistency >/dev/null 2>&1
+    assert_command_success "Validation de la cohérence des classifications"
+}

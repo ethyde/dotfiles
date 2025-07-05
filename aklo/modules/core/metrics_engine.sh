@@ -1,30 +1,33 @@
 #!/bin/bash
 
 #==============================================================================
-# Metrics Engine - Système de métriques avancées TASK-13-7
+# Moteur de Métriques Aklo - TASK-13-5
 #
 # Auteur: AI_Agent
 # Version: 1.0
-# Module de collecte et analyse des métriques de performance
+# Ce module collecte, stocke et analyse les métriques d'utilisation et de
+# performance de l'application Aklo.
 #==============================================================================
 
-# Configuration de base
-set -e
-
-# Variables globales
-METRICS_DB_FILE="${AKLO_METRICS_DB:-${AKLO_CACHE_DIR:-/tmp}/metrics_history.db}"
-METRICS_LOG_FILE="${AKLO_CACHE_DIR:-/tmp}/metrics_engine.log"
+# Configuration
+METRICS_DB_FILE="${AKLO_CACHE_DIR:-/tmp}/metrics_history.db"
+METRICS_LOG_FILE="${AKLO_LOG_DIR:-/tmp}/metrics_engine.log"
 METRICS_STATS_FILE="${AKLO_CACHE_DIR:-/tmp}/metrics_stats.json"
 
-# Configuration des métriques
+# Paramètres de rétention et de performance
 METRICS_RETENTION_DAYS=30
 METRICS_MAX_ENTRIES=10000
-METRICS_BACKUP_INTERVAL=1000
+METRICS_BACKUP_INTERVAL=1000 # Sauvegarde toutes les N écritures
 
-# Métriques en mémoire
+# Structures de données en mémoire
 declare -A LOADING_METRICS
+declare -A COMMAND_METRICS
 declare -A PERFORMANCE_METRICS
 declare -A LEARNING_METRICS
+declare -A SESSION_METADATA
+METRICS_WRITE_COUNTER=0
+
+# Métriques en mémoire
 declare -A PROFILE_USAGE_COUNT
 
 # Compteurs globaux

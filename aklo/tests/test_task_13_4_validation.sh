@@ -64,13 +64,16 @@ test_conditional_loading() {
     echo "=== Test: Chargement conditionnel et fail-safe ==="
     
     # Test que différents profils chargent différents modules
-    local minimal_output=$("${AKLO_SCRIPT}" get_config PROJECT_WORKDIR 2>&1)
+    local minimal_output
+    minimal_output=$(AKLO_DEBUG=true "${AKLO_SCRIPT}" get_config PROJECT_WORKDIR 2>&1)
     echo "$minimal_output" | grep -q "Modules chargés: 0" || fail "MINIMAL devrait charger 0 modules"
     
-    local normal_output=$("${AKLO_SCRIPT}" plan 2>&1 | head -5)
+    local normal_output
+    normal_output=$(AKLO_DEBUG=true "${AKLO_SCRIPT}" plan 2>&1)
     echo "$normal_output" | grep -q "Modules chargés: 1" || fail "NORMAL devrait charger 1 module"
     
-    local full_output=$("${AKLO_SCRIPT}" optimize 2>&1 | head -5)
+    local full_output
+    full_output=$(AKLO_DEBUG=true "${AKLO_SCRIPT}" optimize 2>&1)
     echo "$full_output" | grep -q "Modules chargés: 1" || fail "FULL devrait charger 1 module"
     
     echo "✓ Chargement conditionnel opérationnel"
