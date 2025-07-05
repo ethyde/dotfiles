@@ -10,7 +10,7 @@ test_extract_green() {
     # Setup
     local test_dir
     test_dir=$(mktemp -d)
-    local protocol_file="$test_dir/test_protocol.md"
+    local protocol_file="$test_dir/test_protocol.xml"
     cat > "$protocol_file" << 'EOF'
 # PROTOCOLE DE TEST
 ## SECTION 1 - Introduction
@@ -50,7 +50,7 @@ EOF
     assert_file_contains "$cache_file" "PBI-{{ID}} : {{TITLE}}" "Le contenu du cache est correct"
     
     # Test 5: Gestion d'erreur fichier inexistant
-    local nonexistent_file="$test_dir/nonexistent.md"
+    local nonexistent_file="$test_dir/nonexistent.xml"
     ! extract_and_cache_structure "$nonexistent_file" "PBI" "$cache_file" >/dev/null 2>&1
     assert_command_success "extract_and_cache_structure gère les fichiers inexistants"
 

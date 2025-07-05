@@ -117,18 +117,18 @@ parse_and_generate_artefact() {
   }
   
   # Construire le chemin du protocole (relatif au répertoire racine)
-  local protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.md"
+  local protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.xml"
   
   # Si pas trouvé en relatif, essayer le chemin absolu depuis le script
   if [ ! -f "$protocol_file" ]; then
     local script_dir="$(dirname "$0")"
-    protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.md"
+    protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml"
   fi
   
   if [ ! -f "$protocol_file" ]; then
     echo "❌ Erreur : Protocole $protocol_name non trouvé dans la charte." >&2
-    echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.md" >&2
-    echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.md" >&2
+    echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.xml" >&2
+    echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml" >&2
     return 1
   fi
   
@@ -610,7 +610,7 @@ get_next_id() {
   else
     # Fallback vers l'ancienne implémentation
     local last_id
-    last_id=$(ls "${search_path}/${prefix}"*-*.md 2>/dev/null | sed -n "s/.*${prefix}-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
+    last_id=$(ls "${search_path}/${prefix}"*-*.xml 2>/dev/null | sed -n "s/.*${prefix}-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
     if [ -z "$last_id" ]; then
       last_id=0
     fi
@@ -659,7 +659,7 @@ update_journal() {
   
   JOURNAL_DIR="./$(get_config "JOURNAL_DIR")"
   TODAY=$(date +%Y-%m-%d)
-  JOURNAL_FILE="${JOURNAL_DIR}/JOURNAL-${TODAY}.md"
+  JOURNAL_FILE="${JOURNAL_DIR}/JOURNAL-${TODAY}.xml"
   TIMESTAMP=$(date +%H:%M)
   
   # Créer le répertoire journal si nécessaire
@@ -925,7 +925,7 @@ command_plan() {
   echo ""
   
   # Validation du PBI
-  PBI_FILE=$(ls ./docs/backlog/00-pbi/PBI-${PBI_ID}-*.md 2>/dev/null | head -1)
+  PBI_FILE=$(ls ./docs/backlog/00-pbi/PBI-${PBI_ID}-*.xml 2>/dev/null | head -1)
   if [ ! -f "$PBI_FILE" ]; then
     echo "Erreur : PBI ${PBI_ID} introuvable." >&2
     exit 1
@@ -962,7 +962,7 @@ command_plan() {
     
     TASK_COUNT=$((TASK_COUNT + 1))
     TASK_ID=$(printf "%02d" $TASK_COUNT)
-    TASK_FILENAME="TASK-${PBI_ID}-${TASK_ID}-TODO.md"
+    TASK_FILENAME="TASK-${PBI_ID}-${TASK_ID}-TODO.xml"
     TASK_PATH="./docs/backlog/01-tasks/${TASK_FILENAME}"
     
     # Création du fichier Task selon le niveau d'assistance
@@ -1025,7 +1025,7 @@ EOF
     
     update_journal "PLANIFICATION" "Décomposition PBI" "$JOURNAL_DESCRIPTION" "$JOURNAL_ARTEFACTS"
     
-    JOURNAL_FILE="./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).md"
+    JOURNAL_FILE="./docs/backlog/15-journal/JOURNAL-$(date +%Y-%m-%d).xml"
     MODIFIED_FILES="${MODIFIED_FILES}${JOURNAL_FILE} "
     echo "  ✓ Journal mis à jour"
   fi
@@ -1124,7 +1124,7 @@ command_release() {
   # Préparation des fichiers (sans commit)
   RELEASE_DIR="./$(get_config "RELEASES_DIR")"
   mkdir -p "$RELEASE_DIR"
-  RELEASE_FILE="${RELEASE_DIR}/RELEASE-${NEW_VERSION}-AWAITING_DEPLOYMENT.md"
+  RELEASE_FILE="${RELEASE_DIR}/RELEASE-${NEW_VERSION}-AWAITING_DEPLOYMENT.xml"
   
   # Génération dynamique depuis le protocole RELEASE
   local context_vars="version=${NEW_VERSION},type=${BUMP_TYPE},date=$(date +%Y-%m-%d),status=AWAITING_DEPLOYMENT"
@@ -1139,9 +1139,9 @@ command_release() {
   fi
   
   # Mise à jour du CHANGELOG (simplifié)
-  if [ ! -f "CHANGELOG.md" ]; then
-    echo "# CHANGELOG" > CHANGELOG.md
-    echo "" >> CHANGELOG.md
+  if [ ! -f "CHANGELOG.xml" ]; then
+    echo "# CHANGELOG" > CHANGELOG.xml
+    echo "" >> CHANGELOG.xml
   fi
   
   # Ajout de la nouvelle version au CHANGELOG
@@ -1157,7 +1157,7 @@ command_release() {
 \\
 ### Fixed\\
 - [À compléter]\\
-" CHANGELOG.md
+" CHANGELOG.xml
   
   # Mise à jour de la version dans package.json
   if [ -f "package.json" ]; then
@@ -1165,7 +1165,7 @@ command_release() {
   fi
   
   echo "  ✓ Rapport de release créé"
-  echo "  ✓ CHANGELOG.md mis à jour"
+  echo "  ✓ CHANGELOG.xml mis à jour"
   echo "  ✓ Version mise à jour dans package.json"
   
   # Phase 2: Validation technique TDD (sans commit)
@@ -1191,7 +1191,7 @@ command_release() {
   echo "--- Phase 3: Mise à jour du journal ---"
   
   JOURNAL_DESCRIPTION="Préparation release v${NEW_VERSION} (type: ${BUMP_TYPE})"
-  JOURNAL_ARTEFACTS="RELEASE-${NEW_VERSION}, CHANGELOG.md, package.json"
+  JOURNAL_ARTEFACTS="RELEASE-${NEW_VERSION}, CHANGELOG.xml, package.json"
   
   update_journal "RELEASE" "Préparation release" "$JOURNAL_DESCRIPTION" "$JOURNAL_ARTEFACTS"
   echo "  ✓ Journal mis à jour"
@@ -1205,7 +1205,7 @@ command_release() {
 Release ${BUMP_TYPE} v${NEW_VERSION} préparée et validée.
 
 - Rapport RELEASE-${NEW_VERSION} finalisé
-- CHANGELOG.md mis à jour avec nouvelles fonctionnalités
+- CHANGELOG.xml mis à jour avec nouvelles fonctionnalités
 - Version mise à jour : ${CURRENT_VERSION} → ${NEW_VERSION}
 - Journal mis à jour avec le processus de release
 - Tous les tests passent, build de production validé
@@ -1264,7 +1264,7 @@ command_scratch() {
       echo "  problem    - Résolution de problème complexe"
       echo ""
       echo "Workflow:"
-      echo "  1. Création du fichier SCRATCHPAD-[ID]-[TOPIC].md"
+      echo "  1. Création du fichier SCRATCHPAD-[ID]-[TOPIC].xml"
       echo "  2. Structure selon template choisi"
       echo "  3. Brainstorming et documentation"
       echo "  4. Extraction d'actions concrètes (PBI/TASK)"
@@ -1311,7 +1311,7 @@ command_scratch() {
   local date_id=$(date +%Y%m%d)
   local topic_clean=$(echo "$topic" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
   local scratchpad_id="${date_id}-${topic_clean}"
-  local scratchpad_file="${scratchpad_dir}/SCRATCHPAD-${scratchpad_id}.md"
+  local scratchpad_file="${scratchpad_dir}/SCRATCHPAD-${scratchpad_id}.xml"
   
   # Créer le répertoire si nécessaire
   mkdir -p "$scratchpad_dir"
@@ -1347,11 +1347,11 @@ command_scratch() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "SCRATCHPAD" "Brainstorming: $topic" "Template: $template_type" "SCRATCHPAD-${scratchpad_id}.md"
+    update_journal "SCRATCHPAD" "Brainstorming: $topic" "Template: $template_type" "SCRATCHPAD-${scratchpad_id}.xml"
   fi
 
   echo ""
-  echo "✅ SCRATCHPAD-${scratchpad_id}.md créé avec succès !"
+  echo "✅ SCRATCHPAD-${scratchpad_id}.xml créé avec succès !"
   echo "📍 Fichier: $scratchpad_file"
   echo ""
   echo "🧠 Prochaines étapes:"
@@ -1885,7 +1885,7 @@ command_propose_pbi() {
   mkdir -p "$PBI_DIR"
   
   PBI_ID=$(get_next_id "$PBI_DIR" "PBI")
-  PBI_FILE="${PBI_DIR}/PBI-${PBI_ID}-PROPOSED.md"
+  PBI_FILE="${PBI_DIR}/PBI-${PBI_ID}-PROPOSED.xml"
   TODAY=$(date +%Y-%m-%d)
   
   echo "🎯 Création du PBI-${PBI_ID}: \"$title\""
@@ -1908,11 +1908,11 @@ command_propose_pbi() {
   
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "PRODUCT-OWNER" "Création PBI" "Nouveau PBI-${PBI_ID}: $title" "PBI-${PBI_ID}-PROPOSED.md"
+    update_journal "PRODUCT-OWNER" "Création PBI" "Nouveau PBI-${PBI_ID}: $title" "PBI-${PBI_ID}-PROPOSED.xml"
   fi
   
   echo ""
-  echo "✅ PBI-${PBI_ID}-PROPOSED.md créé avec succès !"
+  echo "✅ PBI-${PBI_ID}-PROPOSED.xml créé avec succès !"
   echo "📍 Fichier: $PBI_FILE"
   echo ""
   echo "Prochaines étapes:"
@@ -1995,7 +1995,7 @@ command_arch() {
   
   # Validation de l'existence du PBI
   PBI_DIR="./$(get_config "PBI_DIR")"
-  PBI_FILE=$(find "$PBI_DIR" -name "PBI-${pbi_id}-*.md" 2>/dev/null | head -1)
+  PBI_FILE=$(find "$PBI_DIR" -name "PBI-${pbi_id}-*.xml" 2>/dev/null | head -1)
   
   if [ -z "$PBI_FILE" ]; then
     echo "Erreur : PBI-${pbi_id} introuvable dans $PBI_DIR" >&2
@@ -2011,13 +2011,13 @@ command_arch() {
   
   # Trouver le prochain ID d'architecture pour ce PBI
   ARCH_ID=1
-  while [ -f "${ARCH_DIR}/ARCH-${pbi_id}-${ARCH_ID}-"*".md" ]; do
+  while [ -f "${ARCH_DIR}/ARCH-${pbi_id}-${ARCH_ID}-"*".xml" ]; do
     ARCH_ID=$((ARCH_ID + 1))
   done
   
   if [ "$review_flag" = "--review" ]; then
     # Mode révision : chercher l'architecture existante
-    EXISTING_ARCH=$(find "$ARCH_DIR" -name "ARCH-${pbi_id}-*-VALIDATED.md" 2>/dev/null | head -1)
+    EXISTING_ARCH=$(find "$ARCH_DIR" -name "ARCH-${pbi_id}-*-VALIDATED.xml" 2>/dev/null | head -1)
     if [ -z "$EXISTING_ARCH" ]; then
       echo "Erreur : Aucune architecture validée trouvée pour PBI-${pbi_id}" >&2
       echo "Utilisez 'aklo arch ${pbi_id}' pour créer une nouvelle architecture."
@@ -2026,7 +2026,7 @@ command_arch() {
     echo "🔄 Révision de l'architecture existante : $(basename "$EXISTING_ARCH")"
   fi
   
-  ARCH_FILE="${ARCH_DIR}/ARCH-${pbi_id}-${ARCH_ID}-DRAFT.md"
+  ARCH_FILE="${ARCH_DIR}/ARCH-${pbi_id}-${ARCH_ID}-DRAFT.xml"
   TODAY=$(date +%Y-%m-%d)
   
   echo "🏗️  Création de l'architecture ARCH-${pbi_id}-${ARCH_ID} pour PBI-${pbi_id}"
@@ -2049,11 +2049,11 @@ command_arch() {
   
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "ARCHITECTURE" "Création document" "Architecture ARCH-${pbi_id}-${ARCH_ID} pour PBI-${pbi_id}" "ARCH-${pbi_id}-${ARCH_ID}-DRAFT.md"
+    update_journal "ARCHITECTURE" "Création document" "Architecture ARCH-${pbi_id}-${ARCH_ID} pour PBI-${pbi_id}" "ARCH-${pbi_id}-${ARCH_ID}-DRAFT.xml"
   fi
   
   echo ""
-  echo "✅ ARCH-${pbi_id}-${ARCH_ID}-DRAFT.md créé avec succès !"
+  echo "✅ ARCH-${pbi_id}-${ARCH_ID}-DRAFT.xml créé avec succès !"
   echo "📍 Fichier: $ARCH_FILE"
   echo ""
   echo "Prochaines étapes:"
@@ -2162,12 +2162,12 @@ command_dev() {
   
   # Recherche de la Task
   local tasks_dir="./$(get_config "TASKS_DIR")"
-  local task_file=$(find "$tasks_dir" -name "TASK-${pbi_id}-${task_seq}-TODO.md" 2>/dev/null | head -1)
+  local task_file=$(find "$tasks_dir" -name "TASK-${pbi_id}-${task_seq}-TODO.xml" 2>/dev/null | head -1)
   
   if [ -z "$task_file" ]; then
     echo "❌ Erreur : Task TASK-${pbi_id}-${task_seq} introuvable avec statut TODO."
     echo "   Répertoire recherché: $tasks_dir"
-    echo "   Fichier attendu: TASK-${pbi_id}-${task_seq}-TODO.md"
+    echo "   Fichier attendu: TASK-${pbi_id}-${task_seq}-TODO.xml"
     echo ""
     echo "Vérifiez que:"
     echo "  1. La Task existe"
@@ -2203,7 +2203,7 @@ command_dev() {
   fi
 
   # Changement de statut TODO → IN_PROGRESS
-  local new_task_file="${tasks_dir}/TASK-${pbi_id}-${task_seq}-IN_PROGRESS.md"
+  local new_task_file="${tasks_dir}/TASK-${pbi_id}-${task_seq}-IN_PROGRESS.xml"
   echo "📝 Mise à jour du statut: TODO → IN_PROGRESS"
   
   mv "$task_file" "$new_task_file"
@@ -2215,7 +2215,7 @@ command_dev() {
 
   # Mise à jour du journal si activé
   if [ "$auto_journal" = "true" ]; then
-    update_journal "DÉVELOPPEMENT" "Démarrage développement TDD TASK-${pbi_id}-${task_seq}" "Branche: $branch_name, Statut: TODO → IN_PROGRESS" "TASK-${pbi_id}-${task_seq}-IN_PROGRESS.md"
+    update_journal "DÉVELOPPEMENT" "Démarrage développement TDD TASK-${pbi_id}-${task_seq}" "Branche: $branch_name, Statut: TODO → IN_PROGRESS" "TASK-${pbi_id}-${task_seq}-IN_PROGRESS.xml"
   fi
 
   echo ""
@@ -2279,7 +2279,7 @@ command_debug() {
       echo "  aklo debug \"Timeout API payment\" --no-agent"
       echo ""
       echo "Workflow:"
-      echo "  1. Création du rapport DEBUG-[ID]-INVESTIGATING.md"
+      echo "  1. Création du rapport DEBUG-[ID]-INVESTIGATING.xml"
       echo "  2. Documentation du problème et étapes de reproduction"
       echo "  3. Formulation d'hypothèses initiales"
       echo "  4. Investigation itérative avec instrumentation"
@@ -2318,7 +2318,7 @@ command_debug() {
     mkdir -p "$debug_dir" 2>/dev/null || true
   fi
   
-  local debug_file="${debug_dir}/DEBUG-${debug_id}-INVESTIGATING.md"
+  local debug_file="${debug_dir}/DEBUG-${debug_id}-INVESTIGATING.xml"
   local today=$(date +%Y-%m-%d)
   
   # Vérification si le rapport existe déjà
@@ -2340,11 +2340,11 @@ command_debug() {
   
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "DEBOGAGE" "Initialisation investigation DEBUG-${debug_id}" "Problème: $title" "DEBUG-${debug_id}-INVESTIGATING.md"
+    update_journal "DEBOGAGE" "Initialisation investigation DEBUG-${debug_id}" "Problème: $title" "DEBUG-${debug_id}-INVESTIGATING.xml"
   fi
 
   echo ""
-  echo "✅ DEBUG-${debug_id}-INVESTIGATING.md créé avec succès !"
+  echo "✅ DEBUG-${debug_id}-INVESTIGATING.xml créé avec succès !"
   echo "📍 Fichier: $debug_file"
   echo ""
   echo "🔍 Prochaines étapes:"
@@ -2388,7 +2388,7 @@ command_review() {
       echo "  1. Analyse du diff de code"
       echo "  2. Vérification conformité protocole DÉVELOPPEMENT"
       echo "  3. Évaluation principes SOLID et qualité"
-      echo "  4. Génération rapport REVIEW-[ID].md"
+      echo "  4. Génération rapport REVIEW-[ID].xml"
       echo "  5. Classification des observations (CRITICAL/MAJOR/MINOR)"
       exit 0
       ;;
@@ -2443,7 +2443,7 @@ command_review() {
     review_id="$target"
   fi
 
-  REVIEW_FILE="${REVIEW_DIR}/REVIEW-${review_id}.md"
+  REVIEW_FILE="${REVIEW_DIR}/REVIEW-${review_id}.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "🔍 Création de la revue REVIEW-${review_id} pour: $target"
@@ -2466,11 +2466,11 @@ command_review() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "REVIEW" "Revue de code: $target" "REVIEW-${review_id}.md"
+    update_journal "REVIEW" "Revue de code: $target" "REVIEW-${review_id}.xml"
   fi
 
   echo ""
-  echo "✅ REVIEW-${review_id}.md créé avec succès !"
+  echo "✅ REVIEW-${review_id}.xml créé avec succès !"
   echo "📍 Fichier: $REVIEW_FILE"
   echo ""
   echo "🔍 Prochaines étapes:"
@@ -2564,7 +2564,7 @@ command_refactor() {
 
   # Générer l'ID selon le protocole (titre-slugifié-YYYYMMDD)
   refactor_id=$(detect_id_pattern "05-REFACTORING" "$scope")
-  REFACTOR_FILE="${REFACTOR_DIR}/REFACTOR-${refactor_id}-ANALYSIS.md"
+  REFACTOR_FILE="${REFACTOR_DIR}/REFACTOR-${refactor_id}-ANALYSIS.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "🔧 Création du refactoring REFACTOR-${refactor_id}"
@@ -2588,11 +2588,11 @@ command_refactor() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "REFACTOR" "Refactoring: $scope" "REFACTOR-${refactor_id}-ANALYSIS.md"
+    update_journal "REFACTOR" "Refactoring: $scope" "REFACTOR-${refactor_id}-ANALYSIS.xml"
   fi
 
   echo ""
-  echo "✅ REFACTOR-${refactor_id}-ANALYSIS.md créé avec succès !"
+  echo "✅ REFACTOR-${refactor_id}-ANALYSIS.xml créé avec succès !"
   echo "📍 Fichier: $REFACTOR_FILE"
   echo ""
   echo "🔧 Prochaines étapes:"
@@ -2707,7 +2707,7 @@ command_hotfix() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   hotfix_id=$(detect_id_pattern "10-HOTFIX" "$issue")
-  HOTFIX_FILE="${HOTFIX_DIR}/HOTFIX-${hotfix_id}.md"
+  HOTFIX_FILE="${HOTFIX_DIR}/HOTFIX-${hotfix_id}.xml"
   TODAY=$(date +%Y-%m-%d)
   TIME=$(date +%H:%M)
 
@@ -2752,7 +2752,7 @@ command_hotfix() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "HOTFIX" "URGENCE: $issue" "HOTFIX-${hotfix_id}.md"
+    update_journal "HOTFIX" "URGENCE: $issue" "HOTFIX-${hotfix_id}.xml"
   fi
 
   # Commit atomique pour traçabilité d'urgence
@@ -2762,7 +2762,7 @@ HOTFIX critique HOTFIX-${hotfix_id}
 
 - Urgence production confirmée
 - Validation TDD: ${PARSED_VALIDATION_LEVEL}
-- Artefact: HOTFIX-${hotfix_id}.md
+- Artefact: HOTFIX-${hotfix_id}.xml
 - Protocole: HOTFIX"
 
   if ! handle_auto_backup "$commit_msg" "HOTFIX"; then
@@ -2872,7 +2872,7 @@ command_optimize() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   optim_id=$(detect_id_pattern "06-OPTIMISATION" "$scope")
-  OPTIM_FILE="${OPTIM_DIR}/OPTIM-${optim_id}-BENCHMARKING.md"
+  OPTIM_FILE="${OPTIM_DIR}/OPTIM-${optim_id}-BENCHMARKING.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "🔬 Création de l'optimisation OPTIM-${optim_id}"
@@ -2910,7 +2910,7 @@ command_optimize() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "OPTIM" "Optimisation: $scope" "OPTIM-${optim_id}-BENCHMARKING.md"
+    update_journal "OPTIM" "Optimisation: $scope" "OPTIM-${optim_id}-BENCHMARKING.xml"
   fi
 
   # Commit atomique pour traçabilité de l'optimisation
@@ -2920,7 +2920,7 @@ Optimisation OPTIM-${optim_id} initialisée
 
 - Objectif: ${scope}
 - Validation TDD: ${PARSED_VALIDATION_LEVEL}
-- Artefact: OPTIM-${optim_id}-BENCHMARKING.md
+- Artefact: OPTIM-${optim_id}-BENCHMARKING.xml
 - Protocole: OPTIMISATION"
 
   if ! handle_auto_backup "$commit_msg" "OPTIMISATION"; then
@@ -3014,7 +3014,7 @@ command_security() {
 
   # Générer l'ID selon le protocole (YYYY-MM-DD)
   audit_id=$(detect_id_pattern "13-SECURITE-AUDIT" "audit")
-  AUDIT_FILE="${SECURITY_DIR}/AUDIT-SECURITY-${audit_id}-SCANNING.md"
+  AUDIT_FILE="${SECURITY_DIR}/AUDIT-SECURITY-${audit_id}-SCANNING.xml"
   TODAY=$(date +%Y-%m-%d)
   
   # Définir le périmètre par défaut
@@ -3043,11 +3043,11 @@ command_security() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "SECURITY" "Audit de sécurité: $scope" "AUDIT-SECURITY-${audit_id}-SCANNING.md"
+    update_journal "SECURITY" "Audit de sécurité: $scope" "AUDIT-SECURITY-${audit_id}-SCANNING.xml"
   fi
 
   echo ""
-  echo "✅ AUDIT-SECURITY-${audit_id}-SCANNING.md créé avec succès !"
+  echo "✅ AUDIT-SECURITY-${audit_id}-SCANNING.xml créé avec succès !"
   echo "📍 Fichier: $AUDIT_FILE"
   echo ""
   echo "🔒 Prochaines étapes (méthode systématique):"
@@ -3364,7 +3364,7 @@ command_experiment() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   experiment_id=$(detect_id_pattern "11-EXPERIMENTATION" "$hypothesis")
-  EXPERIMENT_FILE="${EXPERIMENTS_DIR}/EXPERIMENT-${experiment_id}-PLANNING.md"
+  EXPERIMENT_FILE="${EXPERIMENTS_DIR}/EXPERIMENT-${experiment_id}-PLANNING.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "🧪 Création de l'expérimentation EXPERIMENT-${experiment_id}"
@@ -3388,11 +3388,11 @@ command_experiment() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "EXPERIMENT" "Expérimentation: $hypothesis" "EXPERIMENT-${experiment_id}-PLANNING.md"
+    update_journal "EXPERIMENT" "Expérimentation: $hypothesis" "EXPERIMENT-${experiment_id}-PLANNING.xml"
   fi
 
   echo ""
-  echo "✅ EXPERIMENT-${experiment_id}-PLANNING.md créé avec succès !"
+  echo "✅ EXPERIMENT-${experiment_id}-PLANNING.xml créé avec succès !"
   echo "📍 Fichier: $EXPERIMENT_FILE"
   echo ""
   echo "🧪 Prochaines étapes (méthode scientifique):"
@@ -3488,7 +3488,7 @@ command_docs() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   docs_id=$(detect_id_pattern "17-USER-DOCS" "$topic")
-  DOCS_FILE="${USER_DOCS_DIR}/USER-DOCS-${docs_id}-DRAFT.md"
+  DOCS_FILE="${USER_DOCS_DIR}/USER-DOCS-${docs_id}-DRAFT.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "📚 Création de la documentation USER-DOCS-${docs_id}"
@@ -3512,11 +3512,11 @@ command_docs() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "DOCS" "Documentation: $topic" "USER-DOCS-${docs_id}-DRAFT.md"
+    update_journal "DOCS" "Documentation: $topic" "USER-DOCS-${docs_id}-DRAFT.xml"
   fi
 
   echo ""
-  echo "✅ USER-DOCS-${docs_id}-DRAFT.md créé avec succès !"
+  echo "✅ USER-DOCS-${docs_id}-DRAFT.xml créé avec succès !"
   echo "📍 Fichier: $DOCS_FILE"
   echo ""
   echo "📚 Prochaines étapes (processus de documentation):"
@@ -3610,7 +3610,7 @@ command_analyze() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   analysis_id=$(detect_id_pattern "12-ANALYSE-CONCURRENCE" "$subject")
-  ANALYSIS_FILE="${COMPETITION_DIR}/COMPETITION-${analysis_id}-ANALYSIS.md"
+  ANALYSIS_FILE="${COMPETITION_DIR}/COMPETITION-${analysis_id}-ANALYSIS.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "🔍 Création de l'analyse concurrentielle COMPETITION-${analysis_id}"
@@ -3634,11 +3634,11 @@ command_analyze() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "ANALYZE" "Analyse concurrentielle: $subject" "COMPETITION-${analysis_id}-ANALYSIS.md"
+    update_journal "ANALYZE" "Analyse concurrentielle: $subject" "COMPETITION-${analysis_id}-ANALYSIS.xml"
   fi
 
   echo ""
-  echo "✅ COMPETITION-${analysis_id}-ANALYSIS.md créé avec succès !"
+  echo "✅ COMPETITION-${analysis_id}-ANALYSIS.xml créé avec succès !"
   echo "📍 Fichier: $ANALYSIS_FILE"
   echo ""
   echo "🔍 Prochaines étapes (analyse structurée):"
@@ -3732,7 +3732,7 @@ command_track() {
 
   # Générer l'ID selon le protocole (ID du PBI ou de la fonctionnalité)
   tracking_id=$(detect_id_pattern "16-TRACKING-PLAN" "$feature_id")
-  TRACKING_FILE="${TRACKING_DIR}/TRACKING-PLAN-${tracking_id}-DRAFT.md"
+  TRACKING_FILE="${TRACKING_DIR}/TRACKING-PLAN-${tracking_id}-DRAFT.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "📊 Création du plan de tracking TRACKING-PLAN-${tracking_id}"
@@ -3756,11 +3756,11 @@ command_track() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "TRACK" "Plan de tracking: $feature_id" "TRACKING-PLAN-${tracking_id}-DRAFT.md"
+    update_journal "TRACK" "Plan de tracking: $feature_id" "TRACKING-PLAN-${tracking_id}-DRAFT.xml"
   fi
 
   echo ""
-  echo "✅ TRACKING-PLAN-${tracking_id}-DRAFT.md créé avec succès !"
+  echo "✅ TRACKING-PLAN-${tracking_id}-DRAFT.xml créé avec succès !"
   echo "📍 Fichier: $TRACKING_FILE"
   echo ""
   echo "📊 Prochaines étapes (plan de tracking):"
@@ -3812,7 +3812,7 @@ command_onboard() {
       echo "  • Points d'entrée du code"
       echo ""
       echo "Livrable:"
-      echo "  • ONBOARDING-SUMMARY-YYYY-MM-DD.md"
+      echo "  • ONBOARDING-SUMMARY-YYYY-MM-DD.xml"
       echo ""
       echo "👋 PRINCIPE: Intégration rapide et contexte global"
       exit 0
@@ -3848,7 +3848,7 @@ command_onboard() {
 
   # Générer l'ID selon le protocole (date AAAA-MM-DD)
   onboarding_id=$(detect_id_pattern "14-ONBOARDING" "")
-  ONBOARDING_FILE="${ONBOARDING_DIR}/ONBOARDING-SUMMARY-${onboarding_id}.md"
+  ONBOARDING_FILE="${ONBOARDING_DIR}/ONBOARDING-SUMMARY-${onboarding_id}.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "👋 Création du rapport d'onboarding ONBOARDING-SUMMARY-${onboarding_id}"
@@ -3876,11 +3876,11 @@ command_onboard() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "ONBOARD" "Onboarding projet: $user_role" "ONBOARDING-SUMMARY-${onboarding_id}.md"
+    update_journal "ONBOARD" "Onboarding projet: $user_role" "ONBOARDING-SUMMARY-${onboarding_id}.xml"
   fi
 
   echo ""
-  echo "✅ ONBOARDING-SUMMARY-${onboarding_id}.md créé avec succès !"
+  echo "✅ ONBOARDING-SUMMARY-${onboarding_id}.xml créé avec succès !"
   echo "📍 Fichier: $ONBOARDING_FILE"
   echo ""
   echo "👋 Prochaines étapes (onboarding):"
@@ -3974,7 +3974,7 @@ command_deprecate() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   deprecation_id=$(detect_id_pattern "15-DEPRECATION" "$feature")
-  DEPRECATION_FILE="${DEPRECATION_DIR}/DEPRECATION-${deprecation_id}-ANALYSIS.md"
+  DEPRECATION_FILE="${DEPRECATION_DIR}/DEPRECATION-${deprecation_id}-ANALYSIS.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "📉 Création du plan de dépréciation DEPRECATION-${deprecation_id}"
@@ -3998,11 +3998,11 @@ command_deprecate() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "DEPRECATE" "Dépréciation: $feature" "DEPRECATION-${deprecation_id}-ANALYSIS.md"
+    update_journal "DEPRECATE" "Dépréciation: $feature" "DEPRECATION-${deprecation_id}-ANALYSIS.xml"
   fi
 
   echo ""
-  echo "✅ DEPRECATION-${deprecation_id}-ANALYSIS.md créé avec succès !"
+  echo "✅ DEPRECATION-${deprecation_id}-ANALYSIS.xml créé avec succès !"
   echo "📍 Fichier: $DEPRECATION_FILE"
   echo ""
   echo "📉 Prochaines étapes (dépréciation):"
@@ -4045,7 +4045,7 @@ command_kb() {
       echo "  1. Détection d'une connaissance critique"
       echo "  2. Proposition d'ajout à la base"
       echo "  3. Validation par Human_Developer"
-      echo "  4. Mise à jour du fichier KNOWLEDGE-BASE.md"
+      echo "  4. Mise à jour du fichier KNOWLEDGE-BASE.xml"
       echo ""
       echo "Structure des entrées:"
       echo "  • ID unique (KB-XXX)"
@@ -4087,7 +4087,7 @@ kb_search() {
     exit 1
   fi
 
-  KB_FILE="./$(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.md")"
+  KB_FILE="./$(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.xml")"
   
   if [ ! -f "$KB_FILE" ]; then
     echo "📚 Base de connaissances non trouvée: $KB_FILE"
@@ -4128,7 +4128,7 @@ kb_add() {
     exit 1
   fi
 
-  KB_FILE="./$(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.md")"
+  KB_FILE="./$(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.xml")"
   KB_DIR=$(dirname "$KB_FILE")
   mkdir -p "$KB_DIR"
 
@@ -4166,7 +4166,7 @@ kb_add() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "KB_ADD" "Ajout KB: $subject" "$next_id dans KNOWLEDGE-BASE.md"
+    update_journal "KB_ADD" "Ajout KB: $subject" "$next_id dans KNOWLEDGE-BASE.xml"
   fi
 
   echo ""
@@ -4196,7 +4196,7 @@ kb_update() {
   echo "📝 Fonctionnalité en cours de développement..."
   echo ""
   echo "💡 Pour l'instant, éditez manuellement le fichier:"
-  echo "   $(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.md")"
+  echo "   $(get_config "KB_FILE" || echo "docs/KNOWLEDGE-BASE.xml")"
 }
 
 # Génération d'entrée KB
@@ -4366,7 +4366,7 @@ command_fast() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   fast_id=$(detect_id_pattern "20-FAST-TRACK" "$task")
-  FAST_FILE="${FAST_DIR}/FAST-${fast_id}-TODO.md"
+  FAST_FILE="${FAST_DIR}/FAST-${fast_id}-TODO.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "⚡ Création de la tâche fast-track FAST-${fast_id}"
@@ -4400,11 +4400,11 @@ command_fast() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "FAST" "Fast-track: $task" "FAST-${fast_id}-TODO.md"
+    update_journal "FAST" "Fast-track: $task" "FAST-${fast_id}-TODO.xml"
   fi
 
   echo ""
-  echo "✅ FAST-${fast_id}-TODO.md créé avec succès !"
+  echo "✅ FAST-${fast_id}-TODO.xml créé avec succès !"
   echo "📍 Fichier: $FAST_FILE"
   echo ""
   
@@ -4413,7 +4413,7 @@ command_fast() {
 
 Fast-track FAST-${fast_id} - Modification mineure
 
-- Artefact: FAST-${fast_id}-TODO.md
+- Artefact: FAST-${fast_id}-TODO.xml
 - Protocole: FAST-TRACK
 - Validation: ${PARSED_VALIDATION_LEVEL}"
 
@@ -4507,7 +4507,7 @@ command_meta() {
 
   # Générer l'ID selon le protocole (description-slugifiée-YYYYMMDD)
   meta_id=$(detect_id_pattern "21-META-IMPROVEMENT" "$improvement")
-  META_FILE="${META_DIR}/IMPROVE-${meta_id}-PROPOSED.md"
+  META_FILE="${META_DIR}/IMPROVE-${meta_id}-PROPOSED.xml"
   TODAY=$(date +%Y-%m-%d)
 
   echo "🔄 Création de la proposition d'amélioration IMPROVE-${meta_id}"
@@ -4531,11 +4531,11 @@ command_meta() {
 
   # Mise à jour du journal si activée
   if [ "$auto_journal" = "true" ]; then
-    update_journal "META" "Meta-improvement: $improvement" "IMPROVE-${meta_id}-PROPOSED.md"
+    update_journal "META" "Meta-improvement: $improvement" "IMPROVE-${meta_id}-PROPOSED.xml"
   fi
 
   echo ""
-  echo "✅ IMPROVE-${meta_id}-PROPOSED.md créé avec succès !"
+  echo "✅ IMPROVE-${meta_id}-PROPOSED.xml créé avec succès !"
   echo "📍 Fichier: $META_FILE"
   echo ""
   echo "🔄 Prochaines étapes (meta-improvement):"

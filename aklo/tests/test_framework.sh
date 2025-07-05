@@ -442,7 +442,8 @@ teardown_artefact_test_env() {
     if [ -n "$ORIGINAL_PWD" ]; then
         cd "$ORIGINAL_PWD"
     fi
-    if [ -n "$TEST_PROJECT_DIR" ] && [ -d "$TEST_PROJECT_DIR" ]; then
-        rm -rf "$TEST_PROJECT_DIR"
-    fi
+    # Désactivation temporaire du nettoyage pour debug
+    # if [ -n "$TEST_PROJECT_DIR" ] && [ -d "$TEST_PROJECT_DIR" ]; then
+    #     rm -rf "$TEST_PROJECT_DIR"
+    # fi
 }

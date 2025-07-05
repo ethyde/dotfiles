@@ -226,7 +226,7 @@ class AkloTerminalServer {
       
       // Compter les PBI
       try {
-        const { stdout } = await execAsync('find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l', { cwd: workdir });
+        const { stdout } = await execAsync('find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | wc -l', { cwd: workdir });
         const pbiCount = parseInt(stdout.trim());
         status += `📋 PBI: ${pbiCount} définis\n`;
       } catch {

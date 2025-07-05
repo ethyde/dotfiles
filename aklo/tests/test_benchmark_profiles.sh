@@ -132,24 +132,24 @@ test_analyze_results() {
         echo "📈 Analyse détaillée disponible dans: $BENCHMARK_RESULTS"
         
         # Génération d'un rapport simple
-        echo "# Rapport de Benchmark - Architecture Intelligente" > "/tmp/aklo_benchmark_report.md"
-        echo "" >> "/tmp/aklo_benchmark_report.md"
-        echo "## Résultats par Profil" >> "/tmp/aklo_benchmark_report.md"
-        echo "" >> "/tmp/aklo_benchmark_report.md"
+        echo "# Rapport de Benchmark - Architecture Intelligente" > "/tmp/aklo_benchmark_report.xml"
+        echo "" >> "/tmp/aklo_benchmark_report.xml"
+        echo "## Résultats par Profil" >> "/tmp/aklo_benchmark_report.xml"
+        echo "" >> "/tmp/aklo_benchmark_report.xml"
         
         for profile in "MINIMAL" "NORMAL" "FULL"; do
             local avg=$(awk -F',' -v prof="$profile" '$2==prof {sum+=$4; count++} END {if(count>0) printf "%.1f", sum/count; else print "N/A"}' "$BENCHMARK_RESULTS")
             local min=$(awk -F',' -v prof="$profile" '$2==prof {if(min=="" || $4<min) min=$4} END {print min+0}' "$BENCHMARK_RESULTS")
             local max=$(awk -F',' -v prof="$profile" '$2==prof {if(max=="" || $4>max) max=$4} END {print max+0}' "$BENCHMARK_RESULTS")
             
-            echo "### Profil $profile" >> "/tmp/aklo_benchmark_report.md"
-            echo "- Temps moyen: ${avg}ms" >> "/tmp/aklo_benchmark_report.md"
-            echo "- Temps minimum: ${min}ms" >> "/tmp/aklo_benchmark_report.md"
-            echo "- Temps maximum: ${max}ms" >> "/tmp/aklo_benchmark_report.md"
-            echo "" >> "/tmp/aklo_benchmark_report.md"
+            echo "### Profil $profile" >> "/tmp/aklo_benchmark_report.xml"
+            echo "- Temps moyen: ${avg}ms" >> "/tmp/aklo_benchmark_report.xml"
+            echo "- Temps minimum: ${min}ms" >> "/tmp/aklo_benchmark_report.xml"
+            echo "- Temps maximum: ${max}ms" >> "/tmp/aklo_benchmark_report.xml"
+            echo "" >> "/tmp/aklo_benchmark_report.xml"
         done
         
-        echo "✓ Rapport généré: /tmp/aklo_benchmark_report.md"
+        echo "✓ Rapport généré: /tmp/aklo_benchmark_report.xml"
     else
         fail "Fichier de résultats non trouvé"
     fi
@@ -176,7 +176,7 @@ main() {
     
     echo "✅ Tous les benchmarks des profils sont terminés !"
     echo "📊 Résultats: $BENCHMARK_RESULTS"
-    echo "📈 Rapport: /tmp/aklo_benchmark_report.md"
+    echo "📈 Rapport: /tmp/aklo_benchmark_report.xml"
 }
 
 # Exécution si appelé directement

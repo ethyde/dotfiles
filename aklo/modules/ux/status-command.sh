@@ -67,7 +67,7 @@ show_project_config() {
     
     # Vérifier la charte
     if [ -d "charte" ]; then
-        local protocols_count=$(find charte/PROTOCOLES -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+        local protocols_count=$(find charte/PROTOCOLES -name "*.xml" 2>/dev/null | wc -l | tr -d ' ')
         echo "📚 Charte: $protocols_count protocoles liés"
     else
         echo "⚠️  Charte non liée"
@@ -86,7 +86,7 @@ show_pbi_status() {
         return
     fi
     
-    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
     
     if [ "$total_pbi" -eq 0 ]; then
         echo "📭 Aucun PBI créé"
@@ -101,7 +101,7 @@ show_pbi_status() {
     local in_progress=0
     local done=0
     
-    for pbi_file in docs/backlog/00-pbi/PBI-*.md; do
+    for pbi_file in docs/backlog/00-pbi/PBI-*.xml; do
         if [ -f "$pbi_file" ]; then
             if grep -q "Status.*PROPOSED" "$pbi_file" 2>/dev/null; then
                 proposed=$((proposed + 1))
@@ -125,9 +125,9 @@ show_pbi_status() {
     # PBI les plus récents
     echo ""
     echo "📝 PBI récents:"
-    find docs/backlog/00-pbi -name "PBI-*.md" -type f 2>/dev/null | \
+    find docs/backlog/00-pbi -name "PBI-*.xml" -type f 2>/dev/null | \
         sort -V | tail -3 | while read -r pbi; do
-        local pbi_name=$(basename "$pbi" .md)
+        local pbi_name=$(basename "$pbi" .xml)
         local pbi_title=$(echo "$pbi_name" | sed 's/PBI-[0-9]*-//')
         echo "   • $pbi_title"
     done
@@ -145,7 +145,7 @@ show_tasks_status() {
         return
     fi
     
-    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
     
     if [ "$total_tasks" -eq 0 ]; then
         echo "📭 Aucune tâche créée"
@@ -159,7 +159,7 @@ show_tasks_status() {
     local in_progress=0
     local done=0
     
-    for task_file in docs/backlog/01-tasks/TASK-*.md; do
+    for task_file in docs/backlog/01-tasks/TASK-*.xml; do
         if [ -f "$task_file" ]; then
             if grep -q "Status.*TODO" "$task_file" 2>/dev/null; then
                 todo=$((todo + 1))
@@ -181,9 +181,9 @@ show_tasks_status() {
     if [ "$in_progress" -gt 0 ]; then
         echo ""
         echo "🚀 Tâche courante:"
-        find docs/backlog/01-tasks -name "TASK-*.md" -type f 2>/dev/null | \
+        find docs/backlog/01-tasks -name "TASK-*.xml" -type f 2>/dev/null | \
             xargs grep -l "Status.*IN_PROGRESS" 2>/dev/null | head -1 | while read -r task; do
-            local task_name=$(basename "$task" .md)
+            local task_name=$(basename "$task" .xml)
             local task_title=$(echo "$task_name" | sed 's/TASK-[0-9]*-[0-9]*-//')
             echo "   🎯 $task_title"
         done
@@ -228,8 +228,8 @@ show_status_summary() {
     echo "$(printf '%.0s─' {1..30})"
     
     # Calcul de métriques simples
-    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
-    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
     
     if [ "$total_pbi" -eq 0 ]; then
         echo "🎯 Prochaine étape: Créer votre premier PBI"
@@ -257,8 +257,8 @@ show_status_summary() {
 
 # Status brief (version condensée)
 show_status_brief() {
-    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
-    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
     local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
     
     echo "🤖 Aklo Status: $total_pbi PBI, $total_tasks tâches, branche $current_branch"
@@ -299,10 +299,10 @@ show_status_detailed() {
     echo "📊 Product Backlog Items (PBI)"
     echo "──────────────────────────────"
     if [ -d "docs/backlog/00-pbi" ]; then
-        local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
-        local proposed_pbi=$(find docs/backlog/00-pbi -name "*-PROPOSED.md" 2>/dev/null | wc -l | tr -d ' ')
-        local agreed_pbi=$(find docs/backlog/00-pbi -name "*-AGREED.md" 2>/dev/null | wc -l | tr -d ' ')
-        local done_pbi=$(find docs/backlog/00-pbi -name "*-DONE.md" 2>/dev/null | wc -l | tr -d ' ')
+        local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+        local proposed_pbi=$(find docs/backlog/00-pbi -name "*-PROPOSED.xml" 2>/dev/null | wc -l | tr -d ' ')
+        local agreed_pbi=$(find docs/backlog/00-pbi -name "*-AGREED.xml" 2>/dev/null | wc -l | tr -d ' ')
+        local done_pbi=$(find docs/backlog/00-pbi -name "*-DONE.xml" 2>/dev/null | wc -l | tr -d ' ')
         
         echo "   📈 Total PBI: $total_pbi"
         echo "   🔄 Proposés: $proposed_pbi"
@@ -317,10 +317,10 @@ show_status_detailed() {
     echo "📋 Tasks de Développement"
     echo "──────────────────────────────"
     if [ -d "docs/backlog/01-tasks" ]; then
-        local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
-        local todo_tasks=$(find docs/backlog/01-tasks -name "*-TODO.md" 2>/dev/null | wc -l | tr -d ' ')
-        local progress_tasks=$(find docs/backlog/01-tasks -name "*-IN_PROGRESS.md" 2>/dev/null | wc -l | tr -d ' ')
-        local done_tasks=$(find docs/backlog/01-tasks -name "*-DONE.md" 2>/dev/null | wc -l | tr -d ' ')
+        local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+        local todo_tasks=$(find docs/backlog/01-tasks -name "*-TODO.xml" 2>/dev/null | wc -l | tr -d ' ')
+        local progress_tasks=$(find docs/backlog/01-tasks -name "*-IN_PROGRESS.xml" 2>/dev/null | wc -l | tr -d ' ')
+        local done_tasks=$(find docs/backlog/01-tasks -name "*-DONE.xml" 2>/dev/null | wc -l | tr -d ' ')
         
         echo "   📈 Total Tasks: $total_tasks"
         echo "   📝 À faire: $todo_tasks"
@@ -361,9 +361,9 @@ show_status_detailed() {
     echo "📖 Journal Récent"
     echo "──────────────────────────────"
     if [ -d "docs/backlog/15-journal" ]; then
-        local latest_journal=$(find docs/backlog/15-journal -name "JOURNAL-*.md" 2>/dev/null | sort | tail -1)
+        local latest_journal=$(find docs/backlog/15-journal -name "JOURNAL-*.xml" 2>/dev/null | sort | tail -1)
         if [ -n "$latest_journal" ]; then
-            local journal_date=$(basename "$latest_journal" .md | cut -d'-' -f2-4)
+            local journal_date=$(basename "$latest_journal" .xml | cut -d'-' -f2-4)
             echo "   📅 Dernier journal: $journal_date"
             if [ -f "$latest_journal" ]; then
                 local entry_count=$(grep "^### " "$latest_journal" 2>/dev/null | wc -l | tr -d ' ')
@@ -420,8 +420,8 @@ show_status_detailed() {
 
 # Status JSON (pour intégrations)
 show_status_json() {
-    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
-    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local total_pbi=$(find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    local total_tasks=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
     local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
     local is_configured="false"
     

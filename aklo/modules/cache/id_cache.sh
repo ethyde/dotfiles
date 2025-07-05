@@ -75,7 +75,7 @@ get_next_id_cached() {
     
     # Utiliser la logique originale de get_next_id
     local last_id
-    last_id=$(ls "${search_path}/${prefix}"*-*.md 2>/dev/null | sed -n "s/.*${prefix}-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
+    last_id=$(ls "${search_path}/${prefix}"*-*.xml 2>/dev/null | sed -n "s/.*${prefix}-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
     if [ -z "$last_id" ]; then
         last_id=0
     fi

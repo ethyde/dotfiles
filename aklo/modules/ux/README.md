@@ -229,7 +229,7 @@ aklo propose-pbi --template <TAB><TAB>
 
 ```
 ux-improvements/
-├── README.md                 # Cette documentation
+├── README.xml                 # Cette documentation
 ├── install-ux.sh            # Script d'installation automatique
 ├── help-system.sh           # Système d'aide avancé
 ├── status-command.sh        # Commande status intelligente

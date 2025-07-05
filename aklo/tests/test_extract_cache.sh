@@ -14,7 +14,7 @@ test_extract_and_cache_integration() {
     add_cleanup "rm -rf '$temp_dir'"
 
     # Créer un faux fichier de protocole
-    local protocol_file="$temp_dir/PROTOCOLE-TEST.md"
+    local protocol_file="$temp_dir/PROTOCOLE-TEST.xml"
     cat > "$protocol_file" << 'EOF'
 # Protocole de Test
 
@@ -35,7 +35,7 @@ EOF
     # Définir les variables pour la fonction à tester
     local artefact_type="PBI"
     local protocol_name
-    protocol_name=$(basename "$protocol_file" .md)
+    protocol_name=$(basename "$protocol_file" .xml)
     local cache_file
     cache_file=$(generate_cache_filename "$protocol_name" "$artefact_type")
     # Rediriger le cache vers notre répertoire temporaire

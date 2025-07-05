@@ -12,7 +12,7 @@ teardown() {
 }
 
 test_pbi_generation_cache_behavior() {
-    test_suite "PBI Generation with Cache"
+    test_suite "PBI Generation with Cache (extension-agnostic)"
 
     # 1. Exécution avec cache MISS
     local pbi_title_miss="Test Cache Integration Miss"
@@ -23,9 +23,10 @@ test_pbi_generation_cache_behavior() {
     assert_equals "0" "$exit_code_miss" "La génération PBI (miss) doit réussir"
     assert_contains "$miss_output" "MISS" "Le log doit indiquer un cache MISS"
 
+    # Découverte extension-agnostique
     local pbi_file_miss
-    pbi_file_miss=$(find ./pbi -type f -name "PBI-*-Test-Cache-Integration-Miss.md")
-    assert_not_empty "$pbi_file_miss" "Le fichier PBI doit être créé sur un cache miss"
+    pbi_file_miss=$(ls ./pbi/PBI-*-* 2>/dev/null | grep -E 'Test-Cache-Integration-Miss')
+    assert_not_empty "$pbi_file_miss" "Le fichier PBI doit être créé sur un cache miss, peu importe l'extension"
 
     # Vérifier que le cache a bien été créé
     local cache_file

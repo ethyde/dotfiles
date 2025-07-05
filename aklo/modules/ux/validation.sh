@@ -142,11 +142,11 @@ validate_pbi_id() {
     
     # Vérifier que le PBI existe
     local workdir=$(get_project_workdir)
-    if [ -n "$workdir" ] && [ ! -f "$workdir/backlog/00-pbi/PBI-$pbi_id-"*.md ]; then
+    if [ -n "$workdir" ] && [ ! -f "$workdir/backlog/00-pbi/PBI-$pbi_id-"*.xml ]; then
         errors+=("Le PBI #$pbi_id n'existe pas")
         
         # Suggérer les PBI existants
-        local existing_pbis=$(find "$workdir/backlog/00-pbi" -name "PBI-*.md" 2>/dev/null | \
+        local existing_pbis=$(find "$workdir/backlog/00-pbi" -name "PBI-*.xml" 2>/dev/null | \
             sed 's/.*PBI-\([0-9]*\)-.*/\1/' | sort -n | tr '\n' ' ')
         
         if [ -n "$existing_pbis" ]; then
@@ -191,11 +191,11 @@ validate_task_id() {
     
     # Vérifier que la tâche existe
     local workdir=$(get_project_workdir)
-    if [ -n "$workdir" ] && [ ! -f "$workdir/backlog/01-tasks/TASK-$task_id-"*.md ]; then
+    if [ -n "$workdir" ] && [ ! -f "$workdir/backlog/01-tasks/TASK-$task_id-"*.xml ]; then
         errors+=("La tâche #$task_id n'existe pas")
         
         # Suggérer les tâches existantes
-        local existing_tasks=$(find "$workdir/backlog/01-tasks" -name "TASK-*.md" 2>/dev/null | \
+        local existing_tasks=$(find "$workdir/backlog/01-tasks" -name "TASK-*.xml" 2>/dev/null | \
             sed 's/.*TASK-\([0-9]*\)-.*/\1/' | sort -n | tr '\n' ' ')
         
         if [ -n "$existing_tasks" ]; then

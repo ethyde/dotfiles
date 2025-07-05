@@ -101,13 +101,13 @@ TEMPLATES DISPONIBLES:
     research    Template pour recherche/investigation
 
 WORKFLOW:
-    1. Crée le fichier PBI-<ID>-<TITLE>.md
+    1. Crée le fichier PBI-<ID>-<TITLE>.xml
     2. Remplit avec le template approprié
     3. Ouvre l'éditeur pour finalisation
     4. Commit automatique si configuré
 
 FICHIERS CRÉÉS:
-    docs/backlog/00-pbi/PBI-<ID>-<TITLE>.md
+    docs/backlog/00-pbi/PBI-<ID>-<TITLE>.xml
 
 Voir aussi: aklo plan --help, aklo status
 EOF

@@ -14,7 +14,7 @@ test_parser_cache_integration() {
     test_dir=$(mktemp -d)
     local charte_dir="$test_dir/aklo/charte/PROTOCOLES"
     mkdir -p "$charte_dir"
-    local protocol_file="$charte_dir/03-DEVELOPPEMENT.md"
+    local protocol_file="$charte_dir/03-DEVELOPPEMENT.xml"
     cat > "$protocol_file" << 'EOF'
 # PROTOCOLE DÉVELOPPEMENT
 ## Structure PBI
@@ -27,7 +27,7 @@ EOF
     assert_function_exists "parse_and_generate_artefact" "La fonction parse_and_generate_artefact existe"
 
     # Test 2: Vérifier que le cache n'est PAS encore intégré (phase RED)
-    local output_file="$test_dir/test_output.md"
+    local output_file="$test_dir/test_output.xml"
     local cache_dir
     cache_dir=$(mktemp -d)
     export CACHE_DIR="$cache_dir"

@@ -86,11 +86,11 @@ handle_read_protocol() {
     
     # Déterminer le fichier de protocole
     if [ -n "$protocol_number" ]; then
-        # Recherche par numéro (ex: "02" -> "02-ARCHITECTURE.md")
-        protocol_file=$(find "$CHARTE_DIR/PROTOCOLES" -name "${protocol_number}-*.md" 2>/dev/null | head -1)
+        # Recherche par numéro (ex: "02" -> "02-ARCHITECTURE.xml")
+        protocol_file=$(find "$CHARTE_DIR/PROTOCOLES" -name "${protocol_number}-*.xml" 2>/dev/null | head -1)
     elif [ -n "$protocol_name" ]; then
         # Recherche par nom (insensible à la casse)
-        protocol_file=$(find "$CHARTE_DIR/PROTOCOLES" -iname "*${protocol_name}*.md" 2>/dev/null | head -1)
+        protocol_file=$(find "$CHARTE_DIR/PROTOCOLES" -iname "*${protocol_name}*.xml" 2>/dev/null | head -1)
     fi
     
     if [ -z "$protocol_file" ] || [ ! -f "$protocol_file" ]; then
@@ -123,7 +123,7 @@ handle_list_protocols() {
     
     if [ -d "$CHARTE_DIR/PROTOCOLES" ]; then
         # Lister tous les protocoles
-        for protocol_file in "$CHARTE_DIR/PROTOCOLES"/*.md; do
+        for protocol_file in "$CHARTE_DIR/PROTOCOLES"/*.xml; do
             if [ -f "$protocol_file" ]; then
                 local filename=$(basename "$protocol_file")
                 local title=$(head -1 "$protocol_file" 2>/dev/null | sed 's/^#* *//' || echo "Sans titre")
@@ -135,9 +135,9 @@ handle_list_protocols() {
     fi
     
     # Ajouter les autres documents
-    if [ -f "$CHARTE_DIR/00-CADRE-GLOBAL.md" ]; then
+    if [ -f "$CHARTE_DIR/00-CADRE-GLOBAL.xml" ]; then
         protocols_list="${protocols_list}\\n📖 Documents additionnels:\\n"
-        protocols_list="${protocols_list}• 00-CADRE-GLOBAL.md: Cadre global du protocole\\n"
+        protocols_list="${protocols_list}• 00-CADRE-GLOBAL.xml: Cadre global du protocole\\n"
     fi
     
     if [ -f "$CHARTE_DIR/../config/.aklo.conf" ]; then
@@ -177,7 +177,7 @@ handle_search_documentation() {
     # Rechercher dans tous les fichiers de documentation
     if [ -d "$CHARTE_DIR" ]; then
         # Recherche dans les protocoles
-        for doc_file in "$CHARTE_DIR"/*.md "$CHARTE_DIR/PROTOCOLES"/*.md; do
+        for doc_file in "$CHARTE_DIR"/*.xml "$CHARTE_DIR/PROTOCOLES"/*.xml; do
             if [ -f "$doc_file" ]; then
                 # Recherche insensible à la casse
                 local matches=$(grep -i "$keywords" "$doc_file" 2>/dev/null | head -3)

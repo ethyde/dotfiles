@@ -271,7 +271,7 @@ benchmark_cache() {
     echo "🔴 Test cache miss..."
     local start_time=$(date +%s%N)
     if command -v parse_and_generate_artefact >/dev/null 2>&1; then
-        parse_and_generate_artefact "00-PRODUCT-OWNER" "PBI" "full" "/tmp/benchmark_miss.md" "" >/dev/null 2>&1
+        parse_and_generate_artefact "00-PRODUCT-OWNER" "PBI" "full" "/tmp/benchmark_miss.xml" "" >/dev/null 2>&1
     else
         echo "⚠️  Fonction parse_and_generate_artefact non disponible"
         return 1
@@ -282,7 +282,7 @@ benchmark_cache() {
     # Test 2: Cache hit (deuxième fois)
     echo "🟢 Test cache hit..."
     start_time=$(date +%s%N)
-    parse_and_generate_artefact "00-PRODUCT-OWNER" "PBI" "full" "/tmp/benchmark_hit.md" "" >/dev/null 2>&1
+    parse_and_generate_artefact "00-PRODUCT-OWNER" "PBI" "full" "/tmp/benchmark_hit.xml" "" >/dev/null 2>&1
     end_time=$(date +%s%N)
     local duration_hit=$((($end_time - $start_time) / 1000000))
     
@@ -306,7 +306,7 @@ benchmark_cache() {
     fi
     
     # Nettoyer
-    rm -f /tmp/benchmark_miss.md /tmp/benchmark_hit.md 2>/dev/null || true
+    rm -f /tmp/benchmark_miss.xml /tmp/benchmark_hit.xml 2>/dev/null || true
 }
 
 # Fonction pour nettoyer le cache selon TTL
