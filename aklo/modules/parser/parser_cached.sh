@@ -62,22 +62,22 @@ parse_and_generate_artefact_cached() {
     
     # Construire le chemin du protocole en priorité depuis la variable d'environnement
     local protocol_dir="${AKLO_PROTOCOLS_PATH:-./aklo/charte/PROTOCOLES}"
-    local protocol_file="${protocol_dir}/${protocol_name}.md"
+    local protocol_file="${protocol_dir}/${protocol_name}.xml"
     
     # Si pas trouvé, essayer les chemins legacy pour la compatibilité
     if [ ! -f "$protocol_file" ]; then
-        protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.md"
+        protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.xml"
         if [ ! -f "$protocol_file" ]; then
             local script_dir
             script_dir="$(dirname "$0")"
-            protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.md"
+            protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml"
         fi
     fi
     
     if [ ! -f "$protocol_file" ]; then
         echo "❌ Erreur : Protocole $protocol_name non trouvé." >&2
-        echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.md" >&2
-        echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.md" >&2
+        echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.xml" >&2
+        echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml" >&2
         return 1
     fi
     
@@ -132,12 +132,17 @@ parse_and_generate_artefact_cached() {
             echo "❌ Erreur : Structure d'artefact $artefact_type non trouvée dans $protocol_name." >&2
             return 1
         fi
+        # Forcer le recalcul du cache si le protocole a changé
+        if [ -n "$cache_file" ]; then
+            echo "$artefact_structure" > "$cache_file"
+            log_cache_event "RECALC" "Cache régénéré pour $cache_file"
+        fi
     fi
     
     # Appliquer le filtrage intelligent selon le niveau d'assistance
     local filtered_content
     if ! filtered_content=$(apply_intelligent_filtering "$artefact_structure" "$assistance_level" "$context_vars"); then
-        echo "❌ Erreur : Échec du filtrage intelligent." >&2
+        echo "❌ Erreur : Échec du filtrage intelligent (injection des variables). Vérifiez que tous les marqueurs %%VAR%% sont présents dans le template et que les variables sont bien passées." >&2
         return 1
     fi
     
