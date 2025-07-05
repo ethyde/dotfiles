@@ -221,7 +221,7 @@ class AkloDocumentationServer {
     
     try {
       const files = await readdir(protocolsPath);
-      const protocolFiles = files.filter(file => file.endsWith('.md'));
+      const protocolFiles = files.filter(file => file.endsWith('.xml'));
       
       // Chercher le fichier qui contient le nom du protocole
       const targetProtocol = protocol_name.toUpperCase();
@@ -229,8 +229,8 @@ class AkloDocumentationServer {
       debugInfo += `Fichiers disponibles: ${protocolFiles.join(', ')}\n`;
       
       const matchingFile = protocolFiles.find(file => {
-        // Format: XX-PROTOCOLE.md
-        const match = file.match(/^\d+-(.+)\.md$/);
+        // Format: XX-PROTOCOLE.xml
+        const match = file.match(/^\d+-(.+)\.xml$/);
         const extracted = match ? match[1] : null;
         debugInfo += `Fichier: ${file} -> Extrait: "${extracted}" (match: ${extracted === targetProtocol})\n`;
         return match && match[1] === targetProtocol;
@@ -280,16 +280,16 @@ class AkloDocumentationServer {
     try {
       const files = await readdir(protocolsPath);
       const protocols = files
-        .filter(file => file.endsWith('.md'))
+        .filter(file => file.endsWith('.xml'))
         .map(file => {
-          const match = file.match(/^(\d+)-(.+)\.md$/);
+          const match = file.match(/^(\d+)-(.+)\.xml$/);
           return match ? {
             number: match[1],
             name: match[2],
             filename: file,
           } : {
             number: '??',
-            name: basename(file, '.md'),
+            name: basename(file, '.xml'),
             filename: file,
           };
         })
@@ -338,7 +338,7 @@ class AkloDocumentationServer {
     if (scope === 'protocols' || scope === 'all') {
       // Rechercher dans le CADRE-GLOBAL
       try {
-        const cadreGlobalPath = join(chartePath, '00-CADRE-GLOBAL.md');
+        const cadreGlobalPath = join(chartePath, '00-CADRE-GLOBAL.xml');
         const content = await readFile(cadreGlobalPath, 'utf-8');
         const contentLower = content.toLowerCase();
         
@@ -346,7 +346,7 @@ class AkloDocumentationServer {
         if (matches.length > 0) {
           results.push({
             type: 'Cadre Global',
-            file: '00-CADRE-GLOBAL.md',
+            file: '00-CADRE-GLOBAL.xml',
             path: cadreGlobalPath,
             matches: matches.length,
             relevance: matches.length / searchTerms.length,
@@ -361,7 +361,7 @@ class AkloDocumentationServer {
       try {
         const protocolFiles = await readdir(protocolsPath);
         
-        for (const file of protocolFiles.filter(f => f.endsWith('.md'))) {
+        for (const file of protocolFiles.filter(f => f.endsWith('.xml'))) {
           const content = await readFile(join(protocolsPath, file), 'utf-8');
           const contentLower = content.toLowerCase();
           
@@ -455,12 +455,12 @@ class AkloDocumentationServer {
       const backlogPath = join(project_path, 'docs', 'backlog');
       
       const artefactTypes = [
-        { name: 'PBI', path: '00-pbi', pattern: 'PBI-*.md' },
-        { name: 'Tasks', path: '01-tasks', pattern: 'TASK-*.md' },
-        { name: 'Architecture', path: '02-architecture', pattern: 'ARCH-*.md' },
-        { name: 'Debug', path: '04-debug', pattern: 'DEBUG-*.md' },
-        { name: 'Reviews', path: '07-reviews', pattern: 'REVIEW-*.md' },
-        { name: 'Journal', path: '15-journal', pattern: 'JOURNAL-*.md' },
+        { name: 'PBI', path: '00-pbi', pattern: 'PBI-*.xml' },
+        { name: 'Tasks', path: '01-tasks', pattern: 'TASK-*.xml' },
+        { name: 'Architecture', path: '02-architecture', pattern: 'ARCH-*.xml' },
+        { name: 'Debug', path: '04-debug', pattern: 'DEBUG-*.xml' },
+        { name: 'Reviews', path: '07-reviews', pattern: 'REVIEW-*.xml' },
+        { name: 'Journal', path: '15-journal', pattern: 'JOURNAL-*.xml' },
       ];
       
       summary += '📋 Artefacts du Projet:\n';
@@ -579,7 +579,7 @@ class AkloDocumentationServer {
     const { section, charte_path } = args;
     
     const chartePath = charte_path || await this.findChartePath();
-    const cadreGlobalPath = join(chartePath, '00-CADRE-GLOBAL.md');
+    const cadreGlobalPath = join(chartePath, '00-CADRE-GLOBAL.xml');
     
     try {
       const content = await readFile(cadreGlobalPath, 'utf-8');

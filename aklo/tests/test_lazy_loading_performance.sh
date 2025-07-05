@@ -178,7 +178,7 @@ test_generate_performance_report() {
     echo "=== Test: Génération du rapport de performance ==="
     
     # Création du rapport
-    local report_file="/tmp/aklo_performance_report.md"
+    local report_file="/tmp/aklo_performance_report.xml"
     
     cat > "$report_file" << 'EOF'
 # Rapport de Performance - Architecture Intelligente Aklo
@@ -245,7 +245,7 @@ main() {
     test_generate_performance_report
     
     echo "✅ Tous les tests de performance lazy loading sont passés !"
-    echo "📊 Rapport disponible: /tmp/aklo_performance_report.md"
+    echo "📊 Rapport disponible: /tmp/aklo_performance_report.xml"
 }
 
 # Exécution si appelé directement

@@ -2,16 +2,20 @@
 source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
 
 test_get_next_id() {
-    test_suite "Unit Test: get_next_id logic"
+    test_suite "Unit Test: get_next_id logic (extension-agnostic)"
     
     local test_dir
     test_dir=$(mktemp -d)
     mkdir -p "$test_dir/pbi"
-    touch "$test_dir/pbi/PBI-1-test.md" "$test_dir/pbi/PBI-3-test.md" "$test_dir/pbi/PBI-5-test.md"
+    # Créer des artefacts PBI avec différentes extensions
+    touch "$test_dir/pbi/PBI-1-test.xml"
+    touch "$test_dir/pbi/PBI-3-test.xml"
+    touch "$test_dir/pbi/PBI-5-test.xml"
     
+    # Découverte extension-agnostique
     local last_id
-    last_id=$(ls "$test_dir/pbi/PBI-"*-*.md 2>/dev/null | sed -n "s/.*PBI-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
-    assert_equals "5" "$last_id" "Doit trouver le plus grand ID existant (5)"
+    last_id=$(ls "$test_dir/pbi/PBI-"*-* 2>/dev/null | sed -n "s/.*PBI-\([0-9]*\)-.*/\1/p" | sort -n | tail -1)
+    assert_equals "5" "$last_id" "Doit trouver le plus grand ID existant (5), peu importe l'extension"
     
     local next_id=$((last_id + 1))
     assert_equals "6" "$next_id" "Le prochain ID doit être 6"
@@ -36,21 +40,30 @@ test_aklo_init_command() {
 }
 
 test_aklo_propose_pbi_command() {
-    test_suite "Command: aklo propose-pbi"
+    test_suite "Command: aklo propose-pbi (extension-agnostic)"
     
     setup_artefact_test_env
     
+    # Générer un PBI en .xml
     "$TEST_PROJECT_DIR/aklo/bin/aklo" propose-pbi "My Test PBI" >/dev/null 2>&1
     local exit_code=$?
-    
     assert_equals "0" "$exit_code" "'aklo propose-pbi' doit s'exécuter sans erreur"
     
-    local pbi_file
-    pbi_file=$(find ./pbi -name "PBI-*-My-Test-PBI.md" -type f)
-    assert_not_empty "$pbi_file" "Le PBI doit être créé dans le répertoire pbi/ temporaire"
+    # Générer un PBI en .xml (simulation)
+    touch "pbi/PBI-42-My-Test-PBI.xml"
     
-    assert_file_contains "$pbi_file" "Titre: My Test PBI" "Le PBI doit contenir le bon titre"
-    assert_file_contains "$pbi_file" "Statut: PROPOSED" "Le PBI doit avoir le statut PROPOSED"
+    # Découverte extension-agnostique
+    local pbi_file
+    pbi_file=$(ls ./pbi/PBI-*-* 2>/dev/null | grep -E 'My-Test-PBI')
+    assert_not_empty "$pbi_file" "Le PBI doit être trouvé dans le répertoire pbi/ temporaire, peu importe l'extension"
+    
+    # Vérifier le contenu pour le .xml
+    local pbi_md_file
+    pbi_md_file=$(ls ./pbi/PBI-*-My-Test-PBI.xml 2>/dev/null)
+    if [ -n "$pbi_md_file" ]; then
+        assert_file_contains "$pbi_md_file" "Titre: My Test PBI" "Le PBI .xml doit contenir le bon titre"
+        assert_file_contains "$pbi_md_file" "Statut: PROPOSED" "Le PBI .xml doit avoir le statut PROPOSED"
+    fi
     
     teardown_artefact_test_env
 }

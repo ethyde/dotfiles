@@ -30,7 +30,7 @@ class AtomicCommitManager {
     
     // Initialiser le journal du jour
     const today = new Date().toISOString().split('T')[0];
-    this.journalPath = join(workdir, 'docs', 'backlog', '15-journal', `JOURNAL-${today}.md`);
+    this.journalPath = join(workdir, 'docs', 'backlog', '15-journal', `JOURNAL-${today}.xml`);
     
     // Créer le répertoire journal si nécessaire
     await mkdir(dirname(this.journalPath), { recursive: true });
@@ -173,7 +173,7 @@ Closes ${details.taskId}`;
 ${summary}
 
 - Rapport RELEASE-${version} finalisé
-- CHANGELOG.md mis à jour avec nouvelles fonctionnalités
+- CHANGELOG.xml mis à jour avec nouvelles fonctionnalités
 - Version mise à jour : ${details.oldVersion} → ${version}
 - Journal mis à jour avec le processus de release
 - Tous les tests passent, build de production validé
@@ -293,7 +293,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   
   // Simuler la création d'une task
   manager.stageFile(
-    join(process.cwd(), 'test-task.md'),
+    join(process.cwd(), 'test-task.xml'),
     '# TASK-42-01: Test Task\n\nContenu de test',
     'Création task de test'
   );

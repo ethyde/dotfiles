@@ -182,7 +182,7 @@ EOF
     
     # Créer le PBI
     local workdir=$(grep "PROJECT_WORKDIR=" .aklo.conf | cut -d'=' -f2)
-    local pbi_file="$workdir/backlog/00-pbi/PBI-1-$(echo "$pbi_title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]').md"
+    local pbi_file="$workdir/backlog/00-pbi/PBI-1-$(echo "$pbi_title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]').xml"
     
     cat > "$pbi_file" << EOF
 # $pbi_title
@@ -255,7 +255,7 @@ EOF
         fi
         
         # Créer le fichier de tâche
-        local task_file="$workdir/backlog/01-tasks/TASK-$i-1-$(echo "$task_title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]').md"
+        local task_file="$workdir/backlog/01-tasks/TASK-$i-1-$(echo "$task_title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]').xml"
         
         cat > "$task_file" << EOF
 # $task_title
@@ -374,8 +374,8 @@ EOF
     echo -e "\n${CYAN}📊 État final de votre projet :${NC}"
     
     local workdir=$(grep "PROJECT_WORKDIR=" .aklo.conf | cut -d'=' -f2)
-    local pbi_count=$(find "$workdir/backlog/00-pbi" -name "PBI-*.md" 2>/dev/null | wc -l | tr -d ' ')
-    local task_count=$(find "$workdir/backlog/01-tasks" -name "TASK-*.md" 2>/dev/null | wc -l | tr -d ' ')
+    local pbi_count=$(find "$workdir/backlog/00-pbi" -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    local task_count=$(find "$workdir/backlog/01-tasks" -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
     
     echo -e "📋 PBI créés: $pbi_count"
     echo -e "🔧 Tâches planifiées: $task_count"

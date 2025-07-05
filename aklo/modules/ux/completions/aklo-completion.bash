@@ -44,7 +44,7 @@ _aklo_completion() {
                 # Compléter avec les IDs de PBI disponibles
                 local pbi_ids=""
                 if [[ -d "docs/backlog/00-pbi" ]]; then
-                    pbi_ids=$(find docs/backlog/00-pbi -name "PBI-*.md" 2>/dev/null | \
+                    pbi_ids=$(find docs/backlog/00-pbi -name "PBI-*.xml" 2>/dev/null | \
                         sed 's/.*PBI-\([0-9]*\)-.*/\1/' | sort -n | tr '\n' ' ')
                 fi
                 COMPREPLY=($(compgen -W "$pbi_ids" -- "$cur"))
@@ -64,7 +64,7 @@ _aklo_completion() {
                 # Compléter avec les IDs de tâches disponibles
                 local task_ids=""
                 if [[ -d "docs/backlog/01-tasks" ]]; then
-                    task_ids=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | \
+                    task_ids=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | \
                         sed 's/.*TASK-\([0-9]*\)-.*/\1/' | sort -n | tr '\n' ' ')
                 fi
                 COMPREPLY=($(compgen -W "$task_ids" -- "$cur"))
@@ -77,7 +77,7 @@ _aklo_completion() {
                 # Compléter avec les IDs de tâches disponibles
                 local task_ids=""
                 if [[ -d "docs/backlog/01-tasks" ]]; then
-                    task_ids=$(find docs/backlog/01-tasks -name "TASK-*.md" 2>/dev/null | \
+                    task_ids=$(find docs/backlog/01-tasks -name "TASK-*.xml" 2>/dev/null | \
                         sed 's/.*TASK-\([0-9]*\)-.*/\1/' | sort -n | tr '\n' ' ')
                 fi
                 COMPREPLY=($(compgen -W "$task_ids" -- "$cur"))

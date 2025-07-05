@@ -54,7 +54,7 @@ test_metrics_integration_with_parser() {
     
     # Vérifier que l'artefact a été créé au bon endroit (dans le temp dir)
     local pbi_file
-    pbi_file=$(find ./pbi -name "PBI-*-Test-Metrics-Integration.md" -type f)
+    pbi_file=$(find ./pbi -name "PBI-*-Test-Metrics-Integration.xml" -type f)
     assert_not_empty "$pbi_file" "Le PBI est créé dans le répertoire temporaire 'pbi'"
 }
 

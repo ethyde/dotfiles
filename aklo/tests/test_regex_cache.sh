@@ -157,10 +157,10 @@ test_extract_pbi_id() {
     init_regex_cache
     
     local pbi_id
-    pbi_id=$(extract_pbi_id "PBI-42-PROPOSED.md")
+    pbi_id=$(extract_pbi_id "PBI-42-PROPOSED.xml")
     assert_equals "PBI-42" "$pbi_id" "Should extract PBI-42"
     
-    pbi_id=$(extract_pbi_id "TASK-7-1-TODO.md")
+    pbi_id=$(extract_pbi_id "TASK-7-1-TODO.xml")
     assert_equals "" "$pbi_id" "Should not extract from TASK filename"
 }
 
@@ -168,10 +168,10 @@ test_extract_task_id() {
     init_regex_cache
     
     local task_id
-    task_id=$(extract_task_id "TASK-7-1-TODO.md")
+    task_id=$(extract_task_id "TASK-7-1-TODO.xml")
     assert_equals "TASK-7-1" "$task_id" "Should extract TASK-7-1"
     
-    task_id=$(extract_task_id "PBI-42-PROPOSED.md")
+    task_id=$(extract_task_id "PBI-42-PROPOSED.xml")
     assert_equals "" "$task_id" "Should not extract from PBI filename"
 }
 

@@ -34,7 +34,7 @@ setup_test() {
     mkdir -p "$protocol_dir"
     export AKLO_PROTOCOLS_PATH="$protocol_dir"
 
-    cat > "${protocol_dir}/03-DEVELOPPEMENT.md" <<'EOF'
+    cat > "${protocol_dir}/03-DEVELOPPEMENT.xml" <<'EOF'
 ### 2.3. Structure Obligatoire Du Fichier PBI
 \`\`\`markdown
 # PBI-{{ID}} : {{TITLE}}
@@ -58,7 +58,7 @@ test_suite "Parser avec Cache (Green Path) v3.0"
 setup_test
 echo "-> Test Case: Le parser doit créer les fichiers sur un cache miss"
 
-    output_file="${TEST_TEMP_DIR}/output.md"
+    output_file="${TEST_TEMP_DIR}/output.xml"
     cache_file="${AKLO_CACHE_DIR}/protocol_03-DEVELOPPEMENT_PBI.parsed"
     
     log=$(parse_and_generate_artefact_cached "03-DEVELOPPEMENT" "PBI" "full" "$output_file" "" 2>&1)
@@ -74,7 +74,7 @@ teardown_test
 setup_test
 echo "-> Test Case: Le parser doit utiliser le cache (HIT)"
 
-    output_file="${TEST_TEMP_DIR}/output.md"
+    output_file="${TEST_TEMP_DIR}/output.xml"
     
     # Premier passage pour créer le cache
     parse_and_generate_artefact_cached "03-DEVELOPPEMENT" "PBI" "full" "$output_file" "" >/dev/null 2>&1
@@ -91,7 +91,7 @@ setup_test
 echo "-> Test Case: Le parser ne doit pas utiliser le cache s'il est désactivé"
 
     export AKLO_CACHE_ENABLED=false
-    output_file="${TEST_TEMP_DIR}/output.md"
+    output_file="${TEST_TEMP_DIR}/output.xml"
     cache_file="${AKLO_CACHE_DIR}/protocol_03-DEVELOPPEMENT_PBI.parsed"
 
     log=$(parse_and_generate_artefact_cached "03-DEVELOPPEMENT" "PBI" "full" "$output_file" "" 2>&1)

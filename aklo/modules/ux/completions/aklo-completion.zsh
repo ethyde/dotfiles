@@ -119,7 +119,7 @@ _aklo_pbi_ids() {
     local pbi_ids=()
     
     if [[ -d "docs/backlog/00-pbi" ]]; then
-        for file in docs/backlog/00-pbi/PBI-*.md(N); do
+        for file in docs/backlog/00-pbi/PBI-*.xml(N); do
             if [[ -f "$file" ]]; then
                 local id=${file:t}
                 id=${id#PBI-}
@@ -141,7 +141,7 @@ _aklo_task_ids() {
     local task_ids=()
     
     if [[ -d "docs/backlog/01-tasks" ]]; then
-        for file in docs/backlog/01-tasks/TASK-*.md(N); do
+        for file in docs/backlog/01-tasks/TASK-*.xml(N); do
             if [[ -f "$file" ]]; then
                 local id=${file:t}
                 id=${id#TASK-}

@@ -13,7 +13,7 @@ test_extract_simple() {
     trap 'rm -rf "$test_dir" "$cache_dir"; unset CACHE_DIR; trap - EXIT' EXIT
 
     export CACHE_DIR="$cache_dir"
-    local protocol_file="$test_dir/test_protocol.md"
+    local protocol_file="$test_dir/test_protocol.xml"
     cat > "$protocol_file" << 'EOF'
 # PROTOCOLE DE TEST
 ### 2.3. Structure Obligatoire Du Fichier PBI

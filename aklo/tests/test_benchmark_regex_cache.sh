@@ -14,14 +14,14 @@ source "$(dirname "$0")/../modules/cache/regex_cache.sh"
 # Configuration du benchmark
 ITERATIONS=100
 TEST_FILES=(
-    "PBI-1-PROPOSED.md"
-    "PBI-7-AGREED.md"
-    "PBI-42-DONE.md"
-    "TASK-1-1-TODO.md"
-    "TASK-7-1-IN_PROGRESS.md"
-    "TASK-42-3-DONE.md"
-    "ARCH-7-1.md"
-    "DEBUG-test-20250703.md"
+    "PBI-1-PROPOSED.xml"
+    "PBI-7-AGREED.xml"
+    "PBI-42-DONE.xml"
+    "TASK-1-1-TODO.xml"
+    "TASK-7-1-IN_PROGRESS.xml"
+    "TASK-42-3-DONE.xml"
+    "ARCH-7-1.xml"
+    "DEBUG-test-20250703.xml"
 )
 
 echo "🚀 Benchmark du Cache Regex - TASK-7-1"
