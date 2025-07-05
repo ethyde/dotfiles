@@ -90,8 +90,6 @@ load_modules_for_profile() {
                 echo "⚠️  Module $module non trouvé - continuer sans ce module" >&2
             fi
         done
-    else
-        echo "📦 Profil MINIMAL - aucun module à charger" >&2
     fi
 }
 
@@ -157,7 +155,7 @@ load_modules_for_profile "$AKLO_PROFILE"
 
 if [[ "$AKLO_PROFILE" != "MINIMAL" || "$AKLO_DEBUG_MODE" == "true" ]]; then
     if [[ ${#AKLO_MODULES_LOADED[@]} -eq 0 ]]; then
-        echo "📦 Profil MINIMAL - aucun module à charger" >&2
+        echo "📦 Modules chargés: 0" >&2
     else
         echo "📦 Modules chargés: ${#AKLO_MODULES_LOADED[@]} (${AKLO_MODULES_LOADED[*]})" >&2
     fi

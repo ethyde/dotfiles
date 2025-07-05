@@ -5,7 +5,7 @@
 # Phase BLUE: Version refactorisée et optimisée
 
 # Source des fonctions de cache (TASK-6-1)
-source "$(dirname "${BASH_SOURCE[0]}")/aklo_cache_functions.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../cache/cache_functions.sh"
 
 # Fonction utilitaire pour obtenir le pattern d'un type d'artefact
 # Utilise un case au lieu d'un tableau associatif pour compatibilité
@@ -116,20 +116,10 @@ clean_extracted_structure() {
         return 1
     fi
     
-    # Supprimer la première ligne (pattern de début)
-    structure=$(echo "$structure" | tail -n +2)
-    
-    # Supprimer la dernière ligne si elle contient le pattern de fin
-    if echo "$structure" | tail -n 1 | grep -q "^## SECTION 3"; then
-        local line_count=$(echo "$structure" | wc -l)
-        if [ "$line_count" -gt 1 ]; then
-            local target_lines=$((line_count - 1))
-            structure=$(echo "$structure" | head -n $target_lines)
-        fi
-    fi
-    
-    # Extraire uniquement le contenu markdown entre ```markdown et ```
-    echo "$structure" | sed -n '/```markdown/,/```/p' | sed '1d;$d'
+    # 1. Supprime la première ligne (le `###...`)
+    # 2. Supprime la dernière ligne (le `## SECTION 3...`) (compatible macOS)
+    # 3. Sur ce qui reste, extrait le contenu entre ```markdown et ```
+    echo "$structure" | tail -n +2 | sed '$d' | sed -n '/```markdown/,/```/p' | sed '1d;$d'
 }
 
 # Extraire la structure d'artefact depuis un protocole
@@ -138,23 +128,16 @@ clean_extracted_structure() {
 extract_artefact_structure() {
     local protocol_file="$1"
     local artefact_type="$2"
-    
-    # Validation des paramètres
-    if [ -z "$protocol_file" ] || [ -z "$artefact_type" ]; then
+
+    if [ -z "$protocol_file" ] || [ ! -f "$protocol_file" ] || [ -z "$artefact_type" ]; then
         return 1
     fi
-    
-    # Vérifier l'existence du fichier protocole
-    if [ ! -f "$protocol_file" ]; then
-        return 1
-    fi
-    
-    # Obtenir le pattern pour ce type d'artefact
+
     local start_pattern
     if ! start_pattern=$(get_artefact_pattern "$artefact_type"); then
         return 1
     fi
-    
+
     local end_pattern="^## SECTION 3"
     
     # Extraire la section entre les patterns

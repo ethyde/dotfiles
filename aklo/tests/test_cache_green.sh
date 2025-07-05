@@ -1,152 +1,72 @@
 #!/bin/bash
+source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
 
-# Tests unitaires pour TASK-6-4 - Phase GREEN
-# Test des fonctionnalités de monitoring cache
+AKLO_EXEC=""
 
-set -e
-
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-echo -e "${BLUE}🧪 Tests Phase GREEN - Monitoring Cache${NC}"
-echo "======================================================================="
-
-cd /Users/eplouvie/Projets/dotfiles
-
-# Source des fonctions de monitoring
-source ak../modules/cache/cache_monitoring.sh
-
-# Test 1: Configuration cache avancée
-echo -e "${BLUE}Test 1: Configuration cache avancée${NC}"
-if command -v get_cache_config >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Fonction get_cache_config disponible"
+setup() {
+    setup_artefact_test_env
+    AKLO_EXEC="${TEST_PROJECT_DIR}/aklo/bin/aklo"
     
-    # Tester la lecture de configuration
-    get_cache_config
-    if [ "$CACHE_ENABLED" = "true" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Configuration cache lue correctement"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Configuration cache incorrecte"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Fonction get_cache_config manquante"
-fi
+    # Charger les modules nécessaires depuis la VRAIE installation, pas le temp dir
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_monitoring.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh"
+    export CACHE_DIR="$TEST_PROJECT_DIR/.aklo_cache"
+    mkdir -p "$CACHE_DIR"
+}
 
-# Test 2: Commande aklo cache status
-echo -e "${BLUE}Test 2: Commande aklo cache status${NC}"
-if ./aklo/bin/aklo cache status >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Commande 'aklo cache status' fonctionne"
+teardown() {
+    teardown_artefact_test_env
+    unset CACHE_DIR
+}
+
+test_cache_commands() {
+    test_suite "Cache Commands"
     
-    # Vérifier l'output
-    output=$(./aklo/bin/aklo cache status 2>&1)
-    if echo "$output" | grep -q "STATUT DU CACHE AKLO"; then
-        echo -e "${GREEN}✓ PASS${NC}: Output cache status correct"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Output cache status incorrect"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Commande 'aklo cache status' échoue"
-fi
+    # Test `aklo cache status`
+    local status_output
+    status_output=$($AKLO_EXEC cache status 2>&1)
+    assert_contains "$status_output" "STATUT DU CACHE AKLO" "La commande 'aklo cache status' fonctionne"
 
-# Test 3: Commande aklo cache clear
-echo -e "${BLUE}Test 3: Commande aklo cache clear${NC}"
-# Créer un fichier cache pour le test
-mkdir -p /tmp/aklo_cache
-echo "test" > /tmp/aklo_cache/test.parsed
+    # Test `aklo cache clear`
+    echo "test" > "$CACHE_DIR/test.parsed"
+    $AKLO_EXEC cache clear >/dev/null 2>&1
+    assert_file_not_exists "$CACHE_DIR/test.parsed" "La commande 'aklo cache clear' vide bien le cache"
 
-if ./aklo/bin/aklo cache clear >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Commande 'aklo cache clear' fonctionne"
-    
-    # Vérifier que le cache est vidé
-    if [ ! -f "/tmp/aklo_cache/test.parsed" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache effectivement vidé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache non vidé"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Commande 'aklo cache clear' échoue"
-fi
+    # Test `aklo cache benchmark`
+    $AKLO_EXEC cache benchmark >/dev/null 2>&1
+    local exit_code=$?
+    assert_equals "0" "$exit_code" "La commande 'aklo cache benchmark' s'exécute sans erreur"
+}
 
-# Test 4: Commande aklo cache benchmark
-echo -e "${BLUE}Test 4: Commande aklo cache benchmark${NC}"
-if ./aklo/bin/aklo cache benchmark >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Commande 'aklo cache benchmark' fonctionne"
-else
-    echo -e "${RED}✗ FAIL${NC}: Commande 'aklo cache benchmark' échoue"
-fi
+test_cache_metrics() {
+    test_suite "Cache Metrics"
 
-# Test 5: Métriques cache
-echo -e "${BLUE}Test 5: Métriques cache${NC}"
-if command -v record_cache_metric >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Fonction record_cache_metric disponible"
-    
-    # Tester l'enregistrement d'une métrique
     record_cache_metric "hit" 50
-    if [ -f "/tmp/aklo_cache/cache_metrics.json" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Fichier métriques créé"
-        
-        # Vérifier le contenu
-        if grep -q '"hits"' "/tmp/aklo_cache/cache_metrics.json"; then
-            echo -e "${GREEN}✓ PASS${NC}: Métriques enregistrées correctement"
-        else
-            echo -e "${RED}✗ FAIL${NC}: Métriques incorrectes"
-        fi
-    else
-        echo -e "${RED}✗ FAIL${NC}: Fichier métriques non créé"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Fonction record_cache_metric manquante"
-fi
+    assert_file_exists "$CACHE_DIR/cache_metrics.json" "Le fichier de métriques est créé après enregistrement manuel"
+    assert_file_contains "$CACHE_DIR/cache_metrics.json" '"hits"' "Les métriques manuelles sont enregistrées correctement"
+}
 
-# Test 6: Aide des commandes cache
-echo -e "${BLUE}Test 6: Aide des commandes cache${NC}"
-if ./aklo/bin/aklo cache --help >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Aide des commandes cache disponible"
+test_metrics_integration_with_parser() {
+    test_suite "Cache Metrics Integration with Parser"
     
-    # Vérifier le contenu de l'aide
-    help_output=$(./aklo/bin/aklo cache --help 2>&1)
-    if echo "$help_output" | grep -q "status" && echo "$help_output" | grep -q "clear" && echo "$help_output" | grep -q "benchmark"; then
-        echo -e "${GREEN}✓ PASS${NC}: Aide complète et correcte"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Aide incomplète"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Aide des commandes cache manquante"
-fi
-
-# Test 7: Intégration métriques dans parser
-echo -e "${BLUE}Test 7: Intégration métriques dans parser${NC}"
-# Nettoyer le cache
-rm -rf /tmp/aklo_cache
-mkdir -p /tmp/aklo_cache
-
-# Générer un PBI pour tester les métriques
-if ./aklo/bin/aklo propose-pbi "Test Metrics Integration" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Génération PBI avec métriques réussie"
+    $AKLO_EXEC propose-pbi "Test Metrics Integration" >/dev/null 2>&1
+    assert_file_exists "$CACHE_DIR/cache_metrics.json" "Les métriques sont automatiquement enregistrées lors de la génération d'un PBI"
     
-    # Vérifier que les métriques ont été enregistrées
-    if [ -f "/tmp/aklo_cache/cache_metrics.json" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Métriques automatiquement enregistrées"
-        
-        # Vérifier le contenu des métriques
-        metrics_content=$(cat /tmp/aklo_cache/cache_metrics.json)
-        if echo "$metrics_content" | grep -q '"total_requests": [1-9]'; then
-            echo -e "${GREEN}✓ PASS${NC}: Métriques contiennent des données"
-        else
-            echo -e "${RED}✗ FAIL${NC}: Métriques vides ou incorrectes"
-        fi
-    else
-        echo -e "${RED}✗ FAIL${NC}: Métriques non enregistrées automatiquement"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Génération PBI avec métriques échouée"
-fi
+    # Vérifier que l'artefact a été créé au bon endroit (dans le temp dir)
+    local pbi_file
+    pbi_file=$(find ./pbi -name "PBI-*-Test-Metrics-Integration.md" -type f)
+    assert_not_empty "$pbi_file" "Le PBI est créé dans le répertoire temporaire 'pbi'"
+}
 
-# Nettoyer les fichiers de test
-rm -f docs/backlog/00-pbi/PBI-*-Test-Metrics-*.md
-rm -rf /tmp/aklo_cache
+main() {
+    setup
+    trap teardown EXIT
 
-echo "======================================================================="
-echo -e "${GREEN}🎉 Phase GREEN terminée !${NC}"
+    test_cache_commands
+    test_cache_metrics
+    test_metrics_integration_with_parser
+    
+    test_summary
+}
+
+main

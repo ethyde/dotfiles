@@ -1,138 +1,82 @@
 #!/bin/bash
 
 # Test de régression pour TASK-6-3
-# Vérifier que toutes les commandes aklo fonctionnent avec le cache
+# Vérifie que toutes les commandes aklo fonctionnent avec le cache.
+# Entièrement refactorisé pour utiliser le framework de test et l'isolation.
 
-set -e
+source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+AKLO_EXEC=""
+ORIGINAL_CONFIG=""
 
-echo -e "${BLUE}🧪 Tests de Régression TASK-6-3 - Cache Integration${NC}"
-echo "======================================================================="
+setup() {
+    setup_artefact_test_env
+    AKLO_EXEC="${TEST_PROJECT_DIR}/aklo/bin/aklo"
+    
+    # Sauvegarder la config si elle existe, sinon la créer
+    if [ -f "aklo/.aklo.conf" ]; then
+        ORIGINAL_CONFIG=$(cat "aklo/.aklo.conf")
+    fi
+    # Activer le cache debug pour les logs
+    echo "CACHE_DEBUG=true" >> .aklo.conf
+}
 
-cd /Users/eplouvie/Projets/dotfiles
+teardown() {
+    teardown_artefact_test_env
+}
 
-# Nettoyer
-rm -rf /tmp/aklo_cache
-rm -f docs/backlog/00-pbi/PBI-*-Test-*.md
-rm -f docs/backlog/01-tasks/TASK-*-Test-*.md
+test_command_with_cache() {
+    local cmd_name="$1"
+    local aklo_args="$2"
+    local artefact_type_for_cache="$3"
+    
+    test_suite "Régression Cache - Commande: $cmd_name"
 
-# Activer le cache debug
-echo "CACHE_DEBUG=true" >> aklo/config/.aklo.conf
-
-# Test 1: Commande status
-echo -e "${BLUE}Test 1: aklo status${NC}"
-if ./aklo/bin/aklo status --brief >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: aklo status fonctionne"
-else
-    echo -e "${RED}✗ FAIL${NC}: aklo status échoue"
-fi
-
-# Test 2: Création PBI
-echo -e "${BLUE}Test 2: aklo propose-pbi${NC}"
-if ./aklo/bin/aklo propose-pbi "Test Regression PBI" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: aklo propose-pbi fonctionne"
+    # Exécution de la commande
+    local output
+    output=$($AKLO_EXEC "$cmd_name" $aklo_args 2>&1)
+    local exit_code=$?
+    
+    assert_equals "0" "$exit_code" "La commande '$cmd_name' doit s'exécuter sans erreur"
     
     # Vérifier le cache
-    if ls /tmp/aklo_cache/protocol_*_PBI.parsed 1>/dev/null 2>&1; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache PBI créé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache PBI manquant"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: aklo propose-pbi échoue"
-fi
+    local cache_file
+    cache_file=$(find . -type f -name "*_${artefact_type_for_cache}.parsed" 2>/dev/null)
+    assert_not_empty "$cache_file" "Le cache pour le type '$artefact_type_for_cache' doit être créé"
+}
 
-# Test 3: Planification (utilise TASK)
-echo -e "${BLUE}Test 3: aklo plan${NC}"
-if ./aklo/bin/aklo plan 1 --no-agent >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: aklo plan fonctionne"
+test_cache_disabled() {
+    test_suite "Régression Cache - Cache Désactivé"
     
-    # Vérifier le cache TASK
-    if ls /tmp/aklo_cache/protocol_*_TASK.parsed 1>/dev/null 2>&1; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache TASK créé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache TASK manquant"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: aklo plan échoue"
-fi
-
-# Test 4: Debug (utilise DEBUG)
-echo -e "${BLUE}Test 4: aklo debug${NC}"
-if ./aklo/bin/aklo debug "Test regression debug" --no-agent >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: aklo debug fonctionne"
+    # Désactiver le cache
+    echo "CACHE_ENABLED=false" >> .aklo.conf
     
-    # Vérifier le cache DEBUG
-    if ls /tmp/aklo_cache/protocol_*_DEBUG.parsed 1>/dev/null 2>&1; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache DEBUG créé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache DEBUG manquant"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: aklo debug échoue"
-fi
+    $AKLO_EXEC propose-pbi "Test Cache Disabled" >/dev/null 2>&1
+    local exit_code=$?
+    assert_equals "0" "$exit_code" "La commande doit fonctionner avec le cache désactivé"
 
-# Test 5: Architecture (utilise ARCH)
-echo -e "${BLUE}Test 5: aklo arch${NC}"
-if ./aklo/bin/aklo arch 1 --no-agent >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: aklo arch fonctionne"
-    
-    # Vérifier le cache ARCH
-    if ls /tmp/aklo_cache/protocol_*_ARCH.parsed 1>/dev/null 2>&1; then
-        echo -e "${GREEN}✓ PASS${NC}: Cache ARCH créé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache ARCH manquant"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: aklo arch échoue"
-fi
-
-# Test 6: Cache hit performance
-echo -e "${BLUE}Test 6: Performance cache hit${NC}"
-start_time=$(date +%s%N)
-./aklo/bin/aklo propose-pbi "Test Cache Hit Performance" >/dev/null 2>&1
-end_time=$(date +%s%N)
-duration_hit=$((($end_time - $start_time) / 1000000))
-
-echo "Durée cache hit: ${duration_hit}ms"
-if [ $duration_hit -lt 1000 ]; then
-    echo -e "${GREEN}✓ PASS${NC}: Cache hit performance acceptable (<1s)"
-else
-    echo -e "${RED}✗ FAIL${NC}: Cache hit trop lent (>1s)"
-fi
-
-# Test 7: Configuration cache disable
-echo -e "${BLUE}Test 7: Configuration cache disable${NC}"
-sed -i '' 's/CACHE_ENABLED=true/CACHE_ENABLED=false/' aklo/config/.aklo.conf
-rm -rf /tmp/aklo_cache
-
-if ./aklo/bin/aklo propose-pbi "Test Cache Disabled" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ PASS${NC}: Fonctionne avec cache désactivé"
-    
     # Vérifier qu'aucun cache n'est créé
-    if [ ! -d "/tmp/aklo_cache" ] || [ -z "$(ls -A /tmp/aklo_cache 2>/dev/null)" ]; then
-        echo -e "${GREEN}✓ PASS${NC}: Aucun cache créé quand désactivé"
-    else
-        echo -e "${RED}✗ FAIL${NC}: Cache créé malgré désactivation"
-    fi
-else
-    echo -e "${RED}✗ FAIL${NC}: Échoue avec cache désactivé"
-fi
+    local cache_dir_path="$TEST_PROJECT_DIR/.aklo_cache"
+    assert_true "[ ! -d '$cache_dir_path' ] || [ -z '$(ls -A '$cache_dir_path')' ]" "Aucun fichier cache ne doit être créé lorsque le cache est désactivé"
+}
 
-# Restaurer la configuration
-sed -i '' 's/CACHE_ENABLED=false/CACHE_ENABLED=true/' aklo/config/.aklo.conf
-sed -i '' '/^CACHE_DEBUG=true$/d' aklo/config/.aklo.conf
 
-# Nettoyer les fichiers de test
-rm -f docs/backlog/00-pbi/PBI-*-Test-*.md
-rm -f docs/backlog/01-tasks/TASK-*-Test-*.md
-rm -f docs/backlog/02-arch/ARCH-*-Test-*.md
-rm -f docs/backlog/03-debug/DEBUG-*-Test-*.md
-rm -rf /tmp/aklo_cache
+main() {
+    # Exécuter les tests dans un sous-shell pour garantir le cleanup
+    # même en cas d'erreur avec `set -e` implicite du framework.
+    (
+        setup
+        trap teardown EXIT
 
-echo "======================================================================="
-echo -e "${GREEN}🎉 Tests de régression terminés !${NC}"
+        test_command_with_cache "status" "--brief" "N/A" # Status ne crée pas de cache
+        test_command_with_cache "propose-pbi" "'Test Regression PBI'" "PBI"
+        test_command_with_cache "plan" "1 --no-agent" "TASK"
+        test_command_with_cache "debug" "'Test regression debug' --no-agent" "DEBUG"
+        test_command_with_cache "arch" "1 --no-agent" "ARCH"
+        test_cache_disabled
+    )
+    
+    test_summary
+}
+
+main

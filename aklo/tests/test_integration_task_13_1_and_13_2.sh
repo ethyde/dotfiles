@@ -8,7 +8,6 @@
 # Test d'intégration complète des systèmes de classification et lazy loading
 #==============================================================================
 
-set -e
 script_dir="$(dirname "$0")"
 modules_dir="${script_dir}/../modules"
 
