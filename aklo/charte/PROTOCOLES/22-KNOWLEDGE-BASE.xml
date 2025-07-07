@@ -1,86 +1,158 @@
----
-created: 2025-06-28 14:15
-modified: 2025-06-28 14:35
----
-# PROTOCOLE SPÉCIFIQUE : KNOWLEDGE-BASE (GESTION DES CONNAISSANCES)
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="knowledge_base_management">
+   <description>
+      The mission of this protocol is to capitalize on the knowledge acquired throughout the project
+      to avoid repeating the same mistakes and to accelerate future decision-making.
+   </description>
 
-Ce protocole a pour mission de capitaliser sur le savoir acquis au fil du projet pour éviter de répéter les mêmes erreurs et accélérer les prises de décision futures.
+   <section title="mission_and_deliverable">
+      <sub_section title="mission">
+         <introduction>
+            Extract critical and transversal learnings from `DEBUG`, `ARCHITECTURE`,
+            `EXPERIMENTATION`, or `OPTIMIZATION` protocols and centralize them in a single,
+            easily accessible knowledge base.
+         </introduction>
+      </sub_section>
+      <sub_section title="expected_deliverable">
+         <list>
+            <item>
+               <strong>Knowledge Base:</strong> A single, continuously enriched `KNOWLEDGE-BASE.xml`
+               file at the root of the `/docs/` directory.
+            </item>
+         </list>
+      </sub_section>
+   </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
+   <section title="artefact_and_structure">
+      <sub_section title="artefact">
+         <file>/docs/KNOWLEDGE-BASE.xml</file>
+      </sub_section>
+      <sub_section title="recommended_file_structure">
+         <artefact_template format="xml">
+            <knowledge_base>
+               <introduction>
+                  This document is the source of truth for recurring technical decisions and lessons
+                  learned. It must be consulted before any architectural decision or choice of
+                  dependency.
+               </introduction>
+               <note>
+                  <strong>Governance:</strong> Any modification or addition to this knowledge base
+                  must be explicitly validated by the `Human_Developer` as per the management
+                  procedure.
+               </note>
+               
+               <entry id="KB-001">
+                  <metadata>
+                     <subject>Performance of the SuperChart.js library</subject>
+                     <status>Active</status>
+                     <added_date>2025-07-01</added_date>
+                     <source href="DEBUG-performance-dashboard-20250701.xml">
+                        DEBUG-performance-dashboard-20250701.xml
+                     </source>
+                  </metadata>
+                  <content>
+                     <knowledge>
+                        The `SuperChart.js` library exhibits severe performance degradation
+                        (blocking the main thread) beyond 1000 data points on the same chart.
+                     </knowledge>
+                     <impact_analysis>
+                        <list>
+                           <item><strong>Direct Impact:</strong> Blocks the development of dense
+                              dashboards and real-time analysis features.</item>
+                           <item><strong>Risk:</strong> Uninformed use of this library on new
+                              features could create critical performance regressions.</item>
+                        </list>
+                     </impact_analysis>
+                     <actionable_recommendation>
+                        <list type="ordered">
+                           <item>
+                              <strong>DO NOT USE</strong> `SuperChart.js` for visualizations with
+                              more than 500 points.
+                           </item>
+                           <item>
+                              For dense charts, <strong>USE</strong> `MegaGraph.js`, which
+                              implements a canvas virtualization solution.
+                           </item>
+                           <item>
+                              <strong>VALIDATE</strong> the performance of any new chart via a load
+                              test defined in `OPTIM-benchmark-protocol.xml`.
+                           </item>
+                        </list>
+                     </actionable_recommendation>
+                  </content>
+               </entry>
 
-### 1.1. Mission
+               <entry id="KB-002">
+                  <metadata>
+                     <subject>Inter-Service Communication</subject>
+                     <status>Active</status>
+                     <added_date>2025-06-28</added_date>
+                     <source href="ARCH-refactor-notification-service-1.xml">
+                        ARCH-refactor-notification-service-1.xml
+                     </source>
+                  </metadata>
+                  <content>
+                     <knowledge>
+                        Direct synchronous API calls between the `Users` service and the `Billing`
+                        service created a strong coupling, leading to cascading failures when one of
+                        them slowed down.
+                     </knowledge>
+                     <impact_analysis>
+                        <list>
+                           <item><strong>Direct Impact:</strong> Slowness in the `Billing` service
+                              prevented users from logging in, which is an unacceptable impact.</item>
+                           <item><strong>Risk:</strong> Extending this synchronous communication
+                              pattern to new services will exponentially increase the fragility of
+                              the overall architecture.</item>
+                        </list>
+                     </impact_analysis>
+                     <actionable_recommendation>
+                        <list type="ordered">
+                           <item>
+                              For any new <strong>non-blocking</strong> interaction (e.g.,
+                              notification, status update), <strong>MANDATORY USE</strong> of
+                              asynchronous communication via the Kafka event bus is required.
+                           </item>
+                           <item>
+                              Synchronous calls are only allowed for <strong>blocking and
+                              critical</strong> operations (e.g., verifying a payment's validity
+                              before granting access to a service).
+                           </item>
+                        </list>
+                     </actionable_recommendation>
+                  </content>
+               </entry>
+            </knowledge_base>
+         </artefact_template>
+      </sub_section>
+   </section>
 
-Extraire les apprentissages critiques et transversaux issus des protocoles de `DEBUG`, `ARCHITECTURE`, `EXPERIMENTATION` ou `OPTIMISATION` et les centraliser dans une base de connaissance unique et facile d'accès.
-
-### 1.2. Livrable Attendu
-
-1.  **Base de Connaissance :** Un unique fichier `KNOWLEDGE-BASE.xml` à la racine du répertoire `/docs/`, continuellement enrichi.
-
-## SECTION 2 : ARTEFACT ET STRUCTURE
-
-### 2.1. Artefact
-
--   Un seul et unique fichier : `/docs/KNOWLEDGE-BASE.xml`.
-
-### 2.2. Structure Recommandée du Fichier
-```markdown
-# BASE DE CONNAISSANCES DU PROJET
----
-*Ce document est la source de vérité pour les décisions techniques récurrentes et les leçons apprises. Il doit être consulté avant toute décision d'architecture ou de choix de dépendance.*
-
----
-## ID: KB-001
-**Sujet:** Performance de la librairie `SuperChart.js`
-**Statut:** Actif
-**Date d'ajout:** 2025-07-01
-**Source:** `DEBUG-performance-dashboard-20250701.xml`
-
-#### Connaissance
-La librairie `SuperChart.js` présente de sévères dégradations de performance (blocage du thread principal) au-delà de 1000 points de données sur le même graphique.
-
-#### Analyse d'Impact
-- **Impact Direct :** Bloque le développement de dashboards denses et de fonctionnalités d'analyse en temps réel.
-- **Risque :** L'utilisation non informée de cette librairie sur de nouvelles fonctionnalités pourrait créer des régressions de performance critiques.
-
-#### Recommandation Actionnable
-1.  **NE PAS UTILISER** `SuperChart.js` pour des visualisations de plus de 500 points.
-2.  Pour les graphiques denses, **UTILISER** `MegaGraph.js` qui implémente une solution de virtualisation du canvas.
-3.  **VALIDER** la performance de tout nouveau graphique via un test de charge défini dans `OPTIM-benchmark-protocol.xml`.
-
----
-## ID: KB-002
-**Sujet:** Communication Inter-Services
-**Statut:** Actif
-**Date d'ajout:** 2025-06-28
-**Source:** `ARCH-refactor-notification-service-1.xml`
-
-#### Connaissance
-Les appels API synchrones directs entre le service `Users` et le service `Billing` ont créé un couplage fort, menant à des pannes en cascade lorsque l'un des deux est ralenti.
-
-#### Analyse d'Impact
-- **Impact Direct :** Une lenteur sur le service `Billing` empêchait les utilisateurs de se connecter, ce qui est un impact inacceptable.
-- **Risque :** Étendre ce pattern de communication synchrone à de nouveaux services augmentera exponentiellement la fragilité de l'architecture globale.
-
-#### Recommandation Actionnable
-1.  Pour toute nouvelle interaction **non-bloquante** (ex: notification, mise à jour de statuts), **UTILISER OBLIGATOIREMENT** une communication asynchrone via le bus d'événements Kafka.
-2.  Les appels synchrones ne sont autorisés que pour des opérations **bloquantes et critiques** (ex: vérifier la validité d'un paiement avant de donner accès à un service).
-```
-
-## SECTION 3 : PROCÉDURE DE GESTION
-
-1.  **[ANALYSE] Phase 1 : Détection d'une Connaissance**
-
-      - À la fin d'un protocole (`DEBUG`, `ARCH`, etc.), l'`AI_Agent` ou le `Human_Developer` doit se poser la question : "Avons-nous appris quelque chose ici qui pourrait être utile à quelqu'un d'autre dans le futur ?".
-
-2.  **[PROCEDURE] Phase 2 : Proposition d'Ajout**
-
-      - Si la réponse est oui, l'`AI_Agent` propose une entrée pour la base de connaissance.
-      - La proposition doit inclure la catégorie, le sujet, la connaissance, la recommandation et le lien vers l'artefact source.
-
-3.  **[ATTENTE\_VALIDATION] Phase 3 : Validation**
-
-      - Soumettre la nouvelle entrée pour validation au `Human_Developer`.
-
-4.  **[CONCLUSION] Phase 4 : Mise à Jour**
-
-      - Une fois l'entrée approuvée, l'`AI_Agent` met à jour le fichier `/docs/KNOWLEDGE-BASE.xml` et crée un `commit` dédié (ex: `docs(kb): add lesson about SuperChart.js performance`).
+   <section title="management_procedure">
+      <step number="1" type="analysis" title="knowledge_detection">
+         <description>
+            At the end of a protocol (`DEBUG`, `ARCH`, etc.), the `AI_Agent` or the
+            `Human_Developer` must ask the question: "Have we learned something here that could be
+            useful to someone else in the future?".
+         </description>
+      </step>
+      <step number="2" type="procedure" title="proposal_for_addition">
+         <description>
+            If the answer is yes, the `AI_Agent` proposes an entry for the knowledge base. The
+            proposal must include the subject, the knowledge, the impact, the recommendation, and a
+            link to the source artefact.
+         </description>
+      </step>
+      <step number="3" type="awaiting_validation" title="validation">
+         <description>
+            Submit the new entry for validation by the `Human_Developer`.
+         </description>
+      </step>
+      <step number="4" type="conclusion" title="update">
+         <description>
+            Once the entry is approved, the `AI_Agent` updates the `/docs/KNOWLEDGE-BASE.xml` file
+            and creates a dedicated commit (e.g., `docs(kb): add lesson about SuperChart.js
+            performance`).
+         </description>
+      </step>
+   </section>
+</protocol>

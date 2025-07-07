@@ -1,73 +1,123 @@
----
-created: 2025-06-27 15:39
-modified: 2025-06-27 18:13
----
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="assisted_code_review">
+  <description>
+    This protocol is activated at the request of the Human_Developer to critically analyze a code `diff`, typically the one presented during the [ATTENTE_VALIDATION] step of the [DEVELOPMENT] protocol.
+  </description>
 
-# PROTOCOLE SPÉCIFIQUE : REVUE DE CODE ASSISTÉE
+  <section title="Mission and Deliverable">
+    <sub_section title="Mission">
+      <introduction>
+        To act as an assistant code reviewer to provide a structured first level of feedback, verifying the code's compliance with the Charter's standards and identifying potential improvements.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverable">
+      <deliverable type="report">
+        A single `REVIEW-[ID].xml` report created in the `/docs/backlog/03-reviews/` directory. The ID can correspond to the Task ID or the PR ID if one exists.
+      </deliverable>
+    </sub_section>
+  </section>
 
-Ce protocole s'active à la demande du `Human_Developer` pour analyser de manière critique un `diff` de code, typiquement celui présenté lors de l'étape [ATTENTE_VALIDATION] du protocole [DEVELOPPEMENT].
+  <section title="Review Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>REVIEW-[ID].xml</format>
+      <details>
+        <detail name="id">A unique identifier for the review (e.g., `task-42-1`).</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <code_review_report id="[id]">
+          <metadata>
+            <reviewed_artefact ref="[Link to Task or description of the diff]" />
+            <reviewer>[Reviewer's Name/ID]</reviewer>
+            <review_date>[YYYY-MM-DDTHH:MM:SSZ]</review_date>
+          </metadata>
+          <content>
+            <compliance_checklist>
+              <check name="Adherence to 03-DEVELOPMENT.xml protocol" blocking="true">Yes / No</check>
+              <check name="S.O.L.I.D. principles respected" blocking="true">Yes / Partially / No</check>
+              <check name="Code quality (Typing, Linting) perfect" blocking="true">Yes / No</check>
+              <check name="Clarity and Readability" blocking="false">Good / Average / Poor</check>
+              <check name="Documentation (JSDoc/TSDoc) complete" blocking="true">Yes / Partial / Missing</check>
+              <check name="Test coverage sufficient" blocking="true">Yes / No</check>
+            </compliance_checklist>
+            <observations>
+              <observation severity="CRITICAL">
+                <location file="[path/to/file]" line="[line_number]" />
+                <comment>Must be fixed before merge.</comment>
+              </observation>
+              <observation severity="MAJOR">
+                <location file="[path/to/file]" line="[line_number]" />
+                <comment>Strongly recommended to fix.</comment>
+              </observation>
+              <observation severity="MINOR">
+                <location file="[path/to/file]" line="[line_number]" />
+                <comment>Suggestion for improvement.</comment>
+              </observation>
+            </observations>
+            <strong_points optional="true">
+              <point>Description of a particularly well-implemented practice or pattern found in the code.</point>
+            </strong_points>
+          </content>
+        </code_review_report>
+      </artefact_template>
+      <example>
+        <code_review_report id="task-42-1">
+          <metadata>
+            <reviewed_artefact ref="TASK-42-1-AWAITING_REVIEW.xml" />
+            <reviewer>AI_Agent</reviewer>
+            <review_date>2025-07-07T09:43:33Z</review_date>
+          </metadata>
+          <content>
+            <compliance_checklist>
+              <check name="Adherence to 03-DEVELOPMENT.xml protocol" blocking="true">Yes</check>
+              <check name="S.O.L.I.D. principles respected" blocking="true">Partially</check>
+              <check name="Code quality (Typing, Linting) perfect" blocking="true">Yes</check>
+              <check name="Clarity and Readability" blocking="false">Average</check>
+              <check name="Documentation (JSDoc/TSDoc) complete" blocking="true">Partial</check>
+              <check name="Test coverage sufficient" blocking="true">Yes</check>
+            </compliance_checklist>
+            <observations>
+              <observation severity="CRITICAL">
+                 <location file="src/services/payment.js" line="10" />
+                 <comment>A critical issue that absolutely must be fixed. For instance, a security vulnerability like unsanitized user input being passed to a database query.</comment>
+              </observation>
+              <observation severity="MAJOR">
+                <location file="src/utils/auth.ts" line="42" />
+                <comment>The `generateToken` function does not handle the case where the `user` object is null, which could throw an unhandled exception. Suggest adding a null check at the beginning.</comment>
+              </observation>
+              <observation severity="MINOR">
+                <location file="src/components/Button.tsx" line="15" />
+                <comment>The variable name `d` could be renamed to `data` or `buttonData` for better clarity.</comment>
+              </observation>
+            </observations>
+            <strong_points optional="true">
+              <point>The custom hook `useLocalStorage` in `src/hooks/storage.ts` is very well implemented, clean, and follows best practices for React hooks.</point>
+              <point>The test cases for the `calculatePrice` utility are exhaustive and cover all edge cases effectively.</point>
+            </strong_points>
+          </content>
+        </code_review_report>
+      </example>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
-
-### 1.1. Mission
-
-Agir en tant que relecteur de code assistant pour fournir un premier niveau de feedback structuré, en vérifiant la conformité du code avec les normes de la Charte et en identifiant les améliorations potentielles.
-
-### 1.2. Livrable Attendu
-
-- Un unique rapport `REVIEW-[ID].xml` créé dans le répertoire `/docs/backlog/03-reviews/`. L'`ID` peut correspondre à celui de la `Task` ou de la PR si elle existe.
-
-## SECTION 2 : ARTEFACT REVIEW - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `REVIEW-[ID].xml`
-    - `[ID]` : Un identifiant unique pour la revue (ex: `task-42-1`).
-
-### 2.2. Structure Obligatoire Du Fichier Review
-
-```markdown
-# RAPPORT DE REVUE DE CODE : REVIEW-[ID]
----
-**Task / Diff concerné:** [Lien vers la Task ou description du diff]
----
-
-## 1. Checklist de Conformité
-
-- **[ ] Respect total du protocole `03-DEVELOPPEMENT.xml` :** Oui / Non
-- **[ ] Principes S.O.L.I.D. respectés :** Oui / Partiellement / Non
-- **[ ] Qualité (Typage, Linting) parfaite :** Oui / Non
-- **[ ] Clarté et Lisibilité :** Bonne / Moyenne / Faible
-- **[ ] Documentation (JSDoc) complète :** Oui / Partielle / Manquante
-- **[ ] Couverture de Tests suffisante :** Oui / Non
-
-## 2. Observations et Suggestions
-
-### [CRITICAL] - Doit être corrigé avant la fusion
-- *(Aucun)*
-
-### [MAJOR] - Fortement recommandé de corriger
-- **Fichier `src/utils/auth.ts`, Ligne 42 :** La fonction `generateToken` ne gère pas le cas où l'objet `user` est `null`, ce qui pourrait lever une exception non contrôlée.
-
-### [MINOR] - Suggestion d'amélioration
-- **Fichier `src/components/Button.tsx`, Ligne 15 :** Le nom de la variable `d` pourrait être renommé en `data` pour plus de clarté.
-```
-
-## SECTION 3 : PROCÉDURE DE REVUE
-
-1. **[ANALYSE] Phase 1 : Prise de Contexte**
-      - Prendre en entrée le `diff` de code à analyser.
-      - Lire la `Task` associée pour comprendre l'objectif métier et technique du changement.
-
-2. **[PROCEDURE] Phase 2 : Évaluation Systématique**
-      - Analyser l'ensemble du code modifié (`diff`).
-      - Remplir méthodiquement la **Section 1 (Checklist)** du rapport en se référant explicitement aux règles du protocole `03-DEVELOPPEMENT.xml`.
-      - Remplir la **Section 2 (Observations)** en classant chaque point par niveau de criticité. Chaque observation doit inclure une référence précise au fichier et à la ligne concernée.
-
-3. **[CONCLUSION] Phase 3 : Production du Rapport**
-      - Créer et finaliser le rapport `REVIEW-[ID].xml` dans `/docs/backlog/03-reviews/`.
-      - Présenter le rapport complété au `Human_Developer`.
-      - **Étape Suivante :** Une fois la revue de code approuvée par le `Human_Developer`, la tâche est prête à être fusionnée.
-        - **Action Requise :** Fusionner la branche de la tâche dans la branche principale, supprimer la branche de tâche, et mettre à jour le statut de l'artefact `TASK` à `DONE`.
-        - **⚡ Automatisation `aklo` :** `aklo merge-task <ID_de_la_tache>`
-      - **Note :** La mission de ce protocole se termine ici. Il n'y a pas d'étape [ATTENTE_VALIDATION] car l'action attendue est celle du `Human_Developer` sur la base de ce rapport.
+  <section title="Review Procedure">
+    <step number="1" type="analysis" title="Context Gathering">
+      <action>Take the code `diff` to be analyzed as input. Read the associated `Task` to understand the business and technical objective of the change.</action>
+    </step>
+    <step number="2" type="procedure" title="Systematic Evaluation">
+      <action>Analyze the entire modified code (`diff`). Methodically fill out Section 1 (Checklist) of the report by explicitly referring to the rules of the `03-DEVELOPPEMENT.xml` protocol. Fill out Section 2 (Observations) by classifying each point by its severity level. Each observation must include a precise reference to the file and line number concerned.</action>
+    </step>
+    <step number="3" type="conclusion" title="Report Production">
+      <action>Create and finalize the `REVIEW-[ID].xml` report in `/docs/backlog/03-reviews/`. Present the completed report to the `Human_Developer`.</action>
+      <next_step>
+        <title>Next Step (for Human_Developer)</title>
+        <description>Once the code review is approved by the Human_Developer, the task is ready to be merged. The required action is to merge the task branch into the main branch, delete the task branch, and update the TASK artifact's status to `MERGED`.</description>
+        <automation optional="true">`aklo merge-task [task_id]`</automation>
+      </next_step>
+      <note>
+        The mission of this protocol ends here. There is no `[ATTENTE_VALIDATION]` step for the AI, as the expected action is from the Human_Developer based on this report.
+      </note>
+    </step>
+  </section>
+</protocol>

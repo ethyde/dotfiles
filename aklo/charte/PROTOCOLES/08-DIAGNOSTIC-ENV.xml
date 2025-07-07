@@ -1,63 +1,109 @@
----
-created: 2025-06-27 19:15
-version: 1
-modified: 2025-06-27 20:57
----
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="environment_diagnosis">
+  <description>
+    This protocol is activated when a command executed via the MCP server fails for a reason that appears to be related to the environment (working directory, permissions, corrupted dependencies) rather than an application code error.
+  </description>
 
-# PROTOCOLE SPÉCIFIQUE : DIAGNOSTIC DE L'ENVIRONNEMENT
+  <section title="Mission and Deliverable">
+    <sub_section title="Mission">
+      <introduction>
+        To systematically diagnose and correct environment errors to ensure the stability and reliability of automated operations.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverable">
+      <deliverable type="audit_trail_and_action">
+        A clear diagnosis of the environmental issue, followed by either a resolution or a request for human intervention. A complete audit trail, including timestamps and actions taken, must be recorded in the daily Journal.
+      </deliverable>
+    </sub_section>
+  </section>
 
-Ce protocole s'active lorsqu'une commande exécutée via le serveur MCP échoue pour une raison qui semble liée à l'environnement (répertoire de travail, permissions, dépendances corrompues) plutôt qu'à une erreur de code applicatif.
+  <section title="General Diagnosis Procedure">
+    <sub_section title="Traceability and Auditing Rules">
+        <rule name="Action Logging">
+            Every significant action taken by the AI agent during this protocol must be explicitly documented as an `ai_agent_action` within a timestamped entry in the daily Journal artefact.
+        </rule>
+        <rule name="Timestamping">
+            Every activation of this protocol must begin with a `diagnosis_date` timestamp in its corresponding Journal entry.
+        </rule>
+    </sub_section>
 
-## SECTION 1 : MISSION
+    <step number="1" type="procedure" title="Halt and Identify">
+      <action>Immediately stop all other actions and identify the exact error message.</action>
+    </step>
+    <step number="2" type="analysis" title="Consult Known Errors Catalog">
+      <action>Consult the "Known Errors Catalog". If a case matches, apply its specific resolution procedure.</action>
+    </step>
+    <step number="3" type="analysis" title="Unknown Error - Basic Diagnosis">
+      <introduction>If the error is not cataloged, apply the basic diagnostic checklist:</introduction>
+      <checklist>
+        <check name="Working Directory (WORKDIR) Validation">Rerun the WORKDIR validation command.</check>
+        <check name="Permissions Check">Check for permission errors (e.g., `EPERM`, `EACCES`).</check>
+        <check name="Dependency State Check">Check for missing modules or corrupted state.</check>
+      </checklist>
+      <awaiting_validation>
+        Present the checklist results to the Human_Developer with a proposed action.
+      </awaiting_validation>
+    </step>
+    <step number="4" type="procedure" title="Learning from New Errors (Self-Improvement)">
+        <action>If an unknown error is successfully resolved with the Human_Developer's help, activate the [META-IMPROVEMENT] protocol to propose adding a new `known_error` case to this protocol's XML file. This ensures the system learns from new issues.</action>
+    </step>
+  </section>
 
-Diagnostiquer et corriger de manière systématique les erreurs d'environnement pour garantir la stabilité et la fiabilité des opérations automatisées.
+  <section title="Known Errors Catalog and Solutions">
+    <known_error id="1" error_signature='npm error Tracker "idealTree" already exists'>
+      <diagnosis>An `npm` process conflict or execution from the wrong WORKDIR.</diagnosis>
+      <resolution_procedure>
+        <step number="1" type="verification">Ensure no other `npm` process is running.</step>
+        <step number="2" type="action">Force re-validation of the WORKDIR to the project root.</step>
+        <step number="3" type="command">Execute `npm cache clean --force` from the root.</step>
+        <step number="4" type="action">Rerun the initial command.</step>
+      </resolution_procedure>
+    </known_error>
+    <known_error id="2" error_signature="'npm' is not recognized as an internal or external command">
+      <diagnosis>An issue with the `PATH` environment variable on the execution server.</diagnosis>
+      <resolution_procedure>
+        <step number="1" type="action">Stop the operation.</step>
+        <step number="2" type="human_intervention_required">Inform the Human_Developer that the execution environment appears to be misconfigured. This issue cannot be resolved by the agent.</step>
+      </resolution_procedure>
+    </known_error>
+    <known_error id="3" error_signature="Error: EPERM: operation not permitted or Error: EACCES: permission denied">
+      <diagnosis>The agent is attempting to access a resource for which it does not have the necessary permissions.</diagnosis>
+      <resolution_procedure>
+        <step number="1" type="verification">Precisely identify the affected resource.</step>
+        <step number="2" type="human_intervention_required">Inform the Human_Developer about the permission issue. Permissions must be adjusted manually.</step>
+      </resolution_procedure>
+    </known_error>
+    <known_error id="4" error_signature="Error: Cannot find module 'X'">
+      <diagnosis>Likely cause: the command was run from a subdirectory. Less likely: corrupted dependencies.</diagnosis>
+      <resolution_procedure>
+        <step number="1" type="action">Force re-validation of the WORKDIR to the project root.</step>
+        <step number="2" type="action">Rerun the command from this root.</step>
+        <step number="3" type="action">If the error persists, delete `node_modules` and `package-lock.json` and rerun `npm install`.</step>
+      </resolution_procedure>
+    </known_error>
+  </section>
+  
+  <section title="Example Scenario">
+    <scenario>
+      <situation>
+        The `AI_Agent` runs `npm install`, but the MCP server returns: `Error: Cannot find module 'react'`.
+      </situation>
+      <expected_ai_response><![CDATA[
+[REFLEXION]
+  The command failed with an environment-related error. Activating the [ENVIRONMENT-DIAGNOSIS] protocol. All actions will be logged in the daily Journal for auditing.
 
-## SECTION 2 : PROCÉDURE DE DIAGNOSTIC GÉNÉRAL
+[PROCEDURE]
+  1.  Halt and Identify: The error message is `Error: Cannot find module 'react'`. A new entry has been created in the Journal with a diagnosis timestamp.
+  2.  Consult Known Errors Catalog: This error matches Case #4.
+  3.  Apply Resolution Procedure: I will now apply the resolution for Case #4.
 
-1. **[PROCEDURE] Étape 1 : Halte et Identification**
-    - Stopper immédiatement toute autre action.
-    - Identifier le message d'erreur exact retourné par le serveur MCP.
-
-2. **[ANALYSE] Étape 2 : Consultation du Catalogue des Erreurs Connues**
-    - Consulter la **SECTION 3** de ce document pour voir si l'erreur correspond à un cas connu.
-    - Si un cas correspond, appliquer la procédure de résolution spécifique à ce cas.
-
-3. **[ANALYSE] Étape 3 : Si l'erreur est inconnue - Diagnostic de Base**
-    - Si l'erreur n'est pas cataloguée, appliquer la checklist de diagnostic de base :
-        1. **Valider le Répertoire de Travail (`WORKDIR`) :** Relancer la commande de validation du `WORKDIR` (cf. `00-CADRE-GLOBAL.xml`). S'assurer que toutes les commandes sont lancées depuis la racine absolue du projet. C'est la cause la plus fréquente de problèmes.
-        2. **Vérifier les Permissions :** L'erreur indique-t-elle un problème de permission (`EPERM`, `EACCES`) ?
-        3. **Vérifier l'État des Dépendances :** L'erreur concerne-t-elle un module manquant ou un état corrompu ?
-    - **[ATTENTE_VALIDATION]** Présenter le résultat de cette checklist au `Human_Developer` avec une proposition d'action (par exemple, "L'erreur est inconnue, mais le `WORKDIR` semble incorrect. Propose de le corriger et de relancer.").
-
-## SECTION 3 : CATALOGUE DES ERREURS CONNUES ET LEURS SOLUTIONS
-
-### CAS N°1 : `npm error Tracker "idealTree" already exists`
-
-- **Diagnostic :** Conflit de processus `npm` ou exécution depuis un mauvais répertoire (`WORKDIR`).
-- **Procédure de Résolution :**
-    1. S'assurer qu'aucun autre processus `npm` n'est en cours.
-    2. Forcer la re-validation du `WORKDIR` à la racine du projet.
-    3. Exécuter `npm cache clean --force` depuis la racine.
-    4. Relancer la commande initiale.
-
-### CAS N°2 : `'npm' is not recognized as an internal or external command`
-
-- **Diagnostic :** Problème de variable d'environnement `PATH` sur le serveur d'exécution. `npm` (et donc Node.js) n'est pas accessible.
-- **Procédure de Résolution :**
-    1. Stopper l'opération.
-    2. **[CONCLUSION]** Informer le `Human_Developer` que l'environnement d'exécution semble mal configuré et que la variable `PATH` doit être inspectée. Ce problème ne peut pas être résolu par l'agent.
-
-### CAS N°3 : `Error: EPERM: operation not permitted` Ou `Error: EACCES: permission denied`
-
-- **Diagnostic :** L'agent tente d'écrire ou de modifier un fichier/dossier pour lequel il n'a pas les droits nécessaires.
-- **Procédure de Résolution :**
-    1. Identifier précisément le fichier ou le dossier concerné.
-    2. **[CONCLUSION]** Informer le `Human_Developer` du problème de permission sur la ressource identifiée. Les permissions doivent être ajustées manuellement par l'humain.
-
-### CAS N°4 : `Error: Cannot find module 'X'`
-
-- **Diagnostic :** L'erreur la plus probable est que la commande a été lancée depuis un sous-répertoire au lieu de la racine du projet. Moins probable, une installation de dépendances corrompue.
-- **Procédure de Résolution :**
-    1. Forcer la re-validation du `WORKDIR` à la racine du projet.
-    2. Relancer la commande depuis cette racine.
-    3. Si l'erreur persiste, supprimer `node_modules` et `package-lock.json` et relancer `npm install` depuis la racine.
+[CONCLUSION]
+  The error matches a known case. I will now attempt the resolution, logging each action:
+  - AI Action: Force re-validation of the WORKDIR to the project root.
+  - AI Action: Rerun the `npm install` command from the validated root.
+  I will report back on the outcome.
+]]>
+      </expected_ai_response>
+    </scenario>
+  </section>
+</protocol>

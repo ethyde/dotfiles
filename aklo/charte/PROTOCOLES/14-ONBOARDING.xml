@@ -1,92 +1,104 @@
----
-created: 2025-06-28 11:24
-modified: 2025-06-28 11:29
----
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="project_onboarding">
+  <description>
+    This protocol is activated on demand to generate a high-level summary of the project, intended to accelerate the integration of a new member or to refresh the agent's overall context.
+  </description>
 
-# PROTOCOLE SPÉCIFIQUE : ONBOARDING DE PROJET
+  <section title="Mission and Deliverable">
+    <sub_section title="Mission">
+      <introduction>
+        To synthesize critical project information (mission, architecture, key concepts, startup procedure) into a single, easy-to-read document.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverable">
+      <deliverable type="report">
+        An `ONBOARDING-SUMMARY-[DATE].xml` file created in the project's root directory or in `/docs/project/`.
+      </deliverable>
+    </sub_section>
+  </section>
 
-Ce protocole s'active à la demande pour générer un résumé de haut niveau du projet, destiné à accélérer l'intégration d'un nouveau membre ou à rafraîchir le contexte global de l'agent.
+  <section title="Onboarding Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>ONBOARDING-SUMMARY-[DATE].xml</format>
+      <details>
+        <detail name="date">The date the report was generated, in `YYYY-MM-DD` format.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="generated">This type of document does not have a complex lifecycle. It is created in a single step and has an implicit status of 'GENERATED'.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <onboarding_summary project_name="[Project Name]">
+          <metadata>
+            <generation_date>[YYYY-MM-DD]</generation_date>
+            <generated_by>[Human_Developer's or AI_Agent's Name]</generated_by>
+            <project_version>[Current Git tag, e.g., v1.2.0]</project_version>
+          </metadata>
+          <content>
+            <project_mission_and_objective>
+              A synthesis of the project's "reason for being," its target audience, and the value it provides.
+              <note>This section is a high-level synthesis and must be explicitly validated by the Human_Developer to ensure alignment.</note>
+            </project_mission_and_objective>
+            <key_business_concepts>
+              <concept term="[Term 1]">Definition.</concept>
+              <concept term="[Term 2]">Definition.</concept>
+            </key_business_concepts>
+            <architecture_overview>
+              <main_tech_stack>
+                <technology>e.g., React, Node.js, PostgreSQL, AWS</technology>
+              </main_tech_stack>
+              <architecture_patterns>
+                <pattern>e.g., "Microservices communicating via an API Gateway"</pattern>
+              </architecture_patterns>
+              <reference_architecture_documents>
+                <document ref="[path/to/ARCH-XX.xml]">Decision on [subject]</document>
+              </reference_architecture_documents>
+            </architecture_overview>
+            <quick_start_guide>
+              <step number="1" type="command">`git clone [repository_url]`</step>
+              <step number="2" type="command">`npm install`</step>
+              <step number="3" type="command">`npm run dev`</step>
+              <step number="4" type="info">The application is available at `http://localhost:3000`.</step>
+            </quick_start_guide>
+            <code_entry_points>
+              <entry_point area="Application Startup">src/index.js</entry_point>
+              <entry_point area="Main Feature A">src/features/featureA/</entry_point>
+              <entry_point area="Core Business Logic">src/core/</entry_point>
+            </code_entry_points>
+          </content>
+        </onboarding_summary>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
-
-### 1.1. Mission
-
-Synthétiser les informations critiques du projet (mission, architecture, concepts clés, procédure de démarrage) en un document unique et facile à lire.
-
-### 1.2. Livrable Attendu
-
-1.  **Résumé d'Onboarding :** Un fichier `ONBOARDING-SUMMARY-[DATE].xml` créé dans le répertoire racine du projet ou dans `/docs/project/`.
-
-## SECTION 2 : ARTEFACT ONBOARDING - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `ONBOARDING-SUMMARY-[DATE].xml`
-    -   `[DATE]` : La date de génération du rapport au format `AAAA-MM-DD`.
-
-### 2.2. Statuts
-
--   Ce type de document n'a pas de cycle de vie avec plusieurs statuts. Il est généré en une seule fois et a un statut implicite de **`GENERATED`**.
-
-### 2.3. : STRUCTURE DU RAPPORT D'ONBOARDING
-
-```markdown
-# RÉSUMÉ D'ONBOARDING DU PROJET : [Nom du Projet]
----
-**Date de Génération:** AAAA-MM-DD
-**Généré par:** [Nom du Human_Developer ou AI_Agent]
-**Version du Projet à cette date:** [Tag Git de la version actuelle, ex: v1.2.0]
----
-
-## 1. Mission et Objectif du Projet
-
-*Synthèse de la "raison d'être" du projet, de sa cible et de la valeur qu'il apporte. S'inspire des PBI principaux et de la connaissance générale du `Human_Developer`.*
-
-## 2. Concepts Métier Clés (Glossaire)
-
-*Liste des termes spécifiques au domaine du projet que tout nouveau membre doit comprendre.*
-- **Terme 1 :** Définition.
-- **Terme 2 :** Définition.
-
-## 3. Vue d'Ensemble de l'Architecture
-
-*Description de haut niveau des choix technologiques et structurels. Ne détaille pas l'implémentation mais explique les décisions majeures.*
-- **Stack Technologique Principale :** [Ex: React, Node.js, PostgreSQL, AWS]
-- **Patterns d'Architecture :** [Ex: "Microservices communiquant via une API Gateway", "Monolithe modulaire"]
-- **Documents d'Architecture de Référence :**
-    - [ARCH-XX](../../docs/backlog/02-architecture/ARCH-XX.xml) - Décision sur [sujet]
-    - [ARCH-YY](../../docs/backlog/02-architecture/ARCH-YY.xml) - Décision sur [autre sujet]
-
-## 4. Démarrage Rapide (Quick Start)
-
-*Instructions minimalistes pour lancer l'environnement de développement en local.*
-1.  `git clone https://www.dudsdepot.com/`
-2.  `npm install`
-3.  `npm run dev`
-4.  L'application est disponible à l'adresse `http://localhost:3000`.
-
-## 5. Points d'Entrée du Code
-
-*Pistes pour aider un nouveau développeur à commencer à explorer le code.*
-- **Démarrage de l'application :** `src/index.js`
-- **Feature principale A :** `src/features/featureA/`
-- **Logique métier principale :** `src/core/`
-```
-
-## SECTION 3 : PROCÉDURE DE GÉNÉRATION DU RAPPORT
-
-1.  **[ANALYSE] Phase 1 : Cadrage**
-      - Sur demande du `Human_Developer`, confirmer l'intention de générer un rapport d'onboarding.
-
-2.  **[PROCEDURE] Phase 2 : Collecte d'Informations**
-      - Scanner les répertoires `/docs/backlog/00-pbi/` et `/docs/backlog/02-architecture/` pour identifier les PBI les plus importants et les décisions d'architecture clés.
-      - Analyser le `package.json` pour identifier la stack technologique et les scripts de démarrage.
-      - Identifier les concepts métier récurrents dans les artefacts du backlog.
-
-3.  **[PROCEDURE] Phase 3 : Rédaction du Rapport**
-      - Remplir chaque section du rapport en synthétisant les informations collectées.
-      - Pour la section "Mission", s'appuyer sur la connaissance générale du projet et la valider avec le `Human_Developer`.
-
-4.  **[CONCLUSION] Phase 4 : Livraison**
-      - Créer le fichier `ONBOARDING-SUMMARY-[DATE].xml`.
-      - Présenter le rapport finalisé au `Human_Developer`. La mission de ce protocole se termine ici.
+  <section title="Report Generation Procedure">
+    <step number="1" type="analysis" title="Scoping">
+      <action>Upon request from the Human_Developer, confirm the intent to generate an onboarding report.</action>
+    </step>
+    <step number="2" type="procedure" title="Information Gathering">
+      <action>Scan `/docs/backlog/00-pbi/` and `/docs/backlog/02-architecture/` to identify key PBIs and architectural decisions. Analyze `package.json` to identify the tech stack and startup scripts. Identify recurring business concepts from backlog artifacts.</action>
+    </step>
+    <step number="3" type="procedure" title="Report Writing">
+      <action>Fill each section of the report by synthesizing the collected information. For the "Mission" section, rely on general project knowledge and validate it with the Human_Developer.</action>
+    </step>
+    <step number="4" type="conclusion" title="Delivery">
+      <action>Create the `ONBOARDING-SUMMARY-[DATE].xml` file. Present the finalized report to the Human_Developer. This protocol's mission ends here.</action>
+    </step>
+  </section>
+  
+   <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-07T14:00:00Z">
+          <source protocol="project_onboarding" />
+          <message type="info">Generating project onboarding summary as requested by Human_Developer.</message>
+        </entry>
+        <entry timestamp="2025-07-07T14:05:00Z">
+          <source protocol="project_onboarding" />
+          <message type="info">Onboarding summary `ONBOARDING-SUMMARY-2025-07-07.xml` has been successfully created and delivered.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

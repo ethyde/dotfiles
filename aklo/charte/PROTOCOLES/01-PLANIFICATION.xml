@@ -1,181 +1,247 @@
-# PROTOCOLE SPÉCIFIQUE : PLANIFICATION ET DÉCOMPOSITION
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="planning">
+   <description>
+      This protocol is activated after a PBI is validated (status = AGREED). Its mission is to
+      transform the functional requirement into an initial technical action plan by decomposing it
+      into atomic, traceable tasks (TASK artefacts).
+   </description>
 
-Ce protocole s'active après la validation d'un `PBI` (`Status = AGREED`). Il a pour mission de transformer l'exigence fonctionnelle en un plan d'action technique initial.
+   <section title="mission_and_deliverable">
+      <sub_section title="mission">
+         <introduction>
+            The mission of this protocol is to break down a requirement (PBI, correction plan, etc.)
+            into atomic, logical technical tasks (TASK artefacts).
+         </introduction>
+         <note>
+            Decomposition is most often triggered by the PRODUCT OWNER protocol, but can also be
+            required by DEPRECATION, SECURITY AUDIT, or any protocol needing a detailed technical
+            action plan.
+         </note>
+      </sub_section>
+      <sub_section title="expected_deliverable">
+         <deliverable>
+            One or more `TASK-[pbi_id]-[task_id]-TODO.xml` files created in
+            `/docs/backlog/01-tasks/`, and a planning report summarizing the plan, listing all
+            created tasks, and highlighting those requiring architectural review.
+         </deliverable>
+      </sub_section>
+      <sub_section title="task_usage">
+         <usage>
+            A TASK is an atomic, actionable technical unit derived from a PBI. It must be specific,
+            measurable, achievable, relevant, and time-boxed (SMART). Each TASK is traceable to its
+            parent PBI and is the basis for all development, review, and tracking activities.
+         </usage>
+      </sub_section>
+   </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+   <section title="task_artefact_management_and_structure">
+      <sub_section title="naming">
+         <format>TASK-[pbi_id]-[task_id]-[status].xml</format>
+         <details>
+            <detail name="pbi_id">ID of the parent PBI, ensuring traceability.</detail>
+            <detail name="task_id">Sequential identifier of the task within the PBI scope.</detail>
+            <detail name="status">The status of the task in its lifecycle.</detail>
+         </details>
+      </sub_section>
+      <sub_section title="statuses">
+         <list>
+            <item name="todo">Ready to be picked up.</item>
+            <item name="in_progress">Being executed by a human_developer.</item>
+            <item name="awaiting_review">Development finished, diff awaiting validation.</item>
+            <item name="done">Commit has been made.</item>
+            <item name="merged">Branch has been merged into main.</item>
+         </list>
+      </sub_section>
+      <sub_section title="mandatory_task_artefact_structure">
+         <artefact_template format="xml">
+            <task pbi_id="[pbi_id]" task_id="[task_id]" status="todo" title="[title]">
+               <metadata>
+                  <parent_pbi>PBI-[pbi_id]</parent_pbi>
+                  <arch_review_required>[yes|no]</arch_review_required>
+                  <architecture_document optional="true">ARCH-[pbi_id]-1.xml</architecture_document>
+                  <assignee>[assignee]</assignee>
+                  <git_branch>feature/task-[pbi_id]-[task_id]</git_branch>
+               </metadata>
+               <content>
+                  <technical_objective>
+                     Clear, unambiguous description of the work to be done, files to modify/create,
+                     and expected result.
+                  </technical_objective>
+                  <context_and_files>
+                     Crucial section for the AI. Contains code snippets, file paths, data
+                     structures, and any information needed to accomplish the task.
+                  </context_and_files>
+                  <ai_agent_instructions>
+                     <description>Sequential and precise list of actions for the agent to execute.
+                        Each step should be small and verifiable.</description>
+                     <step number="1">Instruction 1...</step>
+                     <step number="2">Instruction 2...</step>
+                  </ai_agent_instructions>
+                  <definition_of_done>
+                     <criterion state="todo">The code is implemented according to instructions.</criterion>
+                     <criterion state="todo">The code follows the project's coding standards.</criterion>
+                     <criterion state="todo">Unit tests are written and pass successfully.</criterion>
+                     <criterion state="todo">Documentation (docstring) is complete.</criterion>
+                     <criterion state="todo">The code has been reviewed and approved.</criterion>
+                  </definition_of_done>
+               </content>
+            </task>
+         </artefact_template>
+         <example>
+            <task pbi_id="101" task_id="1" status="in_progress" title="Implement login form UI">
+              <metadata>
+                <parent_pbi>PBI-101</parent_pbi>
+                <arch_review_required>no</arch_review_required>
+                <assignee>alice</assignee>
+                <git_branch>feature/task-101-1</git_branch>
+              </metadata>
+              <content>
+                <technical_objective>
+                  Create a login form with email and password fields, styled according to the design system.
+                </technical_objective>
+                <context_and_files>
+                  File: `src/components/LoginForm.tsx`<br/>
+                  Use the existing `Input` and `Button` components.<br/>
+                  Follow the Figma design: `/designs/login-form.fig`.
+                </context_and_files>
+                <ai_agent_instructions>
+                  <description>Step-by-step actions for the agent:</description>
+                  <step number="1">Create the LoginForm component with email and password fields.</step>
+                  <step number="2">Add validation for required fields.</step>
+                  <step number="3">Style the form according to the design system.</step>
+                </ai_agent_instructions>
+                <definition_of_done>
+                  <criterion state="done">Login form renders with email and password fields.</criterion>
+                  <criterion state="in_progress">Validation is implemented for required fields.</criterion>
+                  <criterion state="todo">Form matches the design system styles.</criterion>
+                  <criterion state="todo">Code is reviewed and approved.</criterion>
+                </definition_of_done>
+              </content>
+            </task>
+          </example>
+      </sub_section>
+   </section>
 
-### 1.1. Mission
+   <section title="planning_procedure">
+      <step number="1" type="analysis" title="pbi_appropriation">
+         <description>
+            Take as input a PBI with status AGREED. Deeply analyze acceptance criteria and
+            constraints. Ask clarification questions to the human_developer if needed.
+         </description>
+      </step>
+      <flight_plan required="true">
+         <title>planning_flight_plan</title>
+         <instruction>Before decomposing and creating tasks, the agent must present a detailed plan.</instruction>
+         <objective>Decompose a PBI into atomic, traceable technical tasks</objective>
+         <planned_actions>
+            <item>Deep analysis of the parent PBI and its acceptance criteria</item>
+            <item>Identification of technical components to modify/create</item>
+            <item>Decomposition into SMART tasks</item>
+            <item>Generation of sequential IDs for each task of the PBI</item>
+            <item>Creation of `TASK-[pbi_id]-[task_id]-TODO.xml` files in `/docs/backlog/01-tasks/`</item>
+            <item>Assessment of architectural review need for each task</item>
+         </planned_actions>
+         <affected_files>
+            <item type="creation">/docs/backlog/01-tasks/TASK-[pbi_id]-[task_id]-TODO.xml</item>
+            <item type="update">/docs/backlog/00-pbi/PBI-[pbi_id]-AGREED.xml</item>
+         </affected_files>
+         <system_commands>
+            <item type="automation" optional="true">aklo plan [pbi_id]</item>
+            <item type="verification">Check existing task IDs for this PBI</item>
+         </system_commands>
+         <mcp_tools>
+            <item>mcp_desktop-commander_list_directory</item>
+            <item>mcp_desktop-commander_read_file</item>
+            <item>mcp_desktop-commander_write_file</item>
+            <item>mcp_aklo-terminal_aklo_execute</item>
+         </mcp_tools>
+         <required_validation>
+            <answer>yes</answer>
+            <description>Explicit approval required before creation</description>
+         </required_validation>
+      </flight_plan>
+      <step number="2" type="procedure" title="task_decomposition">
+         <description>
+            Decompose the PBI into a list of technical tasks according to SMART criteria.
+         </description>
+         <smart_criteria>
+            <criterion letter="s" name="specific">The task objective must be clear and unambiguous.</criterion>
+            <criterion letter="m" name="measurable">There must be one or more objective criteria
+               (definition of done) to know when the task is complete.</criterion>
+            <criterion letter="a" name="achievable">The task must be achievable with available
+               skills and resources.</criterion>
+            <criterion letter="r" name="relevant">The task must directly contribute to the parent
+               PBI. No irrelevant work.</criterion>
+            <criterion letter="t" name="time_boxed">The task must be small enough to be a manageable
+               unit of work and not drag on indefinitely.</criterion>
+         </smart_criteria>
+         <action>For each identified task, create the corresponding `TASK-...-TODO.xml` file.</action>
+         <automation command="aklo plan [pbi_id]" optional="true" />
+      </step>
+      <step number="3" type="analysis" title="triage_and_risk_identification">
+         <description>
+            For each created task, assess its complexity and impact. If a task presents an
+            architectural risk, set the `arch_review_required` field to `yes` in the task file;
+            otherwise, set to `no`.
+         </description>
+      </step>
+      <step number="4" type="conclusion" title="plan_presentation">
+         <description>
+            Prepare the planning report listing all created tasks, highlighting those requiring
+            architectural review, and submit it to the human_developer with a clear recommendation.
+         </description>
+         <recommendation_cases>
+            <case name="trivial">If the request is minor, recommend using the FAST-TRACK protocol.</case>
+            <case name="simple">If no task requires review, recommend moving directly to the
+               DEVELOPMENT protocol.</case>
+            <case name="complex">If some tasks require review, recommend activating the ARCHITECTURE
+               protocol.</case>
+         </recommendation_cases>
+      </step>
+   </section>
 
-Décomposer une exigence (`PBI`, plan de correction, etc.) en `Tasks` techniques, atomiques et logiques. 
-**Note :** Ce protocole est le plus souvent activé par [PRODUCT OWNER], mais aussi par [DEPRECATION], [SECURITE-AUDIT] ou tout autre protocole nécessitant un plan d'action technique détaillé.
+   <section title="atomic_commit_and_validation">
+      <sub_section title="commit_content">
+         <commit_message_template>
+        <![CDATA[
+feat(planning): Decompose PBI-[ID] into [N] tasks
 
-### 1.2. Livrables Attendus
+- Creation of [N] SMART technical tasks
+- [X] tasks require architectural review
+- PBI-[ID] updated with the list of associated tasks
+- Journal updated with the planning process
 
-1. **Artefacts de Tâches :** Un ou plusieurs fichiers `TASK-[PBI_ID]-[Task_ID]-TODO.xml` créés dans le répertoire `/docs/backlog/01-tasks/`.
-2. **Rapport de Planification :** Un message de `[CONCLUSION]` pour le `Human_Developer` qui résume le plan, liste les `Tasks` créées et identifie explicitement celles recommandées pour une revue architecturale.
-
-## SECTION 2 : ARTEFACT TASK - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `TASK-[PBI_ID]-[Task_ID]-[Status].xml`
-  - `[PBI_ID]` : L'ID du `PBI` parent, assurant la traçabilité.
-  - `[Task_ID]` : Identifiant séquentiel de la tâche dans le scope du `PBI`.
-  - `[Status]` : Le statut de la tâche dans son cycle de vie.
-
-### 2.2. Statuts
-
-- `TODO` : Prête à être prise en charge.
-- `IN_PROGRESS` : Prise en charge par un `Human_Developer` pour exécution.
-- `AWAITING_REVIEW` : Développement terminé, `diff` en attente de validation par le `Human_Developer`.
-- `DONE` : Le `commit` a été effectué.
-- `MERGED` : La branche a été fusionnée dans la branche principale.
-
-### 2.3. Structure Obligatoire Du Fichier Task
-
-```markdown
-# TASK-%%PBI_ID%%-%%TASK_ID%% : %%TITLE%%
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-%%PBI_ID%%](path/to/pbi)
-**Revue Architecturale Requise:** [%%ARCH_REVIEW%%]
-**Document d'Architecture (si applicable):** [ARCH-%%PBI_ID%%-1.xml](../arch/ARCH-%%PBI_ID%%-1.xml)
-**Assigné à:** `[%%ASSIGNEE%%]`
-**Branche Git:** `feature/task-%%PBI_ID%%-%%TASK_ID%%`
-
----
-
-## 1. Objectif Technique
-
-_Description claire et sans ambiguïté du travail à réaliser, des fichiers à modifier/créer et du résultat attendu._
-
-## 2. Contexte et Fichiers Pertinents
-
-_Section cruciale pour l'IA. Contient les extraits de code, les chemins de fichiers, les structures de données et toute information nécessaire pour la réalisation de la tâche._
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-_Liste séquentielle et précise des actions que le protocole [DEVELOPPEMENT] devra exécuter. Chaque instruction doit être petite et vérifiable._
-
-1.  **Instruction 1...**
-2.  **Instruction 2...**
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [ ] Le code est implémenté conformément aux instructions.
-- [ ] Le code respecte la `PEP 8`.
-- [ ] Les tests unitaires sont écrits et passent avec succès.
-- [ ] La documentation (docstring) est complète.
-- [ ] Le code a été revu et approuvé.
-```
-
-## SECTION 3 : PROCÉDURE DE PLANIFICATION
-
-1. **[ANALYSE] Phase 1 : Appropriation du PBI**
-   - Prendre en entrée un `PBI` avec le statut `AGREED`.
-   - Analyser en profondeur les critères d'acceptation et les contraintes. Poser des questions de clarification au `Human_Developer` si nécessaire.
-
-**🛫 PLAN DE VOL PLANIFICATION (Obligatoire avant Phase 2)**
-
-Avant la décomposition et création des Tasks, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_PLANIFICATION]**
-**Objectif :** Décomposer un PBI en Tasks techniques atomiques et traçables
-**Actions prévues :**
-1. Analyse approfondie du PBI parent et de ses critères d'acceptation
-2. Identification des composants techniques à modifier/créer
-3. Décomposition en Tasks SMART (Spécifique, Mesurable, Atteignable, Réaliste, Temporellement défini)
-4. Génération des IDs séquentiels pour chaque Task du PBI
-5. Création des fichiers `TASK-[PBI_ID]-[Task_ID]-TODO.xml` dans `/docs/backlog/01-tasks/`
-6. Évaluation du besoin de revue architecturale pour chaque Task
-
-**Fichiers affectés :**
-- `/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.xml` : création (multiple)
-- `/docs/backlog/00-pbi/PBI-[PBI_ID]-AGREED.xml` : mise à jour section "Tasks Associées"
-
-**Commandes système :**
-- `aklo plan [PBI_ID]` : automatisation de planification (optionnel)
-- Vérification des IDs Task existants pour ce PBI
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_list_directory` : vérifier Tasks existantes
-- `mcp_desktop-commander_read_file` : lire le PBI parent
-- `mcp_desktop-commander_write_file` : créer les fichiers Task
-- `mcp_aklo-terminal_aklo_execute` : commande aklo (si utilisée)
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant création
-
-2. **[PROCEDURE] Phase 2 : Décomposition en Tâches**
-   - Décomposer le `PBI` en une liste de `Tasks` techniques. Chaque `Task` doit être petite, indépendante et testable par rapport aux critères **SMART** :
-     - **S - Spécifique :** L'objectif de la `Task` doit être clair et sans ambiguïté. On doit savoir exactement ce qui doit être fait.
-     - **M - Mesurable :** Il doit y avoir un ou plusieurs critères objectifs (la "Definition of Done") pour savoir quand la `Task` est terminée.
-     - **A - Atteignable (Achievable) :** La `Task` doit être réalisable avec les compétences et les ressources disponibles.
-     - **R - Réaliste (Relevant) :** La `Task` doit contribuer directement à l'accomplissement du `PBI` parent. Elle ne doit pas inclure de travail non pertinent.
-     - **T - Temporellement défini (Time-boxed) :** Bien que nous n'assignions pas de durée stricte, la `Task` doit être suffisamment petite pour être considérée comme une unité de travail gérable et ne pas s'étaler indéfiniment.
-   - **Action Requise :** Pour chaque `Task` identifiée, créer manuellement le fichier `TASK-[…]-TODO.xml` correspondant dans `/docs/backlog/01-tasks/`.
-   - **⚡ Automatisation `aklo` :** La commande `aklo plan <PBI_ID>` est prévue pour automatiser cette étape.
-
-3. **[ANALYSE] Phase 3 : Triage et Identification des Risques (Aiguillage)**
-   - Pour chaque `Task` créée, évaluer sa complexité et son impact.
-   - **Identifier formellement** toute `Task` qui présente un risque architectural (ex: touche à la sécurité, introduit un nouveau pattern, forte contrainte de performance).
-   - Si une `Task` présente un risque architectural (ex: touche à la sécurité, introduit un nouveau pattern, forte contrainte de performance), **mettre la valeur du champ `Revue Architecturale Requise` à `Oui`** dans le fichier de la `Task`. Pour les autres, mettre `Non`.
-
-4. **[CONCLUSION] Phase 4 : Présentation du Plan**
-   - Préparer le **Rapport de Planification** qui liste toutes les `Tasks` créées et met en évidence celles qui requièrent une revue architecturale.
-   - [ATTENTE_VALIDATION] Soumettre ce rapport au `Human_Developer` avec une recommandation claire :
-     - **Cas 1 (Trivial) :** Si la demande initiale est mineure et ne justifie pas une `Task`, recommander d'utiliser le protocole [FAST-TRACK].
-     - **Cas 2 (Simple) :** Si aucune `Task` ne requiert de revue, recommander de passer directement au protocole [DEVELOPPEMENT].
-     - **Cas 3 (Complexe) :** Si des `Tasks` requièrent une revue, recommander d'activer le protocole [ARCHITECTURE].
-
-## SECTION 4 : COMMIT ATOMIQUE DE PLANIFICATION
-
-### 4.1. Principe du Commit Unique
-
-**Règle Fondamentale :** La planification d'un PBI produit un unique commit atomique qui inclut :
-
-1. **Toutes les TASK créées** : Tous les fichiers `TASK-[PBI_ID]-[Task_ID]-TODO.xml`
-2. **Mise à jour du PBI parent** : Section "Tasks Associées" complétée
-3. **Mise à jour du journal** : Documentation du processus de planification
-
-### 4.2. Contenu du Commit
-
-**Message de commit type :**
-```
-feat(planning): Décomposition PBI-[ID] en [N] tasks
-
-- Création de [N] tasks techniques SMART
-- [X] tasks nécessitent une revue architecturale
-- PBI-[ID] mis à jour avec la liste des tasks associées
-- Journal mis à jour avec le processus de planification
-
-Tasks créées:
-- TASK-[PBI_ID]-01: [Titre]
-- TASK-[PBI_ID]-02: [Titre]
+Tasks created:
+- TASK-[PBI_ID]-01: [Title]
+- TASK-[PBI_ID]-02: [Title]
 - [...]
 
-Prochaine étape: [ARCHITECTURE|DEVELOPPEMENT|FAST-TRACK]
-```
-
-### 4.3. Validation Avant Commit
-
-**[ATTENTE_VALIDATION] Présentation du Diff Complet**
-
-Avant le commit, présenter au `Human_Developer` :
-1. **Diff de tous les fichiers TASK** créés
-2. **Diff du PBI parent** modifié
-3. **Diff du journal** mis à jour
-4. **Recommandation** pour la suite du workflow
-
-**Validation requise :** Le `Human_Developer` doit approuver explicitement le commit atomique complet.
-
-### 4.4. Gestion des Modifications Post-Planification
-
-**Règle :** Les modifications ultérieures des TASK (changements de statut, mises à jour de contenu) font partie d'autres protocoles et génèrent leurs propres commits atomiques.
-
-**Exemples :**
-- Changement `TASK-TODO` → `TASK-DONE` : commit du protocole DÉVELOPPEMENT
-- Modification des critères d'une TASK : commit du protocole META-IMPROVEMENT
-- Ajout de TASK supplémentaires : nouveau cycle de protocole PLANIFICATION
+Next step: [ARCHITECTURE|DEVELOPMENT|FAST-TRACK]
+        ]]>
+      </commit_message_template>
+      </sub_section>
+      <sub_section title="pre_commit_validation">
+         <awaiting_validation> Before the commit, present the complete diff to the human_developer: <list
+               type="ordered">
+               <item>Diff of all created TASK files</item>
+               <item>Diff of the modified parent PBI</item>
+               <item>Diff of the updated journal</item>
+               <item>Recommendation for the next step</item>
+            </list>
+        <instruction>The
+            human_developer must explicitly approve the complete atomic commit.</instruction>
+         </awaiting_validation>
+      </sub_section>
+      <sub_section title="post_planning_modification_management">
+         <rule>
+            Subsequent modifications to TASKs (status changes, content updates) are part of other
+            protocols and generate their own atomic commits.
+         </rule>
+         <examples>
+            <item>Change `TASK-TODO` → `TASK-DONE`: commit from DEVELOPMENT protocol</item>
+            <item>Modification of a TASK's criteria: commit from META-IMPROVEMENT protocol</item>
+            <item>Addition of extra TASKs: new cycle of the PLANNING protocol</item>
+         </examples>
+      </sub_section>
+   </section>
+</protocol>

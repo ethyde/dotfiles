@@ -1,124 +1,167 @@
-# PROTOCOLE SPÉCIFIQUE : OPTIMISATION DE PERFORMANCE
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="performance_optimization">
+  <description>
+    This protocol is activated when a feature does not meet its performance requirements (response time, memory/CPU consumption). The golden rule is: **Measure first, then optimize.**
+  </description>
 
-Ce protocole s'active lorsqu'une fonctionnalité ne respecte pas ses exigences de performance (temps de réponse, consommation mémoire/CPU). La règle d'or est : **Mesurer d'abord, optimiser ensuite.**
+  <section title="Mission and Deliverables">
+    <sub_section title="Mission">
+      <introduction>
+        To scientifically identify performance bottlenecks, implement a targeted solution, and prove its effectiveness through comparative measurements.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverables">
+      <deliverables>
+        <deliverable type="report">
+          A complete `OPTIM-[ID]-DONE.xml` file, created in `/docs/backlog/06-optim/`.
+        </deliverable>
+        <deliverable type="commit">
+          A commit containing the optimized code, produced via the [DEVELOPMENT] protocol.
+        </deliverable>
+      </deliverables>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+  <section title="Optimization Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>OPTIM-[ID]-[Status].xml</format>
+      <details>
+        <detail name="id">A unique identifier generated from the title and date (e.g., `optimize-user-api-20250708`).</detail>
+        <detail name="status">The status of the optimization process.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="benchmarking">Initial analysis and performance measurement are in progress.</item>
+        <item name="awaiting_fix">The bottleneck is identified, and a solution is awaiting validation by the Human_Developer.</item>
+        <item name="done">The optimization has been implemented, validated by a new measurement, and the commit has been created.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <optimization_report id="[id]" status="benchmarking" title="[Optimization Goal]">
+          <metadata>
+            <associated_task optional="true">TASK-[ID]</associated_task>
+          </metadata>
+          <content>
+            <performance_goal>
+              <metric_targeted>e.g., "API response time for GET /users".</metric_targeted>
+              <quantified_objective>e.g., "Must be less than 100ms at the 95th percentile."</quantified_objective>
+            </performance_goal>
+            <benchmark_protocol>
+              <tool_used>e.g., `k6`, `JMeter`, `console.time`.</tool_used>
+              <test_scenario>A precise and reproducible description of how the measurement is performed.</test_scenario>
+            </benchmark_protocol>
+            <initial_measurements>
+              <raw_results><![CDATA[Raw results from the benchmark tool.]]></raw_results>
+              <bottleneck_analysis>Identification of the exact line, query, or function causing the slowness.</bottleneck_analysis>
+            </initial_measurements>
+            <optimization_strategy>
+              <proposed_solution>e.g., "Cache the result with Redis for 5 minutes", "Add an index on column X of table Y".</proposed_solution>
+            </optimization_strategy>
+            <non_regression_proof>
+              <functional_test_coverage>Confirmation that the business logic is covered by tests BEFORE starting optimization.</functional_test_coverage>
+              <performance_regression_tests optional="true">Description of specific performance regression tests written or updated.</performance_regression_tests>
+              <final_test_result>Assertion that 100% of functional tests pass after optimization.</final_test_result>
+            </non_regression_proof>
+            <final_measurements>
+              <raw_results><![CDATA[Raw results from the new benchmark, run under identical conditions.]]></raw_results>
+              <conclusion>Before/after comparison and confirmation that the objective has been met.</conclusion>
+            </final_measurements>
+          </content>
+        </optimization_report>
+      </artefact_template>
+      <example>
+        <optimization_report id="optimize-get-products-api-20250708" status="done" title="Optimize GET /api/products endpoint">
+          <metadata>
+            <associated_task>TASK-115-1</associated_task>
+          </metadata>
+          <content>
+            <performance_goal>
+              <metric_targeted>API response time for GET /api/products</metric_targeted>
+              <quantified_objective>Average response time must be under 200ms.</quantified_objective>
+            </performance_goal>
+            <benchmark_protocol>
+              <tool_used>k6</tool_used>
+              <test_scenario>Run a **load test** with 50 virtual users for 1 minute against the GET /api/products endpoint.</test_scenario>
+            </benchmark_protocol>
+            <initial_measurements>
+              <raw_results><![CDATA[
+http_req_duration..................: avg=850.12ms min=750ms med=840ms max=1.2s p(95)=1.1s
+              ]]></raw_results>
+              <bottleneck_analysis>Analysis with a database profiler shows N+1 queries. The code fetches each product's category in a separate database query inside a loop.</bottleneck_analysis>
+            </initial_measurements>
+            <optimization_strategy>
+              <proposed_solution>Refactor the database query to use a `JOIN` to fetch products and their categories in a single query.</proposed_solution>
+            </optimization_strategy>
+            <non_regression_proof>
+              <functional_test_coverage>The endpoint is covered by 5 **integration tests** ensuring correct data format and pagination.</functional_test_coverage>
+              <performance_regression_tests>A new **unit test** was added to the data access layer to assert that fetching 10 products results in exactly 1 database query.</performance_regression_tests>
+              <final_test_result>All 5 integration tests and the new performance regression test pass after the code change.</final_test_result>
+            </non_regression_proof>
+            <final_measurements>
+              <raw_results><![CDATA[
+http_req_duration..................: avg=95.45ms min=80ms med=92ms max=150ms p(95)=145ms
+              ]]></raw_results>
+              <conclusion>The average response time was reduced from 850ms to 95ms. The objective is met.</conclusion>
+            </final_measurements>
+          </content>
+        </optimization_report>
+      </example>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
+  <section title="Optimization Procedure">
+    <flight_plan required="true" name="OPTIMIZATION_FLIGHT_PLAN">
+      <objective>Optimize performance based on measurable and objective metrics.</objective>
+      <actions>
+        <item>Generate a unique ID for the optimization report.</item>
+        <item>Create the `OPTIM-[ID]-BENCHMARKING.xml` file.</item>
+        <item>Define the performance goal with a quantified metric.</item>
+        <item>Establish a reproducible benchmark protocol.</item>
+        <item>Measure initial performance before optimization.</item>
+        <item>Perform scientific analysis to identify the bottleneck.</item>
+        <item>Propose a targeted optimization strategy.</item>
+        <item>Implement via the [DEVELOPMENT] protocol after validation.</item>
+        <item>Measure final performance to prove the improvement.</item>
+      </actions>
+      <affected_files>
+        <file type="lifecycle">/docs/backlog/06-optim/OPTIM-[ID].xml (BENCHMARKING → AWAITING_FIX → DONE)</file>
+        <file type="modification">Source code files to be optimized.</file>
+        <file type="creation">Benchmark scripts or configurations.</file>
+      </affected_files>
+      <system_commands>
+        <command optional="true">`aklo optimize "[Title]"`</command>
+        <command>Benchmark tools (k6, JMeter, etc.).</command>
+        <command>Profiling and performance analysis tools.</command>
+      </system_commands>
+      <mcp_tools>
+        <tool>mcp_desktop-commander_write_file</tool>
+        <tool>mcp_desktop-commander_execute_command</tool>
+        <tool>mcp_desktop-commander_edit_block</tool>
+      </mcp_tools>
+      <required_validation>YES - Explicit approval required before optimization.</required_validation>
+    </flight_plan>
 
-Identifier scientifiquement les goulets d'étranglement de performance, implémenter une solution ciblée, et prouver son efficacité par des mesures comparatives.
-
-### 1.2. Livrables Attendus
-
-1. **Rapport d'Optimisation :** Un fichier `OPTIM-[ID]-DONE.xml` complet, créé dans `/docs/backlog/06-optim/`.
-2. **Commit d'Optimisation :** Un `commit` contenant le code optimisé.
-
-## SECTION 2 : ARTEFACT OPTIM - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `OPTIM-[ID]-[Status].xml`
-    - `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    - `[Status]` : Le statut du processus d'optimisation.
-
-### 2.2. Statuts
-
-- `BENCHMARKING` : L'analyse initiale et la mesure de performance sont en cours.
-- `AWAITING_FIX` : Le goulet d'étranglement est identifié et une solution attend la validation du `Human_Developer`.
-- `DONE` : L'optimisation a été implémentée, validée par une nouvelle mesure, et le `commit` a été créé.
-
-### 2.3. Structure Obligatoire Du Fichier Optim
-
-```markdown
-# RAPPORT D'OPTIMISATION : OPTIM-[ID]
----
-**Task Associée (si applicable):** [TASK-ID](../../01-tasks/TASK-ID.xml)
----
-
-## 1. Objectif de Performance
-- **Métrique ciblée :** (Ex: "Temps de réponse de l'API GET /users".)
-- **Objectif chiffré :** (Ex: "Doit être inférieur à 100ms au 95ème percentile.")
-
-## 2. Protocole de Benchmark
-- **Outil utilisé :** (Ex: `k6`, `JMeter`, `console.time`.)
-- **Scénario de test :** (Description précise et reproductible de la manière dont la mesure est effectuée.)
-
-## 3. Mesures Initiales (Avant Optimisation)
-- **Résultats bruts :** (Copier/coller des résultats du benchmark.)
-- **Analyse du goulet d'étranglement :** (Identifier la ligne, la requête ou la fonction exacte qui cause la lenteur.)
-
-## 4. Stratégie d'Optimisation
-- **Solution proposée :** (Ex: "Mise en cache du résultat avec Redis pendant 5 minutes", "Ajout d'un index sur la colonne X de la table Y".)
-
-## 5. Preuve de Non-Régression 
-- **Couverture de tests fonctionnels :** (Confirmer que le comportement métier est couvert par des tests **avant** de commencer l'optimisation.) 
-- **Résultat des tests finaux :** (Affirmer que 100% des tests de la suite passent après l'optimisation.)
-
-## 6. Mesures Finales (Après Optimisation)
-- **Résultats bruts :** (Copier/coller des résultats du nouveau benchmark, exécuté dans des conditions identiques.)
-- **Conclusion :** (Comparaison avant/après et confirmation que l'objectif est atteint.)
-```
-
-## SECTION 3 : PROCÉDURE D'OPTIMISATION
-
-**🛫 PLAN DE VOL OPTIMISATION (Obligatoire avant Phase 1)**
-
-Avant toute optimisation de performance, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_OPTIMISATION]**
-**Objectif :** Optimiser les performances selon des métriques mesurables et objectives
-**Actions prévues :**
-1. Génération de l'ID unique pour le rapport d'optimisation
-2. Création du fichier `OPTIM-[ID]-BENCHMARKING.xml` dans `/docs/backlog/06-optim/`
-3. Définition de l'objectif de performance avec métrique chiffrée
-4. Mise en place d'un protocole de benchmark reproductible
-5. Mesure initiale des performances avant optimisation
-6. Analyse scientifique pour identifier le goulet d'étranglement
-7. Proposition d'une stratégie d'optimisation ciblée
-8. Implémentation via protocole DEVELOPPEMENT après validation
-9. Mesure finale pour prouver l'amélioration
-
-**Fichiers affectés :**
-- `/docs/backlog/06-optim/OPTIM-[ID]-BENCHMARKING.xml` → `AWAITING_FIX` → `DONE`
-- Fichiers de code source à optimiser
-- Scripts ou configurations de benchmark
-- Possibles fichiers de tests de performance
-- Fichiers de configuration (cache, base de données, etc.)
-
-**Commandes système :**
-- `aklo optimize "<Titre>"` : automatisation création rapport (optionnel)
-- Outils de benchmark (k6, JMeter, console.time, etc.)
-- Outils de profiling et analyse de performance
-- Exécution de tests de non-régression
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_write_file` : créer le rapport d'optimisation
-- `mcp_desktop-commander_execute_command` : benchmarks et profiling
-- `mcp_desktop-commander_edit_block` : modifications de code optimisé
-- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant optimisation
-
-1. **[PROCEDURE] Phase 1 : Mesurer (Non négociable)**
-    - **Action Requise :** Créer un fichier `OPTIM-[ID]-BENCHMARKING.xml` dans `/docs/backlog/06-optim/`.
-    - **⚡ Automatisation `aklo` :** `aklo optimize "<Titre d'optimisation>"`
-    - Remplir les sections "Objectif de Performance" et "Protocole de Benchmark".
-    - Exécuter le benchmark sur le code **actuel** et remplir la section "Mesures Initiales".
-
-2. **[ANALYSE] Phase 2 : Analyser et Proposer**
-    - Analyser les résultats pour identifier le goulet d'étranglement avec certitude.
-    - Remplir la section "Stratégie d'Optimisation" avec une proposition de correction ciblée.
-    - Passer le statut à `AWAITING_FIX`.
-    - [ATTENTE_VALIDATION] Soumettre le rapport et la proposition de solution pour validation au `Human_Developer`.
-
-3. **[PROCEDURE] Phase 3 : Implémenter et Valider**
-    - Une fois le plan approuvé, **activer le protocole [DEVELOPPEMENT] (`03-DEVELOPPEMENT.xml`)** pour implémenter la solution.
-    - Après l'implémentation, relancer **exactement le même benchmark** que dans la phase 1.
-    - Remplir la section "Mesures Finales" du rapport pour prouver l'amélioration.
-
-4. **[CONCLUSION] Phase 4 : Finalisation**
-    - Une fois le refactoring terminé et tous les tests au vert, remplir la section "Preuve de Non-Régression".
-    - Suivre l'étapes 6 (Revue avant commit) du protocole [DEVELOPPEMENT]
-    - Mettre à jour le rapport de refactoring au statut `DONE`.
-    - Activer le protocole [KNOWLEDGE-BASE] pour déterminer si l'analyse a produit une connaissance qui mérite d'être centralisée.
-    - Suivre l'étapes 7 (Finalisation) du protocole [DEVELOPPEMENT] pour créer le `commit`.
+    <step number="1" type="procedure" title="Measure (Non-negotiable)">
+      <action>Create an `OPTIM-[ID]-BENCHMARKING.xml` file. Fill in the "Performance Goal" and "Benchmark Protocol" sections. Execute the benchmark on the current code and fill in the "Initial Measurements" section.</action>
+      <automation optional="true">`aklo optimize "[Optimization Title]"`</automation>
+    </step>
+    <step number="2" type="analysis" title="Analyze and Propose">
+      <action>Analyze the results to identify the bottleneck with certainty. Fill in the "Optimization Strategy" section with a targeted correction proposal. Change the status to `AWAITING_FIX`.</action>
+      <awaiting_validation>Submit the report and solution proposal to the Human_Developer for validation.</awaiting_validation>
+    </step>
+    <step number="3" type="procedure" title="Implement and Validate">
+      <action>Once the plan is approved, activate the [DEVELOPMENT] protocol to implement the solution. After implementation, rerun the exact same benchmark as in Phase 1. Fill in the "Final Measurements" section of the report to prove the improvement.</action>
+    </step>
+    <step number="4" type="conclusion" title="Finalization">
+      <action>After confirming the performance improvement, fill in the "Non-Regression Proof" section. Follow Step 6 (Pre-Commit Review) of the [DEVELOPMENT] protocol. This review may formally activate the **[CODE REVIEW]** protocol if changes are complex. Once approved, follow Step 7 of the [DEVELOPMENT] protocol to update the optimization report status to `DONE`, consider activating the [KNOWLEDGE-BASE] protocol, and create the final commit.</action>
+    </step>
+  </section>
+  
+  <section title="Commit Management">
+    <rule>
+      The final commit containing the optimization is produced by the [DEVELOPMENT] protocol, which is activated in Phase 3. This ensures all code changes adhere to the same quality, testing, and validation pipeline.
+    </rule>
+  </section>
+</protocol>

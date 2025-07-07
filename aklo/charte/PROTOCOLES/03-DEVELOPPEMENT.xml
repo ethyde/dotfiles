@@ -1,184 +1,214 @@
-# PROTOCOLE SPÉCIFIQUE : DÉVELOPPEMENT ET IMPLÉMENTATION
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="development_and_implementation">
+    <description>
+        This protocol is activated for each individual Task (Status = TODO). It governs how code is
+        written, tested, and documented. It is the single source of truth for all code quality
+        standards.
+    </description>
 
-Ce protocole s'active pour chaque `Task` individuelle (`Status = TODO`). Il régit la manière dont le code est écrit, testé et documenté. C'est la source de vérité unique pour toutes les normes de qualité du code.
+    <section title="Mission and Deliverable">
+        <sub_section title="Mission">
+            <introduction>
+                To implement the code for a Task in a clean, robust, and testable manner, following
+                an iterative development cycle and strictly adhering to quality standards.
+            </introduction>
+            <note>
+                This protocol is the main execution engine, activated by [PLANNING] for new
+                features, but also by [DEBUGGING], [REFACTORING], [OPTIMIZATION], and [HOTFIX] for
+                their respective implementation needs.
+            </note>
+        </sub_section>
+        <sub_section title="Expected Deliverable">
+            <deliverable type="atomic_commit">
+                A single, semantic, and atomic commit on the `feature/task-[PBI_ID]-[Task_ID]`
+                branch. This commit is created only after explicit validation of the `diff` by the
+                Human_Developer.
+            </deliverable>
+        </sub_section>
+    </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
+    <section title="Non-Negotiable Code Quality Rules">
+        <introduction>All of the following rules must be respected.</introduction>
+        <sub_section title="Compliance with S.O.L.I.D. Principles">
+            <principles>
+                <principle name="Single Responsibility">Each function, class, or module should have
+                    only one reason to change.</principle>
+                <principle name="Open/Closed">Entities should be open for extension, but closed for
+                    modification.</principle>
+                <principle name="Liskov Substitution">Subclasses must be substitutable for their
+                    base classes.</principle>
+                <principle name="Interface Segregation">Prefer small, client-specific interfaces.</principle>
+                <principle name="Dependency Inversion">Depend upon abstractions, not upon
+                    concretions.</principle>
+            </principles>
+        </sub_section>
+        <sub_section title="Code Quality and Cleanliness">
+            <rules>
+                <rule name="Strict and Explicit Typing">Strict typing (e.g., TypeScript's `strict`
+                    mode) must be rigorously applied. No use of `any` is tolerated.</rule>
+                <rule name="Linter Compliance">The code must be perfectly compliant with the
+                    `linting` rules configured in the project. No linter errors shall remain.</rule>
+                <rule name="Length Limits">
+                    <limit type="file">Files should ideally not exceed 300 lines.</limit>
+                    <limit type="function">Functions should ideally not exceed 25 lines.</limit>
+                </rule>
+                <rule name="Complete and Integral Code">Always write the full code for a file. No
+                    snippets, placeholder comments (`// ...`), or multiple blocks for the same file.</rule>
+            </rules>
+        </sub_section>
+        <sub_section title="Systematic Documentation">
+            <rules>
+                <rule name="Documentation Format">Every exported function, method, class, type, or
+                    interface must be preceded by a complete comment block following the **TSDoc**
+                    standard for TypeScript projects, or **JSDoc** for JavaScript projects. The
+                    specific format is enforced by the project's linter configuration.</rule>
+                <rule name="Documentation Content">The documentation must explain the element's role
+                    (`@description`), each parameter (`@param`), and the return value (`@returns`).</rule>
+            </rules>
+        </sub_section>
+    </section>
 
-### 1.1. Mission
+    <section title="Test-Driven Development (TDD) Procedure">
+        <introduction>The implementation of any feature must follow this iterative micro-cycle.</introduction>
+        <flight_plan required="true" name="DEVELOPMENT_FLIGHT_PLAN">
+            <objective>Implement a Task according to the TDD (Test-Driven Development) methodology.</objective>
+            <actions>
+                <item>Verify that all prerequisite tasks are completed (if any).</item>
+                <item>Create the Git branch according to the `feature/task-[PBI_ID]-[Task_ID]`
+                    format.</item>
+                <item>Update the Task status from `TODO` to `IN_PROGRESS`.</item>
+                <item>TDD cycle for each feature slice: Write failing unit test (RED), write minimum
+                    code to pass (GREEN), refactor and validate quality (BLUE).</item>
+                <item>Complete validation of the "Definition of Done".</item>
+                <item>Prepare the diff for review.</item>
+                <item>Create an atomic and semantic commit after approval.</item>
+            </actions>
+            <affected_files>
+                <file type="status_change">/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID].xml (TODO
+                    → IN_PROGRESS → AWAITING_REVIEW → DONE)</file>
+                <file type="creation/modification">Source code files as per Task specifications.</file>
+                <file type="creation/modification">Corresponding unit test files.</file>
+            </affected_files>
+            <system_commands>
+                <command>`git checkout -b feature/task-[PBI_ID]-[Task_ID]`</command>
+                <command>Test runner execution (e.g., `npm test`, `pytest`).</command>
+                <command>Linter and type checker validation.</command>
+                <command optional="true">`aklo start-task [ID]` / `aklo submit-task`</command>
+            </system_commands>
+            <mcp_tools>
+                <tool>mcp_desktop-commander_read_file</tool>
+                <tool>mcp_desktop-commander_edit_block</tool>
+                <tool>mcp_desktop-commander_move_file</tool>
+                <tool>mcp_desktop-commander_execute_command</tool>
+            </mcp_tools>
+            <required_validation>YES - Explicit approval required before development.</required_validation>
+        </flight_plan>
 
-Implémenter le code d'une `Task` de manière propre, robuste et testable, en respectant un cycle de développement itératif et en adhérant strictement aux normes de qualité. **Note :** Ce protocole est le moteur d'exécution principal, activé par [PLANIFICATION] pour les nouvelles fonctionnalités, mais aussi par [DEBOGAGE], [REFACTORING], [OPTIMISATION] et [HOTFIX] pour leurs besoins d'implémentation respectifs.
+        <prerequisites title="Environment Preparation">
+            <action>Before starting, create a Git branch that follows the format defined in the
+                TASK's header, then rename the TASK artifact file to change its status from `TODO`
+                to `IN_PROGRESS`.</action>
+            <automation optional="true">`aklo start-task [task_id]`</automation>
+        </prerequisites>
 
-### 1.2. Livrable Attendu
+        <sub_section title="Dependency Management">
+            <rule>If a Task lists dependencies in its metadata, development cannot begin until all
+                prerequisite tasks have a status of `DONE` or `MERGED`. The `start-task` automation
+                or the manual process must verify this condition.</rule>
+        </sub_section>
 
-- Un unique `commit` sémantique et atomique sur la branche `feature/task-[PBI_ID]-[Task_ID]`. Ce `commit` n'est créé **qu'après validation explicite** du `diff` par le `Human_Developer`.
+        <step number="1" title="Write a Failing Test (Red)">
+            <description>Identify a small piece of the functionality required by the Task. Write a
+                single unit test that describes this behavior. Run the test and ensure it fails
+                (RED).</description>
+        </step>
+        <step number="2" title="Write Minimum Code to Pass (Green)">
+            <description>Write the absolute minimum production code necessary for the previous test
+                to pass (GREEN). At this stage, code elegance is secondary; functionality is the
+                only goal. Rerun the test to confirm it passes.</description>
+        </step>
+        <step number="3" title="Refactor and Validate Quality (Blue)">
+            <description>Now that the behavior is secured by a test, execute the following quality
+                checklist:</description>
+            <checklist>
+                <item>Refactor the code: Improve structure (clarity, naming, apply SOLID
+                    principles).</item>
+                <item>Validate the Linter: Run the linter and fix all errors and warnings.</item>
+                <item>Validate Typing: Run the type checker (e.g., `tsc --noEmit`) and fix all type
+                    errors.</item>
+                <item>Validate Non-Regression: Rerun the entire test suite to ensure refactoring did
+                    not break anything.</item>
+            </checklist>
+        </step>
+        <step number="4" title="Iterate or Finalize">
+            <description>If the Task is not complete, return to step 1 for the next piece of
+                functionality. If the Task is complete, proceed to the finalization step.</description>
+        </step>
+        <step number="5" title="Validate the Definition of Done">
+            <description>Before submitting the work for review, open the related Task file. Validate
+                and check off (`[x]`) every single item on the "Definition of Done" checklist. If
+                any item cannot be checked, the work is not finished.</description>
+        </step>
+        <step number="6" title="Pre-Commit Review">
+            <awaiting_validation>
+                Once the "Definition of Done" is fully validated, prepare a complete `diff` of all
+                modifications. Present this `diff` to the Human_Developer for a final review. Update
+                the TASK's status to `AWAITING_REVIEW`.
+            </awaiting_validation>
+            <automation optional="true">`aklo submit-task`</automation>
+        </step>
+        <step number="7" title="Finalization and Atomic Commit">
+            <description>Once the `diff` is approved, update the Task status to `DONE`, update the
+                journal with an implementation summary, and create the single atomic, semantic
+                commit.</description>
+        </step>
+    </section>
 
-## SECTION 2 : RÈGLES DE QUALITÉ DU CODE (NON-NÉGOCIABLES)
+    <section title="Development Atomic Commit">
+        <sub_section title="Single Commit Principle">
+            <rule>The development of a TASK produces a single atomic commit that includes:</rule>
+            <composition>
+                <item>Implemented code for the TASK.</item>
+                <item>Associated tests (unit, integration, etc.).</item>
+                <item>The updated TASK artifact (status `TODO` → `DONE` with completed `Definition
+                    of Done` checklist).</item>
+                <item>The journal update.</item>
+            </composition>
+        </sub_section>
+        <sub_section title="Commit Content">
+            <commit_message_template><![CDATA[
+feat(TASK-[PBI_ID]-[Task_ID]): [Task Title]
 
-Toutes les règles suivantes doivent être respectées.
+[Detailed description of the implementation.]
 
-### 2.1. Respect Des Principes S.O.L.I.D.
-
-- **(S) Responsabilité Unique :** Chaque fonction, classe ou module ne doit avoir qu'une seule raison de changer.
-- **(O) Ouvert/Fermé :** Les entités doivent être ouvertes à l'extension, mais fermées à la modification.
-- **(L) Substitution de Liskov :** Les sous-classes doivent être substituables à leurs classes de base.
-- **(I) Ségrégation des Interfaces :** Privilégier les interfaces petites et spécifiques au besoin.
-- **(D) Inversion des Dépendances :** Dépendre d'abstractions, pas d'implémentations concrètes.
-
-### 2.2. Qualité Et Propreté Du Code
-
-- **Typage Strict et Explicite (TypeScript) :** Le typage strict doit être rigoureusement appliqué. Aucune utilisation de `any` n'est tolérée.
-- **Conformité au Linter :** Le code doit être parfaitement conforme aux règles de `linting` configurées dans le projet. Aucune erreur de linter ne doit subsister.
-- **Limites de Longueur :**
-    - **Fichiers :** Ne doivent idéalement pas dépasser **300 lignes**.
-    - **Fonctions :** Ne doivent idéalement pas dépasser **25 lignes**.
-- **Code Complet et Intégral :** Toujours écrire le code complet pour un fichier. Pas d'extraits, de commentaires de substitution (`// …`) ou de blocs multiples pour un même fichier.
-
-### 2.3. Documentation Systématique
-
-- **Format JSDoc/TSDoc :** Chaque fonction, méthode, classe, type ou interface exporté doit être précédé d'un bloc de commentaires complet.
-- **Contenu :** La documentation doit expliquer le **rôle** de l'élément (`@description`), chaque **paramètre** (`@param`) et la **valeur de retour** (`@returns`).
-
-## SECTION 3 : PROCÉDURE DE DÉVELOPPEMENT TDD
-
-L'implémentation de toute fonctionnalité doit suivre ce micro-cycle itératif.
-
-**🛫 PLAN DE VOL DEVELOPPEMENT (Obligatoire avant Prérequis)**
-
-Avant tout développement de code, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_DEVELOPPEMENT]**
-**Objectif :** Implémenter une Task selon la méthodologie TDD (Test-Driven Development)
-**Actions prévues :**
-1. Création de la branche Git selon format `feature/task-[PBI_ID]-[Task_ID]`
-2. Mise à jour du statut Task de `TODO` à `IN_PROGRESS`
-3. Cycle TDD pour chaque fonctionnalité :
-   - Écriture de tests unitaires (RED)
-   - Implémentation du code minimum (GREEN)
-   - Refactorisation et validation qualité (BLUE)
-4. Validation complète de la "Definition of Done"
-5. Préparation du diff pour revue
-6. Commit atomique et sémantique après approbation
-
-**Fichiers affectés :**
-- `/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.xml` → `IN_PROGRESS` → `AWAITING_REVIEW` → `DONE`
-- Fichiers de code source selon spécifications de la Task
-- Fichiers de tests unitaires correspondants
-- Possibles fichiers de documentation/docstring
-
-**Commandes système :**
-- `git checkout -b feature/task-[PBI_ID]-[Task_ID]` : création branche
-- `aklo start-task [ID]` : automatisation démarrage (optionnel)
-- Exécution de tests : `npm test`, `pytest`, etc.
-- Validation linter et typage selon stack technique
-- `aklo submit-task` : automatisation soumission (optionnel)
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_read_file` : lire spécifications Task
-- `mcp_desktop-commander_edit_block` : modifier code source et tests
-- `mcp_desktop-commander_move_file` : renommer fichier Task (changement statut)
-- `mcp_desktop-commander_execute_command` : tests, linter, git
-- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant développement
-
-**Prérequis : Préparation de l'environnement**
-    - **Action Requise :** Avant de commencer, créer une branche Git qui respecte le format défini dans l'en-tête de la `TASK`, puis renommer le fichier de l'artefact `TASK` pour changer son statut de `TODO` à `IN_PROGRESS`.
-    - **⚡ Automatisation `aklo` :** `aklo start-task [ID_de_la_tache]`
-
-1. **[PROCEDURE] Étape 1 : Écrire un Test qui Échoue (Rouge)**
-    - Identifier une petite partie de la fonctionnalité requise par la `Task`.
-    - Écrire un unique test unitaire qui décrit ce comportement.
-    - Exécuter le test et s'assurer qu'il échoue (`RED`).
-
-2. **[PROCEDURE] Étape 2 : Écrire le Code Minimum pour Réussir (Vert)**
-    - Écrire le **strict minimum** de code de production nécessaire pour que le test précédent passe (`GREEN`).
-    - À ce stade, l'élégance du code est secondaire. L'objectif est uniquement la fonctionnalité.
-    - Relancer le test pour confirmer qu'il passe.
-
-3. **[PROCEDURE] Étape 3 : Refactoriser et Valider la Qualité (Bleu)**
-    - Maintenant que le comportement est sécurisé par un test, exécuter la checklist de qualité suivante :
-        1. **Refactoriser le code :** Améliorer la structure (clarté, renommage, application des principes SOLID de la Section 2).
-        2. **Valider le Linter :** Lancer l'outil de `linting` et corriger **toutes** les erreurs et tous les avertissements.
-        3. **Valider le Typage :** Lancer le vérificateur de types (ex: `tsc --noEmit`) et corriger **toutes** les erreurs de typage.
-        4. **Valider la Non-Régression :** Relancer **toute la suite de tests** pour s'assurer que les refactorisations et corrections n'ont rien cassé.
-4. **[PROGRESSION] Étape 4 : Itérer ou Finaliser**
-    - Si la `Task` n'est pas terminée, retourner à l'étape 1 pour la partie suivante de la fonctionnalité.
-    - Si la `Task` est terminée, passer à l'étape de finalisation.
-
-5. **[PROCEDURE] Étape 5 : Validation de la "Definition of Done"**
-    - Avant de soumettre le travail pour revue, ouvrir le fichier de la `Task` en relation.
-    - Valider et cocher (`[x]`) un par un **tous les points** de la checklist "Definition of Done".
-    - Si un point ne peut pas être coché, le travail n'est pas terminé. Retourner aux étapes précédentes.
-
-6. **[ATTENTE_VALIDATION] Étape 6 : Revue Avant Commit**
-    - **Action Requise :**
-        - Une fois la "Definition of Done" entièrement validée, préparer un `diff` complet de toutes les modifications.
-        - Présenter ce `diff` au `Human_Developer` pour une revue finale.
-        - Mettre à jour le statut de la `TASK` à `AWAITING_REVIEW`
-    - **⚡ Automatisation `aklo` :** `aklo submit-task`
-    - **Note :** La commande `aklo` vous demandera de confirmer le message de commit avant de l'exécuter.
-
-7. **[CONCLUSION] Étape 7 : Finalisation et Commit Atomique**
-    - Mettre à jour le statut de la `Task` à `DONE`.
-    - Mettre à jour le journal avec le résumé de l'implémentation.
-    - Une fois le `diff` approuvé, créer le `commit` atomique et sémantique.
-
-## SECTION 4 : COMMIT ATOMIQUE DE DÉVELOPPEMENT
-
-### 4.1. Principe du Commit Unique
-
-**Règle Fondamentale :** Le développement d'une TASK produit un unique commit atomique qui inclut :
-
-1. **Code implémenté** : Toutes les modifications de code pour la TASK
-2. **Tests associés** : Tests unitaires, d'intégration selon la Definition of Done
-3. **TASK mise à jour** : Statut `TODO` → `DONE` avec checklist complétée
-4. **Mise à jour du journal** : Documentation de l'implémentation
-
-### 4.2. Contenu du Commit
-
-**Message de commit type :**
-```
-feat(TASK-[PBI_ID]-[Task_ID]): [Titre de la TASK]
-
-[Description détaillée de l'implémentation]
-
-- Implémentation complète selon Definition of Done
-- Tous les tests passent (linter, typage, suite de tests)
-- TASK-[PBI_ID]-[Task_ID] marquée comme DONE
-- Journal mis à jour avec le processus d'implémentation
+- Full implementation according to the Definition of Done.
+- All tests pass (linter, typing, test suite).
+- TASK-[PBI_ID]-[Task_ID] marked as DONE.
+- Journal updated with the implementation process.
 
 Closes TASK-[PBI_ID]-[Task_ID]
-```
+      ]]></commit_message_template>
+        </sub_section>
+        <sub_section title="Management of Partial Implementations">
+            <rule>If a TASK proves too large during implementation:</rule>
+            <options>
+                <option>Activate the [META-IMPROVEMENT] protocol to split the TASK.</option>
+                <option>Make a partial commit with `IN_PROGRESS` status and a justification in the
+                    journal.</option>
+                <option>Return to the [PLANNING] protocol to redefine the TASK.</option>
+            </options>
+            <example name="Partial Commit Message"><![CDATA[
+feat(TASK-[PBI_ID]-[Task_ID]): [Title] - Partial implementation
 
-### 4.3. Validation Avant Commit
+[Description of what was implemented.]
 
-**[ATTENTE_VALIDATION] Présentation du Diff Complet**
-
-Avant le commit, présenter au `Human_Developer` :
-1. **Diff du code implémenté** : Toutes les modifications de code
-2. **Diff des tests** : Tests créés ou modifiés
-3. **Diff de la TASK** : Statut et checklist mis à jour
-4. **Diff du journal** : Documentation de l'implémentation
-5. **Rapport de validation** : Confirmation que tous les critères sont remplis
-
-### 4.4. Gestion des Implémentations Partielles
-
-**Règle :** Si une TASK s'avère trop grande pendant l'implémentation :
-
-1. **Option 1 - Division :** Activer le protocole META-IMPROVEMENT pour diviser la TASK
-2. **Option 2 - Commit partiel :** Commit avec statut `IN_PROGRESS` et justification dans le journal
-3. **Option 3 - Révision :** Retour au protocole PLANIFICATION pour redéfinir la TASK
-
-**Exemple de commit partiel :**
-```
-feat(TASK-[PBI_ID]-[Task_ID]): [Titre] - Implémentation partielle
-
-[Description de ce qui a été implémenté]
-
-- Implémentation partielle : [Justification]
-- TASK-[PBI_ID]-[Task_ID] statut IN_PROGRESS
-- Journal mis à jour avec l'état d'avancement
-- Prochaine étape : [Plan pour finaliser]
+- Partial implementation: [Justification]
+- TASK-[PBI_ID]-[Task_ID] status remains IN_PROGRESS.
+- Journal updated with progress status.
+- Next step: [Plan to finalize]
 
 Partial implementation of TASK-[PBI_ID]-[Task_ID]
-```
+      ]]></example>
+        </sub_section>
+    </section>
+</protocol>

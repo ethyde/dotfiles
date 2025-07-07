@@ -1,110 +1,130 @@
----
-created: 2025-06-28 10:55
-modified: 2025-06-28 14:43
----
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="experimentation_management_ab_test">
+  <description>
+    This protocol is activated to validate a product, marketing, or technical hypothesis through a controlled experiment (A/B Test) before committing to full development.
+  </description>
 
-# PROTOCOLE SPÉCIFIQUE : GESTION D'EXPÉRIMENTATION (A/B TEST)
+  <section title="Mission and Deliverables">
+    <sub_section title="Mission">
+      <introduction>
+        To define, implement, run, and analyze an A/B experiment in a scientific manner to make an informed, data-driven decision.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverables">
+      <deliverables>
+        <deliverable type="report">An `EXPERIMENT-[ID].xml` file created in `/docs/backlog/09-experiments/`, serving as the single source of truth for the entire experiment.</deliverable>
+        <deliverable type="tasks">One or more `Tasks` to set up the experiment (development, tool configuration, tracking, etc.).</deliverable>
+        <deliverable type="final_analysis">A completed section in the experiment report with the results and a clear decision.</deliverable>
+      </deliverables>
+    </sub_section>
+  </section>
 
-Ce protocole s'active pour valider une hypothèse produit, marketing ou technique par une expérience contrôlée (A/B Test) avant d'engager un développement complet.
+  <section title="Experiment Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>EXPERIMENT-[ID]-[Status].xml</format>
+      <details>
+        <detail name="id">A unique identifier generated from the title and date (e.g., `cta-button-color-20250708`).</detail>
+        <detail name="status">The status of the experiment.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="planning">The definition of the hypothesis and metrics is in progress.</item>
+        <item name="awaiting_implementation">The plan is validated, awaiting development.</item>
+        <item name="running">The experiment is live and collecting data.</item>
+        <item name="completed">The experiment has ended, awaiting analysis.</item>
+        <item name="concluded">The analysis is complete, and a decision has been made.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <experiment_report id="[id]" status="planning">
+          <metadata>
+            <responsible>[Human_Developer's Name]</responsible>
+            <associated_pbi optional="true">PBI-[ID]</associated_pbi>
+            <tools>
+                <tool name="[Tool Name]" />
+            </tools>
+          </metadata>
+          <content>
+            <hypothesis_and_metrics>
+              <hypothesis>
+                <we_believe_that>[making this change]</we_believe_that>
+                <for_this_user_segment>[this user segment]</for_this_user_segment>
+                <will_result_in>[this qualitative impact]</will_result_in>
+              </hypothesis>
+              <quantitative_validation>
+                <primary_kpi>Name of the primary metric. e.g., "Conversion rate of the CTA button".</primary_kpi>
+                <objective>We will consider the experiment a success if the KPI [increases/decreases] by [X%].</objective>
+                <statistical_significance>With a statistical significance of [95%].</statistical_significance>
+              </quantitative_validation>
+              <secondary_metrics>
+                <metric type="guardrail">e.g., "Page load time must not increase".</metric>
+                <metric type="observational">e.g., "User time on page".</metric>
+              </secondary_metrics>
+            </hypothesis_and_metrics>
+            <variants_description>
+              <variant name="A" type="control">
+                <description>Description of the current behavior.</description>
+                <traffic_allocation unit="%">50</traffic_allocation>
+              </variant>
+              <variant name="B" type="test">
+                <description>Description of the new behavior to be tested.</description>
+                <traffic_allocation unit="%">50</traffic_allocation>
+              </variant>
+            </variants_description>
+            <technical_implementation_plan>
+              <see_also protocol="01-PLANIFICATION" description="Use the Planning protocol to break down this plan into actionable technical Tasks." />
+              Description of the Tasks to be created to implement the test (e.g., feature flag creation, tracking events, UI modifications).
+            </technical_implementation_plan>
+            <results_and_decision>
+              <statistical_results>Table with KPIs, statistical significance, etc.</statistical_results>
+              <analysis>Interpretation of the results.</analysis>
+              <decision>e.g., "Implement Variant B for 100% of users", "Stop the experiment and stick with Variant A", "Launch a new iteration".</decision>
+              <follow_up_pbi optional="true" ref="[PBI-ID]">PBI created to roll out the winning variant.</follow_up_pbi>
+              <note>The final decision is only official after explicit validation by the Human_Developer.</note>
+            </results_and_decision>
+          </content>
+        </experiment_report>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+  <section title="Experimentation Procedure">
+    <step number="1" type="analysis" title="Planning and Hypothesis Definition">
+      <action>Create a new `EXPERIMENT-[ID]-PLANNING.xml` file. Fill in the "Hypothesis and Metrics" and "Variants Description" sections. Draft an initial "Technical Implementation Plan".</action>
+      <automation optional="true">`aklo experiment "[Experiment Title]"`</automation>
+      <awaiting_validation>Submit this plan to the Human_Developer for validation to ensure the hypothesis is solid and measurable.</awaiting_validation>
+    </step>
+    <step number="2" type="procedure" title="Implementation">
+      <action>Once the plan is validated, change the status to `AWAITING_IMPLEMENTATION`. Activate the [PLANIFICATION] protocol to create the necessary technical Tasks. Once the Tasks are implemented and the code is deployed, activate the feature flag to start the experiment.</action>
+    </step>
+    <step number="3" type="procedure" title="Execution and Monitoring">
+      <action>Change the status to `RUNNING`. Monitor the metrics to ensure the experiment is running as expected and has no unexpected negative impacts.</action>
+    </step>
+    <step number="4" type="analysis" title="Analysis and Conclusion">
+      <action>Once the experiment's duration has elapsed (or statistical significance is reached), deactivate the experiment. Change the status to `COMPLETED`. Analyze the collected data and fill in the "Results and Decision" section.</action>
+      <awaiting_validation>Submit the final analysis and the proposed decision to the Human_Developer.</awaiting_validation>
+    </step>
+    <step number="5" type="conclusion" title="Closure">
+      <action>Once the decision is validated, change the status to `CONCLUDED`. Activate the [KNOWLEDGE-BASE] protocol to determine if the analysis has produced knowledge worth centralizing. If necessary, create the follow-up PBI to roll out the winning variant or clean up the experiment's code.</action>
+    </step>
+  </section>
 
-### 1.1. Mission
-
-Définir, implémenter, exécuter et analyser une expérience A/B de manière scientifique pour prendre une décision éclairée et basée sur des données mesurables.
-
-### 1.2. Livrables Attendus
-
-1. **Rapport d'Expérimentation :** Un fichier `EXPERIMENT-[ID].xml` créé dans `/docs/backlog/09-experiments/`, qui sert de document de référence unique pour toute l'expérience.
-2. **Tasks d'Implémentation :** Une ou plusieurs `Tasks` pour mettre en place l'expérience (développement, configuration d'outils, tracking…).
-3. **Rapport d'Analyse Finale :** Une section complétée dans le rapport d'expérimentation avec les résultats et une décision claire.
-
-## SECTION 2 : ARTEFACT EXPERIMENT - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `EXPERIMENT-[ID]-[Status].xml`
-    - `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    - `[Status]` : Le statut de l'expérimentation.
-
-### 2.2. Statuts
-
-- `PLANNING` : La définition de l'hypothèse et des métriques est en cours.
-- `AWAITING_IMPLEMENTATION` : Le plan est validé, en attente de développement.
-- `RUNNING` : L'expérience est en ligne et collecte des données.
-- `COMPLETED` : L'expérience est terminée, en attente d'analyse.
-- `CONCLUDED` : L'analyse est terminée et une décision a été prise.
-
-### 2.3. Structure Obligatoire Du Fichier Experiment
-
-```markdown
-# RAPPORT D'EXPÉRIMENTATION : [ID]
-
----
-## DO NOT EDIT THIS SECTION MANUALLY
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [PLANNING | AWAITING_IMPLEMENTATION | RUNNING | COMPLETED | CONCLUDED]
-**PBI Associé (si applicable):** [PBI-XX](../../00-pbi/PBI-XX-PROPOSED.xml)
-**Outils:** [Ex: Google Analytics, Nom du Feature Flag, etc.]
----
-
-## 1. Hypothèse et Métriques
-
-- **Hypothèse :**
-    - **Nous croyons que** [faire ce changement]
-    - **Pour** [ce segment d'utilisateurs]
-    - **Va résulter en** [cet impact qualitatif].
-- **Validation Quantitative :**
-    - **Métrique Principale (KPI) :** [Nom de la métrique. Ex: "Taux de conversion du bouton CTA"]
-    - **Objectif :** Nous considérerons l'expérience comme un succès si le KPI [augmente/diminue] de [X%] avec une significativité statistique de [95%].
-- **Métriques Secondaires à surveiller :**
-    - [Métrique de garde-fou. Ex: "Temps de chargement de la page ne doit pas augmenter"]
-    - [Autre métrique d'observation]
-
-## 2. Description des Variantes
-
-- **Variante A (Contrôle) :** Description du comportement actuel.
-- **Variante B (Test) :** Description du nouveau comportement à tester.
-- **Répartition du trafic :** (Ex: 50% / 50%)
-
-## 3. Plan d'Implémentation Technique
-
-*Description des `Tasks` à réaliser pour mettre en place le test (ex: création d'un feature flag, ajout d'événements de tracking, modification de l'interface).*
-
-## 4. Analyse des Résultats et Décision
-
-*(Cette section est remplie à la fin de l'expérience)*
-- **Résultats Statistiques :** (Tableau avec les KPIs, la significativité statistique, etc.)
-- **Analyse :** (Interprétation des résultats.)
-- **Décision :** (Ex: "Implémenter la Variante B pour 100% des utilisateurs", "Arrêter l'expérience et rester sur la Variante A", "Lancer une nouvelle itération".)
-- **PBI de Suivi (si applicable) :** [PBI-XX](../../00-pbi/PBI-XX-PROPOSED.xml)
-```
-
-## SECTION 3 : PROCÉDURE D'EXPÉRIMENTATION
-
-1. **[ANALYSE] Phase 1 : Planification et Définition de l'Hypothèse**
-      - **Action Requise :** Créer un nouveau fichier `EXPERIMENT-[ID]-PLANNING.xml` dans `/docs/backlog/09-experiments/`.
-      - **⚡ Automatisation `aklo` :** `aklo experiment "<Titre de l'experience>"`
-      - Remplir les sections "Hypothèse" et "Description des Variantes".
-      - Rédiger une première version du "Plan d'Implémentation Technique".
-      - **[ATTENTE\_VALIDATION]** Soumettre ce plan pour validation au `Human_Developer` pour s'assurer que l'hypothèse est solide et mesurable.
-
-2. **[PROCEDURE] Phase 2 : Implémentation**
-      - Une fois le plan validé, passer le statut à `AWAITING_IMPLEMENTATION`.
-      - **Activer le protocole [PLANIFICATION]** pour créer les `Tasks` techniques nécessaires.
-      - Une fois les `Tasks` implémentées et le code déployé, activer le feature flag pour démarrer l'expérience.
-
-3. **[PROCEDURE] Phase 3 : Exécution et Monitoring**
-      - Passer le statut à `RUNNING`.
-      - Surveiller les métriques pour s'assurer que l'expérience fonctionne comme prévu et qu'elle n'a pas d'impact négatif inattendu.
-
-4. **[ANALYSE] Phase 4 : Analyse et Conclusion**
-      - Une fois la durée de l'expérience écoulée (ou la significativité statistique atteinte), désactiver l'expérience.
-      - Passer le statut à `COMPLETED`.
-      - Analyser les données collectées et remplir la section "Analyse des Résultats et Décision".
-      - **[ATTENTE\_VALIDATION]** Soumettre l'analyse finale et la décision proposée au `Human_Developer`.
-
-5. **[CONCLUSION] Phase 5 : Clôture**
-      - Une fois la décision validée, passer le statut à `CONCLUDED`.
-      - Activer le protocole [KNOWLEDGE-BASE] pour déterminer si l'analyse a produit une connaissance qui mérite d'être centralisée.
-      - Si nécessaire, créer le `PBI` de suivi pour généraliser la variante gagnante ou nettoyer le code de l'expérience.
+  <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-08T10:00:00Z">
+          <source protocol="experimentation_management_ab_test" />
+          <message type="info">Experiment `cta-button-color-increase-conversion-20250708` has been implemented and is now RUNNING.</message>
+        </entry>
+        <entry timestamp="2025-07-15T10:00:00Z">
+          <source protocol="experimentation_management_ab_test" />
+          <message type="info">Experiment `cta-button-color-increase-conversion-20250708` has reached statistical significance and is now COMPLETED.</message>
+        </entry>
+        <entry timestamp="2025-07-15T11:30:00Z">
+          <source protocol="experimentation_management_ab_test" />
+          <message type="info">Decision for `cta-button-color-increase-conversion-20250708` has been validated. Result: Implement Variant B. Status is now CONCLUDED.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

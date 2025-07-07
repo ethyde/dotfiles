@@ -1,89 +1,105 @@
----
-created: 2025-06-28 12:09
-modified: 2025-06-28 12:13
----
-# PROTOCOLE SPÉCIFIQUE : DOCUMENTATION UTILISATEUR
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="user_documentation">
+  <description>
+    This protocol is activated when a new feature or a modification has a direct impact on the end-user and requires the creation or update of public documentation (guides, FAQ, etc.).
+  </description>
 
-Ce protocole s'active lorsqu'une nouvelle fonctionnalité ou une modification a un impact direct sur l'utilisateur final et nécessite la création ou la mise à jour de la documentation publique (guides, FAQ, etc.).
+  <section title="Mission and Deliverable">
+    <sub_section title="Mission">
+      <introduction>
+        To ensure that documentation intended for end-users is clear, accurate, and perfectly synchronized with the application's current behavior.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverable">
+      <deliverable type="documentation_plan">A `USER-DOCS-[ID].xml` file created in `/docs/backlog/14-user-docs/`.</deliverable>
+      <deliverable type="final_content">The finalized text and images ready to be integrated into the documentation management system (e.g., Zendesk, GitBook, help website).</deliverable>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
+  <section title="User Docs Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>USER-DOCS-[ID]-[Status].xml</format>
+      <details>
+        <detail name="id">A unique identifier generated from the title and date (e.g., `setup-passkey-auth-20250707`).</detail>
+        <detail name="status">The status of the documentation work.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="draft">Writing is in progress.</item>
+        <item name="awaiting_review">The content is ready for proofreading and validation by the Human_Developer.</item>
+        <item name="published">The documentation has been published online.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <user_docs_plan id="[id]" status="draft">
+          <metadata>
+            <responsible>[Human_Developer's Name]</responsible>
+            <related_feature ref="[Link to PBI or Release]" />
+            <target_audience>[e.g., "New Users", "Administrators", "All"]</target_audience>
+            <publication_platform>[e.g., "Zendesk", "Blog", "GitBook"]</publication_platform>
+            <target_publication_date>[YYYY-MM-DD]</target_publication_date>
+          </metadata>
+          <content>
+            <documentation_objective>
+              What is the purpose of this document? (e.g., "To explain how to use the new payment feature", "To update the FAQ with new account limits").
+              <note>The objective of this documentation must be explicitly validated by the Human_Developer before proceeding with content authoring.</note>
+            </documentation_objective>
+            <content_plan>
+              <article_title>A clear, user-oriented title</article_title>
+              <section_outline>
+                <section>1. Introduction</section>
+                <section>2. Step 1: ...</section>
+                <section>3. Step 2: ...</section>
+                <section>4. Frequently Asked Questions</section>
+              </section_outline>
+            </content_plan>
+            <draft_content>
+              <![CDATA[
+### [Article Title]
 
-### 1.1. Mission
+... (Full text of the documentation in Markdown or another format) ...
 
-Assurer que la documentation destinée aux utilisateurs finaux est claire, précise, et parfaitement synchronisée avec le comportement actuel de l'application.
+              ]]>
+            </draft_content>
+          </content>
+        </user_docs_plan>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-### 1.2. Livrable Attendu
-
-1.  **Plan de Documentation :** Un fichier `USER-DOCS-[ID].xml` créé dans `/docs/backlog/14-user-docs/`.
-2.  **Contenu Finalisé :** Le texte et les images prêts à être intégrés dans le système de gestion de la documentation (ex: Zendesk, GitBook, site web d'aide).
-
-## SECTION 2 : ARTEFACT USER-DOCS - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `USER-DOCS-[ID]-[Status].xml`
-    -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: description-du-sujet-20250629).
-    -   `[Status]` : Le statut du travail de documentation.
-
-### 2.2. Statuts
-
--   `DRAFT` : La rédaction est en cours.
--   `AWAITING_REVIEW` : Le contenu est prêt pour la relecture et la validation par le `Human_Developer`.
--   `PUBLISHED` : La documentation a été mise en ligne.
-
-### 2.3. Structure Obligatoire du Fichier de Documentation
-
-```markdown
-# PLAN DE DOCUMENTATION UTILISATEUR : %%ID%%
----
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [DRAFT | AWAITING_REVIEW | PUBLISHED]
-**Fonctionnalité Concernée:** [Lien vers le PBI ou la Release]
-**Audience Cible:** [Ex: "Nouveaux utilisateurs", "Administrateurs", "Tous"]
-**Plateforme de Publication:** [Ex: "Zendesk", "Blog", "GitBook"]
-**Date de Publication Cible:** AAAA-MM-DD
----
-
-## 1. Objectif de la Documentation
-
-*Quel est le but de ce document ? (Ex: "Expliquer comment utiliser la nouvelle fonctionnalité de paiement", "Mettre à jour la FAQ avec les nouvelles limites de compte").*
-
-## 2. Plan de Contenu
-
-- **Titre de l'article :** [Titre clair et orienté utilisateur]
-- **Audience Cible :** [Ex: "Tous les utilisateurs", "Administrateurs de compte"]
-- **Structure / Sections :**
-    1.  Introduction
-    2.  Étape 1 : ...
-    3.  Étape 2 : ...
-    4.  Questions Fréquentes
-
-## 3. Contenu Brut à Rédiger
-
-*(Cette section contiendra le texte final, les descriptions d'images, etc.)*
-
-### [Titre de l'article]
-
-... (Texte complet de la documentation) ...
-````
-
-## SECTION 3 : PROCÉDURE DE GESTION DE LA DOCUMENTATION
-
-1.  **[ANALYSE] Phase 1 : Identification du Besoin**
-      - Lors de la phase de [PLANIFICATION] d'un `PBI` ou de [RELEASE], identifier si une documentation utilisateur est nécessaire.
-      - **Action Requise :** Créer un fichier `USER-DOCS-[ID]-DRAFT.xml`, où [ID] est celui du PBI ou de la Release concernée, dans `/docs/backlog/14-user-docs/`.
-      - **⚡ Automatisation `aklo` :** `aklo docs <ID_du_PBI_ou_Release>`
-      - Remplir l'en-tête et la section "Objectif de la Documentation".
-
-2.  **[PROCEDURE] Phase 2 : Rédaction du Contenu**
-      - Élaborer le "Plan de Contenu" en définissant la structure de l'article ou du guide.
-      - Rédiger le "Contenu Brut" en se mettant à la place de l'utilisateur final (langage simple, clair, sans jargon technique).
-
-3.  **[ATTENTE\_VALIDATION] Phase 3 : Relecture et Validation**
-      - Une fois la rédaction terminée, passer le statut à `AWAITING_REVIEW`.
-      - Soumettre le contenu complet pour relecture et approbation au `Human_Developer`.
-
-4.  **[CONCLUSION] Phase 4 : Publication**
-      - Une fois le contenu validé, passer le statut à `PUBLISHED`.
-      - Le `Human_Developer` ou l' `AI_Agent` (si des outils le permettent) procède à la publication du contenu sur la plateforme de documentation.
-      - Informer le `Human_Developer` que la documentation est en ligne.
+  <section title="Documentation Management Procedure">
+    <step number="1" type="analysis" title="Identifying the Need">
+      <action>During the [PLANNING] or [RELEASE] phase, identify if user documentation is necessary. If so, create a `USER-DOCS-[ID]-DRAFT.xml` file. Fill in the header and the "Documentation Objective" section.</action>
+      <automation optional="true">`aklo docs [PBI_or_Release_ID]`</automation>
+    </step>
+    <step number="2" type="procedure" title="Content Authoring">
+      <action>Develop the "Content Plan" by defining the structure of the article or guide. Write the "Draft Content" from the end-user's perspective (simple, clear language, no technical jargon).</action>
+    </step>
+    <step number="3" type="validation" title="Review and Validation">
+      <action>Once the writing is complete, change the status to `AWAITING_REVIEW`.</action>
+      <awaiting_validation>Submit the complete content to the Human_Developer for proofreading and approval.</awaiting_validation>
+    </step>
+    <step number="4" type="conclusion" title="Publication">
+      <action>Once the content is validated, change the status to `PUBLISHED`. The Human_Developer or AI_Agent (if tools permit) proceeds with publishing the content on the documentation platform. Inform the Human_Developer that the documentation is live.</action>
+    </step>
+  </section>
+  
+   <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-08T16:00:00Z">
+          <source protocol="user_documentation" />
+          <message type="info">Creating new user documentation plan `USER-DOCS-PBI-121-DRAFT.xml` for Passkey feature.</message>
+        </entry>
+        <entry timestamp="2025-07-09T11:00:00Z">
+          <source protocol="user_documentation" />
+          <message type="validation_request">Documentation draft for `USER-DOCS-PBI-121` is complete and submitted for review. Status: AWAITING_REVIEW.</message>
+        </entry>
+        <entry timestamp="2025-07-09T14:30:00Z">
+          <source protocol="user_documentation" />
+          <message type="info">Documentation `USER-DOCS-PBI-121` has been approved and published to Zendesk. Status: PUBLISHED.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

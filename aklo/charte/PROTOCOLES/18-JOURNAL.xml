@@ -1,145 +1,132 @@
----
-created: 2025-06-28 12:35
-modified: 2025-06-28 12:57
----
-# PROTOCOLE SPÉCIFIQUE : JOURNAL DE TRAVAIL
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="work_journal">
+  <description>
+    This protocol defines how to chronologically document activities to ensure work traceability, integrating seamlessly with the principle of atomic commits per protocol.
+  </description>
 
-Ce protocole définit comment documenter de manière chronologique les activités pour assurer la traçabilité du travail, en s'intégrant parfaitement dans le principe des commits atomiques par protocole.
+  <section title="Mission and Integration Principle">
+    <sub_section title="Mission">
+      <introduction>
+        To chronologically document actions taken, decisions made, and obstacles encountered, by systematically integrating into the commits of other protocols.
+      </introduction>
+    </sub_section>
+    <sub_section title="Integration with Atomic Commits">
+      <rule name="Fundamental Rule">
+        The journal is never the subject of separate commits. Each journal update is included in the atomic commit of the protocol currently being executed.
+      </rule>
+      <examples name="Integration Examples">
+        <item protocol="DEVELOPMENT">`commit(code + TASK-DONE + journal-update)`</item>
+        <item protocol="PLANNING">`commit(all-created-TASKs + journal-update)`</item>
+        <item protocol="PBI_STATUS_CHANGE">`commit(PBI-AGREED + journal-update)`</item>
+      </examples>
+    </sub_section>
+    <sub_section title="Deliverable">
+        <deliverable type="daily_log_file">A single `JOURNAL-[DATE].xml` file in `/docs/backlog/15-journal/`, updated as protocols are executed.</deliverable>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET PRINCIPE D'INTÉGRATION
+  <section title="Journal Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>JOURNAL-[DATE].xml</format>
+      <details>
+        <detail name="date">The current date in `YYYY-MM-DD` format.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="active">The journal has no formal statuses as it evolves continuously. It is considered 'active' as long as protocols are being executed.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <journal date="[YYYY-MM-DD]">
+          <metadata>
+            <responsible>[Human_Developer's or AI_Agent's Name]</responsible>
+            <daily_objectives>
+              <objective ref="[TASK/PBI ID]">Primary objective for the day.</objective>
+            </daily_objectives>
+          </metadata>
+          <entries>
+            <entry timestamp="[HH:MM:SSZ]" type="session_start|analysis|decision|obstacle|protocol_event|session_end">
+              <source protocol="[Activating Protocol Name]" />
+              <message>Human-readable summary of the event.</message>
+              <details optional="true">
+                <artefact_ref ref="[path/to/artefact]">Link to a relevant artefact.</artefact_ref>
+                <raw_output><![CDATA[Raw output or log snippet if applicable.]]></raw_output>
+              </details>
+            </entry>
+          </entries>
+        </journal>
+      </artefact_template>
+      <example>
+        <journal date="2025-07-07">
+          <metadata>
+            <responsible>AI_Agent</responsible>
+            <daily_objectives>
+              <objective ref="TASK-112-4">Refactor payment logic from UserController.</objective>
+            </daily_objectives>
+          </metadata>
+          <entries>
+            <entry timestamp="09:00:00Z" type="session_start">
+              <source protocol="SESSION_START" />
+              <message>Work session started. Focusing on TASK-112-4.</message>
+            </entry>
+            <entry timestamp="10:15:00Z" type="obstacle">
+              <source protocol="DEVELOPMENT" />
+              <message>Encountered an environment error blocking dependency installation.</message>
+              <details>
+                <raw_output><![CDATA[npm error Tracker "idealTree" already exists]]></raw_output>
+                <artefact_ref ref="/docs/protocols/08-ENVIRONMENT-DIAGNOSIS.xml">Activating ENVIRONMENT-DIAGNOSIS protocol.</artefact_ref>
+              </details>
+            </entry>
+            <entry timestamp="10:20:00Z" type="protocol_event">
+                <source protocol="ENVIRONMENT_DIAGNOSIS"/>
+                <message>Environment issue resolved by clearing npm cache.</message>
+            </entry>
+            <entry timestamp="17:30:00Z" type="session_end">
+              <source protocol="SESSION_END" />
+              <message>Work session ended. Refactoring is 50% complete.</message>
+              <details>
+                <summary>Completed extraction of PaymentService, all tests passing. Next step is to update the controller.</summary>
+              </details>
+            </entry>
+          </entries>
+        </journal>
+      </example>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
-
-Documenter de manière chronologique les actions entreprises, les décisions prises et les obstacles rencontrés, en s'intégrant systématiquement dans les commits des autres protocoles.
-
-### 1.2. Principe d'Intégration aux Commits Atomiques
-
-**Règle Fondamentale :** Le journal ne fait jamais l'objet de commits séparés. Chaque mise à jour du journal est incluse dans le commit atomique du protocole en cours.
-
-**Exemples d'intégration :**
-- **Finalisation TASK :** `commit(code + TASK-DONE + journal-update)`
-- **Planification PBI :** `commit(toutes-TASK-créées + journal-update)`
-- **Changement statut PBI :** `commit(PBI-AGREED + journal-update)`
-
-### 1.3. Livrable
-
-**Fichier Journal Quotidien :** Un unique fichier `JOURNAL-[DATE].xml` dans `/docs/backlog/15-journal/`, mis à jour au fil des protocoles exécutés.
-
-## SECTION 2 : ARTEFACT JOURNAL - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `JOURNAL-[DATE].xml`
-    -   `[DATE]` : La date du jour au format `AAAA-MM-DD`.
-
-### 2.2. Statuts
-
-Le journal n'a pas de statuts formels car il évolue continuellement. Il est considéré comme **actif** tant que des protocoles sont en cours d'exécution.
-
-### 2.3. Structure Obligatoire du Fichier Journal
-
-```markdown
-# JOURNAL DE TRAVAIL : AAAA-MM-DD
----
-**Responsable:** [Nom du Human_Developer / AI_Agent]
-**Objectif(s) de la journée:** [Lister les Tasks ou PBI principaux ciblés]
----
-
-## Entrées Chronologiques
-
-### HH:MM - Début de la session
-
-- **Action :** Démarrage du travail sur la [TASK-XX].
-- **Contexte :** Lecture du PBI parent et du plan d'action.
-
-### HH:MM - Analyse
-
-- **Réflexion :** L'approche proposée dans la Task pour la fonction Y semble complexe.
-- **Hypothèse :** Utiliser la librairie Z pourrait simplifier le code.
-- **Action :** Création d'un [SCRATCHPAD-XYZ] pour explorer cette alternative.
-
-### HH:MM - Décision
-
-- **Décision :** L'alternative explorée est viable et plus simple.
-- **Action :** Mise à jour de la [TASK-XX] pour refléter la nouvelle approche.
-- **[ATTENTE_VALIDATION]** Soumission de la modification de la Task au `Human_Developer`.
-
-### HH:MM - Obstacle
-
-- **Problème :** L'erreur `Tracker "idealTree" already exists` bloque l'installation des dépendances.
-- **Action :** Activation du protocole `[DIAGNOSTIC-ENV]`. Résolu en nettoyant le cache npm.
-
-### HH:MM - Fin de session
-
-- **Résumé du travail accompli :** [Liste des avancées].
-- **Prochaine étape pour demain :** [Description de la prochaine action à entreprendre].
-```
-
-## SECTION 3 : PROCÉDURE D'INTÉGRATION DU JOURNAL
-
-### 3.1. Initialisation de Session
-
-**[PROCEDURE] Phase 1 : Ouverture du Journal Quotidien**
-- **Étape 1.1 :** Obtenir la date actuelle au format `AAAA-MM-DD`
-- **Étape 1.2 :** Construire le chemin `/docs/backlog/15-journal/JOURNAL-[DATE].xml`
-- **Étape 1.3 :** Créer ou ouvrir le fichier journal du jour
-- **Étape 1.4 :** Si nouveau fichier, remplir l'en-tête avec les objectifs de la journée
-- **Étape 1.5 :** Ajouter l'entrée "Début de session" avec timestamp
-
-### 3.2. Mise à Jour Intégrée aux Protocoles
-
-**[PROCEDURE] Phase 2 : Documentation au Fil des Protocoles**
-
-Chaque protocole qui modifie des artefacts **doit** inclure une mise à jour du journal dans son commit atomique :
-
-**Moments de mise à jour obligatoires :**
-1. **Début de protocole :** Entrée chronologique documentant le démarrage
-2. **Étapes importantes :** Décisions, obstacles, analyses significatives
-3. **Fin de protocole :** Résumé des actions accomplies et résultats
-
-**Format des entrées :**
-```markdown
-### HH:MM - [PROTOCOLE] [Étape/Action]
-
-- **Action :** Description de l'action entreprise
-- **Contexte :** Informations pertinentes pour la compréhension
-- **Résultat :** Outcome ou décision prise
-- **Artefacts :** Liens vers les artefacts créés/modifiés
-```
-
-### 3.3. Gestion des Protocoles Abandonnés
-
-**[PROCEDURE] Phase 3 : Documentation des Échecs**
-
-Si un protocole est abandonné en cours :
-1. **Obligation :** Documenter la raison de l'abandon dans le journal
-2. **Format :** Entrée explicite avec timestamp et explication
-3. **Commit :** Inclure cette mise à jour dans un commit de clôture
-
-**Exemple :**
-```markdown
-### HH:MM - [PLANIFICATION] Protocole abandonné
-
-- **Raison :** PBI mal défini, nécessite clarification avec le Product Owner
-- **Actions entreprises :** Analyse partielle, 2 TASK ébauchées
-- **Prochaine étape :** Demande de clarification via [SCRATCHPAD-XYZ]
-```
-
-### 3.4. Automatisation Aklo
-
-**[PROCEDURE] Phase 4 : Intégration dans les Commandes Aklo**
-
-Les commandes `aklo` mettent automatiquement à jour le journal selon leur niveau d'assistance :
-
-- **`full`** : Génération automatique des entrées détaillées
-- **`skeleton`** : Génération de la structure d'entrée à compléter
-- **`minimal`** : Simple mention de l'action avec timestamp
-
-**Configuration :**
-```bash
-# Journal automatique complet (défaut)
-aklo plan <PBI_ID>
-
-# Journal automatique minimal
-aklo plan <PBI_ID> --no-journal
-```
+  <section title="Journal Integration Procedure">
+    <sub_section title="Session Initialization">
+      <step number="1.1">Get the current date in `YYYY-MM-DD` format.</step>
+      <step number="1.2">Construct the path `/docs/backlog/15-journal/JOURNAL-[DATE].xml`.</step>
+      <step number="1.3">Create or open the daily journal file.</step>
+      <step number="1.4">If the file is new, fill in the header with the day's objectives.</step>
+      <step number="1.5">Add the "Session Start" entry with a timestamp.</step>
+    </sub_section>
+    <sub_section title="Integrated Updates During Protocols">
+        <rule>Every protocol that modifies artifacts MUST include a journal update in its atomic commit.</rule>
+        <mandatory_update_points>
+            <point>Beginning of a protocol: document the start.</point>
+            <point>Key steps: document significant decisions, obstacles, or analyses.</point>
+            <point>End of a protocol: summarize the actions accomplished and the results.</point>
+        </mandatory_update_points>
+    </sub_section>
+     <sub_section title="Management of Abandoned Protocols">
+        <rule>If a protocol is abandoned mid-execution, the reason for abandonment must be documented in the journal and included in a closing commit.</rule>
+        <example_entry>
+            ### 14:30 - [PLANIFICATION] Protocol Abandoned
+            - **Reason:** The PBI is ill-defined and requires clarification from the Product Owner.
+            - **Next Step:** Requesting clarification via SCRATCHPAD-XYZ.
+        </example_entry>
+    </sub_section>
+    <sub_section title="Aklo Automation">
+      <introduction>Aklo commands automatically update the journal based on their assistance level.</introduction>
+      <assistance_levels>
+        <level name="full">Generates detailed, automatic entries.</level>
+        <level name="skeleton">Generates an entry structure to be completed.</level>
+        <level name="minimal">Mentions the action with a timestamp only.</level>
+      </assistance_levels>
+    </sub_section>
+  </section>
+</protocol>
