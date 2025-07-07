@@ -1,129 +1,203 @@
-# PROTOCOLE SPÉCIFIQUE : GESTION PRODUIT (PRODUCT OWNER)
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="product_owner_management">
+   <description>
+      This protocol is activated to transform an idea or business need into a formal Product Backlog
+      Item (PBI), ready for development. It is the entry point for the entire workflow.
+   </description>
 
-Ce protocole s'active pour transformer une idée ou un besoin métier en un "Product Backlog Item" (PBI) formel, prêt pour le développement. C'est le point d'entrée de tout le flux de travail.
+   <section title="mission_and_deliverable">
+      <sub_section title="mission">
+         <introduction>
+            The mission of this mode is to define, clarify, and formalize a requirement to ensure it
+            is:
+         </introduction>
+         <list>
+            <item><strong>understandable:</strong> The technical team must unambiguously understand
+               what is requested.</item>
+            <item><strong>valuable:</strong> The requirement must bring clear added value to the end
+               user.</item>
+            <item><strong>feasible:</strong> The request must be sufficiently defined to be
+               evaluated and broken down.</item>
+         </list>
+         <note>
+            A requirement can come from a direct request by the human_developer or result from other
+            protocols such as [competitor_analysis], [experimentation], or [security_audit].
+         </note>
+      </sub_section>
+      <sub_section title="expected_deliverable">
+         <deliverable>
+            A new file `PBI-[id]-PROPOSED.xml` in the `/docs/backlog/00-pbi/` directory, respecting
+            the defined structure and INVEST quality criteria.
+         </deliverable>
+      </sub_section>
+   </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
+   <section title="pbi_artefact_management_and_structure">
+      <sub_section title="naming">
+         <format>PBI-[id]-[status].xml</format>
+         <details>
+            <detail name="id">Unique numeric identifier (e.g., 42).</detail>
+            <detail name="status">The status of the PBI in its lifecycle.</detail>
+         </details>
+      </sub_section>
+      <sub_section title="statuses">
+         <list>
+            <item name="proposed">Proposed, pending validation for planning.</item>
+            <item name="agreed">Specifications validated, ready for task breakdown.</item>
+            <item name="in_progress">At least one associated task is in development.</item>
+            <item name="done">All associated tasks are completed.</item>
+            <item name="accepted">The feature has been validated by the human_developer.</item>
+         </list>
+      </sub_section>
+      <sub_section title="mandatory_pbi_artefact_structure">
+         <artefact_template format="xml">
+            <pbi id="[id]" title="[title]">
+               <metadata>
+                  <status>[status]</status>
+                  <created_date>[date]</created_date>
+               </metadata>
 
-### 1.1. Mission
+               <content>
 
-La mission de ce mode est de définir, clarifier et formaliser une exigence pour s'assurer qu'elle est :
+                  <user_story>
+                     <role>As a [user type]</role>
+                     <action>I want to [perform an action]</action>
+                     <benefit>so that [I get a benefit]</benefit>
+                  </user_story>
+   
+                  <acceptance_criteria>
+                     <criterion state="todo">Criterion 1: Binary and testable condition.</criterion>
+                     <criterion state="todo">Criterion 2: Another binary and testable condition.</criterion>
+                  </acceptance_criteria>
+   
+                  <technical_specifications optional="true">
+                     <description>
+                        Describes impacts, dependencies, or high-level technical choices that may
+                        influence planning.
+                     </description>
+                  </technical_specifications>
+   
+                  <architecture_documents optional="true">
+                     <description>
+                        Link to one or more documents in the `/docs/backlog/02-architecture/`
+                        directory.
+                     </description>
+                     <document href="../../02-architecture/ARCH-[id]-1.xml">ARCH-[id]-1.xml</document>
+                  </architecture_documents>
+   
+                  <associated_tasks>
+                     <task state="todo">TASK-[id]-1</task>
+                     <task state="todo">TASK-[id]-2</task>
+                  </associated_tasks>
+               </content>
+            </pbi>
+         </artefact_template>
+         <example>
+            <pbi id="42" title="User authentication via email">
+               <metadata>
+                  <status>PROPOSED</status>
+                  <created_date>2025-07-08</created_date>
+               </metadata>
+               <content>
+                  <user_story>
+                     <role>As a visitor</role>
+                     <action>I want to register and log in with my email and password</action>
+                     <benefit>so that I can access my personal dashboard</benefit>
+                  </user_story>
+                  <acceptance_criteria>
+                     <criterion state="todo">A user can register using a valid email and a password of at least 8 characters.</criterion>
+                     <criterion state="todo">A registered user can log in with their credentials.</criterion>
+                     <criterion state="todo">An error message is displayed if login fails.</criterion>
+                  </acceptance_criteria>
+               </content>
+            </pbi>
+         </example>
+      </sub_section>
+   </section>
 
-- **Compréhensible :** L'équipe technique doit comprendre sans ambiguïté ce qui est demandé.
-- **Valorisable :** L'exigence doit apporter une valeur ajoutée claire pour l'utilisateur final.
-- **Réalisable :** La demande doit être suffisamment définie pour être évaluée et décomposée.
-- **Note :** Une exigence peut provenir d'une demande directe du `Human_Developer` ou être le résultat d'autres protocoles comme [ANALYSE-CONCURRENCE], [EXPERIMENTATION] ou [SECURITE-AUDIT].
+   <section title="pbi_definition_procedure">
+      <step number="1" type="analysis" title="initial_need_capture">
+         <description>
+            Take as input the idea, feature, or problem to solve. Clarify the main objective: "What
+            problem are we trying to solve, and for whom?"
+         </description>
+      </step>
+      <step number="2" type="procedure" title="user_story_writing">
+         <description>
+            Formulate the need using the standardized format: `As a [user type], I want to [perform
+            an action], so that [I get a benefit]`. This formulation must be user- and
+            value-centered, not technical solution-centered.
+         </description>
+      </step>
+      <step number="3" type="procedure" title="defining_acceptance_criteria">
+         <description>
+            List the specific and testable conditions that, if met, confirm the user story is
+            successfully completed. Each criterion must be binary (true/false) and unambiguous.
+         </description>
+      </step>
+      <step number="4" type="analysis" title="invest_validation">
+         <description>
+            Evaluate the freshly written PBI against the INVEST criteria.
+         </description>
+         <invest_list>
+            <criterion letter="i" name="independent">The PBI should be as autonomous as possible to
+               be developed and delivered without depending on another PBI.</criterion>
+            <criterion letter="n" name="negotiable">The PBI is not a fixed contract. It should allow
+               for discussion between the product owner and the technical team on implementation
+               details.</criterion>
+            <criterion letter="v" name="valuable">The PBI must provide clear and identifiable value
+               to the end user or client. If the value is not obvious, question the relevance of the
+               PBI.</criterion>
+            <criterion letter="e" name="estimable">The development team must be able to estimate the
+               effort required to complete the PBI. If it is too vague or too large, it cannot be
+               estimated.</criterion>
+            <criterion letter="s" name="small">The PBI must be small enough to be completed in a
+               single iteration (e.g., a sprint). Large PBIs ("epics") should be broken down.</criterion>
+            <criterion letter="t" name="testable">It must be possible to verify that the PBI is
+               complete. Acceptance criteria are key to making a PBI testable.</criterion>
+         </invest_list>
+         <note>If a criterion is not met, iterate on the previous steps to refine the PBI (e.g.,
+            split it into two smaller PBIs).</note>
+      </step>
 
-### 1.2. Livrable Attendu
+      <flight_plan required="true">
+         <title>pbi_flight_plan</title>
+         <instruction>Before creating the PBI file, the agent must present a detailed plan.</instruction>
+         <objective>Create a formal and traceable Product Backlog Item</objective>
+         <planned_actions>
+            <item>Generate a unique id for the PBI (check existing ids)</item>
+            <item>Create the file `PBI-[id]-PROPOSED.xml` in `/docs/backlog/00-pbi/`</item>
+            <item>Fill in the mandatory structure with INVEST-validated data</item>
+            <item>Apply the template with user story, acceptance criteria, and metadata</item>
+         </planned_actions>
+         <affected_files>
+            <item type="creation">`/docs/backlog/00-pbi/PBI-[id]-PROPOSED.xml`</item>
+         </affected_files>
+         <system_commands>
+            <item type="automation" optional="true">`aklo propose-pbi "[title]"`</item>
+            <item type="verification">Check id uniqueness by listing the PBI directory</item>
+         </system_commands>
+         <mcp_tools>
+            <item>mcp_desktop-commander_list_directory</item>
+            <item>mcp_desktop-commander_write_file</item>
+            <item>mcp_aklo-terminal_aklo_execute</item>
+         </mcp_tools>
+         <required_validation>
+            <answer>yes</answer>
+            <description>Explicit approval required before creation</description>
+         </required_validation>
+      </flight_plan>
 
-- Un nouveau fichier `PBI-[ID]-PROPOSED.xml` dans le répertoire `/docs/backlog/00-pbi/`, respectant la structure définie et les critères de qualité **INVEST**.
-
-## SECTION 2 : ARTEFACT PBI - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `PBI-[ID]-[Status].xml`
-  - `[ID]` : Identifiant numérique unique (ex: 42).
-  - `[Status]` : Le statut du PBI dans son cycle de vie.
-
-### 2.2. Statuts
-
-- `PROPOSED` : Proposé, en attente de validation pour la planification.
-- `AGREED` : Spécifications validées, prêt pour décomposition en tâches.
-- `IN_PROGRESS` : Au moins une `Task` associée est en cours de développement.
-- `DONE` : Toutes les `Tasks` associées sont terminées.
-- `ACCEPTED` : La fonctionnalité a été validée par le `Human_Developer`.
-
-### 2.3. Structure Obligatoire Du Fichier PBI
-
-```markdown
-# PBI-%%ID%% : %%TITLE%%
-
----
-**Statut:** %%STATUS%%
-**Date de création:** %%DATE%%
----
-
-## 1. Description de la User Story
-
-_En tant que [type d'utilisateur], je veux [réaliser une action], afin de [obtenir un bénéfice]._
-
-## 2. Critères d'Acceptation
-
-- [ ] Critère 1 : Condition binaire et testable.
-- [ ] Critère 2 : Autre condition binaire et testable.
-- [ ] ...
-
-## 3. Spécifications Techniques Préliminaires & Contraintes (Optionnel)
-
-_Section pour l'architecte/lead dev. Décrit les impacts, les dépendances, les choix techniques à haut niveau qui pourraient influencer la planification._
-
-## 4. Documents d'Architecture Associés (Optionnel)
-
-_Lien vers un ou plusieurs documents du répertoire `/docs/backlog/02-architecture/` si une phase de conception a été nécessaire._
-
-- [ARCH-%%ID%%-1.xml](../../02-architecture/ARCH-%%ID%%-1.xml)
-
-## 5. Tasks Associées
-
-_Cette section sera remplie par le protocole [PLANIFICATION]._
-
-- [ ] TASK-%%ID%%-1
-- [ ] TASK-%%ID%%-2
-- [ ] ...
-```
-
-## SECTION 3 : PROCÉDURE DE DÉFINITION D'UN PBI
-
-1. **[ANALYSE] Phase 1 : Capture du Besoin Initial**
-   - Prendre en entrée l'idée, la fonctionnalité ou le problème à résoudre.
-   - Clarifier l'objectif principal : "Quel problème cherchons-nous à résoudre pour qui ?"
-
-2. **[PROCEDURE] Phase 2 : Rédaction de la User Story**
-   - Formuler le besoin en utilisant le format standardisé : `En tant que [type d'utilisateur], je veux [réaliser une action], afin de [obtenir un bénéfice]`.
-   - Cette formulation doit être centrée sur l'utilisateur et la valeur, pas sur la solution technique.
-
-3. **[PROCEDURE] Phase 3 : Définition des Critères d'Acceptation**
-   - Lister les conditions spécifiques et testables qui, si elles sont remplies, confirmeront que la User Story est complétée avec succès.
-   - Chaque critère doit être binaire (vrai/faux) et sans ambiguïté.
-
-4. **[ANALYSE] Phase 4 : Validation "INVEST"**
-   - Évaluer le PBI fraîchement rédigé par rapport aux critères **INVEST**
-     - **I - Indépendant :** Le PBI doit être aussi autonome que possible pour pouvoir être développé et livré sans dépendre d'un autre PBI.
-     - **N - Négociable :** Le PBI n'est pas un contrat figé. Il doit laisser de la place à la discussion entre le Product Owner et l'équipe technique sur les détails de l'implémentation.
-     - **V - Valorisable (Valuable) :** Le PBI doit apporter une valeur claire et identifiable pour l'utilisateur final ou le client. Si la valeur n'est pas évidente, il faut questionner la pertinence du PBI.
-     - **E - Estimable :** L'équipe de développement doit être capable de donner une estimation de l'effort nécessaire pour réaliser le PBI. S'il est trop vague ou trop grand, il ne peut pas être estimé.
-     - **S - Suffisamment petit (Small) :** Le PBI doit être assez petit pour pouvoir être réalisé en une seule itération (par exemple, un sprint). Les PBI trop gros ("épics") doivent être décomposés.
-     - **T - Testable :** Il doit être possible de vérifier que le PBI est terminé. Les critères d'acceptation sont la clé pour rendre un PBI testable.
-   - Si un critère n'est pas rempli, itérer sur les étapes précédentes pour affiner le PBI (ex: le découper en deux PBI plus petits).
-
-**🛫 PLAN DE VOL PBI (Obligatoire avant Phase 5)**
-
-Avant la création du fichier PBI, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_PBI]**
-**Objectif :** Créer un Product Backlog Item formel et traçable
-**Actions prévues :**
-1. Génération de l'ID unique pour le PBI (vérification des IDs existants)
-2. Création du fichier `PBI-[ID]-PROPOSED.xml` dans `/docs/backlog/00-pbi/`
-3. Remplissage de la structure obligatoire avec les données validées INVEST
-4. Application du template avec User Story, Critères d'Acceptation et métadonnées
-
-**Fichiers affectés :**
-- `/docs/backlog/00-pbi/PBI-[ID]-PROPOSED.xml` : création
-
-**Commandes système :**
-- `aklo propose-pbi "[Titre]"` : automatisation de création (optionnel)
-- Vérification de l'unicité de l'ID via listing du répertoire PBI
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_list_directory` : vérifier IDs existants
-- `mcp_desktop-commander_write_file` : créer le fichier PBI
-- `mcp_aklo-terminal_aklo_execute` : commande aklo (si utilisée)
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant création
-
-5. **[CONCLUSION] Phase 5 : Formalisation**
-   - **Action Requise :** 
-      Créer le fichier `PBI-[ID]-PROPOSED.xml` dans `/docs/backlog/00-pbi/` en respectant la structure obligatoire.
-   - **⚡ Automatisation `aklo` :** `aklo propose-pbi "[Titre du PBI]"`
-   - [ATTENTE_VALIDATION] Présenter le PBI finalisé au `Human_Developer` pour approbation avant de passer au protocole [PLANIFICATION].
+      <step number="5" type="conclusion" title="formalization">
+         <required_action>
+            Create the file `PBI-[id]-PROPOSED.xml` in `/docs/backlog/00-pbi/` following the
+            mandatory structure.
+         </required_action>
+         <automation command="aklo propose-pbi &quot;[pbi title]&quot;" />
+         <awaiting_validation>
+            Present the finalized PBI to the human_developer for approval before moving to the
+            [planning] protocol.
+         </awaiting_validation>
+      </step>
+   </section>
+</protocol>

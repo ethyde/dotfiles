@@ -1,109 +1,203 @@
-# PROTOCOLE SPÉCIFIQUE : REFACTORING DE CODE
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="code_refactoring">
+    <description>
+        This protocol is activated when an existing portion of code is identified as needing an
+        improvement in its internal structure without modifying its external behavior.
+    </description>
 
-Ce protocole s'active lorsqu'une portion de code existant est identifiée comme nécessitant une amélioration de sa structure interne sans modification de son comportement externe.
+    <section title="Mission and Deliverables">
+        <sub_section title="Mission">
+            <introduction>
+                To improve the internal quality of the code (readability, maintainability,
+                performance) by applying structural modifications in a secure manner, i.e., without
+                altering the application's visible behavior.
+            </introduction>
+        </sub_section>
+        <sub_section title="Expected Deliverables">
+            <deliverables>
+                <deliverable type="report">
+                    A `REFACTOR-[ID]-DONE.xml` file created in `/docs/backlog/05-refactor/`.
+                </deliverable>
+                <deliverable type="commit">
+                    One or more commits containing only the refactoring changes, produced via the
+                    [DEVELOPMENT] protocol.
+                </deliverable>
+            </deliverables>
+        </sub_section>
+    </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+    <section title="Refactor Artefact Management and Structure">
+        <sub_section title="Naming Convention">
+            <format>REFACTOR-[ID]-[Status].xml</format>
+            <details>
+                <detail name="id">A unique identifier generated from the title and date (e.g.,
+                    `refactor-billing-service-20250708`).</detail>
+                <detail name="status">The status of the refactoring process.</detail>
+            </details>
+        </sub_section>
+        <sub_section title="Statuses">
+            <list>
+                <item name="analysis">The diagnosis is in progress, and test coverage is being
+                    verified.</item>
+                <item name="refactoring">The plan has been approved, and the refactoring is
+                    underway.</item>
+                <item name="done">The refactoring is complete, and the commit has been created.</item>
+            </list>
+        </sub_section>
+        <sub_section title="Mandatory Artefact Structure">
+            <artefact_template format="xml">
+                <refactor_report id="[id]" status="analysis" title="[Refactoring Goal]">
+                    <metadata>
+                        <associated_task optional="true">TASK-[ID]</associated_task>
+                    </metadata>
+                    <content>
+                        <code_smell_diagnosis>
+                            <affected_code path="[path/to/file]" lines="[line_range]" />
+                            <identified_problem>e.g., "Function over 100 lines", "Code duplication",
+                                "Violation of Single Responsibility Principle".</identified_problem>
+                        </code_smell_diagnosis>
+                        <refactoring_strategy>
+                            <objective>e.g., "Extract business logic into a new `BillingService`
+                                class".</objective>
+                            <action_plan>
+                                <step number="1">Rename variable 'x' to 'userProfile'.</step>
+                                <step number="2">Extract lines 50-85 into a private method
+                                    `_calculateTaxes`.</step>
+                            </action_plan>
+                        </refactoring_strategy>
+                        <test_and_coverage_validation>
+                            <test_coverage_report>
+                                <before_refactoring>
+                                    <status>Sufficient / Insufficient</status>
+                                    <coverage_metric unit="%">e.g., 95</coverage_metric>
+                                    <details optional="true">Details on the existing tests (type,
+                                        scope).</details>
+                                </before_refactoring>
+                                <after_refactoring>
+                                    <status>All tests passing</status>
+                                    <coverage_metric unit="%">e.g., 95</coverage_metric>
+                                    <details>Confirms that all relevant tests pass and coverage has
+                                        not decreased.</details>
+                                </after_refactoring>
+                            </test_coverage_report>
+                        </test_and_coverage_validation>
+                    </content>
+                </refactor_report>
+            </artefact_template>
+            <example>
+                <refactor_report id="extract-payment-logic-from-usercontroller-20250708"
+                    status="done" title="Extract payment logic from UserController">
+                    <metadata>
+                        <associated_task>TASK-112-4</associated_task>
+                    </metadata>
+                    <content>
+                        <code_smell_diagnosis>
+                            <affected_code path="/src/controllers/UserController.ts" lines="150-250" />
+                            <identified_problem>The UserController handles user management AND
+                                payment processing, violating the Single Responsibility Principle.
+                                The function is too long and hard to test.</identified_problem>
+                        </code_smell_diagnosis>
+                        <refactoring_strategy>
+                            <objective>Extract all payment-related logic into a new, dedicated
+                                `PaymentService`.</objective>
+                            <action_plan>
+                                <step number="1">Create a new `PaymentService.ts` file.</step>
+                                <step number="2">Move the `processPayment` and `refundPayment`
+                                    methods from `UserController` to `PaymentService`.</step>
+                                <step number="3">Update `UserController` to inject and call
+                                    `PaymentService`.</step>
+                                <step number="4">Adjust tests to target the new service directly.</step>
+                            </action_plan>
+                        </refactoring_strategy>
+                        <test_and_coverage_validation>
+                            <test_coverage_report>
+                                <before_refactoring>
+                                    <status>Sufficient</status>
+                                    <coverage_metric unit="%">98</coverage_metric>
+                                    <details>The `processPayment` logic was covered by 12 **unit
+                                        tests** in `user.controller.spec.ts`.</details>
+                                </before_refactoring>
+                                <after_refactoring>
+                                    <status>All tests passing</status>
+                                    <coverage_metric unit="%">99</coverage_metric>
+                                    <details>All 12 tests were moved to `payment.service.spec.ts`
+                                        and are passing. Overall coverage increased due to better
+                                        isolation.</details>
+                                </after_refactoring>
+                            </test_coverage_report>
+                        </test_and_coverage_validation>
+                    </content>
+                </refactor_report>
+            </example>
+        </sub_section>
+    </section>
 
-### 1.1. Mission
+    <section title="Refactoring Procedure">
+        <flight_plan required="true" name="REFACTORING_FLIGHT_PLAN">
+            <objective>Improve the internal structure of code without altering its external
+                behavior.</objective>
+            <actions>
+                <item>Generate a unique ID for the refactoring report.</item>
+                <item>Create the `REFACTOR-[ID]-ANALYSIS.xml` file.</item>
+                <item>Diagnose the "code smell" and identify the structural problem.</item>
+                <item>Define a refactoring strategy with a detailed action plan.</item>
+                <item>Mandatory verification of existing test coverage.</item>
+                <item>Write missing tests if necessary (via [DEVELOPMENT] protocol).</item>
+                <item>Execute the refactoring via micro-changes with continuous validation.</item>
+                <item>Validate non-regression after each modification.</item>
+            </actions>
+            <affected_files>
+                <file type="lifecycle">/docs/backlog/05-refactor/REFACTOR-[ID].xml (ANALYSIS →
+                    REFACTORING → DONE)</file>
+                <file type="modification">Source code files to be refactored.</file>
+                <file type="conditional_creation">New test files if coverage is insufficient.</file>
+            </affected_files>
+            <system_commands>
+                <command optional="true">`aklo refactor "[Title]"`</command>
+                <command>Test suite execution (before/during/after).</command>
+                <command>Code coverage analysis tools.</command>
+            </system_commands>
+            <mcp_tools>
+                <tool>mcp_desktop-commander_write_file</tool>
+                <tool>mcp_desktop-commander_edit_block</tool>
+                <tool>mcp_desktop-commander_execute_command</tool>
+            </mcp_tools>
+            <required_validation>YES - Explicit approval required before refactoring begins.</required_validation>
+        </flight_plan>
 
-Améliorer la qualité interne du code (lisibilité, maintenabilité, performance) en appliquant des modifications de structure de manière sécurisée, c'est-à-dire sans altérer le comportement visible de l'application.
+        <step number="1" type="analysis" title="Scoping and Securing">
+            <action>Create a `REFACTOR-[ID]-ANALYSIS.xml` file. Fill in the "Code Smell Diagnosis"
+                and "Refactoring Strategy" sections. Crucially, verify the test coverage of the
+                affected code. If coverage is insufficient, the first action must be to write the
+                missing tests by following the [DEVELOPMENT] protocol. This is a non-negotiable
+                prerequisite.</action>
+            <automation optional="true">`aklo refactor "[Refactoring Title]"`</automation>
+            <awaiting_validation>Submit the report and plan to the Human_Developer for validation.</awaiting_validation>
+        </step>
+        <step number="2" type="procedure" title="Execution">
+            <action>Once the plan is approved, change the status to `REFACTORING`. Activate the
+                [DEVELOPMENT] protocol to apply the changes. The TDD cycle is adapted: instead of
+                writing a new test, rely on existing tests. Apply one micro-change (e.g., extract a
+                method), then immediately rerun the test suite to ensure no regression is
+                introduced. Repeat this (small change -> run tests) cycle until the refactoring plan
+                is complete.</action>
+        </step>
+        <step number="3" type="conclusion" title="Finalization">
+            <action>Once refactoring is complete and all tests are green, fill in the "Test and
+                Coverage Validation" section. Follow step 6 (Pre-Commit Review) of the [DEVELOPMENT]
+                protocol. If the changes are significant, this review step may involve formally
+                activating the **[CODE REVIEW]** protocol. Once approved, follow step 7 of the
+                [DEVELOPMENT] protocol to update the refactoring report status to `DONE` and create
+                the commit.</action>
+        </step>
+    </section>
 
-### 1.2. Livrables Attendus
-
-1. **Rapport de Refactoring :** Un fichier `REFACTOR-[ID]-DONE.xml` créé dans `/docs/backlog/05-refactor/`.
-2. **Commit de Refactoring :** Un ou plusieurs `commits` contenant uniquement les modifications de refactoring.
-
-## SECTION 2 : ARTEFACT REFACTOR - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `REFACTOR-[ID]-[Status].xml`
-    - `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    - `[Status]` : Le statut du processus de refactoring.
-
-### 2.2. Statuts
-
-- `ANALYSIS` : Le diagnostic est en cours et la couverture de tests est en cours de vérification.
-- `REFACTORING` : Le plan a été approuvé et le refactoring est en cours.
-- `DONE` : Le refactoring est terminé et le `commit` a été créé.
-
-### 2.3. Structure Obligatoire Du Fichier Refactor
-
-```markdown
-# RAPPORT DE REFACTORING : REFACTOR-[ID]
----
-**Task Associée (si applicable):** [TASK-ID](../../01-tasks/TASK-ID.xml)
----
-
-## 1. Diagnostic du "Code Smell"
-- **Code concerné :** (Chemin vers le fichier et lignes.)
-- **Problème identifié :** (Ex: "Fonction de plus de 100 lignes", "Duplication de code", "Non-respect du principe de Responsabilité Unique".)
-
-## 2. Stratégie de Refactoring
-- **Objectif :** (Ex: "Extraire la logique métier dans une nouvelle classe `BillingService`".)
-- **Plan d'action :** (Liste des étapes techniques prévues : renommages, extractions, etc.)
-
-## 3. Preuve de Non-Régression
-- **Couverture de tests initiale :** (Confirmer que le code est couvert par des tests **avant** de commencer.)
-- **Résultat des tests après refactoring :** (Affirmer que 100% des tests pertinents passent après le refactoring.)
-```
-
-## SECTION 3 : PROCÉDURE DE REFACTORING
-
-**🛫 PLAN DE VOL REFACTORING (Obligatoire avant Phase 1)**
-
-Avant tout refactoring de code, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_REFACTORING]**
-**Objectif :** Améliorer la structure interne du code sans altérer son comportement externe
-**Actions prévues :**
-1. Génération de l'ID unique pour le rapport de refactoring
-2. Création du fichier `REFACTOR-[ID]-ANALYSIS.xml` dans `/docs/backlog/05-refactor/`
-3. Diagnostic du "code smell" et identification du problème structurel
-4. Définition d'une stratégie de refactoring avec plan d'action détaillé
-5. Vérification obligatoire de la couverture de tests existante
-6. Écriture de tests manquants si nécessaire (via protocole DEVELOPPEMENT)
-7. Exécution du refactoring par micro-changements avec validation continue
-8. Validation de non-régression après chaque modification
-
-**Fichiers affectés :**
-- `/docs/backlog/05-refactor/REFACTOR-[ID]-ANALYSIS.xml` → `REFACTORING` → `DONE`
-- Fichiers de code source à refactoriser
-- Possibles nouveaux fichiers de tests si couverture insuffisante
-- Fichiers de tests existants (validation de non-régression)
-
-**Commandes système :**
-- `aklo refactor "<Titre>"` : automatisation création rapport (optionnel)
-- Exécution de la suite de tests avant/pendant/après refactoring
-- Outils d'analyse de couverture de code
-- Outils de linting et validation qualité
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_write_file` : créer le rapport de refactoring
-- `mcp_desktop-commander_edit_block` : modifier code par micro-changements
-- `mcp_desktop-commander_execute_command` : tests et validation continue
-- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant refactoring
-
-1. **[ANALYSE] Phase 1 : Cadrage et Sécurisation**
-    - **Action Requise :** Créer un fichier `REFACTOR-[ID]-ANALYSIS.xml` dans `/docs/backlog/05-refactor/`.
-    - **⚡ Automatisation `aklo` :** `aklo refactor "<Titre de la refactorisation>"`
-    - Remplir les sections "Diagnostic du Code Smell" et "Stratégie de Refactoring".
-    - **Vérifier la couverture de tests.** Si elle est insuffisante, la première action doit être d'écrire les tests manquants en suivant le protocole [DEVELOPPEMENT]. **C'est un prérequis non négociable.**
-    - [ATTENTE_VALIDATION] Soumettre le rapport et le plan pour validation au `Human_Developer`.
-
-2. **[PROCEDURE] Phase 2 : Exécution du Refactoring**
-    - Une fois le plan approuvé, passer le statut à `REFACTORING`.
-    - **Activer le protocole [DEVELOPPEMENT] (`03-DEVELOPPEMENT.xml`)** pour appliquer les changements.
-    - Le cycle TDD est adapté :
-        - Au lieu d'écrire un nouveau test, on s'appuie sur les tests existants.
-        - Appliquer un micro-changement (ex: extraire une méthode).
-        - Relancer immédiatement la suite de tests pour s'assurer qu'aucune régression n'est introduite.
-        - Répéter ce cycle (petit changement -> tests) jusqu'à ce que le plan de refactoring soit complété.
-
-3. **[CONCLUSION] Phase 3 : Finalisation**
-    - Une fois le refactoring terminé et tous les tests au vert, remplir la section "Preuve de Non-Régression".
-    - Suivre l'étapes 6 (Revue avant commit) du protocole [DEVELOPPEMENT]
-    - Mettre à jour le rapport de refactoring au statut `DONE`.
-    - Suivre l'étapes 7 (Finalisation) du protocole [DEVELOPPEMENT] pour créer le `commit`.
+    <section title="Commit Management">
+        <rule>
+            The final commit containing the refactoring changes is not produced directly by this
+            protocol. It is created by the [DEVELOPMENT] protocol, which is activated in Phase 2 and
+            finalized in Phase 3. This ensures that all code changes, even for refactoring, adhere
+            to the same quality and validation pipeline.
+        </rule>
+    </section>
+</protocol>

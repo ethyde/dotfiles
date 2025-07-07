@@ -1,90 +1,109 @@
----
-created: 2025-06-28 11:15
-modified: 2025-06-28 11:22
----
-# PROTOCOLE SPÉCIFIQUE : AUDIT DE SÉCURITÉ
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="security_audit">
+  <description>
+    This protocol is activated periodically (e.g., quarterly) or before a major release to identify and plan the remediation of security vulnerabilities in the code and dependencies.
+  </description>
 
-Ce protocole s'active de manière périodique (ex: trimestriellement) ou avant une release majeure pour identifier et planifier la correction de vulnérabilités de sécurité dans le code et les dépendances.
+  <section title="Mission and Deliverables">
+    <sub_section title="Mission">
+      <introduction>
+        To conduct a systematic security analysis to identify potential vulnerabilities, assess their criticality, and create an action plan to remediate them.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverables">
+      <deliverables>
+        <deliverable type="report">An `AUDIT-SECURITY-[DATE].xml` file created in `/docs/backlog/11-security/`.</deliverable>
+        <deliverable type="remediation_tasks">One or more `Tasks` or `PBIs` created to fix the identified vulnerabilities.</deliverable>
+      </deliverables>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+  <section title="Audit Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>AUDIT-SECURITY-[DATE]-[Status].xml</format>
+      <details>
+        <detail name="date">The date of the audit in `YYYY-MM-DD` format.</detail>
+        <detail name="status">The status of the audit.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="scanning">Automated and manual analysis is in progress.</item>
+        <item name="triage">Found vulnerabilities are being analyzed and prioritized.</item>
+        <item name="concluded">The audit is complete, and the action plan has been created.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <security_audit_report date="[YYYY-MM-DD]" status="scanning">
+          <metadata>
+            <responsible>[Human_Developer's Name]</responsible>
+            <audit_scope>[e.g., "NPM Dependencies", "Authentication API"]</audit_scope>
+            <tools_used>
+              <tool name="[e.g., npm audit, Snyk CLI, SonarQube]" />
+            </tools_used>
+          </metadata>
+          <content>
+            <executive_summary>
+              <overall_risk_level>Critical / High / Medium / Low</overall_risk_level>
+              <critical_vulnerabilities_found>0</critical_vulnerabilities_found>
+              <high_vulnerabilities_found>0</high_vulnerabilities_found>
+            </executive_summary>
+            <identified_vulnerabilities>
+              <vulnerability id="1">
+                <description>e.g., XSS in the search field</description>
+                <severity>Critical</severity>
+                <affected_component>search.js</affected_component>
+                <recommendation>Escape user inputs</recommendation>
+              </vulnerability>
+            </identified_vulnerabilities>
+            <action_plan>
+              <remediation_task type="Urgent" ref="[TASK-ID]">Fix for vulnerability #[ID]</remediation_task>
+              <remediation_task type="Standard" ref="[PBI-ID]">Fix for vulnerability #[ID]</remediation_task>
+              <see_also protocol="00-PRODUCT-OWNER" description="For standard-priority fixes requiring functional changes."/>
+              <see_also protocol="01-PLANNING" description="For urgent technical fixes."/>
+              <see_also protocol="13-SECURITE-AUDIT" description="This action plan is part of the security audit process itself."/>
+              <note>The proposed action plan must be explicitly approved by the Human_Developer before any remediation tasks are created.</note>
+            </action_plan>
+          </content>
+        </security_audit_report>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
-
-Mener une analyse de sécurité systématique pour identifier les failles potentielles, évaluer leur criticité, et créer un plan d'action pour les corriger.
-
-### 1.2. Livrables Attendus
-
-1.  **Rapport d'Audit de Sécurité :** Un fichier `AUDIT-SECURITY-[DATE].xml` créé dans `/docs/backlog/11-security/`.
-2.  **Tasks / PBI de Correction :** Une ou plusieurs `Tasks` ou `PBI` créés pour corriger les vulnérabilités identifiées.
-
-## SECTION 2 : ARTEFACT AUDIT - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `AUDIT-SECURITY-[DATE]-[Status].xml`
-    -   `[DATE]` : La date de l'audit au format `AAAA-MM-DD`.
-    -   `[Status]` : Le statut de l'audit.
-
-### 2.2. Statuts
-
--   `SCANNING` : L'analyse automatisée et manuelle est en cours.
--   `TRIAGE` : Les vulnérabilités trouvées sont en cours d'analyse et de priorisation.
--   `CONCLUDED` : L'audit est terminé et le plan d'action a été créé.
-
-### 2.3. Structure Obligatoire du Fichier d'Audit
-
-```markdown
-# RAPPORT D'AUDIT DE SÉCURITÉ : [DATE]
----
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [SCANNING | TRIAGE | CONCLUDED]
-**Périmètre de l'Audit:** [Ex: "Dépendances NPM", "API d'authentification"]
-**Outils Utilisés:** [Ex: "npm audit", "Snyk CLI", "SonarQube"]
----
-
-## 1. Résumé des Résultats (Executive Summary)
-
-*Synthèse du niveau de risque global et des découvertes les plus critiques.*
-- **Niveau de Risque Global :** Critique / Élevé / Moyen / Faible
-- **Vulnérabilités Critiques Trouvées :** X
-- **Vulnérabilités Élevées Trouvées :** Y
-
-## 2. Liste des Vulnérabilités Identifiées
-
-| ID | Description | Criticité | Composant Affecté | Recommandation |
-|----|-------------|-----------|--------------------|----------------|
-| 1  | [Ex: XSS dans le champ de recherche] | Critique  | `search.js`        | [Ex: Échapper les entrées utilisateur] |
-| 2  | [Ex: Dépendance `lodash` obsolète avec faille connue] | Élevée    | `package.json`     | [Ex: Mettre à jour vers la version X.Y.Z] |
-|... | ...         | ...       | ...                | ...            |
-
-## 3. Plan d'Action - Tâches et PBI Créés
-
-*Liste des liens vers les `Tasks` ou `PBI` qui ont été créés pour corriger les failles.*
-- **Correction Urgente :** [TASK-XX](../../01-tasks/TASK-XX-TODO.xml) - Mettre à jour la dépendance `lodash`.
-- **Correction Standard :** [PBI-YY](../../00-pbi/PBI-YY-PROPOSED.xml) - Réviser la gestion des entrées utilisateur.
-````
-
-## SECTION 3 : PROCÉDURE D'AUDIT
-
-1.  **[PROCEDURE] Phase 1 : Scan Automatisé**
-      - **Action Requise :** Créer un fichier `AUDIT-SECURITY-[DATE]-SCANNING.xml` dans `/docs/backlog/11-security/`.
-      - **⚡ Automatisation `aklo` :** `aklo security`
-      - Exécuter les outils d'analyse de sécurité automatisés (ex: `npm audit`, `Snyk`, scanners de code statique).
-      - Compiler les résultats bruts dans le rapport.
-
-2.  **[ANALYSE] Phase 2 : Triage et Analyse Manuelle**
-      - Passer le statut à `TRIAGE`.
-      - Pour chaque vulnérabilité trouvée, évaluer son impact réel dans le contexte de l'application (éliminer les faux positifs) et assigner un niveau de criticité (Critique, Élevé, Moyen, Faible).
-      - Remplir le tableau de la "Liste des Vulnérabilités Identifiées".
-
-3.  **[ANALYSE] Phase 3 : Plan de Correction**
-      - Pour chaque vulnérabilité validée, proposer une recommandation de correction.
-      - Rédiger un "Plan d'Action" qui liste les `Tasks` et `PBI` à créer.
-
-4.  **[ATTENTE\_VALIDATION] Phase 4 : Validation du Plan**
-      - Soumettre le rapport d'audit complet et le plan d'action pour validation au `Human_Developer`.
-
-5.  **[CONCLUSION] Phase 5 : Clôture**
-      - Une fois le plan validé, **activer les protocoles [PRODUCT OWNER] ou [PLANIFICATION]** pour créer officiellement les `PBI` et `Task` de correction.
-      - Lier les artefacts créés dans la section 3 du rapport d'audit.
-      - Passer le statut du rapport à `CONCLUDED`.
+  <section title="Audit Procedure">
+    <step number="1" type="procedure" title="Automated Scan">
+      <action>Create an `AUDIT-SECURITY-[DATE]-SCANNING.xml` file. Run automated security analysis tools (e.g., `npm audit`, `Snyk`). Compile the raw results in the report.</action>
+      <automation optional="true">`aklo security`</automation>
+    </step>
+    <step number="2" type="analysis" title="Triage and Manual Analysis">
+      <action>Change the status to `TRIAGE`. For each found vulnerability, assess its real-world impact in the application's context (eliminating false positives) and assign a severity level (Critical, High, Medium, Low). Fill in the "Identified Vulnerabilities" list.</action>
+    </step>
+    <step number="3" type="analysis" title="Correction Plan">
+      <action>For each validated vulnerability, propose a remediation recommendation. Draft an "Action Plan" that lists the `Tasks` and `PBIs` to be created.</action>
+    </step>
+    <step number="4" type="validation" title="Plan Validation">
+      <awaiting_validation>Submit the complete audit report and action plan to the Human_Developer for validation.</awaiting_validation>
+    </step>
+    <step number="5" type="conclusion" title="Closure">
+      <action>Once the plan is validated, activate the [PRODUCT OWNER] or [PLANIFICATION] protocols to officially create the remediation PBIs and Tasks. Link the created artifacts in the action plan of the audit report. Change the report's status to `CONCLUDED`.</action>
+    </step>
+  </section>
+  
+  <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-07T09:00:00Z">
+          <source protocol="security_audit" />
+          <message type="info">Starting quarterly security audit for 2025-Q3. Status: SCANNING.</message>
+        </entry>
+        <entry timestamp="2025-07-07T11:00:00Z">
+          <source protocol="security_audit" />
+          <message type="validation_request">Security audit `AUDIT-SECURITY-2025-07-07` is complete and submitted for validation. One high-severity vulnerability found.</message>
+        </entry>
+        <entry timestamp="2025-07-07T11:45:00Z">
+          <source protocol="security_audit" />
+          <message type="info">Action plan for audit `AUDIT-SECURITY-2025-07-07` approved. One remediation task will be created. Status: CONCLUDED.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

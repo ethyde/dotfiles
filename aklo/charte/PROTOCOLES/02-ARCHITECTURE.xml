@@ -1,196 +1,275 @@
-# PROTOCOLE SPÉCIFIQUE : CONCEPTION D'ARCHITECTURE LOGICIELLE
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="architecture_design">
+    <description>
+        This protocol is activated on the recommendation of the [PLANNING] protocol for one or more
+        Tasks identified as having high risk or complexity.
+    </description>
 
-Ce protocole s'active sur recommandation du protocole [PLANIFICATION] pour une ou plusieurs `Tasks` identifiées comme présentant un risque ou une complexité élevés.
+    <section title="Mission and Deliverables">
+        <sub_section title="Mission">
+            <introduction>
+                To analyze a complex technical problem, evaluate several solutions, and formalize a
+                clear and justified architectural decision that will guide the implementation.
+            </introduction>
+        </sub_section>
+        <sub_section title="Expected Deliverables">
+            <deliverables>
+                <deliverable type="document">
+                    An `ARCH-[PBI_ID]-[ID]-VALIDATED.xml` file detailing the chosen solution, the
+                    trade-offs analyzed, and justifications based on guiding principles (SoC, DDD,
+                    Twelve-Factor App, etc.), created in `/docs/backlog/02-architecture/`.
+                </deliverable>
+                <deliverable type="task_plan">
+                    The update, deletion, or creation of Tasks in `/docs/backlog/01-tasks/` to
+                    reflect the validated architecture. The new plan must be immediately actionable.
+                </deliverable>
+            </deliverables>
+        </sub_section>
+    </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+    <section title="Architecture Artefact Management and Structure">
+        <sub_section title="Naming Convention">
+            <format>ARCH-[PBI_ID]-[ID]-[status].xml</format>
+            <details>
+                <detail name="pbi_id">ID of the parent PBI, linking the decision to the business
+                    need.</detail>
+                <detail name="id">Sequential identifier for the architecture document for this PBI.</detail>
+                <detail name="status">Status of the architecture document.</detail>
+            </details>
+        </sub_section>
+        <sub_section title="Statuses">
+            <list>
+                <item name="draft">The document is being drafted; analyses are in progress.</item>
+                <item name="awaiting_review">The architecture proposal is complete and ready for
+                    review by the Human_Developer.</item>
+                <item name="validated">The architecture has been approved. It becomes the reference
+                    for revising Tasks.</item>
+                <item name="deprecated">The architecture has been replaced by a new version or is no
+                    longer relevant.</item>
+            </list>
+        </sub_section>
+        <sub_section title="Mandatory Artefact Structure">
+            <artefact_template format="xml">
+                <architecture_document pbi_id="[pbi_id]" id="[id]" status="draft"
+                    title="[Title describing the architectural problem]">
+                    <metadata>
+                        <parent_pbi>PBI-[pbi_id]</parent_pbi>
+                        <assignee>Human_Developer</assignee>
+                        <git_branch>feature/arch-[pbi_id]-[id]</git_branch>
+                    </metadata>
+                    <content>
+                        <problem_statement>
+                            A clear description of the technical challenge that required activating
+                            this protocol, based on the Tasks flagged by the planner.
+                        </problem_statement>
+                        <options_analysis>
+                            <option name="A" title="[Name of Approach A]">
+                                <description>...</description>
+                                <pros>...</pros>
+                                <cons>...</cons>
+                            </option>
+                            <option name="B" title="[Name of Approach B]">
+                                <description>...</description>
+                                <pros>...</pros>
+                                <cons>...</cons>
+                            </option>
+                        </options_analysis>
+                        <decision_and_rationale>
+                            Announcement of the chosen option and a detailed explanation of the
+                            reasons for this choice, based on the trade-off analysis and project
+                            guiding principles (performance, cost, maintainability, etc.).
+                        </decision_and_rationale>
+                        <solution_diagram optional="true">
+                            A diagram (e.g., Mermaid, ASCII art) to illustrate the chosen solution
+                            can be included here.
+                        </solution_diagram>
+                        <impact_on_tasks>
+                            A detailed description of the Tasks to be created, modified, or deleted
+                            to implement this architecture.
+                        </impact_on_tasks>
+                    </content>
+                </architecture_document>
+            </artefact_template>
+            <example>
+                <architecture_document pbi_id="42" id="1" status="validated"
+                    title="Asynchronous Notification Service Design">
+                    <metadata>
+                        <parent_pbi>PBI-42</parent_pbi>
+                        <assignee>alice</assignee>
+                        <git_branch>feature/arch-42-1-notification-service</git_branch>
+                    </metadata>
+                    <content>
+                        <problem_statement>
+                            Implement an asynchronous notification service for users to ensure
+                            decoupling and scalability of the main application.
+                        </problem_statement>
+                        <options_analysis>
+                            <option name="A" title="Message Broker (RabbitMQ)">
+                                <description>Use a dedicated message broker to handle notification
+                                    queues.</description>
+                                <pros>High scalability, reliability, persistent messages.</pros>
+                                <cons>Adds infrastructure complexity and a new component to
+                                    maintain.</cons>
+                            </option>
+                            <option name="B" title="Native WebSocket Push">
+                                <description>Push notifications directly from the application server
+                                    via a WebSocket connection.</description>
+                                <pros>Simplicity, real-time feel, no extra infrastructure.</pros>
+                                <cons>Less robust under high load, no built-in retry mechanism.</cons>
+                            </option>
+                        </options_analysis>
+                        <decision_and_rationale>
+                            Option A is chosen for its long-term robustness and scalability, which
+                            aligns with our growth projections. The initial setup complexity is an
+                            acceptable trade-off.
+                        </decision_and_rationale>
+                        <solution_diagram optional="true"><![CDATA[
+<diagram type="mermaid">
+graph TD;
+  WebApp --> API_Endpoint;
+  API_Endpoint -- Publishes message --> RabbitMQ;
+  RabbitMQ -- Pushes to queue --> NotificationWorker;
+  NotificationWorker -- Sends notification --> UserDevice;
+</diagram>
+            ]]></solution_diagram>
+                        <impact_on_tasks>
+                            - Create TASK-42-5: Setup and deploy RabbitMQ infrastructure.
+                            - Modify TASK-42-4: Adapt the API to publish events instead of sending
+                            notifications directly.
+                            - Create TASK-42-6: Implement the NotificationWorker service to consume
+                            messages.
+                        </impact_on_tasks>
+                    </content>
+                </architecture_document>
+            </example>
+        </sub_section>
+    </section>
 
-### 1.1. Mission
+    <section title="Architecture Procedure">
+        <flight_plan required="true" name="ARCHITECTURE_FLIGHT_PLAN">
+            <title>Architecture Flight Plan</title>
+            <instruction>Before analyzing the architectural problem, the agent must present a
+                detailed plan.</instruction>
+            <objective>Analyze and design an architectural solution for complex Tasks</objective>
+            <planned_actions>
+                <item>Analyze Tasks flagged as requiring architectural review</item>
+                <item>Identify the core technical problem to be solved</item>
+                <item>Generate the ID for the architecture document</item>
+                <item>Create the `ARCH-[PBI_ID]-[ID]-DRAFT.xml` file in
+                    `/docs/backlog/02-architecture/`</item>
+                <item>Research and analyze 2-3 viable architectural options</item>
+                <item>Evaluate the trade-offs for each option</item>
+                <item>Update the affected Tasks after architecture validation</item>
+            </planned_actions>
+            <affected_files>
+                <item type="creation">/docs/backlog/02-architecture/ARCH-[PBI_ID]-[ID]-DRAFT.xml</item>
+                <item type="update">/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.xml</item>
+                <item type="conditional_creation">New Task files depending on the chosen
+                    architecture</item>
+            </affected_files>
+            <system_commands>
+                <item type="verification">Check for existing architecture documents for this PBI</item>
+                <item type="read">Read flagged Tasks to understand the complexity</item>
+            </system_commands>
+            <mcp_tools>
+                <item>mcp_desktop-commander_list_directory</item>
+                <item>mcp_desktop-commander_read_file</item>
+                <item>mcp_desktop-commander_write_file</item>
+                <item>mcp_desktop-commander_edit_block</item>
+            </mcp_tools>
+            <required_validation>
+                <answer>yes</answer>
+                <description>Explicit approval required before analysis</description>
+            </required_validation>
+        </flight_plan>
+        <step number="1" type="analysis" title="Problem Framing">
+            <description>
+                Take the list of flagged Tasks as input. Write the "Problem Statement" section of
+                the architecture document, which will be created with `DRAFT` status.
+            </description>
+        </step>
+        <step number="2" type="analysis" title="Options Evaluation">
+            <description>
+                Propose 2 to 3 viable architectural approaches to solve the problem. For each
+                option, fill out the trade-off analysis in the document. Submit this analysis to the
+                Human_Developer to choose a direction and get clarifications (ask 4-6 clarifying
+                questions to refine constraints).
+            </description>
+            <awaiting_validation>Submit this analysis to the Human_Developer for validation and
+                clarification.</awaiting_validation>
+        </step>
+        <step number="3" type="procedure" title="Decision and Formalization">
+            <description>
+                Based on the direction chosen by the Human_Developer, write the detailed design of
+                the chosen solution in the architecture document. Write the "Decision and Rationale"
+                and "Impact on Tasks" sections. Change the document status to `AWAITING_REVIEW` and
+                submit it for final validation.
+            </description>
+            <awaiting_validation>Submit the complete design document for final approval.</awaiting_validation>
+        </step>
+        <step number="4" type="conclusion" title="Action Plan Update">
+            <description>
+                Present the Revised Task Plan to the Human_Developer for validation. Once the
+                document is `VALIDATED`, execute the plan described in the "Impact on Tasks"
+                section. Activate the [KNOWLEDGE-BASE] protocol to determine if the analysis has
+                produced knowledge worth centralizing. Modify, delete, and create the TASK files in
+                `/docs/backlog/01-tasks/`.
+            </description>
+        </step>
+    </section>
 
-Analyser un problème technique complexe, évaluer plusieurs solutions, et formaliser une décision d'architecture claire et justifiée qui servira de guide pour l'implémentation.
+    <section title="Atomic Commit and Validation">
+        <sub_section title="Commit Content">
+            <commit_message_template><![CDATA[
+feat(arch): Design PBI-[ID] - [Architecture title]
 
-### 1.2. Livrables Attendus
+- Validated ARCH-[PBI_ID]-[ID] document
+- [N] tasks modified according to architectural impact
+- [X] new tasks created
+- [Y] tasks deleted (became obsolete)
+- Journal updated with architectural decisions
 
-1. **Document de Conception d'Architecture :** Un fichier `ARCH-[PBI_ID]-[ID]-VALIDATED.xml` détaillant la solution retenue, les compromis analysés et les justifications basées sur les principes directeurs (SoC, DDD, Twelve-Factor App…) est créé dans `/docs/backlog/02-architecture/`.
-2. **Plan de `Tasks` Révisé :** La mise à jour, la suppression ou la création de `Tasks` dans `/docs/backlog/01-tasks/` pour refléter l'architecture validée. Le nouveau plan doit être immédiatement exécutable.
+Chosen architecture: [Summary of the solution]
 
-## SECTION 2 : ARTEFACT ARCH - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
-- `ARCH-[PBI_ID]-[ID]-[Status].xml`
-  - `[PBI_ID]` : L'ID du `PBI` parent, liant la décision au besoin métier.
-  - `[ID]` : Identifiant séquentiel du document d'architecture pour ce PBI.
-  - `[Status]` : Le statut du document d'architecture.
-
-### 2.2. Statuts
-
-- `DRAFT` : Le document est en cours de rédaction, les analyses sont en cours.
-- `AWAITING_REVIEW` : La proposition d'architecture est terminée et prête à être examinée par le `Human_Developer`.
-- `VALIDATED` : L'architecture a été approuvée. Elle devient la référence pour la révision des `Tasks`.
-- `DEPRECATED` : L'architecture a été remplacée par une nouvelle version ou n'est plus pertinente.
-
-### 2.3. Structure Obligatoire Du Fichier ARCH
-
-```markdown
-# ARCH-[PBI_ID]-[ID] : [Titre décrivant le problème architectural]
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-42-AGREED.xml](../pbi/PBI-42-AGREED.xml)
-**Document d'Architecture:** [ARCH-42-1.xml](../arch/ARCH-42-1.xml)
-**Assigné à:** `Human_Developer`
-**Branche Git:** `feature/task-42-4-notification-service-skeleton`
-
----
-
-## 1. Problème à Résoudre
-
-_Description claire du défi technique qui a nécessité l'activation de ce protocole. Se base sur les `Tasks` "flaggées" par le planificateur._
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-### Option A : [Nom de l'approche A]
-
-- **Description :** ...
-- **Avantages :** ...
-- **Inconvénients :** ...
-
-### Option B : [Nom de l'approche B]
-
-- **Description :** ...
-- **Avantages :** ...
-- **Inconvénients :** ...
-
-## 3. Décision et Justification
-
-_Annonce de l'option retenue et explication détaillée des raisons de ce choix, en s'appuyant sur l'analyse des compromis et les principes directeurs du projet (performance, coût, maintenabilité, etc.)._
-
-## 4. Schéma de la Solution (Optionnel)
-
-_Un schéma (ex: Mermaid, ASCII art) pour illustrer la solution retenue peut être inclus ici._
-
-## 5. Impact sur les Tâches
-
-_Description détaillée des `Tasks` à créer, modifier ou supprimer pour implémenter cette architecture._
-```
-
-## SECTION 3 : PROCÉDURE D'ARCHITECTURE
-
-**🛫 PLAN DE VOL ARCHITECTURE (Obligatoire avant Phase 1)**
-
-Avant l'analyse du problème architectural, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_ARCHITECTURE]**
-**Objectif :** Analyser et concevoir une solution architecturale pour Tasks complexes
-**Actions prévues :**
-1. Analyse des Tasks flaggées comme nécessitant une revue architecturale
-2. Identification du problème technique central à résoudre
-3. Génération de l'ID pour le document d'architecture
-4. Création du fichier `ARCH-[PBI_ID]-[ID]-DRAFT.xml` dans `/docs/backlog/02-architecture/`
-5. Recherche et analyse de 2-3 options architecturales viables
-6. Évaluation des compromis (trade-offs) pour chaque option
-7. Mise à jour des Tasks concernées après validation de l'architecture
-
-**Fichiers affectés :**
-- `/docs/backlog/02-architecture/ARCH-[PBI_ID]-[ID]-DRAFT.xml` : création
-- `/docs/backlog/01-tasks/TASK-[PBI_ID]-[Task_ID]-TODO.xml` : modification (multiple)
-- Possibles nouveaux fichiers Task selon l'architecture retenue
-
-**Commandes système :**
-- Vérification des documents d'architecture existants pour ce PBI
-- Lecture des Tasks flaggées pour comprendre la complexité
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_list_directory` : vérifier documents ARCH existants
-- `mcp_desktop-commander_read_file` : lire PBI parent et Tasks flaggées
-- `mcp_desktop-commander_write_file` : créer le document d'architecture
-- `mcp_desktop-commander_edit_block` : mettre à jour les Tasks après validation
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant analyse
-
-1. **[ANALYSE] Phase 1 : Cadrage du Problème**
-    - Prendre en entrée la liste des `Tasks` "flaggées".
-    - Rédiger la section "Problème à Résoudre" du document d'architecture, qui sera créé au statut `DRAFT`.
-
-2. **[ANALYSE] Phase 2 : Évaluation des Options**
-    - Proposer 2 à 3 approches architecturales viables pour résoudre le problème.
-    - Pour chaque option, remplir l'analyse de compromis (avantages/inconvénients) dans le document.
-    - [ATTENTE_VALIDATION] Soumettre cette analyse au `Human_Developer` pour choisir une direction et obtenir des clarifications : poser 4 à 6 questions de clarification pour affiner les contraintes.
-
-3. **[PROCEDURE] Phase 3 : Prise de Décision et Formalisation**
-    - Sur la base de la direction choisie par le `Human_Developer`, rédiger la conception détaillée de la solution retenue dans le document d'architecture.
-    - Rédiger les sections "Décision et Justification" et "Impact sur les Tâches".
-    - Passer le statut du document à `AWAITING_REVIEW` et le soumettre pour validation finale.
-    - [ATTENTE_VALIDATION] Soumettre le document de conception complet pour approbation finale.
-
-4. **[CONCLUSION] Phase 4 : Mise à Jour du Plan d'Action**
-    - Présenter le **Plan de `Tasks` Révisé** au `Human_Developer` pour validation.
-    - Une fois le document `VALIDATED`, exécuter le plan décrit dans la section "Impact sur les Tâches".
-    - Activer le protocole [KNOWLEDGE-BASE] pour déterminer si l'analyse a produit une connaissance qui mérite d'être centralisée.
-    - Modifier, supprimer et créer les fichiers `TASK` dans `/docs/backlog/01-tasks/`.
-
-## SECTION 4 : COMMIT ATOMIQUE D'ARCHITECTURE
-
-### 4.1. Principe du Commit Unique
-
-**Règle Fondamentale :** L'architecture d'un PBI produit un unique commit atomique qui inclut :
-
-1. **Document d'architecture validé** : `ARCH-[PBI_ID]-[ID]-VALIDATED.xml`
-2. **Toutes les TASK modifiées** : Mises à jour selon l'impact architectural
-3. **Nouvelles TASK créées** : Si l'architecture nécessite des tâches supplémentaires
-4. **TASK supprimées** : Si l'architecture rend certaines tâches obsolètes
-5. **Mise à jour du journal** : Documentation du processus architectural
-
-### 4.2. Contenu du Commit
-
-**Message de commit type :**
-```
-feat(arch): Architecture PBI-[ID] - [Titre de l'architecture]
-
-- Document ARCH-[PBI_ID]-[ID] validé
-- [N] tasks modifiées selon l'impact architectural
-- [X] nouvelles tasks créées
-- [Y] tasks supprimées (devenues obsolètes)
-- Journal mis à jour avec les décisions architecturales
-
-Architecture retenue: [Résumé de la solution]
-
-Tasks impactées:
-- TASK-[PBI_ID]-01: [Modification apportée]
-- TASK-[PBI_ID]-02: [Modification apportée]
+Impacted tasks:
+- TASK-[PBI_ID]-01: [Modification made]
+- TASK-[PBI_ID]-02: [Modification made]
 - [...]
 
-Nouvelles tasks:
-- TASK-[PBI_ID]-05: [Nouvelle tâche]
+New tasks:
+- TASK-[PBI_ID]-05: [New task]
 - [...]
 
-Prochaine étape: DEVELOPPEMENT
-```
+Next step: DEVELOPMENT
+        ]]></commit_message_template>
+        </sub_section>
+        <sub_section title="Pre-Commit Validation">
+            <awaiting_validation> Before the commit, present the complete diff to the
+                Human_Developer: <list type="ordered">
+                    <item>Diff of the final architecture document</item>
+                    <item>All TASK modifications</item>
+                    <item>New TASKs created</item>
+                    <item>Deleted TASKs (with justification)</item>
+                    <item>Journal update</item>
+                </list>
+        <instruction>The
+                Human_Developer must explicitly approve the atomic commit.</instruction>
+            </awaiting_validation>
+        </sub_section>
+        <sub_section title="Architectural Revision Management">
+            <rule>
+                Any architectural revision after validation constitutes a new full cycle of the
+                ARCHITECTURE protocol with its own atomic commit.
+            </rule>
+            <example>
+                <commit_message><![CDATA[
+fix(arch): Revise architecture for PBI-[ID] - [Reason for revision]
 
-### 4.3. Workflow de Validation
-
-**[PROCEDURE] Séquence de Validation Complète**
-
-1. **Phase Draft :** Création et analyse des options (pas de commit)
-2. **Phase Awaiting Review :** Présentation de la solution complète
-3. **[ATTENTE_VALIDATION] Diff Complet :** Présentation de tous les changements :
-   - Document d'architecture final
-   - Toutes les modifications de TASK
-   - Nouvelles TASK créées
-   - TASK supprimées (avec justification)
-   - Mise à jour du journal
-4. **Commit Atomique :** Après validation explicite du `Human_Developer`
-
-### 4.4. Gestion des Révisions Architecturales
-
-**Règle :** Si l'architecture doit être révisée après validation, cela constitue un nouveau cycle complet du protocole ARCHITECTURE avec son propre commit atomique.
-
-**Exemple de révision :**
-```
-fix(arch): Révision architecture PBI-[ID] - [Raison de la révision]
-
-- Document ARCH-[PBI_ID]-[ID] mis à jour (version 2)
-- [N] tasks re-modifiées selon la nouvelle architecture
-- Journal mis à jour avec la justification de révision
-```
+- Updated ARCH-[PBI_ID]-[ID] document (version 2)
+- [N] tasks re-modified according to the new architecture
+- Journal updated with the revision justification
+        ]]></commit_message>
+            </example>
+        </sub_section>
+    </section>
+</protocol>

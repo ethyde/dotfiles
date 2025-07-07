@@ -1,95 +1,113 @@
----
-created: 2025-06-28 11:08
-modified: 2025-06-28 11:17
----
-# PROTOCOLE SPÉCIFIQUE : ANALYSE DE LA CONCURRENCE
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="competition_analysis">
+  <description>
+    This protocol is activated at the request of the Human_Developer to systematically analyze the products, features, or technical approaches of competitors.
+  </description>
 
-Ce protocole s'active à la demande du `Human_Developer` pour analyser de manière structurée les produits, fonctionnalités ou approches techniques de concurrents.
+  <section title="Mission and Deliverables">
+    <sub_section title="Mission">
+      <introduction>
+        To collect, synthesize, and analyze information about the competition to identify opportunities, threats, and generate actionable ideas for our own product.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverables">
+      <deliverables>
+        <deliverable type="report">A `COMPETITION-[ID].xml` file created in `/docs/backlog/10-competition/`.</deliverable>
+        <deliverable type="pbi_proposals">One or more PBI proposals (`PBI-[ID]-PROPOSED.xml` files) resulting from the analysis's conclusions.</deliverable>
+      </deliverables>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+  <section title="Analysis Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>COMPETITION-[ID]-[Status].xml</format>
+      <details>
+        <detail name="id">A unique identifier generated from the title and date (e.g., `competitor-auth-methods-20250707`).</detail>
+        <detail name="status">The status of the analysis.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="analysis">Research and report writing are in progress.</item>
+        <item name="concluded">The analysis is complete, and follow-up actions have been created.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <competition_analysis_report id="[id]" status="analysis">
+          <metadata>
+            <responsible>[Human_Developer's Name]</responsible>
+            <analysis_date>[YYYY-MM-DD]</analysis_date>
+            <analysis_subject>[e.g., "Competitor Authentication Methods"]</analysis_subject>
+            <competitors_analyzed>
+              <competitor name="[Competitor A Name]" />
+              <competitor name="[Competitor B Name]" />
+            </competitors_analyzed>
+          </metadata>
+          <content>
+            <executive_summary>
+              A summary in a few key points of the main findings and key conclusions. This is the most important part for a quick read.
+            </executive_summary>
+            <detailed_analysis>
+              <competitor_review name="[Competitor A Name]">
+                <approach_or_feature>Description of what they do.</approach_or_feature>
+                <strengths>What they do well.</strengths>
+                <weaknesses>What could be improved.</weaknesses>
+                <opportunity_for_us>How we can draw inspiration or do better.</opportunity_for_us>
+              </competitor_review>
+            </detailed_analysis>
+            <recommendations_and_action_plan>
+              <recommended_action type="CREATE_PBI">Create a PBI to [describe feature X].
+                  <see_also protocol="00-PRODUCT-OWNER" />
+              </recommended_action>
+              <recommended_action type="LAUNCH_EXPERIMENT">Launch an [EXPERIMENTATION] phase on [describe hypothesis Y].
+                  <see_also protocol="11-EXPERIMENTATION" />
+              </recommended_action>
+              <recommended_action type="NO_ACTION">Do nothing, because [justification].</recommended_action>
+              <note>All recommended actions must be explicitly approved by the Human_Developer before being initiated.</note>
+            </recommendations_and_action_plan>
+            <proposed_pbis>
+              <pbi ref="[path/to/PBI-ID.xml]">PBI Title</pbi>
+            </proposed_pbis>
+          </content>
+        </competition_analysis_report>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
+  <section title="Analysis Procedure">
+    <step number="1" type="analysis" title="Scoping the Analysis">
+      <action>Create a new `COMPETITION-[ID]-ANALYSIS.xml` file. Completely fill out the header (Responsible, Status, Subject, etc.). Clearly define the "Analysis Subject" and the list of "Competitors Analyzed".</action>
+      <automation optional="true">`aklo analyze "[Analysis Title]"`</automation>
+    </step>
+    <step number="2" type="procedure" title="Research and Synthesis">
+      <action>Conduct research on the identified competitors, focusing on the defined subject. Fill in the "Detailed Analysis by Competitor" section of the report. Write the "Executive Summary".</action>
+    </step>
+    <step number="3" type="analysis" title="Recommendations">
+      <action>Based on the analysis, formulate clear recommendations and an action plan in the dedicated section.</action>
+    </step>
+    <step number="4" type="validation" title="Validation and PBI Creation">
+      <awaiting_validation>Submit the complete report and recommendations to the Human_Developer for validation.</awaiting_validation>
+    </step>
+    <step number="5" type="conclusion" title="Closure">
+      <action>Once the action plan is validated, activate the [PRODUCT OWNER] protocol for each PBI to be created. Link the created PBIs in the "Proposed PBIs" section of the analysis report. Change the report's status to `CONCLUDED`.</action>
+    </step>
+  </section>
 
-Collecter, synthétiser et analyser des informations sur la concurrence pour identifier des opportunités, des menaces, et générer des idées actionnables pour notre propre produit.
-
-### 1.2. Livrables Attendus
-
-1.  **Rapport d'Analyse Concurrentielle :** Un fichier `COMPETITION-[ID].xml` créé dans `/docs/backlog/10-competition/`.
-2.  **Propositions de PBI :** Une ou plusieurs propositions de `PBI` (fichiers `PBI-[ID]-PROPOSED.xml`) découlant des conclusions de l'analyse.
-
-## SECTION 2 : ARTEFACT ANALYSE - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `COMPETITION-[ID]-[Status].xml`
-    -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    -   `[Status]` : Le statut de l'analyse.
-
-### 2.2. Statuts
-
--   `ANALYSIS` : La recherche et la rédaction du rapport sont en cours.
--   `CONCLUDED` : L'analyse est terminée, et les actions de suivi ont été créées.
-
-### 2.3. Structure Obligatoire du Fichier d'Analyse
-
-```markdown
-# RAPPORT D'ANALYSE CONCURRENTIELLE : [ID]
----
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [ANALYSIS | CONCLUDED]
-**Date de l'Analyse:** $(date +'%Y-%m-%d')
-**Sujet de l'Analyse:** [Ex: "Méthodes d'authentification concurrentes"]
-**Concurrents Analysés:** [Liste des concurrents]
----
-
-## 1. Synthèse des Observations (Executive Summary)
-
-*Résumé en quelques points des découvertes principales et des conclusions clés. C'est la partie la plus importante pour une lecture rapide.*
-
-## 2. Analyse Détaillée par Concurrent
-
-### Concurrent A : [Nom du Concurrent A]
-- **Approche / Fonctionnalité :** (Description de ce qu'ils font)
-- **Points Forts (Forces) :** (Ce qu'ils font bien)
-- **Points Faibles (Faiblesses) :** (Ce qui pourrait être amélioré)
-- **Opportunité pour nous :** (Comment on peut s'en inspirer ou faire mieux)
-
-### Concurrent B : [Nom du Concurrent B]
-- ...
-
-## 3. Recommandations et Plan d'Action
-
-*Liste des actions concrètes recommandées suite à cette analyse.*
-- **Action 1 :** Créer un PBI pour [décrire la fonctionnalité X].
-- **Action 2 :** Lancer une phase d'[EXPERIMENTATION] sur [décrire l'hypothèse Y].
-- **Action 3 :** Ne rien faire, car [justification].
-
-## 4. PBI Proposés
-
-*Liste des liens vers les PBI qui ont été créés suite à cette analyse.*
-- [PBI-XX](../../00-pbi/PBI-XX-PROPOSED.xml)
-```
-
-## SECTION 3 : PROCÉDURE D'ANALYSE
-
-1.  **[ANALYSE] Phase 1 : Cadrage de l'Analyse**
-      - **Action Requise :** Créer un nouveau fichier `COMPETITION-[ID]-ANALYSIS.xml` dans `/docs/backlog/10-competition/`.
-      - **⚡ Automatisation `aklo` :** `aklo analyze "<Titre de l'analyse>"`
-      - Remplir complètement l'en-tête (Responsable, Statut, Sujet, etc.).
-      - Définir clairement le "Sujet de l'Analyse" et la liste des "Concurrents Analysés".
-
-2.  **[PROCEDURE] Phase 2 : Recherche et Synthèse**
-      - Mener la recherche sur les concurrents identifiés, en se concentrant sur le sujet défini.
-      - Remplir la section "Analyse Détaillée par Concurrent" du rapport.
-      - Rédiger la "Synthèse des Observations".
-
-3.  **[ANALYSE] Phase 3 : Recommandations**
-      - Sur la base de l'analyse, formuler des recommandations claires et un plan d'action dans la section dédiée.
-
-4.  **[ATTENTE\_VALIDATION] Phase 4 : Validation et Création des PBI**
-      - Soumettre le rapport complet et les recommandations pour validation au `Human_Developer`.
-
-5.  **[CONCLUSION] Phase 5 : Clôture**
-      - Une fois le plan d'action validé, **activer le protocole [PRODUCT OWNER]** pour chaque PBI à créer.
-      - Lier les PBI créés dans la section "PBI Proposés" du rapport d'analyse.
-      - Passer le statut du rapport à `CONCLUDED`.
+  <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-07T10:00:00Z">
+          <source protocol="competition_analysis" />
+          <message type="info">Starting competitive analysis: `competitor-auth-methods-20250707`.</message>
+        </entry>
+        <entry timestamp="2025-07-07T15:30:00Z">
+          <source protocol="competition_analysis" />
+          <message type="validation_request">Analysis report `competitor-auth-methods-20250707` is complete and submitted for validation.</message>
+        </entry>
+        <entry timestamp="2025-07-07T16:45:00Z">
+          <source protocol="competition_analysis" />
+          <message type="info">Recommendations for `competitor-auth-methods-20250707` have been approved. One PBI will be created. Status is now `CONCLUDED`.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

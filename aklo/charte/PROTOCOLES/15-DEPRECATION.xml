@@ -1,90 +1,107 @@
----
-created: 2025-06-28 11:50
-modified: 2025-06-28 11:54
----
-# PROTOCOLE SPÉCIFIQUE : DÉPRÉCIATION DE FONCTIONNALITÉ
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="feature_deprecation">
+  <description>
+    This protocol is activated when a decision is made to remove a feature, API, or significant portion of code from the application.
+  </description>
 
-Ce protocole s'active lorsqu'une décision est prise de retirer une fonctionnalité, une API ou une portion de code significative de l'application.
+  <section title="Mission and Deliverables">
+    <sub_section title="Mission">
+      <introduction>
+        To plan and execute the removal of a feature in a secure and controlled manner, minimizing the impact on users and the application's stability.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverables">
+      <deliverables>
+        <deliverable type="report">A `DEPRECATION-[ID].xml` file created in `/docs/backlog/12-deprecations/`.</deliverable>
+        <deliverable type="commits">One or more commits that remove the associated code, tests, documentation, and configurations.</deliverable>
+        <deliverable type="user_communication" optional="true">The content of a communication intended to inform users of the upcoming removal.</deliverable>
+      </deliverables>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+  <section title="Deprecation Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>DEPRECATION-[ID]-[Status].xml</format>
+      <details>
+        <detail name="id">A unique identifier generated from the title and date (e.g., `remove-legacy-billing-api-20250708`).</detail>
+        <detail name="status">The status of the process.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="analysis">Impact analysis and planning are in progress.</item>
+        <item name="awaiting_execution">The plan is validated, awaiting technical implementation.</item>
+        <item name="executed">The code has been removed, and the version is ready to be deployed.</item>
+        <item name="communicated">The removal has been communicated to users (if necessary).</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <deprecation_plan id="[id]" status="analysis">
+          <metadata>
+            <responsible>[Human_Developer's Name]</responsible>
+            <feature_to_deprecate>[Clear name of the feature]</feature_to_deprecate>
+            <target_removal_date>[YYYY-MM-DD]</target_removal_date>
+          </metadata>
+          <content>
+            <justification>
+              Why this feature must be removed (e.g., "Low usage", "Replaced by a new version", "High maintenance cost", "Security risk").
+              <note>The justification for deprecating a feature must be explicitly validated by the Human_Developer before proceeding with the impact analysis.</note>
+            </justification>
+            <impact_analysis>
+              <user_impact>Which users will be affected and how?</user_impact>
+              <technical_impact>Which other parts of the code depend on this feature?</technical_impact>
+              <data_impact>Is it necessary to migrate or archive data?</data_impact>
+            </impact_analysis>
+            <technical_action_plan>
+              <task>Remove API routes (`/api/v1/...`).</task>
+              <task>Delete the `src/features/old-billing/` module.</task>
+              <see_also protocol="01-PLANIFICATION" description="Use the Planning protocol to turn this plan into actionable technical Tasks."/>
+            </technical_action_plan>
+            <communication_plan optional="true">
+              <target_audience>Who needs to be informed?</target_audience>
+              <message>Content of the message to be sent.</message>
+              <channel_and_date>How and when the communication will be made.</channel_and_date>
+            </communication_plan>
+          </content>
+        </deprecation_plan>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
+  <section title="Deprecation Procedure">
+    <step number="1" type="analysis" title="Analysis and Planning">
+      <action>Create a new `DEPRECATION-[ID]-ANALYSIS.xml` file. Fill in the "Justification" and "Impact Analysis" sections. Propose a "Technical Action Plan" and a "Communication Plan".</action>
+      <automation optional="true">`aklo deprecate "[Deprecation Title]"`</automation>
+      <awaiting_validation>Submit the complete plan to the Human_Developer for validation.</awaiting_validation>
+    </step>
+    <step number="2" type="procedure" title="Execution of Removal">
+      <action>Once the plan is validated, change the status to `AWAITING_EXECUTION`. Activate the [PLANIFICATION] protocol to create the necessary technical Tasks. Execute the Tasks following the [DEVELOPMENT] protocol. Once the code is removed, change the status to `EXECUTED`.</action>
+    </step>
+    <step number="3" type="procedure" title="Communication and Closure">
+      <action>If a communication plan was defined, execute it. Once the communication is done (or if it was not necessary), change the final status to `COMMUNICATED`.</action>
+      <conclusion>Inform the Human_Developer that the deprecation process is complete.</conclusion>
+    </step>
+  </section>
 
-Planifier et exécuter le retrait d'une fonctionnalité de manière sécurisée et contrôlée, en minimisant l'impact sur les utilisateurs et la stabilité de l'application.
-
-### 1.2. Livrables Attendus
-
-1.  **Plan de Dépréciation :** Un fichier `DEPRECATION-[ID].xml` créé dans `/docs/backlog/12-deprecations/`.
-2.  **Commit(s) de Suppression :** Un ou plusieurs `commits` qui retirent le code, les tests, la documentation et les configurations associés.
-3.  **Communication Utilisateur (si applicable) :** Le contenu d'une communication destinée à informer les utilisateurs du retrait à venir.
-
-## SECTION 2 : ARTEFACT DEPRECATION - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `DEPRECATION-[ID]-[Status].xml`
-    -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    -   `[Status]` : Le statut du processus.
-
-### 2.2. Statuts
-
--   `ANALYSIS` : L'analyse d'impact et la planification sont en cours.
--   `AWAITING_EXECUTION` : Le plan est validé, en attente de l'implémentation technique.
--   `EXECUTED` : Le code a été retiré et la version est prête à être déployée.
--   `COMMUNICATED` : La suppression a été communiquée aux utilisateurs (si nécessaire).
-
-### 2.3. Structure Obligatoire du Fichier de Dépréciation
-
-```markdown
-# PLAN DE DÉPRÉCIATION : [ID]
----
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [ANALYSIS | AWAITING_EXECUTION | EXECUTED | COMMUNICATED]
-**Fonctionnalité à Déprécier:** [Nom clair de la fonctionnalité]
-**Date de Retrait Cible:** $(date +'%Y-%m-%d')
----
-
-## 1. Justification
-
-*Pourquoi cette fonctionnalité doit-elle être retirée ? (Ex: "Faible utilisation", "Remplacée par une nouvelle version", "Coût de maintenance trop élevé", "Risque de sécurité").*
-
-## 2. Analyse d'Impact
-
-- **Impact Utilisateur :** (Quels utilisateurs seront affectés et comment ?)
-- **Impact Technique :** (Quelles autres parties du code dépendent de cette fonctionnalité ?)
-- **Impact sur les Données :** (Faut-il migrer ou archiver des données ?)
-
-## 3. Plan d'Action Technique
-
-*Liste des `Tasks` à réaliser pour la suppression.*
-- [ ] Retirer les routes d'API (`/api/v1/...`).
-- [ ] Supprimer le module `src/features/old-billing/`.
-- [ ] Retirer les tests correspondants.
-- [ ] Nettoyer les variables de configuration.
-
-## 4. Plan de Communication (si applicable)
-
-- **Cible :** (Qui doit être informé ?)
-- **Message :** (Contenu du message à envoyer.)
-- **Canal et Date :** (Comment et quand la communication sera faite.)
-```
-
-## SECTION 3 : PROCÉDURE DE DÉPRÉCIATION
-
-1.  **[ANALYSE] Phase 1 : Analyse et Planification**
-      - **Action Requise :** Créer un nouveau fichier `DEPRECATION-[ID]-ANALYSIS.xml` dans `/docs/backlog/12-deprecations/`.
-      - **⚡ Automatisation `aklo` :** `aklo deprecate "<Titre de la dépréciation>"`
-      - Remplir les sections "Justification" et "Analyse d'Impact".
-      - Proposer un "Plan d'Action Technique" et un "Plan de Communication".
-      - [ATTENTE\_VALIDATION] Soumettre le plan complet pour validation au `Human_Developer`.
-
-2.  **[PROCEDURE] Phase 2 : Exécution de la Suppression**
-      - Une fois le plan validé, passer le statut à `AWAITING_EXECUTION`.
-      - **Activer le protocole [PLANIFICATION]** pour créer les `Tasks` techniques nécessaires.
-      - Exécuter les `Tasks` en suivant le protocole [DEVELOPPEMENT].
-      - Une fois le code retiré, passer le statut à `EXECUTED`.
-
-3.  **[PROCEDURE] Phase 3 : Communication et Clôture**
-      - Si un plan de communication a été défini, l'exécuter.
-      - Une fois la communication effectuée (ou si elle n'était pas nécessaire), passer le statut final à `COMMUNICATED`.
-      - **[CONCLUSION]** Informer le `Human_Developer` que le processus de dépréciation est terminé.
+  <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-08T11:00:00Z">
+          <source protocol="feature_deprecation" />
+          <message type="info">Starting deprecation plan for `remove-legacy-xml-export-20250708`. Status: ANALYSIS.</message>
+        </entry>
+        <entry timestamp="2025-07-10T14:20:00Z">
+          <source protocol="feature_deprecation" />
+          <message type="validation_request">Deprecation plan `remove-legacy-xml-export-20250708` submitted for approval.</message>
+        </entry>
+         <entry timestamp="2025-07-15T10:00:00Z">
+          <source protocol="feature_deprecation" />
+          <message type="info">Code removal for `remove-legacy-xml-export-20250708` is complete. Status: EXECUTED.</message>
+        </entry>
+        <entry timestamp="2025-07-16T12:00:00Z">
+          <source protocol="feature_deprecation" />
+          <message type="info">User communication for `remove-legacy-xml-export-20250708` has been sent. Process is complete. Status: COMMUNICATED.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

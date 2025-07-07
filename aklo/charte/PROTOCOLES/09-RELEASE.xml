@@ -1,188 +1,195 @@
-# PROTOCOLE SPÉCIFIQUE : GESTION DE RELEASE
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="release_management">
+  <description>
+    This protocol is activated when the Human_Developer decides that a set of features is ready to be published as a new stable version of the application.
+  </description>
 
-Ce protocole s'active lorsque le `Human_Developer` décide qu'un ensemble de fonctionnalités est prêt à être publié en tant que nouvelle version stable de l'application.
+  <section title="Mission and Deliverables">
+    <sub_section title="Mission">
+      <introduction>
+        To coordinate and automate the necessary steps to transform a series of validated commits into an official, documented, and deployment-ready software version.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverables">
+      <deliverables>
+        <deliverable type="report">A `RELEASE-[version].xml` file created in `/docs/backlog/07-releases/`.</deliverable>
+        <deliverable type="changelog">The `CHANGELOG.xml` file at the project root, updated with the new version's changes.</deliverable>
+        <deliverable type="git_tag">A semantic and annotated Git tag (e.g., `v1.2.0`).</deliverable>
+        <deliverable type="build_artefact">A build artefact ready for deployment (e.g., a Docker container, a .zip archive).</deliverable>
+      </deliverables>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+  <section title="Release Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>RELEASE-[version]-[Status].xml</format>
+      <details>
+        <detail name="version">The semantic version number (e.g., `1.2.0`).</detail>
+        <detail name="status">The status of the release process.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="preparing">Information gathering and release branch creation are in progress.</item>
+        <item name="awaiting_deployment">The version has been built, tagged, and is ready for final deployment.</item>
+        <item name="shipped">The version has been deployed to production.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <release_report version="[version]" status="preparing">
+          <metadata>
+            <start_date>[YYYY-MM-DD]</start_date>
+            <end_date optional="true">[YYYY-MM-DD]</end_date>
+          </metadata>
+          <content>
+            <release_objective>A brief description of this version's purpose.</release_objective>
+            <included_pbis>
+              <pbi ref="[path/to/PBI-ID.xml]">PBI Title</pbi>
+            </included_pbis>
+            <pre_deployment_checklist>
+              <check name="Release branch created">false</check>
+              <check name="CHANGELOG generated and validated">false</check>
+              <check name="Version bumped in package.json">false</check>
+              <check name="All tests passed on release branch">false</check>
+              <check name="Production build created successfully">false</check>
+              <check name="Git tag created and pushed">false</check>
+              <check name="Stakeholders notified of release" optional="true">false</check>
+            </pre_deployment_checklist>
+          </content>
+        </release_report>
+      </artefact_template>
+      <example>
+        <release_report version="1.2.0" status="preparing">
+          <metadata>
+            <start_date>2025-07-08</start_date>
+          </metadata>
+          <content>
+            <release_objective>Deliver the credit card payment feature and fix performance bugs on the dashboard.</release_objective>
+            <included_pbis>
+              <pbi ref="../../00-pbi/PBI-42-DONE.xml">Credit card payment</pbi>
+              <pbi ref="../../00-pbi/PBI-45-DONE.xml">Dashboard optimization</pbi>
+            </included_pbis>
+            <pre_deployment_checklist>
+              <check name="Release branch created">true</check>
+              <check name="CHANGELOG generated and validated">true</check>
+              <check name="Version bumped in package.json">true</check>
+              <check name="All tests passed on release branch">true</check>
+              <check name="Production build created successfully">true</check>
+              <check name="Git tag created and pushed">false</check>
+              <check name="Stakeholders notified of release" optional="true">false</check>
+            </pre_deployment_checklist>
+          </content>
+        </release_report>
+      </example>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
+  <section title="Release Procedure">
+    <flight_plan required="true" name="RELEASE_FLIGHT_PLAN">
+      <objective>Create a stable and deployable version of the application.</objective>
+      <actions>
+        <item>Read `.aklo.conf` for versioning conventions.</item>
+        <item>Determine the next version number (major/minor/patch).</item>
+        <item>Create the `RELEASE-[version]-PREPARING.xml` report.</item>
+        <item>Create a release branch (if configured).</item>
+        <item>Update version files (package.json, etc.).</item>
+        <item>Generate CHANGELOG.xml based on completed PBIs.</item>
+        <item>Run the full test suite.</item>
+        <item>Create and validate the production build.</item>
+        <item>Create the annotated Git tag and deploy.</item>
+        <item optional="true">Notify stakeholders.</item>
+      </actions>
+      <affected_files>
+        <file type="lifecycle">/docs/backlog/07-releases/RELEASE-[version].xml</file>
+        <file type="update">CHANGELOG.xml</file>
+        <file type="update">package.json</file>
+        <file type="creation">Production build artifacts.</file>
+      </affected_files>
+      <system_commands>
+        <command optional="true">`aklo release &lt;major|minor|patch&gt;`</command>
+        <command>`git checkout -b release/[version]`</command>
+        <command>Full test suite execution (unit, integration, e2e).</command>
+        <command>Production build scripts.</command>
+        <command>`git tag -a v[version]`</command>
+      </system_commands>
+      <required_validation>YES - Explicit approval required before starting the release process.</required_validation>
+    </flight_plan>
 
-Coordonner et automatiser les étapes nécessaires pour transformer une série de `commits` validés en une version logicielle officielle, documentée et prête pour le déploiement.
+    <step number="1" type="analysis" title="Configuration Reading and Version Proposal">
+      <action>Read versioning conventions from `.aklo.conf`. Determine the next version number based on the defined scheme.</action>
+      <awaiting_validation>Propose the version number to the Human_Developer for approval.</awaiting_validation>
+    </step>
+    <step number="2" type="procedure" title="Preparation">
+      <action>Create the `RELEASE-[version]-PREPARING.xml` report. If configured, create a release branch. Otherwise, all actions occur on the main development branch. Update the version in project files (e.g., `package.json`) and generate a draft `CHANGELOG.xml`.</action>
+      <automation optional="true">`aklo release &lt;major|minor|patch&gt;`</automation>
+    </step>
+    <step number="3" type="validation" title="Content Validation">
+      <awaiting_validation>Submit the proposed `CHANGELOG.xml` to the Human_Developer for validation.</awaiting_validation>
+    </step>
+    <step number="4" type="procedure" title="Technical Validation and Build">
+      <action>Run the entire test suite on the working branch. If all tests pass, run the production build script.</action>
+    </step>
+    <step number="5" type="procedure" title="Atomic Commit Preparation">
+      <action>Finalize the release report, setting its status to `AWAITING_DEPLOYMENT`. Update the journal with the release process summary. Stage all modified files for the final atomic commit.</action>
+    </step>
+    <step number="6" type="validation" title="Atomic Commit Validation">
+      <awaiting_validation>Present the complete release diff to the Human_Developer for explicit validation.</awaiting_validation>
+    </step>
+    <step number="7" type="conclusion" title="Finalization and Tagging">
+      <action>Create the atomic release commit. If configured, merge into the production branch. Create an annotated Git tag and push the tag and branches to the remote repository.</action>
+    </step>
+    <step number="8" type="procedure" title="Post-Release Notification" optional="true">
+        <action>Notify relevant stakeholders (e.g., via Slack, email) about the new release, including a link to the `CHANGELOG.xml`.</action>
+    </step>
+  </section>
 
-### 1.2. Livrables Attendus
-
-1.  **Rapport de Release :** Un fichier `RELEASE-[version].xml` créé dans `/docs/backlog/07-releases/`.
-2.  **Journal des Modifications :** Le fichier `CHANGELOG.xml` à la racine du projet, mis à jour avec les changements de la nouvelle version.
-3.  **Tag Git :** Un tag Git sémantique et annoté (ex: `v1.2.0`).
-4.  **Build de Production :** Un artefact de build prêt pour le déploiement (ex: un conteneur Docker, une archive `.zip`).
-
-## SECTION 2 : ARTEFACT RELEASE - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `RELEASE-[version]-[Status].xml`
-    -   `[version]` : Le numéro de version sémantique (ex: `1.2.0`).
-    -   `[Status]` : Le statut du processus de release.
-
-### 2.2. Statuts
-
--   `PREPARING` : La collecte des informations et la création de la branche de release sont en cours.
--   `AWAITING_DEPLOYMENT` : La version a été buildée, tagguée et est prête pour le déploiement final.
--   `SHIPPED` : La version a été déployée en production.
-
-### 2.3. Structure Obligatoire du Fichier Release
-
-```markdown
-# RAPPORT DE RELEASE : v[version]
----
-**Date de Début:** YYYY-MM-DD
-**Date de Fin:** YYYY-MM-DD
----
-
-## 1. Objectif de la Release
-
-*Brève description du but de cette version. Ex: "Livrer la fonctionnalité de paiement par carte et corriger les bugs de performance sur le dashboard."*
-
-## 2. PBI Inclus dans cette Version
-
-*Liste des PBI (avec liens) qui ont été complétés depuis la dernière release et qui sont inclus ici. Cette liste sert de base pour générer le CHANGELOG.*
-- [PBI-42](../../00-pbi/PBI-42-DONE.xml): Paiement par carte
-- [PBI-45](../../00-pbi/PBI-45-DONE.xml): Optimisation du dashboard
-
-## 3. Checklist de Pré-déploiement
-
-- [ ] La branche `release/vX.X.X` a été créée depuis `main` (ou `develop`).
-- [ ] Le `CHANGELOG.xml` a été généré et validé.
-- [ ] La version dans `package.json` a été mise à jour.
-- [ ] Tous les tests (unitaires, intégration, end-to-end) passent sur la branche de release.
-- [ ] Le build de production a été créé avec succès.
-- [ ] Le tag Git `vX.X.X` a été créé et poussé.
-```
-
-## SECTION 3 : PROCÉDURE DE RELEASE
-
-**🛫 PLAN DE VOL RELEASE (Obligatoire avant Phase 1)**
-
-Avant toute procédure de release, l'agent **doit** présenter un plan détaillé :
-
-**[PLAN_DE_VOL_RELEASE]**
-**Objectif :** Créer une version stable et déployable de l'application
-**Actions prévues :**
-1. Lecture de la configuration `.aklo.conf` pour conventions de versioning
-2. Détermination du prochain numéro de version (major/minor/patch)
-3. Création du rapport `RELEASE-[version]-PREPARING.xml` dans `/docs/backlog/07-releases/`
-4. Création de branche de release (si configuré) ou travail sur branche principale
-5. Mise à jour des fichiers de version (package.json, etc.)
-6. Génération du CHANGELOG.xml basé sur les PBI complétés
-7. Exécution complète de la suite de tests
-8. Build de production et validation
-9. Création du tag Git annoté et déploiement
-
-**Fichiers affectés :**
-- `/docs/backlog/07-releases/RELEASE-[version]-PREPARING.xml` → `AWAITING_DEPLOYMENT` → `SHIPPED`
-- `CHANGELOG.xml` : mise à jour avec nouvelles fonctionnalités
-- `package.json` (ou équivalent) : mise à jour version
-- Possibles fichiers de configuration de build
-- Artefacts de build de production
-
-**Commandes système :**
-- `aklo release <major|minor|patch>` : automatisation release (optionnel)
-- `git checkout -b release/[version]` : création branche release (si configuré)
-- Exécution suite complète de tests (unitaires, intégration, e2e)
-- Scripts de build de production selon stack technique
-- `git tag -a v[version]` : création tag annoté
-- Commandes de déploiement selon infrastructure
-
-**Outils MCP utilisés :**
-- `mcp_desktop-commander_read_file` : lire configuration .aklo.conf
-- `mcp_desktop-commander_write_file` : créer rapport et CHANGELOG
-- `mcp_desktop-commander_edit_block` : mettre à jour fichiers de version
-- `mcp_desktop-commander_execute_command` : tests, build, git, déploiement
-- `mcp_aklo-terminal_aklo_execute` : commandes aklo (si utilisées)
-
-**Validation requise :** ✅ OUI - Attente approbation explicite avant release
-
-1.  **[ANALYSE] Phase 1 : Lecture de la Configuration**
-    -   Lire et charger en mémoire les conventions depuis `.aklo.conf`.
-    -   Déterminer le prochain numéro de version en se basant sur le **Schéma de version** défini.
-    -   [ATTENTE_VALIDATION] Proposer le numéro de version au `Human_Developer` pour approbation.
-
-2.  **[PROCEDURE] Phase 2 : Préparation**
-    - **Action Requise :**
-        -   Sur décision du `Human_Developer`, créer le rapport `RELEASE-[version]-PREPARING.xml`.
-        -   **Si** `Utilisation de branches de release: Oui`, créer une branche en utilisant le **Format des branches de release** (ex: `release/1.2.0`) depuis la **Branche de développement principale**.
-        -   **Sinon**, toutes les actions se feront directement sur la **Branche de développement principale**.
-        -   Mettre à jour la version dans les fichiers projet (`package.json`, etc.).
-        -   Générer une proposition de `CHANGELOG.xml`.
-    - **⚡ Automatisation `aklo` :** `aklo release <major|minor|patch>`
-
-3.  **[ATTENTE_VALIDATION] Phase 3 : Validation du Contenu**
-    -   Soumettre le `CHANGELOG.xml` proposé pour validation au `Human_Developer`.
-
-4.  **[PROCEDURE] Phase 4 : Validation Technique et Build**
-    -   Lancer l'intégralité de la suite de tests sur la branche de travail.
-    -   Si tous les tests sont au vert, lancer le script de build de production.
-
-5.  **[PROCEDURE] Phase 5 : Préparation du Commit Atomique**
-    -   Finaliser le rapport de release au statut `AWAITING_DEPLOYMENT`.
-    -   Mettre à jour le journal avec le processus de release.
-    -   Préparer tous les fichiers pour le commit atomique final.
-
-6.  **[ATTENTE_VALIDATION] Phase 6 : Validation du Commit Atomique**
-    -   Présenter le diff complet de la release au `Human_Developer`.
-    -   Attendre validation explicite avant le commit final.
-
-7.  **[CONCLUSION] Phase 7 : Finalisation et Tagging**
-    -   Créer le commit atomique de release.
-    -   Si configuré, fusionner dans la **Branche de production**.
-    -   Créer un tag Git annoté en respectant le **Format du tag Git** défini.
-    -   Pousser le tag et les branches sur le dépôt distant.
-
-## SECTION 4 : COMMIT ATOMIQUE DE RELEASE
-
-### 4.1. Principe du Commit Unique
-
-**Règle Fondamentale :** Une release produit un unique commit atomique qui inclut :
-
-1. **Rapport de release finalisé** : `RELEASE-[version]-AWAITING_DEPLOYMENT.xml`
-2. **CHANGELOG.xml mis à jour** : Avec toutes les nouvelles fonctionnalités
-3. **Version mise à jour** : Dans `package.json` ou fichiers équivalents
-4. **Mise à jour du journal** : Documentation du processus de release
-
-### 4.2. Workflow Séquentiel Sans Commits Intermédiaires
-
-**Principe :** Toutes les modifications sont préparées en local, validées ensemble, puis commitées atomiquement.
-
-**Séquence :**
-1. **Préparation locale :** Rapport + CHANGELOG + version (pas de commit)
-2. **Validation technique :** Tests + build (pas de commit)
-3. **Validation humaine :** Diff complet présenté au `Human_Developer`
-4. **Commit atomique :** Après validation explicite
-5. **Tagging :** Tag Git créé sur le commit atomique
-
-### 4.3. Contenu du Commit
-
-**Message de commit type :**
-```
+  <section title="Atomic Release Commit">
+    <sub_section title="Single Commit Principle">
+      <rule>A release produces a single atomic commit that includes:</rule>
+      <composition>
+        <item>The finalized `RELEASE-[version]-AWAITING_DEPLOYMENT.xml` report.</item>
+        <item>The updated `CHANGELOG.xml`.</item>
+        <item>The updated version in `package.json` or equivalent files.</item>
+        <item>The journal update.</item>
+      </composition>
+    </sub_section>
+    <sub_section title="Commit Content">
+      <commit_message_template><![CDATA[
 release: Version [version]
 
-[Résumé des principales fonctionnalités de cette version]
+[Summary of the main features in this release.]
 
-- Rapport RELEASE-[version] finalisé
-- CHANGELOG.xml mis à jour avec [N] nouvelles fonctionnalités
-- Version mise à jour : [ancienne] → [nouvelle]
-- Journal mis à jour avec le processus de release
-- Tous les tests passent, build de production validé
+- Finalized RELEASE-[version] report.
+- Updated CHANGELOG.xml with [N] new features.
+- Version bumped: [old] -> [new].
+- Journal updated with the release process.
+- All tests pass, production build validated.
 
 Features included:
 - [Feature 1]
 - [Feature 2]
 - [...]
 
-Breaking changes: [None|Liste des breaking changes]
-```
-
-### 4.4. Gestion des Rollbacks
-
-**Règle :** En cas de problème détecté après release, utiliser le protocole HOTFIX plutôt que de modifier le commit de release.
-
-**Traçabilité :** Le commit de release reste inchangé pour préserver l'historique, les corrections sont apportées par des commits séparés.
+Breaking changes: [None | List of breaking changes]
+      ]]></commit_message_template>
+    </sub_section>
+    <sub_section title="Rollback Management">
+      <rule>If a problem is detected after the release, use the [HOTFIX] protocol rather than modifying the release commit. The release commit remains unchanged to preserve history.</rule>
+      <see_also protocol="10-HOTFIX" description="Use for post-release critical bug fixes." />
+    </sub_section>
+    <sub_section title="Example Journal Entry">
+      <example_journal_entry>
+        <entry timestamp="2025-07-08T15:00:00Z">
+          <source protocol="release_management" />
+          <message>Release v1.2.0 successfully created and tagged. Awaiting deployment.</message>
+          <details>
+            <version>1.2.0</version>
+            <changelog_ref>CHANGELOG.xml</changelog_ref>
+            <commit_ref>[commit_hash]</commit_ref>
+          </details>
+        </entry>
+      </example_journal_entry>
+    </sub_section>
+  </section>
+</protocol>

@@ -1,100 +1,100 @@
----
-created: 2025-06-28 12:57
-modified: 2025-06-28 13:00
----
-# PROTOCOLE SPÉCIFIQUE : SCRATCHPAD (BROUILLON DE RÉFLEXION)
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="scratchpad_reflection_draft">
+  <description>
+    This protocol is activated for temporary explorations that require a brainstorming or pseudo-coding phase, while remaining completely outside of the versioning system.
+  </description>
 
-Ce protocole s'active pour les explorations temporaires qui nécessitent une phase de brainstorming ou de pseudo-codage, en restant complètement hors du système de versioning.
+  <section title="Mission and Out-of-Versioning Status">
+    <sub_section title="Mission">
+      <introduction>
+        To provide a temporary and unstructured workspace to explore solutions, compare approaches, and clarify complex ideas before formalizing them in an official artifact (Task, ARCH, etc.).
+      </introduction>
+    </sub_section>
+    <sub_section title="Out-of-Versioning Status">
+        <rule name="Fundamental Principle">Scratchpads are excluded from Git versioning to avoid polluting the repository with temporary files.</rule>
+        <implementation>
+            <item>The path `docs/backlog/16-scratchpads/` must be added to the `.gitignore` file.</item>
+            <item>No commit should ever include scratchpad files.</item>
+            <item>Storage is local only for the duration of the exploration.</item>
+        </implementation>
+    </sub_section>
+    <sub_section title="Deliverable">
+      <deliverable type="temporary_draft_file">A `SCRATCHPAD-[ID].xml` file created in `/docs/backlog/16-scratchpads/`, considered disposable and non-versioned.</deliverable>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET STATUT HORS VERSIONING
+  <section title="Scratchpad Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>SCRATCHPAD-[ID].xml</format>
+      <details>
+        <detail name="id">A unique identifier generated from the title and date (e.g., `explore-caching-strategy-20250707`).</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Lifecycle and Statuses">
+      <list>
+        <item name="active">The draft is being used for active reflection.</item>
+        <item name="archived">The reflection has led to a solution formalized in another artifact. The draft is kept for historical reference.</item>
+        <item name="discarded">The exploration did not lead to a conclusion or is no longer relevant.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Retention Management">
+        <rule name="Minimum duration">Mandatory retention for 6 months.</rule>
+        <rule name="Deletion">Only upon explicit validation from the Human_Developer.</rule>
+        <rule name="Automatic cleanup">None - deletion is always manual.</rule>
+    </sub_section>
+    <sub_section title="Recommended (Flexible) Structure">
+      <artefact_template format="xml">
+        <scratchpad id="[id]" status="active">
+          <metadata>
+            <responsible>[Human_Developer's or AI_Agent's Name]</responsible>
+            <context>Exploration for [TASK-XX] / Reflection from [JOURNAL-YYYY-MM-DD]</context>
+            <note>This file is a temporary draft and must NEVER be committed to Git. Its existence and conclusions are traced in the daily Journal.</note>
+          </metadata>
+          <content>
+            <problem_to_solve>
+              Reformulation of the problem in my own words to ensure I have understood it correctly.
+            </problem_to_solve>
+            <brainstorming_and_exploration>
+              </brainstorming_and_exploration>
+            <exploration_conclusion>
+              <decision>The chosen solution resulting from this reflection.</decision>
+              <next_action>The concrete next step to be taken.</next_action>
+            </exploration_conclusion>
+          </content>
+        </scratchpad>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
+  <section title="Scratchpad Usage Procedure">
+    <step number="1" type="procedure" title="Initialization">
+      <action>When a Task or a reflection in the [JOURNAL] proves complex, create a new `SCRATCHPAD-[ID]-ACTIVE.xml` file. Create an entry in the [JOURNAL] to indicate the start of the exploration and link to the Scratchpad. Fill in the Scratchpad's header and the "Problem to Solve" section.</action>
+      <automation optional="true">`aklo scratch "[Exploration Title]"`</automation>
+    </step>
+    <step number="2" type="procedure" title="Free-form Exploration">
+      <action>Use the file as a workspace to iterate on ideas, pseudo-code, and comparative analyses. The content is free-form and should serve the reflection process.</action>
+    </step>
+    <step number="3" type="conclusion" title="Closure">
+      <action>Once a clear solution emerges, document it in the "Exploration Conclusion". Formalize the result by updating the relevant `Task`, creating a new `ARCHITECTURE` document, or taking any other necessary formal action. Create an entry in the [JOURNAL] to summarize the decision and link to the Scratchpad's conclusion. Change the Scratchpad's status to `ARCHIVED` or, with the Human_Developer's agreement, to `DISCARDED`.</action>
+    </step>
+  </section>
 
-Fournir un espace de travail temporaire et non structuré pour explorer des solutions, comparer des approches et clarifier des idées complexes avant de les formaliser dans un artefact officiel (`Task`, `ARCH`, etc.).
-
-### 1.2. Statut Hors Versioning
-
-**Principe Fondamental :** Les scratchpads sont **exclus du versioning Git** pour éviter la pollution du dépôt avec des fichiers temporaires.
-
-**Implémentation :**
-- Ajout automatique au `.gitignore` : `docs/backlog/16-scratchpads/`
-- Aucun commit ne doit inclure des fichiers scratchpad
-- Stockage local uniquement pendant la durée d'exploration
-
-### 1.3. Livrable
-
-**Fichier Brouillon Temporaire :** Un fichier `SCRATCHPAD-[ID].xml` créé dans `/docs/backlog/16-scratchpads/`, considéré comme jetable et non versionné.
-
-## SECTION 2 : ARTEFACT SCRATCHPAD - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `SCRATCHPAD-[ID].xml`
-    -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-
-### 2.2. Statuts et Cycle de Vie
-
--   `ACTIVE` : Le brouillon est en cours d'utilisation pour une réflexion active.
--   `ARCHIVED` : La réflexion a abouti à une solution formalisée dans un autre artefact. Le brouillon est conservé pour référence historique.
--   `DISCARDED` : L'exploration n'a pas abouti ou n'est plus pertinente.
-
-### 2.3. Gestion de la Rétention
-
-**Règles de rétention :**
-- **Durée minimale :** 6 mois de conservation obligatoire
-- **Suppression :** Uniquement sur validation explicite du `Human_Developer`
-- **Nettoyage automatique :** Aucun - la suppression est toujours manuelle
-- **Archivage :** Possibilité de déplacer vers un dossier d'archive local (hors Git)
-
-### 2.3. Structure Recommandée (Flexible)
-
-Un `Scratchpad` est libre par nature. La structure suivante est une suggestion, pas une obligation.
-
-```markdown
-# SCRATCHPAD : [ID]
----
-**Responsable:** [Nom du Human_Developer / AI_Agent]
-**Statut:** [ACTIVE | ARCHIVED | DISCARDED]
-**Contexte:** Exploration pour la [TASK-XX] / Réflexion du [JOURNAL-AAAA-MM-DD]
----
-
-## 1. Problème à Résoudre
-
-*Reformulation du problème avec mes propres mots pour m'assurer que je l'ai bien compris.*
-
-## 2. Brainstorming / Exploration
-
-*(Contenu libre : listes à puces, pseudo-code, schémas en ASCII, comparaison d'options, etc.)*
-
-### Approche A : ...
-- **Avantages :** ...
-- **Inconvénients :** ...
-
-### Approche B : ...
-- **Avantages :** ...
-- **Inconvénients :** ...
-
-## 3. Conclusion de l'Exploration
-
-*Quelle est la solution retenue suite à cette réflexion ? Quelle est la prochaine étape concrète ?*
-- **Décision :** L'approche B est la plus prometteuse.
-- **Action Suivante :** Mettre à jour la [TASK-XX] avec un plan d'action détaillé basé sur cette approche.
-````
-
-## SECTION 3 : PROCÉDURE D'UTILISATION DU SCRATCHPAD
-
-1.  **[PROCEDURE] Phase 1 : Initialisation**
-      - Lorsqu'une `Task` ou une réflexion dans le [JOURNAL] s'avère complexe
-      - **Action Requise :** Créer un nouveau fichier `SCRATCHPAD-[ID]-ACTIVE.xml` dans `/docs/backlog/16-scratchpads/`.
-      - **⚡ Automatisation `aklo` :** `aklo scratch "<Titre de la dépréciation>"`
-      - Créer une entrée dans le [JOURNAL] pour indiquer le début de l'exploration et lier le `Scratchpad`.
-      - Remplir l'en-tête du `Scratchpad` et la section "Problème à Résoudre".
-
-2.  **[PROCEDURE] Phase 2 : Exploration Libre**
-      - Utiliser le fichier comme un espace de travail pour itérer sur des idées, du pseudo-code, et des analyses comparatives. Le contenu est libre et doit servir la réflexion.
-
-3.  **[CONCLUSION] Phase 3 : Clôture**
-      - Une fois qu'une solution claire émerge de l'exploration, la documenter dans la "Conclusion de l'Exploration".
-      - **Formaliser le résultat :** Mettre à jour la `Task` concernée, créer un nouveau document [ARCHITECTURE], ou toute autre action formelle nécessaire.
-      - Créer une entrée dans le [JOURNAL] pour résumer la décision et lier la conclusion du `Scratchpad`.
-      - Passer le statut du `Scratchpad` à `ARCHIVED` ou, avec l'accord du `Human_Developer`, à `DISCARDED`.
+  <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-07T11:00:00Z">
+          <source protocol="development" />
+          <message type="analysis">Task TASK-112-5 is more complex than anticipated. Starting a reflection session.</message>
+          <details>
+              <artefact_ref ref="/docs/backlog/16-scratchpads/SCRATCHPAD-explore-algorithm-for-task-112.xml">Created a scratchpad to explore algorithmic options.</artefact_ref>
+          </details>
+        </entry>
+        <entry timestamp="2025-07-07T12:30:00Z">
+          <source protocol="scratchpad_reflection_draft" />
+          <message type="decision">Conclusion reached in scratchpad. Decision: Proceed with Collaborative Filtering approach.</message>
+           <details>
+              <artefact_ref ref="/docs/backlog/01-tasks/TASK-112-5.xml">Updating the Task with the detailed implementation plan.</artefact_ref>
+          </details>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>

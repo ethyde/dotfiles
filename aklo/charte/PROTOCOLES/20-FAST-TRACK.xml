@@ -1,59 +1,84 @@
----
-created: 2025-06-28 14:14
-modified: 2025-06-28 14:22
----
-# PROTOCOLE SPÉCIFIQUE : FAST-TRACK (PROCÉDURE ACCÉLÉRÉE)
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="fast_track_procedure">
+   <description>
+      This protocol is activated at the discretion of the Human_Developer for minor, low-risk
+      modifications that do not justify the full PBI -&gt; TASK cycle.
+   </description>
 
-Ce protocole s'active à la discrétion du `Human_Developer` pour des modifications mineures, à faible risque, qui ne justifient pas le cycle complet `PBI -> TASK`.
+   <section title="mission_and_deliverables">
+      <sub_section title="mission">
+         <introduction>
+            To quickly implement a minor modification (e.g., typo correction, CSS style adjustment,
+            configuration change) while maintaining full traceability.
+         </introduction>
+      </sub_section>
+      <sub_section title="expected_deliverables">
+         <list>
+            <item>
+               <strong>Fast-Track Artefact:</strong> A single `FAST-[ID]-[Status].xml` file created
+               in `/docs/backlog/17-fast-track/`.
+            </item>
+            <item>
+               <strong>Correction Commit:</strong> A single semantic commit directly linked to the
+               Fast-Track artefact.
+            </item>
+         </list>
+      </sub_section>
+   </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
-
-### 1.1. Mission
-
-Implémenter rapidement une modification mineure (ex: correction de faute de frappe, ajustement de style CSS, modification de configuration) tout en conservant une traçabilité complète.
-
-### 1.2. Livrables Attendus
-
-1.  **Artefact Fast-Track :** Un unique fichier `FAST-[ID].xml` créé dans `/docs/backlog/17-fast-track/`.
-2.  **Commit de Correction :** Un unique `commit` sémantique directement lié à l'artefact Fast-Track.
-
-## SECTION 2 : ARTEFACT FAST-TRACK - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `FAST-[ID]-[Status].xml`
-    -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    -   `[Status]` : Le statut de la tâche.
-
-### 2.2. Statuts
-
--   `TODO` : La tâche est définie et prête à être exécutée.
--   `DONE` : Le `diff` a été validé et le `commit` a été créé.
-
-### 2.3. Structure Obligatoire du Fichier Fast-Track
-
-````markdown
-# RAPPORT FAST-TRACK : [ID]
----
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [TODO | DONE]
-**Commit Associé:** [Sera rempli à la fin avec le hash du commit]
----
-
-## 1. Contexte et Justification
-
-- **Origine de la demande :** (Ex: "Ticket utilisateur #512", "Observation lors de la revue du PBI-42", "Demande orale pour une démo")
-- **Justification du Fast-Track :** (Pourquoi ce n'est pas une `Task` normale ? Ex: "Correction de texte sans impact sur la logique métier", "Ajustement de style visuel uniquement")
-
-## 2. Description du Changement
-
-*Description claire et concise de la modification à effectuer. Qu'est-ce qui doit être changé et quel est le résultat attendu ?*
-
-## 3. Plan d'Action et Diff Proposé
-
-*Diff complet de la solution proposée. Doit inclure tous les changements de code.*
-
-```diff
+   <section title="fast_track_artefact_management_and_structure">
+      <sub_section title="naming">
+         <format>FAST-[ID]-[Status].xml</format>
+         <details>
+            <detail name="ID">
+               A unique identifier generated from the title and date (e.g.,
+               `subject-description-20250707`).
+            </detail>
+            <detail name="Status">The status of the task.</detail>
+         </details>
+      </sub_section>
+      <sub_section title="statuses">
+         <list>
+            <item name="TODO">The task is defined and ready to be executed.</item>
+            <item name="DONE">The diff has been validated and the commit has been created.</item>
+         </list>
+      </sub_section>
+      <sub_section title="mandatory_fast_track_artefact_structure">
+         <artefact_template format="xml">
+            <fast_track_report id="[ID]">
+               <note>
+                  <strong>Reminder:</strong> This Fast-Track protocol should only be used for
+                  minor, low-risk modifications. For any substantial features or changes, please
+                  follow the standard PBI protocol.
+               </note>
+               <metadata>
+                  <responsible>[Human_Developer Name]</responsible>
+                  <status>[TODO | DONE]</status>
+                  <associated_commit>
+                     [To be filled at the end with the commit hash]
+                  </associated_commit>
+               </metadata>
+               <content>
+                  <context_and_justification>
+                     <origin>
+                        (e.g., "User ticket #512", "Observation during review of PBI-42", "Oral
+                        request for a demo")
+                     </origin>
+                     <justification>
+                        (Why is this not a normal `Task`? e.g., "Text correction with no impact on
+                        business logic", "Visual style adjustment only")
+                     </justification>
+                  </context_and_justification>
+                  <change_description>
+                     Clear and concise description of the change to be made. What needs to be
+                     changed and what is the expected result?
+                  </change_description>
+                  <action_plan_and_proposed_diff>
+                     <description>
+                        Complete diff of the proposed solution. Must include all code changes.
+                     </description>
+                     <diff>
+                        <![CDATA[
 --- a/src/components/Header.js
 +++ b/src/components/Header.js
 @@ -10,7 +10,7 @@
@@ -65,34 +90,55 @@ Implémenter rapidement une modification mineure (ex: correction de faute de fra
      </header>
    );
  }
-```
+]]>
+                     </diff>
+                  </action_plan_and_proposed_diff>
+                  <validation_checklist>
+                     <criterion state="todo">
+                        The change has been manually tested in a development environment.
+                     </criterion>
+                     <criterion state="todo">
+                        The change introduces no linter or compilation errors.
+                     </criterion>
+                     <criterion state="todo" optional="true">
+                        The most relevant non-regression test was executed successfully.
+                     </criterion>
+                  </validation_checklist>
+               </content>
+            </fast_track_report>
+         </artefact_template>
+      </sub_section>
+   </section>
 
-## 4. Checklist de Validation Minimale
-
-  - [ ] Le changement a été testé manuellement dans un environnement de développement.
-  - [ ] Le changement n'introduit aucune erreur de linter ou de compilation.
-  - [ ] (Si applicable) Le test de non-régression le plus pertinent a été exécuté avec succès.
-````
-
-## SECTION 3 : PROCÉDURE FAST-TRACK
-
-1.  **[PROCEDURE] Phase 1 : Initialisation par le Human\_Developer**
-      - **Action Requise :**  Créer un fichier `FAST-[ID]-TODO.xml` dans `/docs/backlog/17-fast-track/`.
-      - **⚡ Automatisation `aklo` :** `aklo fast "<Titre de la tâche>"`
-      - Remplir la section "Description du Besoin".
-      - Créer une branche de travail (ex: `fast/fix-typo-homepage`).
-
-2.  **[PROCEDURE] Phase 2 : Implémentation par l'AI\_Agent**
-
-      - Implémenter la correction demandée.
-      - Remplir la section "Plan d'Action et Diff Proposé" avec le `diff` complet des modifications.
-
-3.  **[ATTENTE\_VALIDATION] Phase 3 : Validation**
-
-      - Soumettre l'artefact `FAST-[ID]-TODO.xml` complété pour validation au `Human_Developer`.
-
-4.  **[CONCLUSION] Phase 4 : Finalisation**
-
-      - Une fois le `diff` approuvé, le `Human_Developer` ou l'`AI_Agent` via un outil (`The Aklo Protocol`) crée le `commit` sémantique (ex: `fix(ui): correct typo in homepage title`).
-      - Mettre à jour le statut de l'artefact à `DONE`.
-      - Fusionner la branche.
+   <section title="fast_track_procedure">
+      <step number="1" type="procedure" title="initialization_by_the_human_developer">
+         <required_action>
+            Create a `FAST-[ID]-TODO.xml` file in `/docs/backlog/17-fast-track/`.
+         </required_action>
+         <automation command="aklo fast &quot;[Task title]&quot;"/>
+         <description>
+            Fill in the "Context and Justification" and "Description of Change" sections. Create a
+            working branch (e.g., `fast/fix-typo-homepage`).
+         </description>
+      </step>
+      <step number="2" type="procedure" title="implementation_by_the_ai_agent">
+         <description>
+            Implement the requested correction. Fill the "Action Plan and Proposed Diff" section
+            with the complete diff of the modifications.
+         </description>
+      </step>
+      <step number="3" type="awaiting_validation" title="validation">
+         <description>
+            Submit the completed `FAST-[ID]-TODO.xml` artefact for validation to the
+            `Human_Developer`.
+         </description>
+      </step>
+      <step number="4" type="conclusion" title="finalization">
+         <description>
+            Once the diff is approved, the `Human_Developer` or the `AI_Agent` via a tool (The Aklo
+            Protocol) creates the semantic commit (e.g., `fix(ui): correct typo in homepage title`).
+            Update the artefact's status to `DONE` and fill in the commit hash. Merge the branch.
+         </description>
+      </step>
+   </section>
+</protocol>

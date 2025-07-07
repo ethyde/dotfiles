@@ -1,89 +1,113 @@
----
-created: 2025-06-28 11:57
-modified: 2025-06-28 12:05
----
-# PROTOCOLE SPÉCIFIQUE : PLAN DE TRACKING
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="tracking_plan">
+  <description>
+    This protocol is activated before the development of a feature that requires collecting new data (analytics, logs, performance) to ensure that the collected data is consistent, useful, and well-defined.
+  </description>
 
-Ce protocole s'active avant le développement d'une fonctionnalité nécessitant la collecte de nouvelles données (analytique, logs, performance) pour s'assurer que les données collectées sont cohérentes, utiles et bien définies.
+  <section title="Mission and Deliverable">
+    <sub_section title="Mission">
+      <introduction>
+        To define in a structured and intentional way the events, logs, and metrics to be collected for a given feature, specifying their purpose, structure, and destination.
+      </introduction>
+    </sub_section>
+    <sub_section title="Expected Deliverable">
+      <deliverable type="report">
+        A `TRACKING-PLAN-[ID].xml` file created in `/docs/backlog/13-tracking/`, serving as the source of truth for the tracking implementation.
+      </deliverable>
+    </sub_section>
+  </section>
 
-## SECTION 1 : MISSION ET LIVRABLE
+  <section title="Tracking Plan Artefact Management and Structure">
+    <sub_section title="Naming Convention">
+      <format>TRACKING-PLAN-[ID]-[Status].xml</format>
+      <details>
+        <detail name="id">The ID of the related PBI or feature.</detail>
+        <detail name="status">The status of the plan.</detail>
+      </details>
+    </sub_section>
+    <sub_section title="Statuses">
+      <list>
+        <item name="draft">The plan definition is in progress.</item>
+        <item name="awaiting_implementation">The plan is validated and ready to be integrated into development Tasks.</item>
+        <item name="implemented">The tracking plan has been implemented in production.</item>
+      </list>
+    </sub_section>
+    <sub_section title="Mandatory Artefact Structure">
+      <artefact_template format="xml">
+        <tracking_plan id="[id]" status="draft">
+          <metadata>
+            <responsible>[Human_Developer's Name]</responsible>
+            <related_feature ref="[Link to PBI or Task]" />
+            <tools>
+              <tool name="[e.g., Google Analytics, Sentry, Datadog]" />
+            </tools>
+          </metadata>
+          <content>
+            <collection_objectives>
+              <objective type="Product Analysis">To understand the adoption rate of the new feature.</objective>
+              <objective type="Observability">To monitor the performance of the associated API.</objective>
+              <note>The objectives for data collection must be explicitly validated by the Human_Developer to ensure alignment with business and product goals.</note>
+            </collection_objectives>
+            <data_dictionary>
+              <category name="User Events (Analytics)">
+                <user_event name="feature_x_enabled">
+                  <trigger>The user enables feature X.</trigger>
+                  <properties>{ "source": "settings_page" }</properties>
+                  <destination>Google Analytics, Mixpanel</destination>
+                </user_event>
+              </category>
+              <category name="Performance Metrics (Observability)">
+                <performance_metric name="api_feature_x_response_time_ms">
+                  <description>Measures the API latency for feature X.</description>
+                  <type>Timing (milliseconds)</type>
+                  <destination>Datadog, Prometheus</destination>
+                </performance_metric>
+              </category>
+              <category name="Technical Logs (Debugging)">
+                <technical_log name="feature_x_calculation_failed">
+                  <level>ERROR</level>
+                  <context_to_include>{ "userId": "...", "reasonForFailure": "..." }</context_to_include>
+                  <destination>Sentry, ELK Stack</destination>
+                </technical_log>
+              </category>
+            </data_dictionary>
+          </content>
+        </tracking_plan>
+      </artefact_template>
+    </sub_section>
+  </section>
 
-### 1.1. Mission
+  <section title="Tracking Plan Creation Procedure">
+    <step number="1" type="analysis" title="Defining Objectives">
+      <action>When a PBI requires new data collection, create a `TRACKING-PLAN-[ID]-DRAFT.xml` file. Fill in the header and the "Collection Objectives" section in collaboration with the Human_Developer.</action>
+      <automation optional="true">`aklo track [PBI_or_Task_ID]`</automation>
+    </step>
+    <step number="2" type="procedure" title="Defining Events and Metrics">
+      <action>For each objective, list the specific events, metrics, or logs to be collected. Fill in the "Data Dictionary" in detail.</action>
+    </step>
+    <step number="3" type="validation" title="Plan Validation">
+      <awaiting_validation>Submit the complete tracking plan to the Human_Developer for validation. This is a critical step to ensure the collected data will be useful and correctly structured.</awaiting_validation>
+    </step>
+    <step number="4" type="conclusion" title="Integration into Development">
+      <action>Once the plan is validated, change the status to `AWAITING_IMPLEMENTATION`. The content of this plan must be used to create or enrich development Tasks. Each event or metric to be implemented should become a sub-part of a Task.</action>
+      <see_also protocol="01-PLANNING" description="This plan serves as a requirement for the Planning protocol."/>
+    </step>
+  </section>
 
-Définir de manière structurée et intentionnelle les événements, logs et métriques à collecter pour une fonctionnalité donnée, en précisant leur but, leur structure et leur destination.
-
-### 1.2. Livrable Attendu
-
-1.  **Plan de Tracking :** Un fichier `TRACKING-PLAN-[ID].xml` créé dans `/docs/backlog/13-tracking/`, servant de source de vérité pour l'implémentation du tracking.
-
-## SECTION 2 : ARTEFACT TRACKING-PLAN - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `TRACKING-PLAN-[ID]-[Status].xml`
-    -   `[ID]` : L'ID du `PBI` ou de la fonctionnalité concernée.
-    -   `[Status]` : Le statut du plan.
-
-### 2.2. Statuts
-
--   `DRAFT` : La définition du plan est en cours.
--   `AWAITING_IMPLEMENTATION` : Le plan est validé et prêt à être intégré dans les `Tasks` de développement.
--   `IMPLEMENTED` : Le plan de tracking a été implémenté en production.
-
-### 2.3. Structure Obligatoire du Fichier de Tracking
-
-```markdown
-# PLAN DE TRACKING : [ID]
----
-**Responsable:** [Nom du Human_Developer]
-**Statut:** [DRAFT | AWAITING_IMPLEMENTATION | IMPLEMENTED]
-**Fonctionnalité Concernée:** [Lien vers le PBI ou la Task concernée]
-**Outils Concernés:** [Ex: Google Analytics, Sentry, Datadog]
----
-
-## 1. Objectifs de la Collecte
-
-*Pourquoi collectons-nous ces données ? Quel problème cherchons-nous à résoudre ou quelle question cherchons-nous à éclaircir ?*
-- **Objectif A (Analyse Produit) :** Comprendre le taux d'adoption de la nouvelle feature.
-- **Objectif B (Observabilité) :** Surveiller la performance de l'API associée.
-- **Objectif C (Débogage) :** Enregistrer les erreurs potentielles dans le nouveau flux.
-
-## 2. Dictionnaire des Événements et Métriques
-
-### Catégorie : Événements Utilisateur (Analytics)
-- **Événement :** `feature_x_enabled`
-  - **Déclencheur :** L'utilisateur active la fonctionnalité X.
-  - **Propriétés :** `{ "source": "settings_page" }`
-  - **Destination :** [Ex: Google Analytics, Mixpanel]
-
-### Catégorie : Métriques de Performance (Observability)
-- **Métrique :** `api_feature_x_response_time_ms`
-  - **Description :** Mesure la latence de l'API pour la fonctionnalité X.
-  - **Type :** Timing (millisecondes).
-  - **Destination :** [Ex: Datadog, Prometheus]
-
-### Catégorie : Logs Techniques (Debugging)
-- **Log :** `feature_x_calculation_failed`
-  - **Niveau :** `ERROR`
-  - **Contexte à inclure :** `{ "userId": "...", "reasonForFailure": "..." }`
-  - **Destination :** [Ex: Sentry, ELK Stack]
-```
-
-## SECTION 3 : PROCÉDURE DE CRÉATION D'UN PLAN DE TRACKING
-
-1.  **[ANALYSE] Phase 1 : Définition des Objectifs**
-      - Lors de la phase de [PLANIFICATION] d'un `PBI`, si de nouvelles données doivent être collectées, 
-      **Action Requise :** Créer un fichier `TRACKING-PLAN-[ID]-DRAFT.xml`, où [ID] est celui du PBI ou de la Task concernée, dans `/docs/backlog/13-tracking/`.
-      - **⚡ Automatisation `aklo` :** `aklo track <ID_du_PBI_ou_Task>`
-      - Remplir l'en-tête et la section "Objectifs de la Collecte" en collaboration avec le `Human_Developer`.
-
-2.  **[PROCEDURE] Phase 2 : Définition des Événements et Métriques**
-      - Pour chaque objectif, lister les événements, métriques ou logs spécifiques à collecter.
-      - Remplir le "Dictionnaire des Événements et Métriques" de manière détaillée.
-
-3.  **[ATTENTE_VALIDATION] Phase 3 : Validation du Plan**
-      - Soumettre le plan de tracking complet pour validation au `Human_Developer`. C'est une étape critique pour s'assurer que les données collectées seront utiles et correctement structurées.
-
-4.  **[CONCLUSION] Phase 4 : Intégration au Développement**
-      - Une fois le plan validé, passer le statut à `AWAITING_IMPLEMENTATION`.
-      - Le contenu de ce plan doit être utilisé pour créer ou enrichir les `Tasks` de développement dans le protocole [PLANIFICATION]. Chaque événement ou métrique à implémenter doit devenir une sous-partie d'une `Task`.
+  <section title="Example Journal Entries">
+      <example_journal_entry>
+        <entry timestamp="2025-07-07T18:00:00Z">
+          <source protocol="tracking_plan" />
+          <message type="info">Creating new tracking plan `TRACKING-PLAN-PBI-125-DRAFT.xml` for profile picture feature.</message>
+        </entry>
+        <entry timestamp="2025-07-07T18:30:00Z">
+          <source protocol="tracking_plan" />
+          <message type="validation_request">Tracking plan `TRACKING-PLAN-PBI-125` submitted for validation.</message>
+        </entry>
+        <entry timestamp="2025-07-07T18:45:00Z">
+          <source protocol="tracking_plan" />
+          <message type="info">Tracking plan `TRACKING-PLAN-PBI-125` has been approved. Status is now `AWAITING_IMPLEMENTATION`.</message>
+        </entry>
+      </example_journal_entry>
+    </section>
+</protocol>
