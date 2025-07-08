@@ -1,29 +1,22 @@
-# TASK-13-3 : Création des profils adaptatifs de performance
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-13](../00-pbi/PBI-13-PROPOSED.xml)
-**Revue Architecturale Requise:** Non
-**Document d'Architecture (si applicable):** N/A
-**Assigné à:** `AI_Agent`
-**Branche Git:** `feature/task-13-3`
-
----
-
-## 1. Objectif Technique
-
-Implémenter les trois profils de performance adaptatifs (MINIMAL, NORMAL, FULL) avec configuration automatique et possibilité de override manuel via variables d'environnement.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- Nouveau fichier : `aklo/modules/core/performance_profiles.sh`
-- `aklo/config/.aklo.conf` : Configuration des profils
-
-**Profils identifiés par diagnostic :**
-```bash
+<task pbi_id="13" task_id="3" status="done" title="Création des profils adaptatifs de performance">
+  <metadata>
+    <parent_pbi>PBI-13</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee>AI_Agent</assignee>
+    <git_branch>feature/task-13-3</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Implémenter les trois profils de performance adaptatifs (MINIMAL, NORMAL, FULL) avec configuration automatique et possibilité de override manuel via variables d'environnement.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>Nouveau fichier : aklo/modules/core/performance_profiles.sh</li>
+        <li>aklo/config/.aklo.conf : Configuration des profils</li>
+      </ul>
+      Profils identifiés par diagnostic :
+      <code language="bash"><![CDATA[
 # MINIMAL: Commandes de configuration rapides
 MODULES=("core/basic_functions")
 TARGET_TIME="<0.050s"
@@ -35,26 +28,28 @@ TARGET_TIME="<0.200s"
 # FULL: Commandes d'optimisation et monitoring
 MODULES=("all_modules")
 TARGET_TIME="<1.000s"
-```
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Créer le module `performance_profiles.sh`** avec définition des profils
-2. **Implémenter `get_profile_config()`** qui retourne la config d'un profil
-3. **Créer `detect_optimal_profile()`** basé sur la commande et le contexte
-4. **Implémenter `apply_profile()`** qui configure l'environnement selon le profil
-5. **Ajouter support override** via `AKLO_PROFILE` environment variable
-6. **Créer `validate_profile()`** pour vérifier la cohérence des configurations
-7. **Implémenter `get_profile_metrics()`** pour monitoring des performances
-8. **Ajouter configuration** dans `.aklo.conf` avec profils par défaut
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Module `performance_profiles.sh` créé avec 3 profils
-- [x] Configuration automatique du profil optimal fonctionnelle
-- [x] Override manuel via `AKLO_PROFILE` implémenté
-- [x] Validation et métriques de profils intégrées
-- [x] Configuration `.aklo.conf` étendue pour les profils
-- [x] Tests unitaires pour chaque profil
-- [x] Documentation complète des profils et de leur usage
-- [x] Temps cibles respectés pour chaque profil
+      ]]></code>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Implémenter les profils, la détection, l'override, la validation, les métriques et la documentation.</description>
+      <step number="1">Créer le module <file>performance_profiles.sh</file> avec définition des profils</step>
+      <step number="2">Implémenter <code>get_profile_config()</code> qui retourne la config d'un profil</step>
+      <step number="3">Créer <code>detect_optimal_profile()</code> basé sur la commande et le contexte</step>
+      <step number="4">Implémenter <code>apply_profile()</code> qui configure l'environnement selon le profil</step>
+      <step number="5">Ajouter support override via <code>AKLO_PROFILE</code> environment variable</step>
+      <step number="6">Créer <code>validate_profile()</code> pour vérifier la cohérence des configurations</step>
+      <step number="7">Implémenter <code>get_profile_metrics()</code> pour monitoring des performances</step>
+      <step number="8">Ajouter configuration dans <file>.aklo.conf</file> avec profils par défaut</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Module <file>performance_profiles.sh</file> créé avec 3 profils</criterion>
+      <criterion state="done">Configuration automatique du profil optimal fonctionnelle</criterion>
+      <criterion state="done">Override manuel via <code>AKLO_PROFILE</code> implémenté</criterion>
+      <criterion state="done">Validation et métriques de profils intégrées</criterion>
+      <criterion state="done">Configuration <file>.aklo.conf</file> étendue pour les profils</criterion>
+      <criterion state="done">Tests unitaires pour chaque profil</criterion>
+      <criterion state="done">Documentation complète des profils et de leur usage</criterion>
+      <criterion state="done">Temps cibles respectés pour chaque profil</criterion>
+    </definition_of_done>
+  </content>
+</task>

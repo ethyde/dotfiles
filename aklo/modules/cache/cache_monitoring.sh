@@ -5,7 +5,7 @@
 
 # Configuration cache par défaut
 CACHE_ENABLED="${CACHE_ENABLED:-true}"
-CACHE_DIR="${CACHE_DIR:-/tmp/aklo_cache}"
+CACHE_DIR="${AKLO_CACHE_DIR:-${CACHE_DIR:-/tmp/aklo_cache}}"
 CACHE_MAX_SIZE_MB="${CACHE_MAX_SIZE_MB:-100}"
 CACHE_TTL_DAYS="${CACHE_TTL_DAYS:-7}"
 CACHE_CLEANUP_ON_START="${CACHE_CLEANUP_ON_START:-true}"
@@ -57,7 +57,8 @@ get_cache_config() {
             CACHE_DEBUG=$(grep "^CACHE_DEBUG=" "$config_file" | cut -d'=' -f2) 2>/dev/null || true
         fi
     fi
-    
+    # Priorité à la variable d'environnement AKLO_CACHE_DIR
+    CACHE_DIR="${AKLO_CACHE_DIR:-${CACHE_DIR:-/tmp/aklo_cache}}"
     # Mettre à jour le fichier de métriques
     CACHE_METRICS_FILE="${CACHE_DIR}/cache_metrics.json"
 }
@@ -244,7 +245,7 @@ clear_cache() {
     fi
     
     echo "🗑️  Vidage du cache..."
-    rm -f "$CACHE_DIR"/*.parsed 2>/dev/null || true
+    find "$CACHE_DIR" -type f -name "*.parsed" -exec rm -f {} + 2>/dev/null || true
     rm -f "$CACHE_METRICS_FILE" 2>/dev/null || true
     
     echo "✅ Cache vidé ($files_count fichiers supprimés)"
@@ -278,6 +279,7 @@ benchmark_cache() {
     fi
     local end_time=$(date +%s%N)
     local duration_miss=$((($end_time - $start_time) / 1000000))
+    log_cache_event "MISS" "Cache miss: ${duration_miss}ms"
     
     # Test 2: Cache hit (deuxième fois)
     echo "🟢 Test cache hit..."
@@ -285,6 +287,7 @@ benchmark_cache() {
     parse_and_generate_artefact "00-PRODUCT-OWNER" "PBI" "full" "/tmp/benchmark_hit.xml" "" >/dev/null 2>&1
     end_time=$(date +%s%N)
     local duration_hit=$((($end_time - $start_time) / 1000000))
+    log_cache_event "HIT" "Cache hit: ${duration_hit}ms"
     
     # Calculer le gain
     local gain=$((duration_miss - duration_hit))
@@ -292,12 +295,7 @@ benchmark_cache() {
     if [ $duration_miss -gt 0 ]; then
         gain_percent=$((gain * 100 / duration_miss))
     fi
-    
-    echo ""
-    echo "📊 Résultats:"
-    echo "  Cache miss: ${duration_miss}ms"
-    echo "  Cache hit:  ${duration_hit}ms"
-    echo "  Gain:       ${gain}ms (${gain_percent}%)"
+    log_cache_event "GAIN" "Gain: ${gain}ms (${gain_percent}%)"
     
     if [ $gain -gt 0 ]; then
         echo "✅ Cache efficace !"

@@ -1,30 +1,24 @@
-# TASK-13-1 : Détection et classification des commandes par profil de performance
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-13](../00-pbi/PBI-13-PROPOSED.xml)
-**Revue Architecturale Requise:** Oui
-**Document d'Architecture (si applicable):** [ARCH-13-1.xml](../02-arch/ARCH-13-1.xml)
-**Assigné à:** `AI_Agent`
-**Branche Git:** `feature/task-13-1`
-
----
-
-## 1. Objectif Technique
-
-Créer un système de classification automatique des commandes aklo avec apprentissage intelligent pour les nouvelles commandes, permettant de déterminer le profil de chargement optimal (minimal/normal/full) sans intervention manuelle.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- `aklo/bin/aklo` : Script principal avec logique de commandes
-- Nouveau fichier : `aklo/modules/core/command_classifier.sh`
-- Nouveau fichier : `aklo/modules/core/learning_engine.sh`
-
-**Commandes identifiées par diagnostic :**
-```bash
+<task pbi_id="13" task_id="1" status="done" title="Détection et classification des commandes par profil de performance">
+  <metadata>
+    <parent_pbi>PBI-13</parent_pbi>
+    <arch_review_required>yes</arch_review_required>
+    <architecture_document>ARCH-13-1.xml</architecture_document>
+    <assignee>AI_Agent</assignee>
+    <git_branch>feature/task-13-1</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Créer un système de classification automatique des commandes aklo avec apprentissage intelligent pour les nouvelles commandes, permettant de déterminer le profil de chargement optimal (minimal/normal/full) sans intervention manuelle.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>aklo/bin/aklo : Script principal avec logique de commandes</li>
+        <li>Nouveau fichier : aklo/modules/core/command_classifier.sh</li>
+        <li>Nouveau fichier : aklo/modules/core/learning_engine.sh</li>
+      </ul>
+      Commandes identifiées par diagnostic :
+      <code language="bash"><![CDATA[
 # Profil MINIMAL (core)
 get_config, status, version, help
 
@@ -36,34 +30,35 @@ optimize, benchmark, cache, monitor, diagnose
 
 # Profil AUTO (apprentissage automatique)
 [nouvelles commandes détectées automatiquement]
-```
-
-**Architecture cible selon ARCH-13-1 :**
-Classification automatique avec apprentissage intelligent des nouvelles commandes et comportement unifié MCP/CLI.
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Créer le module de classification** `aklo/modules/core/command_classifier.sh`
-2. **Implémenter `classify_command()`** avec apprentissage automatique pour nouvelles commandes
-3. **Créer le module d'apprentissage** `aklo/modules/core/learning_engine.sh`
-4. **Définir les constantes de profils** MINIMAL, NORMAL, FULL, AUTO avec leurs modules
-5. **Créer `get_required_modules()`** qui liste les modules nécessaires pour un profil
-6. **Implémenter `detect_command_from_args()`** pour analyser les arguments CLI
-7. **Ajouter la base de données d'apprentissage** pour stocker les patterns d'usage
-8. **Implémenter l'algorithme d'apprentissage** pour classifier automatiquement les nouvelles commandes
-9. **Créer des tests unitaires** pour valider la classification et l'apprentissage
-10. **Documenter la logique** de classification automatique et les critères de profils
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Module `command_classifier.sh` créé et fonctionnel
-- [x] Module `learning_engine.sh` créé avec apprentissage automatique
-- [x] Fonction `classify_command()` implémentée avec 4 profils (MINIMAL, NORMAL, FULL, AUTO)
-- [x] Classification correcte de toutes les commandes aklo existantes
-- [x] Système d'apprentissage automatique pour nouvelles commandes
-- [x] Base de données d'apprentissage fonctionnelle
-- [x] Algorithme de classification automatique opérationnel
-- [x] Tests unitaires écrits et passent avec succès
-- [x] Documentation complète des profils et de l'apprentissage automatique
-- [x] Code respecte les standards bash et les conventions aklo
-- [x] Aucune régression sur les commandes existantes
+      ]]></code>
+      Architecture cible selon ARCH-13-1 :
+      <p>Classification automatique avec apprentissage intelligent des nouvelles commandes et comportement unifié MCP/CLI.</p>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Implémenter la classification, l'apprentissage, les tests et la documentation.</description>
+      <step number="1">Créer le module de classification <file>aklo/modules/core/command_classifier.sh</file></step>
+      <step number="2">Implémenter <code>classify_command()</code> avec apprentissage automatique pour nouvelles commandes</step>
+      <step number="3">Créer le module d'apprentissage <file>aklo/modules/core/learning_engine.sh</file></step>
+      <step number="4">Définir les constantes de profils MINIMAL, NORMAL, FULL, AUTO avec leurs modules</step>
+      <step number="5">Créer <code>get_required_modules()</code> qui liste les modules nécessaires pour un profil</step>
+      <step number="6">Implémenter <code>detect_command_from_args()</code> pour analyser les arguments CLI</step>
+      <step number="7">Ajouter la base de données d'apprentissage pour stocker les patterns d'usage</step>
+      <step number="8">Implémenter l'algorithme d'apprentissage pour classifier automatiquement les nouvelles commandes</step>
+      <step number="9">Créer des tests unitaires pour valider la classification et l'apprentissage</step>
+      <step number="10">Documenter la logique de classification automatique et les critères de profils</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Module <file>command_classifier.sh</file> créé et fonctionnel</criterion>
+      <criterion state="done">Module <file>learning_engine.sh</file> créé avec apprentissage automatique</criterion>
+      <criterion state="done">Fonction <code>classify_command()</code> implémentée avec 4 profils (MINIMAL, NORMAL, FULL, AUTO)</criterion>
+      <criterion state="done">Classification correcte de toutes les commandes aklo existantes</criterion>
+      <criterion state="done">Système d'apprentissage automatique pour nouvelles commandes</criterion>
+      <criterion state="done">Base de données d'apprentissage fonctionnelle</criterion>
+      <criterion state="done">Algorithme de classification automatique opérationnel</criterion>
+      <criterion state="done">Tests unitaires écrits et passent avec succès</criterion>
+      <criterion state="done">Documentation complète des profils et de l'apprentissage automatique</criterion>
+      <criterion state="done">Code respecte les standards bash et les conventions aklo</criterion>
+      <criterion state="done">Aucune régression sur les commandes existantes</criterion>
+    </definition_of_done>
+  </content>
+</task>

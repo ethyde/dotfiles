@@ -1,55 +1,52 @@
-# TASK-7-4 : Système de monitoring et métriques I/O
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-7](../00-pbi/PBI-7-PROPOSED.xml)
-**Revue Architecturale Requise:** Oui
-**Document d'Architecture (si applicable):** [ARCH-7-1.xml](../02-arch/ARCH-7-1.xml)
-**Assigné à:** `eplouvie`
-**Branche Git:** `feature/task-7-4`
-**Statut:** `DONE`
-**Date de début:** `2025-01-28`
-**Date de fin:** `2025-01-28`
-
----
-
-## 1. Objectif Technique
-
-Créer un système de monitoring des opérations I/O pour identifier les goulots d'étranglement, mesurer les performances et fournir des métriques détaillées sur l'utilisation des optimisations.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- `aklo/bin/aklo_cache_monitoring.sh` : Monitoring existant du cache
-- `aklo/bin/aklo` : Intégration des métriques dans toutes les commandes
-- `aklo/config/.aklo.conf` : Configuration du monitoring
-
-**Métriques à collecter :**
-- Nombre et durée des opérations I/O
-- Hits/misses des caches (regex, IDs, batch)
-- Temps d'exécution des commandes
-- Utilisation mémoire des caches
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Étendre le système de monitoring existant** pour couvrir toutes les I/O
-2. **Créer `start_io_monitoring()`** pour initialiser le monitoring
-3. **Implémenter `track_io_operation()`** pour enregistrer chaque opération
-4. **Créer `generate_io_report()`** pour produire des rapports détaillés
-5. **Ajouter des seuils d'alerte** pour performances dégradées
-6. **Implémenter un dashboard** simple en mode texte
-7. **Créer des fonctions de nettoyage** des métriques anciennes
-8. **Intégrer avec la commande `aklo cache benchmark`**
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Système de monitoring I/O complet et fonctionnel ✅
-- [x] Métriques détaillées collectées pour toutes les opérations ✅
-- [x] Rapports de performance générés automatiquement ✅
-- [x] Dashboard textuel intégré à la commande cache ✅
-- [x] Seuils d'alerte configurables implémentés ✅
-- [x] Intégration avec le système de benchmark existant ✅
-- [x] Nettoyage automatique des métriques anciennes ✅
-- [x] Documentation complète du système de monitoring ✅
+<task pbi_id="7" task_id="4" status="done" title="Système de monitoring et métriques I/O">
+  <metadata>
+    <parent_pbi>PBI-7</parent_pbi>
+    <arch_review_required>yes</arch_review_required>
+    <architecture_document>ARCH-7-1.xml</architecture_document>
+    <assignee>eplouvie</assignee>
+    <git_branch>feature/task-7-4</git_branch>
+    <start_date>2025-01-28</start_date>
+    <end_date>2025-01-28</end_date>
+  </metadata>
+  <content>
+    <technical_objective>
+      Créer un système de monitoring des opérations I/O pour identifier les goulots d'étranglement, mesurer les performances et fournir des métriques détaillées sur l'utilisation des optimisations.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>aklo/bin/aklo_cache_monitoring.sh : Monitoring existant du cache</li>
+        <li>aklo/bin/aklo : Intégration des métriques dans toutes les commandes</li>
+        <li>aklo/config/.aklo.conf : Configuration du monitoring</li>
+      </ul>
+      Métriques à collecter :
+      <ul>
+        <li>Nombre et durée des opérations I/O</li>
+        <li>Hits/misses des caches (regex, IDs, batch)</li>
+        <li>Temps d'exécution des commandes</li>
+        <li>Utilisation mémoire des caches</li>
+      </ul>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Étendre le monitoring, collecter les métriques, générer des rapports et intégrer au dashboard.</description>
+      <step number="1">Étendre le système de monitoring existant pour couvrir toutes les I/O.</step>
+      <step number="2">Créer <code>start_io_monitoring()</code> pour initialiser le monitoring.</step>
+      <step number="3">Implémenter <code>track_io_operation()</code> pour enregistrer chaque opération.</step>
+      <step number="4">Créer <code>generate_io_report()</code> pour produire des rapports détaillés.</step>
+      <step number="5">Ajouter des seuils d'alerte pour performances dégradées.</step>
+      <step number="6">Implémenter un dashboard simple en mode texte.</step>
+      <step number="7">Créer des fonctions de nettoyage des métriques anciennes.</step>
+      <step number="8">Intégrer avec la commande <code>aklo cache benchmark</code>.</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Système de monitoring I/O complet et fonctionnel</criterion>
+      <criterion state="done">Métriques détaillées collectées pour toutes les opérations</criterion>
+      <criterion state="done">Rapports de performance générés automatiquement</criterion>
+      <criterion state="done">Dashboard textuel intégré à la commande cache</criterion>
+      <criterion state="done">Seuils d'alerte configurables implémentés</criterion>
+      <criterion state="done">Intégration avec le système de benchmark existant</criterion>
+      <criterion state="done">Nettoyage automatique des métriques anciennes</criterion>
+      <criterion state="done">Documentation complète du système de monitoring</criterion>
+    </definition_of_done>
+  </content>
+</task>

@@ -1,72 +1,58 @@
-# PBI-11 : Créer serveur MCP documentation shell natif étendu
-
-## 📋 Description
-
-Étendre le serveur MCP documentation shell natif pour qu'il offre toutes les fonctionnalités du serveur Node.js, incluant la validation d'artefacts et la recherche avancée.
-
-## 🎯 Objectif Métier
-
-- **Parité fonctionnelle** : Mêmes capacités que le serveur Node.js
-- **Performance** : Serveur léger et rapide
-- **Universalité** : Fonctionne sur tous les systèmes Unix
-- **Maintenance** : Code shell standard, facile à déboguer
-
-## 🔍 Analyse Actuelle
-
-### Serveur Shell Actuel (3 outils)
-- `read_protocol_shell` : Lecture protocoles basique
-- `list_protocols_shell` : Liste protocoles
-- `search_documentation_shell` : Recherche simple
-
-### Serveur Node.js (7 outils)
-- `read_protocol` : Lecture protocoles avec sections
-- `list_protocols` : Liste avec métadonnées
-- `search_documentation` : Recherche avec scope
-- `read_artefact` : Lecture artefacts avec métadonnées
-- `project_documentation_summary` : Résumé complet
-- `validate_artefact` : Validation selon protocoles
-- `server_info` : Informations serveur
-
-## 🎯 Fonctionnalités à Ajouter
-
-### 1. Lecture Artefacts (`read_artefact`)
-- Parsing des en-têtes d'artefacts
-- Extraction métadonnées (status, dates, owner)
-- Support tous types (PBI, TASK, DEBUG, etc.)
-- Validation format basique
-
-### 2. Validation Artefacts (`validate_artefact`)
-- Validation structure selon protocoles
-- Vérification champs obligatoires
-- Contrôle cohérence (dates, status, etc.)
-- Rapport de validation détaillé
-
-### 3. Résumé Documentation (`project_documentation_summary`)
-- Scan complet répertoire documentation
-- Comptage artefacts par type et status
-- Métriques projet (vélocité, qualité)
-- Génération rapport structuré
-
-### 4. Recherche Avancée
-- Recherche avec scope (protocols/artefacts/all)
-- Filtrage par type d'artefact
-- Recherche dans métadonnées
-- Résultats avec contexte
-
-## 🛠️ Approche Technique
-
-### Parsing Métadonnées Artefacts
-```bash
+<pbi id="11" title="Créer serveur MCP documentation shell natif étendu">
+  <metadata>
+    <status>PROPOSED</status>
+    <created_date>2025-01-28</created_date>
+    <owner>Documentation Team</owner>
+    <priority>HIGH</priority>
+    <effort_estimated>6</effort_estimated>
+  </metadata>
+  <content>
+    <user_story>
+      <role>En tant qu'utilisateur aklo</role>
+      <action>je veux un serveur MCP documentation shell natif offrant toutes les fonctionnalités du serveur Node.js</action>
+      <benefit>afin de bénéficier d'une validation d'artefacts et d'une recherche avancée sans dépendances Node.js</benefit>
+    </user_story>
+    <business_objectives>
+      <objective>Parité fonctionnelle : Mêmes capacités que le serveur Node.js</objective>
+      <objective>Performance : Serveur léger et rapide</objective>
+      <objective>Universalité : Fonctionne sur tous les systèmes Unix</objective>
+      <objective>Maintenance : Code shell standard, facile à déboguer</objective>
+    </business_objectives>
+    <current_analysis>
+      <shell_server_tools>
+        <tool>read_protocol_shell : Lecture protocoles basique</tool>
+        <tool>list_protocols_shell : Liste protocoles</tool>
+        <tool>search_documentation_shell : Recherche simple</tool>
+      </shell_server_tools>
+      <node_server_tools>
+        <tool>read_protocol : Lecture protocoles avec sections</tool>
+        <tool>list_protocols : Liste avec métadonnées</tool>
+        <tool>search_documentation : Recherche avec scope</tool>
+        <tool>read_artefact : Lecture artefacts avec métadonnées</tool>
+        <tool>project_documentation_summary : Résumé complet</tool>
+        <tool>validate_artefact : Validation selon protocoles</tool>
+        <tool>server_info : Informations serveur</tool>
+      </node_server_tools>
+    </current_analysis>
+    <features_to_add>
+      <feature>Lecture Artefacts (read_artefact) : Parsing en-têtes, extraction métadonnées, support tous types, validation format basique</feature>
+      <feature>Validation Artefacts (validate_artefact) : Validation structure selon protocoles, vérification champs obligatoires, contrôle cohérence, rapport détaillé</feature>
+      <feature>Résumé Documentation (project_documentation_summary) : Scan complet, comptage artefacts, métriques projet, génération rapport structuré</feature>
+      <feature>Recherche Avancée : Recherche avec scope, filtrage par type, recherche dans métadonnées, résultats avec contexte</feature>
+    </features_to_add>
+    <technical_approach>
+      <parsing_metadata>
+        <code language="bash"><![CDATA[
 extract_metadata() {
     local file="$1"
     # Extraction en-tête YAML/Markdown
     # Status, dates, owner, type
     # Validation format
 }
-```
-
-### Validation Protocoles
-```bash
+        ]]></code>
+      </parsing_metadata>
+      <validation_protocols>
+        <code language="bash"><![CDATA[
 validate_pbi() {
     # Vérification structure PBI
     # Champs obligatoires
@@ -78,10 +64,10 @@ validate_task() {
     # Lien PBI parent
     # Critères acceptation
 }
-```
-
-### Recherche Multi-Scope
-```bash
+        ]]></code>
+      </validation_protocols>
+      <search_multi_scope>
+        <code language="bash"><![CDATA[
 search_with_scope() {
     local query="$1"
     local scope="$2"  # protocols|artefacts|all
@@ -92,46 +78,20 @@ search_with_scope() {
         "all") search_all "$query" ;;
     esac
 }
-```
-
-### Génération Résumés
-```bash
+        ]]></code>
+      </search_multi_scope>
+      <generate_summary>
+        <code language="bash"><![CDATA[
 generate_project_summary() {
     # Scan docs/backlog/
     # Comptage par type/status
     # Métriques temporelles
     # Format JSON/Markdown
 }
-```
-
-## 📊 Critères d'Acceptation
-
-- [ ] 7 outils équivalents au serveur Node.js
-- [ ] Parsing métadonnées artefacts fonctionnel
-- [ ] Validation complète selon protocoles Aklo
-- [ ] Recherche avancée avec scopes
-- [ ] Génération résumés projet automatique
-- [ ] Performance équivalente ou supérieure
-- [ ] Tests complets pour tous les outils
-- [ ] Documentation mise à jour
-
-## 🔗 Dépendances
-
-- Accès aux protocoles Aklo (charte/)
-- Structure projet Aklo standard
-- Optionnel : `jq` pour JSON complexe
-
-## 📈 Impact Attendu
-
-- **Fonctionnalités** : +100% (parité Node.js)
-- **Performance** : +30% (pas d'overhead Node.js)
-- **Adoption** : +200% (0 dépendances)
-- **Maintenance** : +150% (shell standard)
-
-## 🔧 Implémentation Technique
-
-### Structure Serveur Étendu
-```bash
+        ]]></code>
+      </generate_summary>
+      <server_structure>
+        <code language="bash"><![CDATA[
 #!/bin/sh
 # Serveur MCP Documentation Aklo - Version Complète
 
@@ -147,15 +107,33 @@ handle_tool_call() {
         "server_info") handle_server_info ;;
     esac
 }
-```
-
-## 🗓️ Estimation
-
-**Complexité** : Moyenne-Haute (5-6 jours)
-**Priorité** : Haute (parité fonctionnelle)
-
----
-
-**Status** : PROPOSED
-**Created** : 2025-01-28
-**Owner** : Documentation Team
+        ]]></code>
+      </server_structure>
+    </technical_approach>
+    <acceptance_criteria>
+      <criterion state="todo">7 outils équivalents au serveur Node.js</criterion>
+      <criterion state="todo">Parsing métadonnées artefacts fonctionnel</criterion>
+      <criterion state="todo">Validation complète selon protocoles Aklo</criterion>
+      <criterion state="todo">Recherche avancée avec scopes</criterion>
+      <criterion state="todo">Génération résumés projet automatique</criterion>
+      <criterion state="todo">Performance équivalente ou supérieure</criterion>
+      <criterion state="todo">Tests complets pour tous les outils</criterion>
+      <criterion state="todo">Documentation mise à jour</criterion>
+    </acceptance_criteria>
+    <dependencies>
+      <dependency>Accès aux protocoles Aklo (charte/)</dependency>
+      <dependency>Structure projet Aklo standard</dependency>
+      <dependency>Optionnel : jq pour JSON complexe</dependency>
+    </dependencies>
+    <expected_impact>
+      <impact>Fonctionnalités : +100% (parité Node.js)</impact>
+      <impact>Performance : +30% (pas d'overhead Node.js)</impact>
+      <impact>Adoption : +200% (0 dépendances)</impact>
+      <impact>Maintenance : +150% (shell standard)</impact>
+    </expected_impact>
+    <estimation>
+      <complexity>Moyenne-Haute (5-6 jours)</complexity>
+      <priority>Haute (parité fonctionnelle)</priority>
+    </estimation>
+  </content>
+</pbi>

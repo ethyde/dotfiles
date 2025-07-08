@@ -61,8 +61,8 @@ test_aklo_propose_pbi_command() {
     local pbi_md_file
     pbi_md_file=$(ls ./pbi/PBI-*-My-Test-PBI.xml 2>/dev/null)
     if [ -n "$pbi_md_file" ]; then
-        assert_file_contains "$pbi_md_file" "Titre: My Test PBI" "Le PBI .xml doit contenir le bon titre"
-        assert_file_contains "$pbi_md_file" "Statut: PROPOSED" "Le PBI .xml doit avoir le statut PROPOSED"
+        assert_file_contains "$pbi_md_file" "<title>My Test PBI</title>" "Le PBI .xml doit contenir le bon titre (balise XML)"
+        assert_file_contains "$pbi_md_file" "<status>PROPOSED</status>" "Le PBI .xml doit avoir le statut PROPOSED (balise XML)"
     fi
     
     teardown_artefact_test_env

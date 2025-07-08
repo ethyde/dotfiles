@@ -1,38 +1,42 @@
-# PBI-12 : Ajouter commandes MCP étendues à aklo
-
-## 📋 Description
-
-Étendre la commande `aklo mcp` existante avec deux nouvelles sous-commandes pour améliorer l'expérience utilisateur et la gestion des serveurs MCP.
-
-## 🎯 Objectif Métier
-
-- **Simplicité** : Accès direct aux configurations MCP via aklo
-- **Flexibilité** : Support configuration simple et avancée
-- **Monitoring** : Visibilité sur l'état des serveurs MCP
-- **Cohérence** : Interface unifiée pour toutes les opérations MCP
-
-## 🔍 Analyse Actuelle
-
-### Commandes MCP Existantes
-- ✅ `aklo mcp setup` → `setup-mcp.sh`
-- ✅ `aklo mcp restart` → `restart-mcp.sh`
-- ✅ `aklo mcp watch` → `watch-mcp.sh`
-
-### Scripts MCP Disponibles Non Intégrés
-- `generate-config.sh` : Configuration simple et rapide
-- `generate-config-universal.sh` : Configuration multi-clients avec options
-- `aklo-mcp.sh status` : État détaillé des serveurs MCP
-
-## 🎯 Nouvelles Commandes à Ajouter
-
-### 1. `aklo mcp config` - Génération de Configuration
-
-**Comportement** :
-- **Sans arguments** : `generate-config.sh` (rapide et simple)
-- **Avec arguments** : `generate-config-universal.sh` avec arguments passés
-
-**Exemples d'usage** :
-```bash
+<pbi id="12" title="Ajouter commandes MCP étendues à aklo">
+  <metadata>
+    <status>PROPOSED</status>
+    <created_date>2025-01-28</created_date>
+    <owner>CLI Team</owner>
+    <priority>MEDIUM</priority>
+    <effort_estimated>2</effort_estimated>
+  </metadata>
+  <content>
+    <user_story>
+      <role>En tant qu'utilisateur aklo</role>
+      <action>je veux de nouvelles commandes MCP étendues dans aklo</action>
+      <benefit>afin d'améliorer l'expérience utilisateur et la gestion des serveurs MCP</benefit>
+    </user_story>
+    <business_objectives>
+      <objective>Simplicité : Accès direct aux configurations MCP via aklo</objective>
+      <objective>Flexibilité : Support configuration simple et avancée</objective>
+      <objective>Monitoring : Visibilité sur l'état des serveurs MCP</objective>
+      <objective>Cohérence : Interface unifiée pour toutes les opérations MCP</objective>
+    </business_objectives>
+    <current_analysis>
+      <existing_commands>
+        <item>aklo mcp setup → setup-mcp.sh</item>
+        <item>aklo mcp restart → restart-mcp.sh</item>
+        <item>aklo mcp watch → watch-mcp.sh</item>
+      </existing_commands>
+      <available_scripts>
+        <item>generate-config.sh : Configuration simple et rapide</item>
+        <item>generate-config-universal.sh : Configuration multi-clients avec options</item>
+        <item>aklo-mcp.sh status : État détaillé des serveurs MCP</item>
+      </available_scripts>
+    </current_analysis>
+    <features_to_add>
+      <feature>aklo mcp config : Génération de configuration (simple ou avancée selon arguments)</feature>
+      <feature>aklo mcp status : État détaillé des serveurs MCP avec métriques et diagnostics</feature>
+    </features_to_add>
+    <technical_approach>
+      <command_config>
+        <code language="bash"><![CDATA[
 # Configuration simple (JSON pur)
 aklo mcp config > ~/.cursor-mcp.json
 
@@ -47,36 +51,19 @@ aklo mcp config all
 
 # Aide
 aklo mcp config --help
-```
-
-### 2. `aklo mcp status` - État des Serveurs
-
-**Comportement** :
-- Appelle `aklo-mcp.sh status`
-- Affiche l'état détaillé des serveurs MCP
-- Inclut métriques et diagnostics
-
-**Exemples d'usage** :
-```bash
+        ]]></code>
+      </command_config>
+      <command_status>
+        <code language="bash"><![CDATA[
 # État des serveurs MCP
 aklo mcp status
 
 # État avec détails étendus (si supporté)
 aklo mcp status --detailed
-```
-
-## 🛠️ Implémentation Technique
-
-### Architecture Scripts MCP
-**Confirmation des dépendances** :
-- ✅ `setup-mcp.sh` → utilise `auto-detect.sh`
-- ✅ `install.sh`, `install-node.sh` → scripts d'assistance
-- ✅ Tous les scripts sont dans `modules/mcp/`
-
-### Modifications Requises
-
-#### 1. Mise à Jour `bin/aklo`
-```bash
+        ]]></code>
+      </command_status>
+      <bin_aklo_update>
+        <code language="bash"><![CDATA[
 # Dans command_mcp()
 case "$action" in
     "config")
@@ -95,48 +82,42 @@ case "$action" in
         ;;
     # ... autres commandes existantes
 esac
-```
-
-#### 2. Mise à Jour Documentation
-- Ajouter les nouvelles commandes dans le help
-- Mettre à jour README.xml avec exemples
-- Documenter les options avancées
-
-#### 3. Mise à Jour Chemins
-- Vérifier que tous les chemins pointent vers `modules/mcp/`
-- S'assurer que `aklo-mcp.sh` existe et fonctionne
-
-## 📊 Critères d'Acceptation
-
-- [ ] `aklo mcp config` sans arguments utilise `generate-config.sh`
-- [ ] `aklo mcp config <args>` utilise `generate-config-universal.sh`
-- [ ] `aklo mcp status` utilise `aklo-mcp.sh status`
-- [ ] Tous les arguments sont correctement passés
-- [ ] Messages d'aide mis à jour
-- [ ] Documentation README.xml mise à jour
-- [ ] Tests fonctionnels pour toutes les nouvelles commandes
-- [ ] Rétrocompatibilité préservée
-
-## 🔗 Dépendances
-
-- Scripts existants dans `modules/mcp/`
-- Vérification existence `aklo-mcp.sh`
-- Mise à jour chemins si nécessaire
-
-## 📈 Impact Attendu
-
-- **UX** : +200% (accès direct aux configs)
-- **Adoption** : +150% (simplicité d'usage)
-- **Efficacité** : +100% (moins de navigation manuelle)
-- **Cohérence** : +300% (interface unifiée)
-
-## 🗓️ Estimation
-
-**Complexité** : Faible (1-2 jours)
-**Priorité** : Moyenne (amélioration UX)
-
----
-
-**Status** : PROPOSED
-**Created** : 2025-01-28
-**Owner** : CLI Team
+        ]]></code>
+      </bin_aklo_update>
+      <doc_update>
+        <item>Ajouter les nouvelles commandes dans le help</item>
+        <item>Mettre à jour README.xml avec exemples</item>
+        <item>Documenter les options avancées</item>
+      </doc_update>
+      <path_update>
+        <item>Vérifier que tous les chemins pointent vers modules/mcp/</item>
+        <item>S'assurer que aklo-mcp.sh existe et fonctionne</item>
+      </path_update>
+    </technical_approach>
+    <acceptance_criteria>
+      <criterion state="todo">aklo mcp config sans arguments utilise generate-config.sh</criterion>
+      <criterion state="todo">aklo mcp config &lt;args&gt; utilise generate-config-universal.sh</criterion>
+      <criterion state="todo">aklo mcp status utilise aklo-mcp.sh status</criterion>
+      <criterion state="todo">Tous les arguments sont correctement passés</criterion>
+      <criterion state="todo">Messages d'aide mis à jour</criterion>
+      <criterion state="todo">Documentation README.xml mise à jour</criterion>
+      <criterion state="todo">Tests fonctionnels pour toutes les nouvelles commandes</criterion>
+      <criterion state="todo">Rétrocompatibilité préservée</criterion>
+    </acceptance_criteria>
+    <dependencies>
+      <dependency>Scripts existants dans modules/mcp/</dependency>
+      <dependency>Vérification existence aklo-mcp.sh</dependency>
+      <dependency>Mise à jour chemins si nécessaire</dependency>
+    </dependencies>
+    <expected_impact>
+      <impact>UX : +200% (accès direct aux configs)</impact>
+      <impact>Adoption : +150% (simplicité d'usage)</impact>
+      <impact>Efficacité : +100% (moins de navigation manuelle)</impact>
+      <impact>Cohérence : +300% (interface unifiée)</impact>
+    </expected_impact>
+    <estimation>
+      <complexity>Faible (1-2 jours)</complexity>
+      <priority>Moyenne (amélioration UX)</priority>
+    </estimation>
+  </content>
+</pbi>

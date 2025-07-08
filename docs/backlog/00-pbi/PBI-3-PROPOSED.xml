@@ -1,44 +1,48 @@
-# PBI-3 : Documentation technique MCP et guides d'intégration
-
----
-**Statut:** PROPOSED
-**Date de création:** 2025-01-27
-**Priorité:** MEDIUM
-**Effort estimé:** 5 points
----
-
-## 1. Description de la User Story
-
-_En tant que **développeur ou administrateur système**, je veux **une documentation technique complète des serveurs MCP aklo**, afin de **configurer, dépanner et étendre les intégrations MCP efficacement**._
-
-## 2. Critères d'Acceptation
-
-- [ ] **Guide d'installation MCP détaillé** : Procédures pour différents environnements
-- [ ] **Troubleshooting MCP** : Solutions aux erreurs de configuration courantes
-- [ ] **Configuration IDE** : Guides spécifiques Cursor, VSCode, autres éditeurs
-- [ ] **Documentation API MCP** : Référence complète des serveurs aklo-terminal et aklo-documentation
-- [ ] **Guide développement custom** : Création de nouveaux serveurs MCP
-- [ ] **Exemples d'intégration** : Cas d'usage avancés et personnalisations
-- [ ] **Optimisation performance** : Configuration pour gros projets
-- [ ] **Tests automatisés** : Validation des configurations MCP
-
-## 3. Spécifications Techniques Préliminaires & Contraintes
-
-**Architecture technique :**
-- Documentation API avec exemples de code
-- Scripts de validation automatique
-- Templates de configuration
-- Outils de diagnostic intégrés
-
-**Contraintes :**
-- Compatibilité multi-plateforme (macOS, Linux, Windows)
-- Versioning de la documentation avec les serveurs MCP
-- Tests d'intégration automatisés
-
-## 4. Documents d'Architecture Associés
-
-_À créer pour l'architecture de documentation technique._
-
-## 5. Tasks Associées
-
-_Cette section sera remplie par le protocole [PLANIFICATION]._
+<pbi id="3" title="Documentation technique MCP et guides d'intégration">
+  <metadata>
+    <status>PROPOSED</status>
+    <created_date>2025-01-27</created_date>
+    <priority>MEDIUM</priority>
+    <effort_estimated>5</effort_estimated>
+  </metadata>
+  <content>
+    <user_story>
+      <role>En tant que développeur ou administrateur système</role>
+      <action>je veux une documentation technique complète des serveurs MCP aklo</action>
+      <benefit>afin de configurer, dépanner et étendre les intégrations MCP efficacement</benefit>
+    </user_story>
+    <acceptance_criteria>
+      <criterion state="todo">Guide d'installation MCP détaillé : Procédures pour différents environnements</criterion>
+      <criterion state="todo">Troubleshooting MCP : Solutions aux erreurs de configuration courantes</criterion>
+      <criterion state="todo">Configuration IDE : Guides spécifiques Cursor, VSCode, autres éditeurs</criterion>
+      <criterion state="todo">Documentation API MCP : Référence complète des serveurs aklo-terminal et aklo-documentation</criterion>
+      <criterion state="todo">Guide développement custom : Création de nouveaux serveurs MCP</criterion>
+      <criterion state="todo">Exemples d'intégration : Cas d'usage avancés et personnalisations</criterion>
+      <criterion state="todo">Optimisation performance : Configuration pour gros projets</criterion>
+      <criterion state="todo">Tests automatisés : Validation des configurations MCP</criterion>
+    </acceptance_criteria>
+    <technical_specifications>
+      <description>
+        Architecture technique :
+        <ul>
+          <li>Documentation API avec exemples de code</li>
+          <li>Scripts de validation automatique</li>
+          <li>Templates de configuration</li>
+          <li>Outils de diagnostic intégrés</li>
+        </ul>
+        Contraintes :
+        <ul>
+          <li>Compatibilité multi-plateforme (macOS, Linux, Windows)</li>
+          <li>Versioning de la documentation avec les serveurs MCP</li>
+          <li>Tests d'intégration automatisés</li>
+        </ul>
+      </description>
+    </technical_specifications>
+    <architecture_documents>
+      <document optional="true">À créer pour l'architecture de documentation technique.</document>
+    </architecture_documents>
+    <associated_tasks>
+      <!-- À remplir par le protocole PLANIFICATION -->
+    </associated_tasks>
+  </content>
+</pbi>

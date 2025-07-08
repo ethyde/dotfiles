@@ -1,31 +1,30 @@
-# PBI-8 : Optimisation validation TDD incrémentale et parallélisation
-
----
-**Statut:** PROPOSED
-**Date de création:** 2025-01-27
-**Priorité:** HIGH
-**Effort estimé:** 7 points
----
-
-## 1. Description de la User Story
-
-_En tant que **développeur utilisant aklo**, je veux **une validation TDD optimisée avec traitement incrémental et parallèle**, afin de **réduire significativement les temps d'attente lors des validations de qualité**._
-
-## 2. Critères d'Acceptation
-
-- [ ] **Validation incrémentale** : Traitement uniquement des fichiers modifiés
-- [ ] **Parallélisation** : Lancer linter, tests, build en parallèle
-- [ ] **Cache de validation** : Éviter re-validation de fichiers inchangés
-- [ ] **Réduction 50-70%** des temps de validation sur gros projets
-- [ ] **Configuration granulaire** : Choix des validations par type de fichier
-- [ ] **Interruption intelligente** : Arrêt rapide en cas d'échec critique
-- [ ] **Rapports optimisés** : Affichage progressif des résultats
-- [ ] **Intégration Git** : Utilisation des hooks pour validation ciblée
-
-## 3. Spécifications Techniques Préliminaires & Contraintes
-
-**Optimisations prévues :**
-```bash
+<pbi id="8" title="Optimisation validation TDD incrémentale et parallélisation">
+  <metadata>
+    <status>PROPOSED</status>
+    <created_date>2025-01-27</created_date>
+    <priority>HIGH</priority>
+    <effort_estimated>7</effort_estimated>
+  </metadata>
+  <content>
+    <user_story>
+      <role>En tant que développeur utilisant aklo</role>
+      <action>je veux une validation TDD optimisée avec traitement incrémental et parallèle</action>
+      <benefit>afin de réduire significativement les temps d'attente lors des validations de qualité</benefit>
+    </user_story>
+    <acceptance_criteria>
+      <criterion state="todo">Validation incrémentale : Traitement uniquement des fichiers modifiés</criterion>
+      <criterion state="todo">Parallélisation : Lancer linter, tests, build en parallèle</criterion>
+      <criterion state="todo">Cache de validation : Éviter re-validation de fichiers inchangés</criterion>
+      <criterion state="todo">Réduction 50-70% des temps de validation sur gros projets</criterion>
+      <criterion state="todo">Configuration granulaire : Choix des validations par type de fichier</criterion>
+      <criterion state="todo">Interruption intelligente : Arrêt rapide en cas d'échec critique</criterion>
+      <criterion state="todo">Rapports optimisés : Affichage progressif des résultats</criterion>
+      <criterion state="todo">Intégration Git : Utilisation des hooks pour validation ciblée</criterion>
+    </acceptance_criteria>
+    <technical_specifications>
+      <description>
+        Optimisations prévues :
+        <code language="bash"><![CDATA[
 # Validation incrémentale
 validate_tdd_incremental() {
   local changed_files=$(git diff --name-only)
@@ -45,17 +44,20 @@ validate_with_cache() {
     VALIDATION_CACHE[$file]="$file_hash"
   fi
 }
-```
-
-**Contraintes :**
-- Compatibilité avec système de validation existant
-- Gestion des dépendances entre validations
-- Robustesse en cas d'interruption
-
-## 4. Documents d'Architecture Associés
-
-_À créer pour l'architecture de validation optimisée._
-
-## 5. Tasks Associées
-
-_Cette section sera remplie par le protocole [PLANIFICATION]._
+        ]]></code>
+        Contraintes :
+        <ul>
+          <li>Compatibilité avec système de validation existant</li>
+          <li>Gestion des dépendances entre validations</li>
+          <li>Robustesse en cas d'interruption</li>
+        </ul>
+      </description>
+    </technical_specifications>
+    <architecture_documents>
+      <document optional="true">À créer pour l'architecture de validation optimisée.</document>
+    </architecture_documents>
+    <associated_tasks>
+      <!-- À remplir par le protocole PLANIFICATION -->
+    </associated_tasks>
+  </content>
+</pbi>

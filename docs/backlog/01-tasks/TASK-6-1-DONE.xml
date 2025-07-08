@@ -1,29 +1,29 @@
-# TASK-6-1 : Infrastructure de base du système de cache
-
----
-**Statut:** DONE
-**Date de création:** 2025-01-27
-**PBI Parent:** PBI-6 - Cache intelligent du parser générique
-**Effort estimé:** 1 point
-**Branche:** feature/task-6-1
----
-
-## 1. Description Technique
-
-Créer l'infrastructure de base pour le système de cache du parser générique avec gestion des fichiers cache et validation des timestamps.
-
-## 2. Spécifications Détaillées
-
-### 2.1. Fonctions à implémenter
-
-```bash
+<task pbi_id="6" task_id="1" status="done" title="Infrastructure de base du système de cache">
+  <metadata>
+    <parent_pbi>PBI-6</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee></assignee>
+    <git_branch>feature/task-6-1</git_branch>
+    <creation_date>2025-01-27</creation_date>
+    <effort>1 point</effort>
+  </metadata>
+  <content>
+    <technical_objective>
+      Créer l'infrastructure de base pour le système de cache du parser générique avec gestion des fichiers cache et validation des timestamps.
+    </technical_objective>
+    <context_and_files>
+      Répertoire cache : <file>/tmp/aklo_cache/</file>
+      Format fichier : <file>protocol_[PROTOCOL_NAME]_[ARTEFACT_TYPE].parsed</file>
+      Fichier mtime : <file>[CACHE_FILE].mtime</file>
+      
+      Fonctions à implémenter :
+      <code language="bash"><![CDATA[
 # Fonction de validation cache
 cache_is_valid() {
   local cache_file="$1"
   local protocol_mtime="$2"
-  
-  [ -f "$cache_file" ] && 
-  [ -f "${cache_file}.mtime" ] && 
+  [ -f "$cache_file" ] && \
+  [ -f "${cache_file}.mtime" ] && \
   [ "$(cat "${cache_file}.mtime")" = "$protocol_mtime" ]
 }
 
@@ -38,29 +38,36 @@ cleanup_cache() {
   local cache_dir="/tmp/aklo_cache"
   find "$cache_dir" -name "*.parsed" -mtime +7 -delete
 }
-```
-
-### 2.2. Structure des fichiers cache
-
-- **Répertoire :** `/tmp/aklo_cache/`
-- **Format fichier :** `protocol_[PROTOCOL_NAME]_[ARTEFACT_TYPE].parsed`
-- **Fichier mtime :** `[CACHE_FILE].mtime`
-
-## 3. Definition of Done
-
-- [x] Fonction `cache_is_valid()` implémentée et testée
-- [x] Fonction `use_cached_structure()` implémentée et testée  
-- [x] Fonction `cleanup_cache()` implémentée et testée
-- [x] Création automatique du répertoire cache
-- [x] Tests unitaires couvrant tous les cas (cache valide/invalide/absent)
-- [x] Gestion des erreurs (permissions, espace disque)
-- [x] Documentation JSDoc complète
-- [x] Validation linter et typage
-- [x] Tests de non-régression passés
-
-## 4. Critères de Validation
-
-- **Performance :** Validation cache < 1ms
-- **Robustesse :** Gestion gracieuse des erreurs I/O
-- **Compatibilité :** Fonctionne sur macOS, Linux
-- **Tests :** Couverture 100% des fonctions cache de base
+      ]]></code>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Implémenter les fonctions de gestion du cache, valider leur fonctionnement, et documenter le code.</description>
+      <step number="1">Implémenter la fonction <code>cache_is_valid()</code> pour vérifier la validité du cache.</step>
+      <step number="2">Implémenter la fonction <code>use_cached_structure()</code> pour lire le cache.</step>
+      <step number="3">Implémenter la fonction <code>cleanup_cache()</code> pour nettoyer les caches obsolètes.</step>
+      <step number="4">Créer automatiquement le répertoire cache si absent.</step>
+      <step number="5">Écrire des tests unitaires couvrant tous les cas (cache valide/invalide/absent).</step>
+      <step number="6">Gérer les erreurs (permissions, espace disque).</step>
+      <step number="7">Documenter chaque fonction avec JSDoc.</step>
+      <step number="8">Valider le code avec le linter et le typage.</step>
+      <step number="9">Exécuter les tests de non-régression.</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Fonction <code>cache_is_valid()</code> implémentée et testée</criterion>
+      <criterion state="done">Fonction <code>use_cached_structure()</code> implémentée et testée</criterion>
+      <criterion state="done">Fonction <code>cleanup_cache()</code> implémentée et testée</criterion>
+      <criterion state="done">Création automatique du répertoire cache</criterion>
+      <criterion state="done">Tests unitaires couvrant tous les cas (cache valide/invalide/absent)</criterion>
+      <criterion state="done">Gestion des erreurs (permissions, espace disque)</criterion>
+      <criterion state="done">Documentation JSDoc complète</criterion>
+      <criterion state="done">Validation linter et typage</criterion>
+      <criterion state="done">Tests de non-régression passés</criterion>
+    </definition_of_done>
+    <validation_criteria>
+      <criterion>Performance : Validation cache &lt; 1ms</criterion>
+      <criterion>Robustesse : Gestion gracieuse des erreurs I/O</criterion>
+      <criterion>Compatibilité : Fonctionne sur macOS, Linux</criterion>
+      <criterion>Tests : Couverture 100% des fonctions cache de base</criterion>
+    </validation_criteria>
+  </content>
+</task>

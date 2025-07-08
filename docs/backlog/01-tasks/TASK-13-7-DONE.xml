@@ -1,35 +1,31 @@
-# TASK-13-7 : Système de métriques avancées et monitoring
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-13](../00-pbi/PBI-13-PROPOSED.xml)
-**Document d'Architecture:** [ARCH-13-1-VALIDATED.xml](../02-architecture/ARCH-13-1-VALIDATED.xml)
-**Assigné à:** `AI_Agent`
-**Branche Git:** `feature/task-13-7`
-
----
-
-## 1. Objectif Technique
-
-Développer un système de métriques avancées avec monitoring en temps réel pour tracer les performances du lazy loading, l'efficacité de l'apprentissage automatique et l'historique complet d'usage des profils.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- Nouveau fichier : `aklo/modules/core/metrics_engine.sh`
-- Nouveau fichier : `aklo/modules/core/monitoring_dashboard.sh`
-- Nouveau fichier : `aklo/data/metrics_history.db`
-
-**Architecture selon ARCH-13-1 :**
-- Métriques avancées de performance par profil
-- Monitoring en temps réel du lazy loading
-- Historique complet d'usage et d'apprentissage
-- Dashboard de monitoring des performances
-
-**Métriques requises :**
-```bash
+<task pbi_id="13" task_id="7" status="done" title="Système de métriques avancées et monitoring">
+  <metadata>
+    <parent_pbi>PBI-13</parent_pbi>
+    <arch_review_required>yes</arch_review_required>
+    <architecture_document>ARCH-13-1-VALIDATED.xml</architecture_document>
+    <assignee>AI_Agent</assignee>
+    <git_branch>feature/task-13-7</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Développer un système de métriques avancées avec monitoring en temps réel pour tracer les performances du lazy loading, l'efficacité de l'apprentissage automatique et l'historique complet d'usage des profils.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>Nouveau fichier : aklo/modules/core/metrics_engine.sh</li>
+        <li>Nouveau fichier : aklo/modules/core/monitoring_dashboard.sh</li>
+        <li>Nouveau fichier : aklo/data/metrics_history.db</li>
+      </ul>
+      Architecture selon ARCH-13-1 :
+      <ul>
+        <li>Métriques avancées de performance par profil</li>
+        <li>Monitoring en temps réel du lazy loading</li>
+        <li>Historique complet d'usage et d'apprentissage</li>
+        <li>Dashboard de monitoring des performances</li>
+      </ul>
+      Métriques requises :
+      <code language="bash"><![CDATA[
 # Métriques de performance
 - Temps de chargement par profil
 - Temps d'exécution par commande
@@ -41,34 +37,36 @@ Développer un système de métriques avancées avec monitoring en temps réel p
 - Évolution des patterns d'usage
 - Efficacité de l'apprentissage
 - Historique des décisions de classification
-```
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Créer le module `metrics_engine.sh`** avec collecte des métriques avancées
-2. **Créer le module `monitoring_dashboard.sh`** pour le monitoring temps réel
-3. **Implémenter `collect_loading_metrics()`** pour tracer le lazy loading
-4. **Créer `track_performance_metrics()`** pour mesurer les performances
-5. **Implémenter `monitor_learning_efficiency()`** pour tracer l'apprentissage
-6. **Créer `generate_usage_report()`** pour analyser l'historique d'usage
-7. **Implémenter `real_time_monitoring()`** pour le monitoring en temps réel
-8. **Créer `export_metrics_dashboard()`** pour visualiser les métriques
-9. **Ajouter la persistance** des métriques historiques
-10. **Créer des alertes** pour détecter les problèmes de performance
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Module `metrics_engine.sh` créé et fonctionnel
-- [x] Module `monitoring_dashboard.sh` créé avec monitoring temps réel
-- [x] Collecte des métriques avancées opérationnelle
-- [x] Métriques de performance du lazy loading tracées
-- [x] Métriques d'efficacité de l'apprentissage disponibles
-- [x] Historique complet d'usage persistant
-- [x] Dashboard de monitoring des performances fonctionnel
-- [x] Système d'alertes pour problèmes de performance
-- [x] Rapports d'analyse d'usage générés
-- [x] Monitoring temps réel opérationnel
-- [x] Tests unitaires écrits et passants
-- [x] Documentation complète du système de métriques
-- [x] Code respecte les standards bash et les conventions aklo
-- [x] Intégration transparente avec tous les modules core
+      ]]></code>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Implémenter le moteur de métriques, le dashboard, la collecte, le monitoring, la persistance, les alertes, les rapports et la documentation.</description>
+      <step number="1">Créer le module <file>metrics_engine.sh</file> avec collecte des métriques avancées</step>
+      <step number="2">Créer le module <file>monitoring_dashboard.sh</file> pour le monitoring temps réel</step>
+      <step number="3">Implémenter <code>collect_loading_metrics()</code> pour tracer le lazy loading</step>
+      <step number="4">Créer <code>track_performance_metrics()</code> pour mesurer les performances</step>
+      <step number="5">Implémenter <code>monitor_learning_efficiency()</code> pour tracer l'apprentissage</step>
+      <step number="6">Créer <code>generate_usage_report()</code> pour analyser l'historique d'usage</step>
+      <step number="7">Implémenter <code>real_time_monitoring()</code> pour le monitoring en temps réel</step>
+      <step number="8">Créer <code>export_metrics_dashboard()</code> pour visualiser les métriques</step>
+      <step number="9">Ajouter la persistance des métriques historiques</step>
+      <step number="10">Créer des alertes pour détecter les problèmes de performance</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Module <file>metrics_engine.sh</file> créé et fonctionnel</criterion>
+      <criterion state="done">Module <file>monitoring_dashboard.sh</file> créé avec monitoring temps réel</criterion>
+      <criterion state="done">Collecte des métriques avancées opérationnelle</criterion>
+      <criterion state="done">Métriques de performance du lazy loading tracées</criterion>
+      <criterion state="done">Métriques d'efficacité de l'apprentissage disponibles</criterion>
+      <criterion state="done">Historique complet d'usage persistant</criterion>
+      <criterion state="done">Dashboard de monitoring des performances fonctionnel</criterion>
+      <criterion state="done">Système d'alertes pour problèmes de performance</criterion>
+      <criterion state="done">Rapports d'analyse d'usage générés</criterion>
+      <criterion state="done">Monitoring temps réel opérationnel</criterion>
+      <criterion state="done">Tests unitaires écrits et passants</criterion>
+      <criterion state="done">Documentation complète du système de métriques</criterion>
+      <criterion state="done">Code respecte les standards bash et les conventions aklo</criterion>
+      <criterion state="done">Intégration transparente avec tous les modules core</criterion>
+    </definition_of_done>
+  </content>
+</task>

@@ -1,44 +1,48 @@
-# PBI-4 : Documentation des métriques et KPI avec tableaux de bord
-
----
-**Statut:** PROPOSED
-**Date de création:** 2025-01-27
-**Priorité:** MEDIUM
-**Effort estimé:** 6 points
----
-
-## 1. Description de la User Story
-
-_En tant que **tech lead ou product owner**, je veux **des tableaux de bord automatisés avec métriques et KPI de qualité**, afin de **suivre la productivité, la qualité du code et l'efficacité des workflows aklo**._
-
-## 2. Critères d'Acceptation
-
-- [ ] **Métriques de qualité** : Couverture tests, dette technique, complexité cyclomatique
-- [ ] **KPI de productivité** : Vélocité équipe, lead time, cycle time des PBI/Tasks
-- [ ] **Métriques aklo** : Utilisation des protocoles, temps d'exécution, erreurs fréquentes
-- [ ] **Tableaux de bord automatisés** : Génération via `aklo metrics dashboard`
-- [ ] **Alertes intelligentes** : Notifications sur seuils critiques
-- [ ] **Rapports périodiques** : Synthèses hebdomadaires/mensuelles automatiques
-- [ ] **Exports données** : JSON, CSV pour intégration outils externes
-- [ ] **Visualisations** : Graphiques tendances et comparaisons
-
-## 3. Spécifications Techniques Préliminaires & Contraintes
-
-**Architecture métriques :**
-- Collecte de données non-intrusive
-- Stockage local avec option cloud
-- API REST pour intégration externe
-- Respect RGPD (pas de données personnelles)
-
-**Contraintes :**
-- Performance minimale sur collecte
-- Configuration granulaire des métriques
-- Anonymisation des données sensibles
-
-## 4. Documents d'Architecture Associés
-
-_À créer pour l'architecture du système de métriques._
-
-## 5. Tasks Associées
-
-_Cette section sera remplie par le protocole [PLANIFICATION]._
+<pbi id="4" title="Documentation des métriques et KPI avec tableaux de bord">
+  <metadata>
+    <status>PROPOSED</status>
+    <created_date>2025-01-27</created_date>
+    <priority>MEDIUM</priority>
+    <effort_estimated>6</effort_estimated>
+  </metadata>
+  <content>
+    <user_story>
+      <role>En tant que tech lead ou product owner</role>
+      <action>je veux des tableaux de bord automatisés avec métriques et KPI de qualité</action>
+      <benefit>afin de suivre la productivité, la qualité du code et l'efficacité des workflows aklo</benefit>
+    </user_story>
+    <acceptance_criteria>
+      <criterion state="todo">Métriques de qualité : Couverture tests, dette technique, complexité cyclomatique</criterion>
+      <criterion state="todo">KPI de productivité : Vélocité équipe, lead time, cycle time des PBI/Tasks</criterion>
+      <criterion state="todo">Métriques aklo : Utilisation des protocoles, temps d'exécution, erreurs fréquentes</criterion>
+      <criterion state="todo">Tableaux de bord automatisés : Génération via aklo metrics dashboard</criterion>
+      <criterion state="todo">Alertes intelligentes : Notifications sur seuils critiques</criterion>
+      <criterion state="todo">Rapports périodiques : Synthèses hebdomadaires/mensuelles automatiques</criterion>
+      <criterion state="todo">Exports données : JSON, CSV pour intégration outils externes</criterion>
+      <criterion state="todo">Visualisations : Graphiques tendances et comparaisons</criterion>
+    </acceptance_criteria>
+    <technical_specifications>
+      <description>
+        Architecture métriques :
+        <ul>
+          <li>Collecte de données non-intrusive</li>
+          <li>Stockage local avec option cloud</li>
+          <li>API REST pour intégration externe</li>
+          <li>Respect RGPD (pas de données personnelles)</li>
+        </ul>
+        Contraintes :
+        <ul>
+          <li>Performance minimale sur collecte</li>
+          <li>Configuration granulaire des métriques</li>
+          <li>Anonymisation des données sensibles</li>
+        </ul>
+      </description>
+    </technical_specifications>
+    <architecture_documents>
+      <document optional="true">À créer pour l'architecture du système de métriques.</document>
+    </architecture_documents>
+    <associated_tasks>
+      <!-- À remplir par le protocole PLANIFICATION -->
+    </associated_tasks>
+  </content>
+</pbi>

@@ -1,30 +1,23 @@
-# TASK-13-5 : Tests de performance et validation des optimisations
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-13](../00-pbi/PBI-13-PROPOSED.xml)
-**Revue Architecturale Requise:** Non
-**Document d'Architecture (si applicable):** N/A
-**Assigné à:** `AI_Agent`
-**Branche Git:** `feature/task-13-5`
-
----
-
-## 1. Objectif Technique
-
-Créer une suite complète de tests de performance pour valider que l'architecture lazy loading atteint les objectifs de performance tout en préservant les optimisations existantes des TASK-7-x.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- Nouveau fichier : `aklo/tests/test_lazy_loading_performance.sh`
-- Nouveau fichier : `aklo/tests/benchmark_profiles.sh`
-- Extension : `aklo/tests/test_regression_lazy_loading.sh`
-
-**Métriques cibles issues du diagnostic :**
-```bash
+<task pbi_id="13" task_id="5" status="done" title="Tests de performance et validation des optimisations">
+  <metadata>
+    <parent_pbi>PBI-13</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee>AI_Agent</assignee>
+    <git_branch>feature/task-13-5</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Créer une suite complète de tests de performance pour valider que l'architecture lazy loading atteint les objectifs de performance tout en préservant les optimisations existantes des TASK-7-x.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>Nouveau fichier : aklo/tests/test_lazy_loading_performance.sh</li>
+        <li>Nouveau fichier : aklo/tests/benchmark_profiles.sh</li>
+        <li>Extension : aklo/tests/test_regression_lazy_loading.sh</li>
+      </ul>
+      Métriques cibles issues du diagnostic :
+      <code language="bash"><![CDATA[
 # Performance cible par profil
 MINIMAL: get_config < 0.050s (vs 0.080s actuel)
 NORMAL: plan, dev < 0.200s  
@@ -34,26 +27,28 @@ FULL: optimize, benchmark < 1.000s
 Cache regex: hit rate > 90%
 Batch I/O: réduction syscalls > 40%
 Cache IDs: hit rate > 80%
-```
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Créer le benchmark de performance** comparant avant/après lazy loading
-2. **Implémenter les tests par profil** validant les temps cibles
-3. **Créer les tests de régression** pour toutes les optimisations TASK-7-x
-4. **Implémenter le monitoring** des métriques de cache et I/O
-5. **Créer les tests de charge** simulant usage intensif
-6. **Ajouter la validation** des fallbacks en cas d'erreur
-7. **Implémenter les rapports** de performance automatiques
-8. **Créer la documentation** des résultats et recommandations
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Suite de tests de performance complète et automatisée
-- [x] Validation des temps cibles pour chaque profil
-- [x] Tests de régression passants pour toutes les optimisations TASK-7-x
-- [x] Monitoring des métriques de cache et I/O fonctionnel
-- [x] Tests de charge et de robustesse implémentés
-- [x] Rapports de performance automatiques générés
-- [x] Documentation complète des résultats et métriques
-- [x] Validation que le paradoxe de sur-optimisation est résolu
+      ]]></code>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Créer les benchmarks, les tests de profil, de régression, de charge, le monitoring, la validation et la documentation.</description>
+      <step number="1">Créer le benchmark de performance comparant avant/après lazy loading</step>
+      <step number="2">Implémenter les tests par profil validant les temps cibles</step>
+      <step number="3">Créer les tests de régression pour toutes les optimisations TASK-7-x</step>
+      <step number="4">Implémenter le monitoring des métriques de cache et I/O</step>
+      <step number="5">Créer les tests de charge simulant usage intensif</step>
+      <step number="6">Ajouter la validation des fallbacks en cas d'erreur</step>
+      <step number="7">Implémenter les rapports de performance automatiques</step>
+      <step number="8">Créer la documentation des résultats et recommandations</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Suite de tests de performance complète et automatisée</criterion>
+      <criterion state="done">Validation des temps cibles pour chaque profil</criterion>
+      <criterion state="done">Tests de régression passants pour toutes les optimisations TASK-7-x</criterion>
+      <criterion state="done">Monitoring des métriques de cache et I/O fonctionnel</criterion>
+      <criterion state="done">Tests de charge et de robustesse implémentés</criterion>
+      <criterion state="done">Rapports de performance automatiques générés</criterion>
+      <criterion state="done">Documentation complète des résultats et métriques</criterion>
+      <criterion state="done">Validation que le paradoxe de sur-optimisation est résolu</criterion>
+    </definition_of_done>
+  </content>
+</task>

@@ -1,130 +1,94 @@
-# PBI-9 : Étendre serveurs MCP shell natifs avec fonctionnalités complètes
-
-## 📋 Description
-
-Étendre les serveurs MCP shell natifs pour qu'ils offrent les mêmes fonctionnalités que les serveurs Node.js, rendant Node.js vraiment optionnel et renforçant l'approche "native-first".
-
-## 🎯 Objectif Métier
-
-- **Universalité** : Fonctionnalités complètes sur 100% des systèmes Unix
-- **Simplicité** : 0 dépendances pour toutes les fonctionnalités MCP
-- **Performance** : Serveurs légers et rapides
-- **Cohérence** : Approche native-first réellement effective
-
-## 🔍 Analyse Actuelle
-
-### Serveurs Shell Natifs (2 outils)
-- `aklo_execute_shell` : Commandes aklo basiques
-- `aklo_status_shell` : Statut projet simple
-
-### Serveurs Node.js (4 outils)  
-- `aklo_execute` : Commandes aklo avec validation avancée
-- `aklo_status` : Statut projet détaillé
-- `safe_shell` : Exécution shell sécurisée
-- `project_info` : Informations projet complètes
-
-## 🎯 Fonctionnalités à Ajouter
-
-### 1. Exécution Shell Sécurisée (`safe_shell`)
-- Liste de commandes autorisées
-- Validation des arguments
-- Timeout configurable
-- Gestion d'erreurs robuste
-
-### 2. Informations Projet (`project_info`)
-- Lecture package.json (avec parsing JSON natif)
-- Informations Git (branch, status, remote)
-- Configuration Aklo (.aklo.conf)
-- Métriques projet (PBI count, tasks, etc.)
-
-### 3. Validation Avancée Commandes Aklo
-- Liste complète des commandes autorisées
-- Validation des arguments
-- Gestion contexte de travail
-- Logs sécurisés
-
-## 🛠️ Approche Technique
-
-### Parsing JSON en Shell Natif
-```bash
-# Option 1: jq si disponible (fallback si absent)
-# Option 2: parsing manuel avec sed/grep/awk
-# Option 3: parsing hybride selon complexité
-```
-
-### Sécurité Shell
-```bash
+<pbi id="9" title="Étendre serveurs MCP shell natifs avec fonctionnalités complètes">
+  <metadata>
+    <status>IN_PROGRESS</status>
+    <created_date>2025-01-28</created_date>
+    <owner>Architecture Team</owner>
+    <priority>HIGH</priority>
+    <effort_estimated>4</effort_estimated>
+  </metadata>
+  <content>
+    <user_story>
+      <role>En tant qu'utilisateur aklo</role>
+      <action>je veux que les serveurs MCP shell natifs offrent les mêmes fonctionnalités que les serveurs Node.js</action>
+      <benefit>afin de rendre Node.js optionnel et renforcer l'approche native-first</benefit>
+    </user_story>
+    <business_objectives>
+      <objective>Universalité : Fonctionnalités complètes sur 100% des systèmes Unix</objective>
+      <objective>Simplicité : 0 dépendances pour toutes les fonctionnalités MCP</objective>
+      <objective>Performance : Serveurs légers et rapides</objective>
+      <objective>Cohérence : Approche native-first réellement effective</objective>
+    </business_objectives>
+    <current_analysis>
+      <shell_servers>
+        <tool>aklo_execute_shell : Commandes aklo basiques</tool>
+        <tool>aklo_status_shell : Statut projet simple</tool>
+      </shell_servers>
+      <node_servers>
+        <tool>aklo_execute : Commandes aklo avec validation avancée</tool>
+        <tool>aklo_status : Statut projet détaillé</tool>
+        <tool>safe_shell : Exécution shell sécurisée</tool>
+        <tool>project_info : Informations projet complètes</tool>
+      </node_servers>
+    </current_analysis>
+    <features_to_add>
+      <feature>Exécution Shell Sécurisée (safe_shell) : Liste de commandes autorisées, validation des arguments, timeout configurable, gestion d'erreurs robuste</feature>
+      <feature>Informations Projet (project_info) : Lecture package.json, informations Git, configuration Aklo, métriques projet</feature>
+      <feature>Validation Avancée Commandes Aklo : Liste complète des commandes autorisées, validation des arguments, gestion contexte de travail, logs sécurisés</feature>
+    </features_to_add>
+    <technical_approach>
+      <parsing_json_shell>
+        <option>Option 1: jq si disponible (fallback si absent)</option>
+        <option>Option 2: parsing manuel avec sed/grep/awk</option>
+        <option>Option 3: parsing hybride selon complexité</option>
+      </parsing_json_shell>
+      <security_shell>
+        <code language="bash"><![CDATA[
 ALLOWED_COMMANDS=("ls" "cat" "grep" "find" "git" "npm" "node")
 validate_command() {
     # Validation whitelist + arguments
 }
-```
-
-### Gestion Timeout
-```bash
+        ]]></code>
+      </security_shell>
+      <timeout_management>
+        <code language="bash"><![CDATA[
 execute_with_timeout() {
     timeout "$TIMEOUT" "$@" 2>&1
 }
-```
-
-## 📊 Critères d'Acceptation
-
-- [ ] Serveurs shell natifs offrent les 4 outils des serveurs Node.js
-- [ ] Parsing JSON natif fonctionnel (avec fallback jq)
-- [ ] Sécurité équivalente aux serveurs Node.js
-- [ ] Performance supérieure aux serveurs Node.js
-- [ ] Tests complets pour tous les outils
-- [ ] Documentation mise à jour
-- [ ] Rétrocompatibilité préservée
-
-## 🔗 Dépendances
-
-- Aucune dépendance externe requise
-- Compatible avec tous les systèmes Unix
-- Optionnel : `jq` pour parsing JSON avancé
-
-## 📈 Impact Attendu
-
-- **Adoption** : +100% (fonctionne partout)
-- **Performance** : +50% (pas de Node.js)
-- **Simplicité** : +200% (0 dépendances)
-- **Maintenance** : +100% (code shell standard)
-
-## 🗓️ Estimation
-
-**Complexité** : Moyenne (3-4 jours)
-**Priorité** : Haute (cohérence architecture native-first)
-
-## 5. Tasks Associées
-
-- [ ] **[TASK-9-1](../01-tasks/TASK-9-1-TODO.xml)** : Implémentation outil `safe_shell` en shell natif
-  - *Revue Architecturale Requise : OUI*
-  - *Complexité : MOYENNE - Sécurité et validation*
-
-- [ ] **[TASK-9-2](../01-tasks/TASK-9-2-TODO.xml)** : Implémentation outil `project_info` avec parsing JSON natif
-  - *Revue Architecturale Requise : OUI*
-  - *Complexité : HAUTE - Parsing JSON critique*
-
-- [ ] **[TASK-9-3](../01-tasks/TASK-9-3-TODO.xml)** : Extension outil `aklo_execute` avec validation avancée
-  - *Revue Architecturale Requise : NON*
-  - *Complexité : MOYENNE - Extension fonctionnelle*
-
-- [ ] **[TASK-9-4](../01-tasks/TASK-9-4-TODO.xml)** : Extension outil `aklo_status` avec métriques détaillées
-  - *Revue Architecturale Requise : NON*
-  - *Complexité : MOYENNE - Métriques et analyse*
-
-- [ ] **[TASK-9-5](../01-tasks/TASK-9-5-TODO.xml)** : Tests d'intégration et validation de performance
-  - *Revue Architecturale Requise : NON*
-  - *Complexité : MOYENNE - Tests et benchmarks*
-
-- [ ] **[TASK-9-6](../01-tasks/TASK-9-6-TODO.xml)** : Configuration et documentation de l'architecture hybride
-  - *Revue Architecturale Requise : NON*
-  - *Complexité : FAIBLE - Documentation et configuration*
-
-**Recommandation :** 2 tasks (9-1, 9-2) nécessitent une revue architecturale avant développement.
-
----
-
-**Status** : IN_PROGRESS
-**Created** : 2025-01-28
-**Owner** : Architecture Team
+        ]]></code>
+      </timeout_management>
+    </technical_approach>
+    <acceptance_criteria>
+      <criterion state="todo">Serveurs shell natifs offrent les 4 outils des serveurs Node.js</criterion>
+      <criterion state="todo">Parsing JSON natif fonctionnel (avec fallback jq)</criterion>
+      <criterion state="todo">Sécurité équivalente aux serveurs Node.js</criterion>
+      <criterion state="todo">Performance supérieure aux serveurs Node.js</criterion>
+      <criterion state="todo">Tests complets pour tous les outils</criterion>
+      <criterion state="todo">Documentation mise à jour</criterion>
+      <criterion state="todo">Rétrocompatibilité préservée</criterion>
+    </acceptance_criteria>
+    <dependencies>
+      <dependency>Aucune dépendance externe requise</dependency>
+      <dependency>Compatible avec tous les systèmes Unix</dependency>
+      <dependency>Optionnel : jq pour parsing JSON avancé</dependency>
+    </dependencies>
+    <expected_impact>
+      <impact>Adoption : +100% (fonctionne partout)</impact>
+      <impact>Performance : +50% (pas de Node.js)</impact>
+      <impact>Simplicité : +200% (0 dépendances)</impact>
+      <impact>Maintenance : +100% (code shell standard)</impact>
+    </expected_impact>
+    <estimation>
+      <complexity>Moyenne (3-4 jours)</complexity>
+      <priority>Haute (cohérence architecture native-first)</priority>
+    </estimation>
+    <associated_tasks>
+      <task ref="TASK-9-1" status="todo">Implémentation outil safe_shell en shell natif (Revue Architecturale : OUI, Complexité : MOYENNE)</task>
+      <task ref="TASK-9-2" status="todo">Implémentation outil project_info avec parsing JSON natif (Revue Architecturale : OUI, Complexité : HAUTE)</task>
+      <task ref="TASK-9-3" status="todo">Extension outil aklo_execute avec validation avancée (Revue Architecturale : NON, Complexité : MOYENNE)</task>
+      <task ref="TASK-9-4" status="todo">Extension outil aklo_status avec métriques détaillées (Revue Architecturale : NON, Complexité : MOYENNE)</task>
+      <task ref="TASK-9-5" status="todo">Tests d'intégration et validation de performance (Revue Architecturale : NON, Complexité : MOYENNE)</task>
+      <task ref="TASK-9-6" status="todo">Configuration et documentation de l'architecture hybride (Revue Architecturale : NON, Complexité : FAIBLE)</task>
+      <recommendation>2 tasks (9-1, 9-2) nécessitent une revue architecturale avant développement.</recommendation>
+    </associated_tasks>
+  </content>
+</pbi>

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Fonctions de cache pour le parser générique aklo
+# Toutes les opérations de log de statuts de cache (MISS, HIT, etc.) doivent utiliser la fonction centralisée log_cache_event définie ci-dessous.
+# Voir la documentation inline de log_cache_event pour la liste des statuts standards et l’usage recommandé.
 # TASK-6-1: Infrastructure de base du système de cache
 # Phase BLUE: Version refactorisée et optimisée
 
@@ -141,4 +143,15 @@ generate_cache_filename() {
     fi
     
     echo "${AKLO_CACHE_DIR}/protocol_${protocol_name}_${artefact_type}.parsed"
+}
+
+# Fonction utilitaire pour le logging des statuts de cache
+# Statuts standards : MISS, HIT, DISABLED, RECALC, CACHED, SUCCESS, ERROR, FALLBACK, COMPLETE, CHECK
+# Usage : log_cache_event <STATUT> <details>
+log_cache_event() {
+    local event="$1"
+    local details="$2"
+    # Toujours loguer sur stderr (debug) ET sur stdout (pour les tests)
+    echo "[CACHE] $event: $details" >&2
+    echo "[CACHE] $event: $details"
 }
