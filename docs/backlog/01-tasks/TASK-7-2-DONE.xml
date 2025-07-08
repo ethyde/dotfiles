@@ -1,52 +1,50 @@
-# TASK-7-2 : Optimisation des opérations I/O par batch
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-7](../00-pbi/PBI-7-PROPOSED.xml)
-**Revue Architecturale Requise:** Oui
-**Document d'Architecture (si applicable):** [ARCH-7-1.xml](../02-arch/ARCH-7-1.xml)
-**Assigné à:** `[Nom du Human_Developer]`
-**Branche Git:** `feature/task-7-2`
-
----
-
-## 1. Objectif Technique
-
-Implémenter un système de batch pour les opérations I/O fréquentes, permettant de grouper les lectures/écritures de fichiers et réduire le nombre de syscalls système.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- `aklo/bin/aklo` : Opérations I/O multiples (ls, find, cat, etc.)
-- `aklo/bin/aklo_cache_functions.sh` : Fonctions de cache existantes
-- `aklo/bin/aklo_extract_functions.sh` : Lectures de fichiers multiples
-
-**Opérations I/O identifiées :**
-- Lecture de multiples fichiers de configuration
-- Scan des répertoires pour compter les artefacts
-- Validation d'existence de fichiers multiples
-- Opérations de find répétitives
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Analyser les opérations I/O répétitives** dans le script aklo
-2. **Créer une fonction `batch_file_operations()`** pour grouper les opérations
-3. **Implémenter `batch_read_files()`** pour lectures multiples
-4. **Créer `batch_check_existence()`** pour validations d'existence
-5. **Optimiser les opérations `find`** avec des patterns combinés
-6. **Ajouter un cache temporaire** pour les résultats de scan
-7. **Implémenter des métriques** de réduction des syscalls
-8. **Créer des tests de performance** avant/après optimisation
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Système de batch I/O implémenté et fonctionnel
-- [x] Réduction de 40-60% des syscalls sur opérations fréquentes
-- [x] Fonctions batch_read_files() et batch_check_existence() créées
-- [x] Cache temporaire pour résultats de scan implémenté
-- [x] Métriques de performance intégrées
-- [x] Tests de performance documentés (avant/après)
-- [x] Compatibilité avec les fonctions existantes maintenue
-- [x] Gestion d'erreurs robuste pour les opérations batch
+<task pbi_id="7" task_id="2" status="done" title="Optimisation des opérations I/O par batch">
+  <metadata>
+    <parent_pbi>PBI-7</parent_pbi>
+    <arch_review_required>yes</arch_review_required>
+    <architecture_document>ARCH-7-1.xml</architecture_document>
+    <assignee>[Nom du Human_Developer]</assignee>
+    <git_branch>feature/task-7-2</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Implémenter un système de batch pour les opérations I/O fréquentes, permettant de grouper les lectures/écritures de fichiers et réduire le nombre de syscalls système.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>aklo/bin/aklo : Opérations I/O multiples (ls, find, cat, etc.)</li>
+        <li>aklo/bin/aklo_cache_functions.sh : Fonctions de cache existantes</li>
+        <li>aklo/bin/aklo_extract_functions.sh : Lectures de fichiers multiples</li>
+      </ul>
+      Opérations I/O identifiées :
+      <ul>
+        <li>Lecture de multiples fichiers de configuration</li>
+        <li>Scan des répertoires pour compter les artefacts</li>
+        <li>Validation d'existence de fichiers multiples</li>
+        <li>Opérations de find répétitives</li>
+      </ul>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Implémenter le batch I/O, optimiser les opérations, ajouter des métriques et documenter les performances.</description>
+      <step number="1">Analyser les opérations I/O répétitives dans le script aklo.</step>
+      <step number="2">Créer une fonction <code>batch_file_operations()</code> pour grouper les opérations.</step>
+      <step number="3">Implémenter <code>batch_read_files()</code> pour lectures multiples.</step>
+      <step number="4">Créer <code>batch_check_existence()</code> pour validations d'existence.</step>
+      <step number="5">Optimiser les opérations <code>find</code> avec des patterns combinés.</step>
+      <step number="6">Ajouter un cache temporaire pour les résultats de scan.</step>
+      <step number="7">Implémenter des métriques de réduction des syscalls.</step>
+      <step number="8">Créer des tests de performance avant/après optimisation.</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Système de batch I/O implémenté et fonctionnel</criterion>
+      <criterion state="done">Réduction de 40-60% des syscalls sur opérations fréquentes</criterion>
+      <criterion state="done">Fonctions batch_read_files() et batch_check_existence() créées</criterion>
+      <criterion state="done">Cache temporaire pour résultats de scan implémenté</criterion>
+      <criterion state="done">Métriques de performance intégrées</criterion>
+      <criterion state="done">Tests de performance documentés (avant/après)</criterion>
+      <criterion state="done">Compatibilité avec les fonctions existantes maintenue</criterion>
+      <criterion state="done">Gestion d'erreurs robuste pour les opérations batch</criterion>
+    </definition_of_done>
+  </content>
+</task>

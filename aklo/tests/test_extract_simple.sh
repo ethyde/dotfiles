@@ -1,7 +1,7 @@
 test_extract_simple() {
-    test_suite "Tests simples - Extract and Cache (TASK-6-2)"
+    test_suite "Tests simples - Extraction et Cache XML natif"
 
-    # Source des fonctions en utilisant le chemin absolu du projet
+    # Source des fonctions (à adapter si besoin)
     source "${AKLO_PROJECT_ROOT}/modules/io/extract_functions.sh"
     source "${AKLO_PROJECT_ROOT}/modules/cache/cache_functions.sh"
 
@@ -15,23 +15,27 @@ test_extract_simple() {
     export CACHE_DIR="$cache_dir"
     local protocol_file="$test_dir/test_protocol.xml"
     cat > "$protocol_file" << 'EOF'
-# PROTOCOLE DE TEST
-### 2.3. Structure Obligatoire Du Fichier PBI
-```markdown
-# PBI-{{ID}} : {{TITLE}}
-## 1. Description
-{{DESCRIPTION}}
-```
+<protocol name="test_proto">
+  <artefact_template>
+    <pbi>
+      <id>42</id>
+      <title>Test PBI</title>
+      <description>Exemple de PBI en XML natif</description>
+    </pbi>
+  </artefact_template>
+</protocol>
 EOF
 
-    # Test 1: extract_artefact_structure
+    # Test 1: extract_artefact_xml (nouvelle fonction à implémenter)
     local result_pbi
-    result_pbi=$(extract_artefact_structure "$protocol_file" "PBI")
-    assert_contains "$result_pbi" "PBI-{{ID}} : {{TITLE}}" "extract_artefact_structure extrait la structure PBI"
+    result_pbi=$(extract_artefact_xml "$protocol_file" "pbi")
+    assert_contains "$result_pbi" "<pbi>" "extract_artefact_xml extrait la balise <pbi>"
+    assert_contains "$result_pbi" "<title>Test PBI</title>" "Le titre doit être présent"
+    assert_not_contains "$result_pbi" "{{" "Ne doit plus contenir de marqueur de variable"
 
-    # Test 2: extract_and_cache_structure
+    # Test 2: extract_and_cache_structure (adapté pour XML)
     local cache_file="$cache_dir/test.parsed"
-    extract_and_cache_structure "$protocol_file" "PBI" "$cache_file"
+    extract_and_cache_structure "$protocol_file" "pbi" "$cache_file"
     assert_command_success "extract_and_cache_structure s'exécute sans erreur"
     assert_file_exists "$cache_file" "extract_and_cache_structure crée le fichier cache"
 

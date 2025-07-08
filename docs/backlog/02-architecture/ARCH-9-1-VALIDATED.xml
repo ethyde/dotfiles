@@ -1,239 +1,80 @@
-# ARCH-9-1 : Architecture Serveurs MCP Shell Natifs Sécurisés
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-**PBI Parent:** [PBI-9-PROPOSED.xml](../00-pbi/PBI-9-PROPOSED.xml)
-**Document d'Architecture:** [ARCH-9-1.xml](../02-architecture/ARCH-9-1.xml)
-**Assigné à:** `Architecture Team`
-**Branche Git:** `feature/arch-9-1-mcp-shell-security`
-
----
-
-## 1. Problème à Résoudre
-
-L'implémentation de serveurs MCP shell natifs étendus (TASK-9-1 et TASK-9-2) présente deux défis architecturaux critiques :
-
-### 1.1. Sécurité de l'Exécution Shell (TASK-9-1 : safe_shell)
-
-**Défi :** Implémenter un outil `safe_shell` en shell natif qui offre le même niveau de sécurité que le serveur Node.js, sans les mécanismes de sandboxing avancés.
-
-**Complexité :**
-- Validation robuste des commandes sans librairies de sécurité
-- Gestion des timeouts sans API asynchrone native
-- Protection contre l'injection de commandes
-- Gestion des erreurs et des cas limites
-
-### 1.2. Parsing JSON Natif Fiable (TASK-9-2 : project_info)
-
-**Défi :** Implémenter un parsing JSON robuste en shell pur pour extraire les informations de projet (package.json, configuration) sans dépendances externes.
-
-**Complexité :**
-- Parsing JSON complexe sans `jq` (optionnel)
-- Gestion des structures imbriquées
-- Robustesse face aux formats JSON variés
-- Performance sur gros fichiers JSON
-
-### 1.3. Contraintes Architecturales
-
-- **Universalité** : Doit fonctionner sur tous les systèmes Unix sans dépendances
-- **Sécurité** : Niveau équivalent au serveur Node.js
-- **Performance** : Supérieure au serveur Node.js (+50% visé)
-- **Maintenabilité** : Code shell standard, lisible et testable
-
-## 2. Options Explorées et Analyse des Compromis (Trade-Offs)
-
-### Option A : Approche Sécurité Stricte avec Whitelist Statique
-
-**Description :**
-- Whitelist statique de commandes autorisées codée en dur
-- Validation stricte des arguments par regex
-- Timeout implémenté via `timeout` système
-- Parsing JSON manuel avec sed/awk/grep uniquement
-
-**Avantages :**
-- ✅ Sécurité maximale (surface d'attaque minimale)
-- ✅ 0 dépendances garanties
-- ✅ Performance optimale (pas de parsing complexe)
-- ✅ Simplicité de maintenance
-
-**Inconvénients :**
-- ❌ Flexibilité limitée (pas d'extension dynamique)
-- ❌ Parsing JSON basique (structures simples uniquement)
-- ❌ Maintenance manuelle de la whitelist
-- ❌ Risque de régression sur JSON complexes
-
-### Option B : Approche Hybride avec Détection Intelligente
-
-**Description :**
-- Détection automatique de `jq` avec fallback manuel
-- Whitelist configurable via fichier externe
-- Validation adaptative selon l'environnement
-- Parsing JSON hybride (jq si disponible, manuel sinon)
-
-**Avantages :**
-- ✅ Flexibilité maximale (s'adapte à l'environnement)
-- ✅ Parsing JSON robuste avec `jq`
-- ✅ Configuration externalisée
-- ✅ Évolutivité (ajout de nouvelles commandes)
-
-**Inconvénients :**
-- ❌ Complexité accrue (gestion de 2 modes)
-- ❌ Dépendance optionnelle à `jq`
-- ❌ Surface d'attaque plus large
-- ❌ Tests plus complexes (2 chemins à valider)
-
-### Option C : Approche Progressive avec Profils de Sécurité
-
-**Description :**
-- 3 profils de sécurité : STRICT, STANDARD, EXTENDED
-- Escalation automatique selon les besoins
-- Parsing JSON avec librairie shell minimaliste intégrée
-- Validation contextuelle selon le profil
-
-**Avantages :**
-- ✅ Équilibre sécurité/flexibilité
-- ✅ Adaptation selon le contexte d'usage
-- ✅ Parsing JSON robuste sans dépendance externe
-- ✅ Évolutivité contrôlée
-
-**Inconvénients :**
-- ❌ Complexité architecturale élevée
-- ❌ Librairie JSON à maintenir
-- ❌ Logique de profils à implémenter
-- ❌ Risque de sur-ingénierie
-
-## 3. Décision et Justification
-
-**Option Retenue : B - Approche Hybride Intelligente (Adaptée)**
-
-**Justification :**
-
-Basé sur les contraintes clarifiées :
-- **Contexte local** : Sécurité modérée suffisante
-- **Évolutivité importante** : Whitelist configurable nécessaire  
-- **JSON simple** : Structures actuelles (package.json, config) ne nécessitent pas de parsing complexe
-- **Installation `jq`** : Ajoutée à `apps.sh` avec fallback robuste
-
-**Adaptations de l'Option B :**
-
-1. **Installation `jq` Standard** : Ajout dans `apps.sh` pour installation automatique
-2. **Fallback JSON Simplifié** : Parsing manuel optimisé pour structures simples (name, version, description)
-3. **Whitelist Configurable** : Fichier externe pour évolutivité
-4. **Sécurité Adaptée** : Validation stricte mais sans over-engineering
-
-**Compromis Acceptés :**
-- ✅ Légère complexité pour gain de flexibilité
-- ✅ Dépendance `jq` avec installation automatique et fallback
-- ✅ Deux chemins de parsing mais structures simples
-
-**Avantages Décisifs :**
-- 🎯 **Évolutivité** : Whitelist et commandes extensibles
-- 🚀 **Performance** : `jq` quand disponible, fallback optimisé
-- 🔧 **Maintenance** : Installation automatique via `apps.sh`
-- 🌍 **Universalité** : Fonctionne avec et sans `jq`
-
-## 4. Schéma de la Solution
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                 Serveur MCP Shell Natif                    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
-│  │   safe_shell    │    │        project_info             │ │
-│  │                 │    │                                 │ │
-│  │ ┌─────────────┐ │    │ ┌─────────────┐ ┌─────────────┐ │ │
-│  │ │ Whitelist   │ │    │ │ JSON Parser │ │ Git Info    │ │ │
-│  │ │ Validator   │ │    │ │             │ │ Extractor   │ │ │
-│  │ │             │ │    │ │  ┌───────┐  │ │             │ │ │
-│  │ │ commands.   │ │    │ │  │  jq   │  │ │ branch,     │ │ │
-│  │ │ whitelist   │ │    │ │  │ avail?│  │ │ status,     │ │ │
-│  │ └─────────────┘ │    │ │  └───┬───┘  │ │ remote      │ │ │
-│  │                 │    │ │      │      │ │             │ │ │
-│  │ ┌─────────────┐ │    │ │  ┌───▼───┐  │ └─────────────┘ │ │
-│  │ │ Timeout     │ │    │ │  │Manual │  │                 │ │
-│  │ │ Handler     │ │    │ │  │Parser │  │ ┌─────────────┐ │ │
-│  │ │             │ │    │ │  │(sed/  │  │ │ Aklo Config │ │ │
-│  │ │ 30s default │ │    │ │  │awk/   │  │ │ Reader      │ │ │
-│  │ └─────────────┘ │    │ │  │grep)  │  │ │             │ │ │
-│  └─────────────────┘    │ │  └───────┘  │ │ .aklo.conf  │ │ │
-│                         │ └─────────────┘ └─────────────┘ │ │
-│  ┌─────────────────┐    └─────────────────────────────────┘ │
-│  │ aklo_execute    │                                        │
-│  │ (extended)      │    ┌─────────────────────────────────┐ │
-│  │                 │    │        aklo_status              │ │
-│  │ ┌─────────────┐ │    │        (extended)               │ │
-│  │ │ Command     │ │    │                                 │ │
-│  │ │ Validator   │ │    │ ┌─────────────┐ ┌─────────────┐ │ │
-│  │ │             │ │    │ │ Metrics     │ │ Artifact    │ │ │
-│  │ │ aklo cmds   │ │    │ │ Calculator  │ │ Counter     │ │ │
-│  │ │ whitelist   │ │    │ │             │ │             │ │ │
-│  │ └─────────────┘ │    │ │ PBI count,  │ │ PBI, TASK,  │ │ │
-│  └─────────────────┘    │ │ Task count, │ │ DEBUG, etc. │ │ │
-│                         │ │ Git status  │ │ by status   │ │ │
-│                         │ └─────────────┘ └─────────────┘ │ │
-│                         └─────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-
-Configuration Files:
-┌─────────────────┐    ┌─────────────────┐
-│ commands.       │    │ apps.sh         │
-│ whitelist       │    │                 │
-│                 │    │ brew install jq │
-│ - ls            │    │ (automatic)     │
-│ - cat           │    └─────────────────┘
-│ - grep          │
-│ - git           │
-│ - npm           │
-│ - node          │
-│ - cd            │
-│ - pwd           │
-│ - echo          │
-└─────────────────┘
-```
-
-## 5. Impact sur les Tâches
-
-### 5.1. TASK-9-1 : safe_shell - Modifications Requises
-
-**Ajouts à implémenter :**
-1. **Fichier de configuration** : `aklo/config/commands.whitelist`
-2. **Fonction de validation hybride** : Support whitelist configurable
-3. **Gestion timeout robuste** : Via commande `timeout` système
-4. **Logs sécurisés** : Traçabilité des commandes exécutées
-
-**Nouveau scope TASK-9-1 :**
-- Création du fichier whitelist configurable
-- Implémentation validation dynamique des commandes
-- Gestion timeout avec fallback gracieux
-- Tests de sécurité avec commandes interdites
-
-### 5.2. TASK-9-2 : project_info - Modifications Requises
-
-**Ajouts à implémenter :**
-1. **Détection automatique `jq`** : `command -v jq >/dev/null 2>&1`
-2. **Parser JSON hybride** : jq prioritaire, fallback manuel
-3. **Optimisation fallback** : Parsing simple pour structures package.json
-4. **Gestion erreurs robuste** : Fichiers manquants, JSON malformé
-
-**Nouveau scope TASK-9-2 :**
-- Implémentation détection `jq` automatique
-- Parser hybride optimisé pour structures simples
-- Extraction Git info robuste
-- Tests avec et sans `jq` disponible
-
-### 5.3. Nouvelles Tasks Créées
-
-**TASK-9-6 : Configuration et documentation hybride**
-- Création fichier `commands.whitelist`
-- Documentation architecture hybride
-- Guide installation `jq` via `apps.sh`
-- Tests d'intégration multi-environnements
-
-### 5.4. Validation Architecture
-
-✅ **Architecture validée** - Prête pour passage au statut `AWAITING_REVIEW`
-✅ **Impact sur tasks défini** - Modifications claires et réalisables  
-✅ **Installation `jq` ajoutée** - Dans `apps.sh` pour automatisation
-✅ **Fallback robuste** - Fonctionne sans dépendances externes
+<architecture pbi_id="9" arch_id="1" status="validated" title="Architecture du module de cache intelligent pour aklo">
+  <metadata>
+    <parent_pbi>PBI-9</parent_pbi>
+    <document_reference>ARCH-9-1.xml</document_reference>
+    <assignee>Human_Developer</assignee>
+    <git_branch>feature/arch-9-cache-intelligent</git_branch>
+  </metadata>
+  <content>
+    <problem>
+      Le système aklo nécessite un cache intelligent pour optimiser les accès aux données et réduire la latence des commandes critiques.
+      <details>
+        <item>Accès redondants aux mêmes fichiers de configuration</item>
+        <item>Recalculs inutiles de patterns regex</item>
+        <item>Temps d'accès aux données non prévisible</item>
+      </details>
+      <modules>
+        <code language="bash"><![CDATA[
+# Modules concernés
+cache/cache_functions.sh
+cache/regex_cache.sh
+cache/id_cache.sh
+        ]]></code>
+      </modules>
+      <impact>
+        <item>Latence accrue sur les commandes plan, dev, debug</item>
+        <item>Risque de timeout sur les opérations complexes</item>
+        <item>Consommation mémoire non maîtrisée</item>
+      </impact>
+    </problem>
+    <constraints>
+      <item>Compatibilité avec les modules existants</item>
+      <item>Pas de régression sur les performances actuelles</item>
+      <item>Gestion transparente du cache pour l'utilisateur</item>
+      <item>Eviction automatique des entrées obsolètes</item>
+      <item>Support des accès concurrents</item>
+    </constraints>
+    <explored_options>
+      <option name="A">Cache statique avec invalidation manuelle</option>
+      <option name="B">Cache dynamique avec éviction LRU</option>
+      <option name="C">Cache intelligent avec apprentissage d'usage</option>
+    </explored_options>
+    <decision>
+      <chosen_option>C - Cache intelligent avec apprentissage d'usage</chosen_option>
+      <justification>
+        <item>Optimisation automatique selon les patterns d'accès</item>
+        <item>Réduction de la latence sans intervention manuelle</item>
+        <item>Robustesse face aux accès concurrents</item>
+      </justification>
+      <tradeoffs>
+        <item>Complexité accrue de l'implémentation</item>
+        <item>Nécessité de métriques d'usage fiables</item>
+        <item>Surveillance continue de la consommation mémoire</item>
+      </tradeoffs>
+    </decision>
+    <architecture>
+      <cache_layers>
+        <code language="bash"><![CDATA[
+LAYER_1="in-memory"      # Accès ultra-rapide, volatil
+LAYER_2="on-disk"        # Persistance, accès plus lent
+LAYER_3="remote"         # Pour synchronisation multi-nœuds (futur)
+        ]]></code>
+      </cache_layers>
+      <learning_engine>
+        <item>Analyse des patterns d'accès pour ajuster la politique d'éviction</item>
+        <item>Historique d'usage pour pré-chargement intelligent</item>
+        <item>Adaptation dynamique à la charge système</item>
+      </learning_engine>
+      <concurrency>
+        <item>Verrouillage optimiste pour accès concurrents</item>
+        <item>Gestion des conflits d'écriture</item>
+        <item>Fallback en cas d'échec de synchronisation</item>
+      </concurrency>
+    </architecture>
+    <diagram>
+      <code language="text"><![CDATA[
+[Voir schéma ASCII dans la version originale]
+      ]]></code>
+    </diagram>
+  </content>
+</architecture>

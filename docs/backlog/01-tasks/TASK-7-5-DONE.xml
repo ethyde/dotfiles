@@ -1,55 +1,51 @@
-# TASK-7-5 : Configuration tuning et gestion mémoire
-
----
-
-## DO NOT EDIT THIS SECTION MANUALLY
-
-**PBI Parent:** [PBI-7](../00-pbi/PBI-7-PROPOSED.xml)
-**Revue Architecturale Requise:** Non
-**Document d'Architecture (si applicable):** N/A
-**Assigné à:** `eplouvie`
-**Branche Git:** `feature/task-7-5`
-**Statut:** `DONE`
-**Date de début:** `2025-01-28`
-**Date de fin:** `2025-01-28`
-
----
-
-## 1. Objectif Technique
-
-Implémenter un système de configuration tuning permettant d'ajuster les paramètres d'optimisation selon l'environnement, et gérer efficacement la mémoire pour éviter les fuites sur gros volumes de données.
-
-## 2. Contexte et Fichiers Pertinents
-
-**Fichiers concernés :**
-- `aklo/config/.aklo.conf` : Configuration principale
-- `aklo/bin/aklo_cache_functions.sh` : Gestion des caches
-- `aklo/bin/aklo` : Paramètres d'optimisation
-
-**Paramètres à configurer :**
-- Taille maximale des caches (regex, IDs, batch)
-- TTL des caches et fréquence de nettoyage
-- Seuils de performance et alertes
-- Niveau de verbosité du monitoring
-
-## 3. Instructions Détaillées pour l'AI_Agent (Prompt)
-
-1. **Étendre la configuration .aklo.conf** avec section [performance]
-2. **Créer `load_performance_config()`** pour charger les paramètres
-3. **Implémenter `auto_tune_performance()`** pour ajustement automatique
-4. **Créer des fonctions de nettoyage mémoire** pour les caches
-5. **Ajouter la détection d'environnement** (local/CI/production)
-6. **Implémenter des profils prédéfinis** (dev, test, prod)
-7. **Créer `validate_performance_config()`** pour validation
-8. **Ajouter des commandes de diagnostic** mémoire et performance
-
-## 4. Définition de "Terminé" (Definition of Done)
-
-- [x] Configuration performance étendue et fonctionnelle
-- [x] Paramètres ajustables selon l'environnement
-- [x] Système de nettoyage mémoire implémenté
-- [x] Profils prédéfinis (dev, test, prod) créés
-- [x] Auto-tuning basé sur la détection d'environnement
-- [x] Validation de configuration implémentée
-- [x] Commandes de diagnostic mémoire ajoutées
-- [x] Documentation complète des paramètres de tuning
+<task pbi_id="7" task_id="5" status="done" title="Configuration tuning et gestion mémoire">
+  <metadata>
+    <parent_pbi>PBI-7</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee>eplouvie</assignee>
+    <git_branch>feature/task-7-5</git_branch>
+    <start_date>2025-01-28</start_date>
+    <end_date>2025-01-28</end_date>
+  </metadata>
+  <content>
+    <technical_objective>
+      Implémenter un système de configuration tuning permettant d'ajuster les paramètres d'optimisation selon l'environnement, et gérer efficacement la mémoire pour éviter les fuites sur gros volumes de données.
+    </technical_objective>
+    <context_and_files>
+      Fichiers concernés :
+      <ul>
+        <li>aklo/config/.aklo.conf : Configuration principale</li>
+        <li>aklo/bin/aklo_cache_functions.sh : Gestion des caches</li>
+        <li>aklo/bin/aklo : Paramètres d'optimisation</li>
+      </ul>
+      Paramètres à configurer :
+      <ul>
+        <li>Taille maximale des caches (regex, IDs, batch)</li>
+        <li>TTL des caches et fréquence de nettoyage</li>
+        <li>Seuils de performance et alertes</li>
+        <li>Niveau de verbosité du monitoring</li>
+      </ul>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Étendre la configuration, implémenter le tuning, la gestion mémoire, et les diagnostics.</description>
+      <step number="1">Étendre la configuration <file>.aklo.conf</file> avec section [performance]</step>
+      <step number="2">Créer <code>load_performance_config()</code> pour charger les paramètres</step>
+      <step number="3">Implémenter <code>auto_tune_performance()</code> pour ajustement automatique</step>
+      <step number="4">Créer des fonctions de nettoyage mémoire pour les caches</step>
+      <step number="5">Ajouter la détection d'environnement (local/CI/production)</step>
+      <step number="6">Implémenter des profils prédéfinis (dev, test, prod)</step>
+      <step number="7">Créer <code>validate_performance_config()</code> pour validation</step>
+      <step number="8">Ajouter des commandes de diagnostic mémoire et performance</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Configuration performance étendue et fonctionnelle</criterion>
+      <criterion state="done">Paramètres ajustables selon l'environnement</criterion>
+      <criterion state="done">Système de nettoyage mémoire implémenté</criterion>
+      <criterion state="done">Profils prédéfinis (dev, test, prod) créés</criterion>
+      <criterion state="done">Auto-tuning basé sur la détection d'environnement</criterion>
+      <criterion state="done">Validation de configuration implémentée</criterion>
+      <criterion state="done">Commandes de diagnostic mémoire ajoutées</criterion>
+      <criterion state="done">Documentation complète des paramètres de tuning</criterion>
+    </definition_of_done>
+  </content>
+</task>

@@ -1,23 +1,20 @@
-# TASK-6-3 : Intégration cache dans parse_and_generate_artefact
-
----
-**Statut:** TODO
-**Date de création:** 2025-01-27
-**PBI Parent:** PBI-6 - Cache intelligent du parser générique
-**Effort estimé:** 1.5 points
-**Branche:** feature/task-6-3
-**Dépendance:** TASK-6-1, TASK-6-2
----
-
-## 1. Description Technique
-
-Modifier la fonction `parse_and_generate_artefact` pour utiliser le système de cache intelligent avec fallback transparent vers l'ancien système.
-
-## 2. Spécifications Détaillées
-
-### 2.1. Fonction modifiée
-
-```bash
+<task pbi_id="6" task_id="3" status="done" title="Intégration cache dans parse_and_generate_artefact">
+  <metadata>
+    <parent_pbi>PBI-6</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee></assignee>
+    <git_branch>feature/task-6-3</git_branch>
+    <creation_date>2025-01-27</creation_date>
+    <effort>1.5 points</effort>
+    <dependency>TASK-6-1, TASK-6-2</dependency>
+  </metadata>
+  <content>
+    <technical_objective>
+      Modifier la fonction <code>parse_and_generate_artefact</code> pour utiliser le système de cache intelligent avec fallback transparent vers l'ancien système.
+    </technical_objective>
+    <context_and_files>
+      Fonction modifiée :
+      <code language="bash"><![CDATA[
 parse_and_generate_artefact() {
   local protocol_name="$1"
   local artefact_type="$2"
@@ -45,22 +42,37 @@ parse_and_generate_artefact() {
   local filtered_content=$(apply_intelligent_filtering "$artefact_structure" "$assistance_level" "$context_vars")
   echo "$filtered_content" > "$output_file"
 }
-```
-
-### 2.2. Compatibilité et fallback
-
-- **Fallback transparent :** En cas d'erreur cache, utiliser méthode originale
-- **Rétrocompatibilité :** Aucun changement d'interface externe
-- **Logging :** Traces pour debugging (cache hit/miss)
-
-## 3. Definition of Done
-
-- [x] Modification de `parse_and_generate_artefact` avec cache intégré
-- [x] Fallback transparent vers méthode originale en cas d'erreur
-- [x] Tests de régression : toutes les commandes aklo fonctionnent
-- [x] Tests de performance : mesure des gains cache hit vs miss
-- [x] Logging des statistiques cache (hit/miss ratio)
-- [x] Configuration cache via .aklo.conf (enable/disable)
-- [x] Tests avec tous les types d'artefacts (PBI, TASK, ARCH, etc.)
-- [x] Documentation des changements
-- [x] Validation linter et typage
+      ]]></code>
+      Compatibilité et fallback :
+      <ul>
+        <li>Fallback transparent : En cas d'erreur cache, utiliser méthode originale</li>
+        <li>Rétrocompatibilité : Aucun changement d'interface externe</li>
+        <li>Logging : Traces pour debugging (cache hit/miss)</li>
+      </ul>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Modifier la fonction pour intégrer le cache, assurer le fallback, et documenter les changements.</description>
+      <step number="1">Modifier <code>parse_and_generate_artefact</code> pour intégrer le système de cache.</step>
+      <step number="2">Assurer un fallback transparent vers la méthode originale en cas d'erreur cache.</step>
+      <step number="3">Ajouter des logs pour les statistiques cache (hit/miss).</step>
+      <step number="4">Maintenir la rétrocompatibilité de l'interface.</step>
+      <step number="5">Permettre la configuration du cache via <file>.aklo.conf</file> (enable/disable).</step>
+      <step number="6">Écrire des tests de régression pour toutes les commandes aklo.</step>
+      <step number="7">Écrire des tests de performance (cache hit vs miss).</step>
+      <step number="8">Tester avec tous les types d'artefacts (PBI, TASK, ARCH, etc.).</step>
+      <step number="9">Documenter tous les changements.</step>
+      <step number="10">Valider le code avec le linter et le typage.</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Modification de <code>parse_and_generate_artefact</code> avec cache intégré</criterion>
+      <criterion state="done">Fallback transparent vers méthode originale en cas d'erreur</criterion>
+      <criterion state="done">Tests de régression : toutes les commandes aklo fonctionnent</criterion>
+      <criterion state="done">Tests de performance : mesure des gains cache hit vs miss</criterion>
+      <criterion state="done">Logging des statistiques cache (hit/miss ratio)</criterion>
+      <criterion state="done">Configuration cache via .aklo.conf (enable/disable)</criterion>
+      <criterion state="done">Tests avec tous les types d'artefacts (PBI, TASK, ARCH, etc.)</criterion>
+      <criterion state="done">Documentation des changements</criterion>
+      <criterion state="done">Validation linter et typage</criterion>
+    </definition_of_done>
+  </content>
+</task>

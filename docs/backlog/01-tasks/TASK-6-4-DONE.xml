@@ -1,57 +1,67 @@
-# TASK-6-4 : Configuration et monitoring du système de cache
-
----
-**Statut:** TODO
-**Date de création:** 2025-01-27
-**PBI Parent:** PBI-6 - Cache intelligent du parser générique
-**Effort estimé:** 0.5 points
-**Branche:** feature/task-6-4
-**Dépendance:** TASK-6-3
----
-
-## 1. Description Technique
-
-Ajouter la configuration du cache dans .aklo.conf et implémenter le monitoring des performances avec métriques hit/miss ratio.
-
-## 2. Spécifications Détaillées
-
-### 2.1. Configuration .aklo.conf
-
-```ini
+<task pbi_id="6" task_id="4" status="done" title="Configuration et monitoring du système de cache">
+  <metadata>
+    <parent_pbi>PBI-6</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee></assignee>
+    <git_branch>feature/task-6-4</git_branch>
+    <creation_date>2025-01-27</creation_date>
+    <effort>0.5 points</effort>
+    <dependency>TASK-6-3</dependency>
+  </metadata>
+  <content>
+    <technical_objective>
+      Ajouter la configuration du cache dans <file>.aklo.conf</file> et implémenter le monitoring des performances avec métriques hit/miss ratio.
+    </technical_objective>
+    <context_and_files>
+      Configuration <file>.aklo.conf</file> :
+      <code language="ini"><![CDATA[
 [cache]
 enabled=true
 cache_dir=/tmp/aklo_cache
 max_size_mb=100
 ttl_days=7
 cleanup_on_start=true
-```
-
-### 2.2. Commandes de monitoring
-
-```bash
+      ]]></code>
+      Commandes de monitoring :
+      <code language="bash"><![CDATA[
 # Nouvelle commande aklo
 aklo cache status    # Affiche statistiques cache
 aklo cache clear     # Vide le cache
 aklo cache benchmark # Benchmark avec/sans cache
-```
-
-### 2.3. Métriques à collecter
-
-- **Hit ratio :** Pourcentage de cache hits
-- **Miss ratio :** Pourcentage de cache misses  
-- **Gain temps :** Temps économisé grâce au cache
-- **Taille cache :** Espace disque utilisé
-- **Dernière utilisation :** Timestamp des fichiers cache
-
-## 3. Definition of Done
-
-- [x] Configuration cache ajoutée à .aklo.conf
-- [x] Fonction `get_cache_config()` pour lire configuration
-- [x] Commande `aklo cache status` implémentée
-- [x] Commande `aklo cache clear` implémentée  
-- [x] Commande `aklo cache benchmark` implémentée
-- [x] Collecte automatique des métriques hit/miss
-- [x] Affichage des gains de performance
-- [x] Nettoyage automatique selon TTL configuré
-- [x] Tests de toutes les commandes cache
-- [x] Documentation utilisateur des nouvelles commandes
+      ]]></code>
+      Métriques à collecter :
+      <ul>
+        <li>Hit ratio : Pourcentage de cache hits</li>
+        <li>Miss ratio : Pourcentage de cache misses</li>
+        <li>Gain temps : Temps économisé grâce au cache</li>
+        <li>Taille cache : Espace disque utilisé</li>
+        <li>Dernière utilisation : Timestamp des fichiers cache</li>
+      </ul>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Ajouter la configuration du cache, implémenter les commandes de monitoring et la collecte des métriques.</description>
+      <step number="1">Ajouter la configuration cache à <file>.aklo.conf</file>.</step>
+      <step number="2">Implémenter la fonction <code>get_cache_config()</code> pour lire la configuration.</step>
+      <step number="3">Implémenter la commande <code>aklo cache status</code> pour afficher les statistiques cache.</step>
+      <step number="4">Implémenter la commande <code>aklo cache clear</code> pour vider le cache.</step>
+      <step number="5">Implémenter la commande <code>aklo cache benchmark</code> pour mesurer les performances avec/sans cache.</step>
+      <step number="6">Collecter automatiquement les métriques hit/miss.</step>
+      <step number="7">Afficher les gains de performance.</step>
+      <step number="8">Nettoyer automatiquement selon le TTL configuré.</step>
+      <step number="9">Écrire des tests pour toutes les commandes cache.</step>
+      <step number="10">Documenter les nouvelles commandes pour l'utilisateur.</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Configuration cache ajoutée à <file>.aklo.conf</file></criterion>
+      <criterion state="done">Fonction <code>get_cache_config()</code> pour lire configuration</criterion>
+      <criterion state="done">Commande <code>aklo cache status</code> implémentée</criterion>
+      <criterion state="done">Commande <code>aklo cache clear</code> implémentée</criterion>
+      <criterion state="done">Commande <code>aklo cache benchmark</code> implémentée</criterion>
+      <criterion state="done">Collecte automatique des métriques hit/miss</criterion>
+      <criterion state="done">Affichage des gains de performance</criterion>
+      <criterion state="done">Nettoyage automatique selon TTL configuré</criterion>
+      <criterion state="done">Tests de toutes les commandes cache</criterion>
+      <criterion state="done">Documentation utilisateur des nouvelles commandes</criterion>
+    </definition_of_done>
+  </content>
+</task>

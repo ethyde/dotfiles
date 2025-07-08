@@ -1,87 +1,188 @@
-# PROTOCOLE SPÉCIFIQUE : META-IMPROVEMENT (AMÉLIORATION DE LA CHARTE)
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="meta_improvement">
+   <description>
+      This protocol is activated to manage the evolution of the charter itself, ensuring it remains
+      a living, relevant, and effective tool.
+   </description>
 
-Ce protocole s'active pour gérer l'évolution de la charte elle-même, afin qu'elle reste un outil vivant, pertinent et efficace.
+   <section title="mission_and_deliverables">
+      <sub_section title="mission">
+         <introduction>
+            Identify frictions in work processes, propose improvements to existing protocols, and
+            formalize their updates in a traceable manner.
+         </introduction>
+      </sub_section>
+      <sub_section title="expected_deliverables">
+         <list>
+            <item>
+               <strong>Improvement Proposal:</strong> An `IMPROVE-[ID].xml` file created in
+               `/docs/backlog/18-improvements/`.
+            </item>
+            <item>
+               <strong>Charter Update:</strong> A commit containing the changes made to the relevant
+               protocol files.
+            </item>
+         </list>
+      </sub_section>
+   </section>
 
-## SECTION 1 : MISSION ET LIVRABLES
+   <section title="improvement_artefact_management_and_structure">
+      <sub_section title="naming">
+         <format>IMPROVE-[ID]-[Status].xml</format>
+         <details>
+            <detail name="ID">
+               A unique identifier generated from the title and date (e.g.,
+               `refine-debug-protocol-20250707`).
+            </detail>
+            <detail name="Status">The status of the proposal.</detail>
+         </details>
+      </sub_section>
+      <sub_section title="statuses">
+         <list>
+            <item name="PROPOSED">The proposal is drafted and awaiting discussion.</item>
+            <item name="ACCEPTED">The proposal is validated and ready for implementation.</item>
+            <item name="IMPLEMENTED">The charter has been updated.</item>
+         </list>
+      </sub_section>
+      <sub_section title="mandatory_improvement_artefact_structure">
+         <artefact_template format="xml">
+            <improvement_proposal id="[ID]">
+               <metadata>
+                  <responsible>[Human_Developer Name / AI_Agent]</responsible>
+                  <status>[PROPOSED | ACCEPTED | IMPLEMENTED]</status>
+                  <proposal_date>[YYYY-MM-DD]</proposal_date>
+               </metadata>
+               <content>
+                  <diagnosis_and_context>
+                     <affected_protocols>
+                        <protocol>e.g., 04-DEBUG.xml</protocol>
+                     </affected_protocols>
+                     <observed_friction>
+                        Describe the problem in detail, with a concrete example if possible.
+                     </observed_friction>
+                     <current_impact>
+                        What does this friction cause? (e.g., loss of time, frustration...).
+                     </current_impact>
+                  </diagnosis_and_context>
+                  <improvement_proposal_analysis>
+                     <proposed_solution>Describe the proposed change clearly.</proposed_solution>
+                     <expected_benefits>
+                        <item>Describe a specific expected benefit.</item>
+                     </expected_benefits>
+                     <potential_drawbacks_or_risks>
+                        <item>Describe a specific potential drawback or risk.</item>
+                     </potential_drawbacks_or_risks>
+                  </improvement_proposal_analysis>
+                  <implementation_plan>
+                     <required_modifications>
+                        Provide a diff or a precise description of the changes to be made.
+                     </required_modifications>
+                     <estimated_effort>Low / Medium / High</estimated_effort>
+                  </implementation_plan>
+                  <validation_checklist>
+                     <criterion state="todo">
+                        The impact of this change on other protocols has been assessed.
+                     </criterion>
+                     <criterion state="todo">
+                        The proposal is aligned with the fundamental principles of the charter
+                        (Traceability, Quality, etc.).
+                     </criterion>
+                     <criterion state="todo">
+                        Potential risks have been identified and are deemed acceptable.
+                     </criterion>
+                  </validation_checklist>
+               </content>
+            </improvement_proposal>
+         </artefact_template>
+         
+         <example>
+            <improvement_proposal id="refine-debug-protocol-20250707">
+               <metadata>
+                  <responsible>AI_Agent</responsible>
+                  <status>PROPOSED</status>
+                  <proposal_date>2025-07-07</proposal_date>
+               </metadata>
+               <content>
+                  <diagnosis_and_context>
+                     <affected_protocols>
+                        <protocol>04-DEBUG.xml</protocol>
+                     </affected_protocols>
+                     <observed_friction>
+                        During the `DEBUG-login-issue`, filling out the 'Investigation Log' took
+                        longer than the fix itself for an obvious bug.
+                     </observed_friction>
+                     <current_impact>
+                        Loss of time on simple fixes, frustration, tendency to bypass the protocol.
+                     </current_impact>
+                  </diagnosis_and_context>
+                  <improvement_proposal_analysis>
+                     <proposed_solution>
+                        Introduce a 'Quick Diagnosis' section in the `DEBUG` protocol for cases
+                        where the root cause is obvious, allowing to skip the 'Investigation Log'.
+                     </proposed_solution>
+                     <expected_benefits>
+                        <item>Significant time savings for simple bugs.</item>
+                        <item>Better adherence to the protocol by making it more flexible.</item>
+                     </expected_benefits>
+                     <potential_drawbacks_or_risks>
+                        <item>
+                           Risk that a bug wrongly deemed 'obvious' is not investigated enough,
+                           masking a deeper issue.
+                        </item>
+                     </potential_drawbacks_or_risks>
+                  </improvement_proposal_analysis>
+                  <implementation_plan>
+                     <required_modifications>
+                        Add a new optional section "Quick Diagnosis" to the DEBUG protocol. If
+                        filled, the "Investigation Log" section becomes optional.
+                     </required_modifications>
+                     <estimated_effort>Low</estimated_effort>
+                  </implementation_plan>
+                  <validation_checklist>
+                     <criterion state="done">
+                        The impact of this change on other protocols has been assessed.
+                     </criterion>
+                     <criterion state="todo">
+                        The proposal is aligned with the fundamental principles of the charter
+                        (Traceability, Quality, etc.).
+                     </criterion>
+                     <criterion state="done">
+                        Potential risks have been identified and are deemed acceptable.
+                     </criterion>
+                  </validation_checklist>
+               </content>
+            </improvement_proposal>
+         </example>
+      </sub_section>
+   </section>
 
-### 1.1. Mission
-
-Identifier les frictions dans les processus de travail, proposer des améliorations aux protocoles existants, et formaliser leur mise à jour de manière tracée.
-
-### 1.2. Livrables Attendus
-
-1.  **Proposition d'Amélioration :** Un fichier `IMPROVE-[ID].xml` créé dans `/docs/backlog/18-improvements/`.
-2.  **Mise à jour de la Charte :** Un `commit` contenant les modifications apportées aux fichiers de protocole concernés.
-
-## SECTION 2 : ARTEFACT IMPROVE - GESTION ET STRUCTURE
-
-### 2.1. Nommage
-
--   `IMPROVE-[ID]-[Status].xml`
-    -   `[ID]` : Un identifiant unique généré à partir du titre et de la date (ex: `description-du-sujet-20250629`).
-    -   `[Status]` : Le statut de la proposition.
-
-### 2.2. Statuts
-
--   `PROPOSED` : La proposition est rédigée et en attente de discussion.
--   `ACCEPTED` : La proposition est validée, prête pour implémentation.
--   `IMPLEMENTED` : La charte a été mise à jour.
-
-### 2.3. Structure Obligatoire du Fichier Improve
-```markdown
-# PROPOSITION D'AMÉLIORATION : [ID]
----
-**Responsable:** [Nom du Human_Developer / AI_Agent]
-**Statut:** [PROPOSED | ACCEPTED | IMPLEMENTED]
-**Date de Proposition:** $(date +'%Y-%m-%d')
----
-
-## 1. Diagnostic et Contexte
-
-- **Protocole(s) Concerné(s) :** (Liste des protocoles à modifier. Ex: `04-DEBOGAGE.xml`)
-- **Friction Observée (Le Problème) :** (Description détaillée du problème, avec si possible un exemple concret ou un lien vers un artefact qui a révélé le problème. Ex: "Lors du `DEBUG-login-issue`, la nécessité de remplir le 'Journal d'Investigation' a pris plus de temps que la correction elle-même pour un bug évident.")
-- **Impact Actuel :** (Qu'est-ce que cette friction engendre ? Ex: "Perte de temps sur les corrections simples, frustration, tendance à vouloir contourner le protocole.")
-
-## 2. Analyse de la Proposition d'Amélioration
-
-- **Solution Proposée :** (Description claire de la modification. Ex: "Introduire une section 'Diagnostic Rapide' dans le protocole `DEBOGAGE` pour les cas où la cause racine est évidente, permettant de sauter le 'Journal d'Investigation'.")
-- **Avantages Attendus :** - (Ex: "Gain de temps significatif pour les bugs simples.")
-  - (Ex: "Meilleure adhésion au protocole en le rendant plus flexible.")
-- **Inconvénients ou Risques Potentiels :**
-  - (Ex: "Risque qu'un bug jugé 'évident' à tort ne soit pas assez investigué, masquant un problème plus profond.")
-  - (Ex: "Nécessite une plus grande discipline de la part du développeur pour ne pas abuser de la procédure allégée.")
-
-## 3. Plan d'Action pour l'Implémentation
-
-- **Modifications à Apporter :** (Un `diff` ou une description précise des changements à effectuer dans les fichiers de la charte.)
-- **Effort d'Implémentation Estimé :** (Faible / Moyen / Élevé. Ex: "Faible, ne concerne que la mise à jour d'un fichier Markdown.")
-
-## 4. Checklist de Validation
-
-- [ ] L'impact de cette modification sur les autres protocoles a été évalué.
-- [ ] La proposition est alignée avec les principes fondamentaux de la charte (Traçabilité, Qualité, etc.).
-- [ ] Les risques potentiels ont été identifiés et sont jugés acceptables.
-```
-
-## SECTION 3 : PROCÉDURE D'AMÉLIORATION
-
-1.  **[ANALYSE] Phase 1 : Identification**
-
-      - Le `Human_Developer` ou l'`AI_Agent` identifie une friction dans les opérations quotidiennes.
-      - **Action Requise :**  Créer un fichier `IMPROVE-[ID]-PROPOSED.xml` dans `/docs/backlog/18-improvements/`.
-      - **⚡ Automatisation `aklo` :** `aklo meta "<Titre de l'amélioration>"`
-      - Remplir les sections "Diagnostic" et "Proposition de Solution".
-
-2.  **[ATTENTE\_VALIDATION] Phase 2 : Validation**
-
-      - Soumettre la proposition pour discussion et validation au `Human_Developer`.
-
-3.  **[PROCEDURE] Phase 3 : Implémentation**
-
-      - Une fois la proposition `ACCEPTED`, l'`AI_Agent` prépare un `diff` des modifications à apporter aux fichiers de la charte.
-      - Ce `diff` est soumis à une validation finale.
-
-4.  **[CONCLUSION] Phase 4 : Finalisation**
-
-      - Une fois le `diff` approuvé, créer un `commit` (ex: `chore(charte): refine debug protocol`).
-      - Mettre à jour l'artefact `IMPROVE-[ID]` au statut `IMPLEMENTED`.
+   <section title="improvement_procedure">
+      <step number="1" type="analysis" title="identification">
+         <description>
+            The `Human_Developer` or `AI_Agent` identifies friction in daily operations.
+         </description>
+         <required_action>
+            Create an `IMPROVE-[ID]-PROPOSED.xml` file in `/docs/backlog/18-improvements/` and fill
+            in the "Diagnosis" and "Proposed Solution" sections.
+         </required_action>
+         <automation command="aklo meta &quot;[Title of the improvement]&quot;"/>
+      </step>
+      <step number="2" type="awaiting_validation" title="validation">
+         <description>
+            Submit the proposal for discussion and validation to the `Human_Developer`.
+         </description>
+      </step>
+      <step number="3" type="procedure" title="implementation">
+         <description>
+            Once the proposal is `ACCEPTED`, the `AI_Agent` prepares a `diff` of the changes to be
+            made to the charter files. This `diff` is submitted for final validation.
+         </description>
+      </step>
+      <step number="4" type="conclusion" title="finalization">
+         <description>
+            Once the `diff` is approved, create a commit (e.g., `chore(charter): refine debug
+            protocol`) and update the `IMPROVE-[ID]` artefact to the `IMPLEMENTED` status.
+         </description>
+      </step>
+   </section>
+</protocol>

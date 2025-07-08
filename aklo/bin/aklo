@@ -184,7 +184,7 @@ fi
 # TASK-6-3: Version avec cache intelligent et fallback transparent
 parse_and_generate_artefact() {
   local protocol_name="$1"        # Ex: "03-DEVELOPPEMENT"
-  local artefact_type="$2"        # Ex: "PBI", "TASK"
+  local artefact_type="$2"        # Ex: "pbi", "task"
   local assistance_level="$3"     # "full", "skeleton", "minimal"
   local output_file="$4"          # Chemin du fichier de sortie
   local context_vars="$5"         # Variables contextuelles
@@ -211,24 +211,20 @@ parse_and_generate_artefact() {
     fi
   fi
   
-  # Fonction utilitaire pour le logging cache
+  # Logging cache sur stderr ET stdout
   log_cache_event() {
     local event="$1"
     local details="$2"
-    if [ "$AKLO_CACHE_DEBUG" = "true" ]; then
-      echo "[CACHE] $event: $details" >&2
-    fi
+    echo "[CACHE] $event: $details" >&2
+    echo "[CACHE] $event: $details"
   }
   
-  # Construire le chemin du protocole (relatif au répertoire racine)
+  # Construire le chemin du protocole
   local protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.xml"
-  
-  # Si pas trouvé en relatif, essayer le chemin absolu depuis le script
   if [ ! -f "$protocol_file" ]; then
     local script_dir="$(dirname "$(realpath "$0")")"
     protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml"
   fi
-  
   if [ ! -f "$protocol_file" ]; then
     echo "❌ Erreur : Protocole $protocol_name non trouvé dans la charte." >&2
     echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.xml" >&2
@@ -237,43 +233,33 @@ parse_and_generate_artefact() {
   fi
   
   local artefact_structure=""
+  local cache_file="/tmp/aklo_cache/protocol_${protocol_name}_${artefact_type}.parsed"
   
-  # NOUVEAU: Tentative d'utilisation du cache si activé
   if [ "$AKLO_CACHE_ENABLED" = "true" ]; then
     log_cache_event "CHECK" "Vérification cache pour ${protocol_name}/${artefact_type}"
-    
-    # Optimisation: Génération rapide du nom de fichier cache
-    local cache_file="/tmp/aklo_cache/protocol_${protocol_name}_${artefact_type}.parsed"
-    
-    # Optimisation: Vérification rapide de l'existence du cache
     if [ -f "$cache_file" ]; then
-      # Obtenir le timestamp du protocole (optimisé)
       local protocol_mtime
       if protocol_mtime=$(stat -f %m "$protocol_file" 2>/dev/null || stat -c %Y "$protocol_file" 2>/dev/null); then
-        # Vérifier la validité du cache (optimisé)
         local cache_mtime
         if cache_mtime=$(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null); then
           if [ "$cache_mtime" -ge "$protocol_mtime" ]; then
-            # Cache hit - lecture directe optimisée
             log_cache_event "HIT" "Cache valide trouvé: $cache_file"
             if artefact_structure=$(cat "$cache_file" 2>/dev/null); then
               log_cache_event "SUCCESS" "Cache lu avec succès"
-              # TASK-6-4: Enregistrer métrique cache hit
-              record_cache_metric "hit" 2>/dev/null || true
+              # Mise à jour des métriques de cache (HIT)
+              record_cache_metric "hit"
             else
               log_cache_event "ERROR" "Échec lecture cache - fallback vers extraction"
               artefact_structure=""
             fi
           else
-            # Cache miss - extraction et mise en cache
             log_cache_event "MISS" "Cache invalide ou inexistant"
-            if artefact_structure=$(extract_artefact_structure "$protocol_file" "$artefact_type"); then
-              # Mise en cache atomique
+            if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type"); then
               mkdir -p "/tmp/aklo_cache"
               echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
               log_cache_event "CACHED" "Structure extraite et mise en cache"
-              # TASK-6-4: Enregistrer métrique cache miss
-              record_cache_metric "miss" 2>/dev/null || true
+              # Mise à jour des métriques de cache (MISS)
+              record_cache_metric "miss"
             else
               log_cache_event "ERROR" "Échec extraction avec cache - fallback"
               artefact_structure=""
@@ -284,15 +270,13 @@ parse_and_generate_artefact() {
         log_cache_event "ERROR" "Impossible d'obtenir mtime - fallback"
       fi
     else
-      # Pas de cache existant - extraction et mise en cache
       log_cache_event "MISS" "Aucun cache trouvé"
-      if artefact_structure=$(extract_artefact_structure "$protocol_file" "$artefact_type"); then
-        # Mise en cache atomique
+      if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type"); then
         mkdir -p "/tmp/aklo_cache"
         echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
         log_cache_event "CACHED" "Structure extraite et mise en cache"
-        # TASK-6-4: Enregistrer métrique cache miss
-        record_cache_metric "miss" 2>/dev/null || true
+        # Mise à jour des métriques de cache (MISS)
+        record_cache_metric "miss"
       else
         log_cache_event "ERROR" "Échec extraction - fallback"
         artefact_structure=""
@@ -300,32 +284,25 @@ parse_and_generate_artefact() {
     fi
   else
     log_cache_event "DISABLED" "Cache désactivé par configuration"
+    artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type")
   fi
   
-  # Fallback vers méthode originale si cache échoue ou désactivé
   if [ -z "$artefact_structure" ]; then
-    log_cache_event "FALLBACK" "Utilisation méthode originale"
-    artefact_structure=$(extract_artefact_structure "$protocol_file" "$artefact_type")
-    
-    if [ -z "$artefact_structure" ]; then
-      echo "❌ Erreur : Structure d'artefact $artefact_type non trouvée dans $protocol_name." >&2
-      return 1
-    fi
-  fi
-  
-  # Appliquer le filtrage intelligent selon le niveau d'assistance
-  local filtered_content
-  if ! filtered_content=$(apply_intelligent_filtering "$artefact_structure" "$assistance_level" "$context_vars"); then
-    echo "❌ Erreur : Échec du filtrage intelligent." >&2
+    log_cache_event "FALLBACK" "Aucune structure extraite"
+    echo "❌ Erreur : Structure d'artefact $artefact_type non trouvée dans $protocol_name." >&2
     return 1
   fi
   
-  # Écrire le résultat dans le fichier de sortie
-  if ! echo "$filtered_content" > "$output_file"; then
+  # Injection dynamique des valeurs contextuelles dans le XML
+  local filtered_xml
+  filtered_xml=$(apply_intelligent_filtering "$artefact_structure" "$assistance_level" "$context_vars")
+
+  # Écriture du XML filtré dans le fichier de sortie
+  if ! echo "$filtered_xml" > "$output_file"; then
     echo "❌ Erreur : Impossible d'écrire dans $output_file." >&2
     return 1
   fi
-  
+
   log_cache_event "COMPLETE" "Génération artefact terminée: $output_file"
   return 0
 }
@@ -586,6 +563,18 @@ apply_intelligent_filtering() {
       filtered_content=$(echo "$filtered_content" | sed '/^$/N;/^\n$/d')
       ;;
   esac
+  
+  # Injection systématique des balises <title> et <status> si absentes
+  if echo "$filtered_content" | grep -q '<[a-zA-Z0-9_\-]\+>'; then
+    local artefact_tag
+    artefact_tag=$(echo "$filtered_content" | grep -o '<[a-zA-Z0-9_\-]\+>' | head -1 | sed 's/[<>]//g')
+    if [ -n "$title_value" ] && ! echo "$filtered_content" | grep -q '<title>'; then
+      filtered_content=$(echo "$filtered_content" | sed "0,/<$artefact_tag>/s//&\n  <title>$title_value<\/title>/")
+    fi
+    if [ -n "$status_value" ] && ! echo "$filtered_content" | grep -q '<status>'; then
+      filtered_content=$(echo "$filtered_content" | sed "0,/<$artefact_tag>/s//&\n  <status>$status_value<\/status>/")
+    fi
+  fi
   
   echo "$filtered_content"
 }
@@ -1675,7 +1664,14 @@ command_validate() {
 # Commande: cache - Gestion du cache intelligent (TASK-6-4)
 command_cache() {
   local action="$1"
-  
+
+  # Sourcing explicite du module de monitoring du cache pour garantir la disponibilité des fonctions
+  local script_dir="$(dirname "$(realpath "$0")")"
+  local cache_monitoring_module="${script_dir}/../modules/cache/cache_monitoring.sh"
+  if [ -f "$cache_monitoring_module" ]; then
+    source "$cache_monitoring_module"
+  fi
+
   case "$action" in
     "status")
       show_cache_status

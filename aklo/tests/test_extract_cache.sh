@@ -5,7 +5,7 @@
 # Définition du test
 test_extract_and_cache_integration() {
     # 1. Préparation
-    test_suite "Integration Test: extract_and_cache_structure"
+    test_suite "Integration Test: extract_and_cache_structure (XML natif)"
     source_test_helpers "cache/cache_functions.sh" "io/extract_functions.sh"
 
     local temp_dir
@@ -13,27 +13,22 @@ test_extract_and_cache_integration() {
     # Assurer le nettoyage à la fin du test
     add_cleanup "rm -rf '$temp_dir'"
 
-    # Créer un faux fichier de protocole
+    # Créer un faux fichier de protocole XML natif
     local protocol_file="$temp_dir/PROTOCOLE-TEST.xml"
     cat > "$protocol_file" << 'EOF'
-# Protocole de Test
-
-## SECTION 2: Structures
-
-### 2.3. Structure Obligatoire Du Fichier PBI
-```markdown
-# PBI-{{ID}} : {{TITLE}}
-
-**As a** [user type]
-**I want to** [goal]
-**So that** [reason]
-```
-
-## SECTION 3: Processus
+<protocol name="test_proto">
+  <artefact_template>
+    <pbi>
+      <id>99</id>
+      <title>PBI XML Cache</title>
+      <description>Test cache XML natif</description>
+    </pbi>
+  </artefact_template>
+</protocol>
 EOF
 
     # Définir les variables pour la fonction à tester
-    local artefact_type="PBI"
+    local artefact_type="pbi"
     local protocol_name
     protocol_name=$(basename "$protocol_file" .xml)
     local cache_file
@@ -41,7 +36,6 @@ EOF
     # Rediriger le cache vers notre répertoire temporaire
     cache_file="$temp_dir/$(basename "$cache_file")"
     local mtime_file="${cache_file}.mtime"
-
 
     # 2. Exécution
     local extracted_structure
@@ -54,14 +48,14 @@ EOF
     # Vérifier le contenu extrait
     local expected_structure
     expected_structure=$(cat << 'EOF'
-# PBI-{{ID}} : {{TITLE}}
-
-**As a** [user type]
-**I want to** [goal]
-**So that** [reason]
+<pbi>
+  <id>99</id>
+  <title>PBI XML Cache</title>
+  <description>Test cache XML natif</description>
+</pbi>
 EOF
 )
-    assert_equals "$expected_structure" "$extracted_structure" "La structure extraite est correcte"
+    assert_equals "$expected_structure" "$extracted_structure" "La structure extraite est correcte (XML)"
 
     # Vérifier la création des fichiers de cache
     assert_file_exists "$cache_file" "Le fichier de cache .parsed doit être créé"
@@ -70,5 +64,5 @@ EOF
     # Vérifier le contenu du fichier de cache
     local cached_content
     cached_content=$(cat "$cache_file")
-    assert_equals "$expected_structure" "$cached_content" "Le contenu du fichier de cache est correct"
+    assert_equals "$expected_structure" "$cached_content" "Le contenu du fichier de cache est correct (XML)"
 } 

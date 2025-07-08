@@ -1,23 +1,20 @@
-# TASK-6-2 : Fonction de mise en cache des structures protocoles
-
----
-**Statut:** DONE
-**Date de création:** 2025-01-27
-**PBI Parent:** PBI-6 - Cache intelligent du parser générique
-**Effort estimé:** 2 points
-**Branche:** feature/task-6-2
-**Dépendance:** TASK-6-1 (Infrastructure de base)
----
-
-## 1. Description Technique
-
-Implémenter la fonction de mise en cache qui extrait et stocke les structures des protocoles pour réutilisation ultérieure.
-
-## 2. Spécifications Détaillées
-
-### 2.1. Fonction principale à implémenter
-
-```bash
+<task pbi_id="6" task_id="2" status="done" title="Fonction de mise en cache des structures protocoles">
+  <metadata>
+    <parent_pbi>PBI-6</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <assignee></assignee>
+    <git_branch>feature/task-6-2</git_branch>
+    <creation_date>2025-01-27</creation_date>
+    <effort>2 points</effort>
+    <dependency>TASK-6-1</dependency>
+  </metadata>
+  <content>
+    <technical_objective>
+      Implémenter la fonction de mise en cache qui extrait et stocke les structures des protocoles pour réutilisation ultérieure.
+    </technical_objective>
+    <context_and_files>
+      Fonction principale à implémenter :
+      <code language="bash"><![CDATA[
 extract_and_cache_structure() {
   local protocol_file="$1"
   local artefact_type="$2" 
@@ -33,24 +30,40 @@ extract_and_cache_structure() {
   
   echo "$structure"
 }
-```
-
-### 2.2. Optimisations requises
-
-- **Validation entrées :** Vérification existence fichier protocole
-- **Gestion erreurs :** Fallback si échec de cache
-- **Atomic write :** Écriture atomique pour éviter corruption
-- **Permissions :** Gestion des droits d'écriture
-
-## 3. Definition of Done
-
-- [x] Fonction `extract_and_cache_structure()` implémentée
-- [x] Validation des paramètres d'entrée
-- [x] Gestion d'erreurs robuste avec fallback
-- [x] Écriture atomique des fichiers cache
-- [x] Tests unitaires pour tous les types d'artefacts
-- [x] Tests d'erreur (fichier inexistant, permissions, etc.)
-- [x] Intégration avec infrastructure TASK-6-1
-- [x] Documentation JSDoc complète
-- [x] Validation linter et typage
-- [x] Benchmark de performance (mesure temps extraction)
+      ]]></code>
+      Optimisations requises :
+      <ul>
+        <li>Validation entrées : Vérification existence fichier protocole</li>
+        <li>Gestion erreurs : Fallback si échec de cache</li>
+        <li>Atomic write : Écriture atomique pour éviter corruption</li>
+        <li>Permissions : Gestion des droits d'écriture</li>
+      </ul>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Implémenter la fonction d'extraction et de mise en cache, gérer les erreurs et optimiser la robustesse.</description>
+      <step number="1">Implémenter <code>extract_and_cache_structure()</code> pour extraire et stocker la structure d'un protocole.</step>
+      <step number="2">Valider les paramètres d'entrée (existence du fichier protocole).</step>
+      <step number="3">Gérer les erreurs avec fallback si le cache échoue.</step>
+      <step number="4">Assurer l'écriture atomique des fichiers cache.</step>
+      <step number="5">Gérer les permissions d'écriture.</step>
+      <step number="6">Écrire des tests unitaires pour tous les types d'artefacts.</step>
+      <step number="7">Tester les cas d'erreur (fichier inexistant, permissions, etc.).</step>
+      <step number="8">Intégrer avec l'infrastructure de TASK-6-1.</step>
+      <step number="9">Documenter chaque fonction avec JSDoc.</step>
+      <step number="10">Valider le code avec le linter et le typage.</step>
+      <step number="11">Mesurer les performances (benchmark extraction).</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">Fonction <code>extract_and_cache_structure()</code> implémentée</criterion>
+      <criterion state="done">Validation des paramètres d'entrée</criterion>
+      <criterion state="done">Gestion d'erreurs robuste avec fallback</criterion>
+      <criterion state="done">Écriture atomique des fichiers cache</criterion>
+      <criterion state="done">Tests unitaires pour tous les types d'artefacts</criterion>
+      <criterion state="done">Tests d'erreur (fichier inexistant, permissions, etc.)</criterion>
+      <criterion state="done">Intégration avec infrastructure TASK-6-1</criterion>
+      <criterion state="done">Documentation JSDoc complète</criterion>
+      <criterion state="done">Validation linter et typage</criterion>
+      <criterion state="done">Benchmark de performance (mesure temps extraction)</criterion>
+    </definition_of_done>
+  </content>
+</task>

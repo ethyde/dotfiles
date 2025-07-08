@@ -1,54 +1,38 @@
-# PROPOSITION D'AMÉLIORATION : -valuation-d-une-migration-des-artefacts-vers-xml-20250705
----
-**Responsable:** AI_Agent
-**Statut:** PROPOSED
-**Date de Proposition:** 2025-07-05
----
-
-## 1. Diagnostic et Contexte
-
-- **Protocole(s) Concerné(s) :** Potentiellement **TOUS**. Une migration vers XML impacterait la manière dont chaque artefact est créé, lu, et modifié.
-- **Friction Observée (Le Problème) :** Le format Markdown actuel, bien que lisible par l'homme, manque de structure formelle. La validation des artefacts repose sur des expressions régulières et des conventions, ce qui peut être fragile. Une structure plus rigide pourrait-elle améliorer la robustesse du système ? C'est la question fondamentale.
-- **Impact Actuel :** Le système est fonctionnel mais sa validation de données est "soft". Une erreur de formatage dans un artefact peut passer inaperçue jusqu'à l'exécution, et la modification des structures d'artefacts nécessite de mettre à jour de nombreux scripts de parsing basés sur `sed`, `awk` ou `grep`.
-
-## 2. Analyse de la Proposition d'Amélioration
-
-- **Solution Proposée :** Évaluer la migration des protocoles de la charte et des nouveaux artefacts vers le format XML.
-
-- **Avantages Attendus :**
-  - **Validation Robuste :** Possibilité de définir des schémas (XSD) pour chaque type d'artefact, garantissant une structure toujours valide.
-  - **Interrogation Puissante :** Utilisation de XPath et XSLT pour extraire et transformer des données, beaucoup plus puissant et moins fragile que les regex.
-  - **Écosystème Mature :** Accès à une vaste gamme de bibliothèques de parsing et de manipulation XML.
-
-- **Inconvénients ou Risques Potentiels :**
-  - **Perte de Lisibilité Humaine :** Le XML est verbeux et beaucoup moins agréable à lire et à écrire manuellement que le Markdown.
-  - **Complexité Accidentelle :** Introduction d'une couche de complexité (parsing XML, gestion des namespaces) pour résoudre un problème peut-être déjà bien géré.
-  - **Impact Massif sur l'Outillage Existant :** **TOUS** les scripts `aklo` qui lisent ou écrivent des fichiers devraient être entièrement réécrits.
-  - **Défi de la Cohabitation :** Laisser les anciens artefacts en Markdown tout en créant les nouveaux en XML obligerait le système à être "bilingue", augmentant massivement la complexité de chaque commande lisant des artefacts.
-
-## 3. Plan d'Action pour l'Implémentation
-
-- **Étape 1 : Migration de la Charte.**
-    - Convertir tous les protocoles de `aklo/charte/PROTOCOLES/` en `.xml`.
-    - Définir un schéma XSD formel pour la structure d'un protocole.
-
-- **Étape 2 : Refactorisation du Parser et des Générateurs.**
-    - Remplacer la logique `grep`/`sed` par un parseur XML (ex: `xmlstarlet`).
-    - Mettre à jour les commandes (`propose-pbi`, `plan`, `arch`...) pour qu'elles lisent les templates XML et génèrent des artefacts `.xml`.
-
-- **Étape 3 : Décision Stratégique sur les Artefacts Existants.**
-    - **Option A (Système Bilingue) :** Modifier toutes les commandes pour qu'elles gèrent à la fois les anciens `.xml` et les nouveaux `.xml`. **Effort continu élevé, risque de bugs.**
-    - **Option B (Migration Complète) :** Créer un script de migration unique pour convertir tous les artefacts `.xml` existants en `.xml`. **Effort initial élevé, mais solution propre et durable.**
-
-- **Étape 4 : Preuve de Concept (PoC) sur un périmètre limité.**
-    - Appliquer les étapes 1 et 2 uniquement pour le protocole `00-PRODUCT-OWNER.xml`.
-    - Implémenter la commande `aklo propose-pbi` pour générer un PBI en `.xml`.
-    - Évaluer la complexité réelle sur ce cas d'usage avant de généraliser.
-
-- **Effort d'Implémentation Estimé :** **Critique.** C'est une réécriture quasi-complète du système.
-
-## 4. Checklist de Validation
-
-- [ ] L'impact de cette modification sur les autres protocoles a été évalué. (Impact : Maximal)
-- [ ] La proposition est alignée avec les principes fondamentaux de la charte (Traçabilité, Qualité, etc.).
-- [ ] Les risques potentiels ont été identifiés et sont jugés acceptables.
+<improvement id="valuation-migration-artefacts-xml-20250705" status="proposed" title="Évaluation d'une migration des artefacts vers XML">
+  <metadata>
+    <author>Human_Developer</author>
+    <date>2025-07-05</date>
+    <related_pbi>PBI-13</related_pbi>
+    <document_reference>IMPROVE--valuation-d-une-migration-des-artefacts-vers-xml-20250705.xml</document_reference>
+  </metadata>
+  <content>
+    <context>
+      La gestion des artefacts projet (PBI, TASK, ARCH, etc.) est actuellement réalisée en markdown, ce qui pose des limites pour l'automatisation, la validation et l'intégration avec les outils Aklo.
+    </context>
+    <problem>
+      <item>Validation manuelle fastidieuse et sujette à erreur</item>
+      <item>Difficulté d'intégration avec les outils d'analyse et de reporting</item>
+      <item>Absence de schéma formel pour garantir la cohérence</item>
+    </problem>
+    <objectives>
+      <item>Évaluer la faisabilité d'une migration complète vers XML</item>
+      <item>Définir les templates XML stricts pour chaque type d'artefact</item>
+      <item>Automatiser la validation et la génération des artefacts</item>
+    </objectives>
+    <proposed_solution>
+      <item>Migration progressive des artefacts existants vers XML</item>
+      <item>Utilisation des protocoles de la Charte Aklo pour définir les schémas</item>
+      <item>Développement d'outils de conversion et de validation automatique</item>
+    </proposed_solution>
+    <impact>
+      <item>Amélioration de la robustesse et de la cohérence documentaire</item>
+      <item>Facilitation de l'automatisation des workflows Aklo</item>
+      <item>Réduction des erreurs humaines lors de la création/modification d'artefacts</item>
+    </impact>
+    <open_questions>
+      <item>Quels outils de conversion et de validation seront nécessaires ?</item>
+      <item>Comment gérer la migration des artefacts historiques ?</item>
+      <item>Quel impact sur les processus existants et la formation des utilisateurs ?</item>
+    </open_questions>
+  </content>
+</improvement>
