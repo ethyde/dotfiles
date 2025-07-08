@@ -268,6 +268,80 @@ aklo_execute_shell() {
       '{"status": $status, "stdout": $stdout, "stderr": $stderr, "exit_code": $exit_code}'
 }
 
+#==============================================================================
+# Fonction : aklo_status_shell
+# Description :
+#   Statut projet détaillé avec métriques, analyse artefacts, rapport santé.
+#   - Calcul des métriques (PBI/TASK par statut, config, activité)
+#   - Analyse artefacts par type et statut
+#   - Rapport santé (indicateurs, alertes)
+#   - Gestion projets non initialisés
+#   - Formatage JSON structuré
+#
+# Usage :
+#   aklo_status_shell
+#   (attend un JSON sur stdin avec le champ optionnel workdir)
+#
+# Limitations :
+#   - Fallback natif limité si jq absent
+#   - Performance dépend du nombre d’artefacts
+#==============================================================================
+aklo_status_shell() {
+    # Lire l'entrée JSON depuis stdin
+    local input
+    input=$(cat)
+    # Parsing workdir (jq ou fallback natif)
+    local workdir
+    if command -v jq >/dev/null 2>&1; then
+        workdir=$(echo "$input" | jq -r '.workdir // "."')
+    else
+        workdir=$(echo "$input" | grep -o '"workdir"[ ]*:[ ]*"[^"]*"' | sed 's/.*: *"\([^"]*\)"/\1/')
+        [ -z "$workdir" ] && workdir="."
+    fi
+    # Vérifier initialisation projet Aklo
+    local aklo_conf_file="$workdir/aklo/config/.aklo.conf"
+    local aklo_config="Non configuré"
+    [ -f "$aklo_conf_file" ] && aklo_config="Configuré"
+    # Calcul métriques artefacts
+    local pbi_proposed pbi_done pbi_total task_todo task_done task_total
+    pbi_proposed=$(ls "$workdir/docs/backlog/00-pbi/"*-PROPOSED.xml 2>/dev/null | wc -l | tr -d ' ')
+    pbi_done=$(ls "$workdir/docs/backlog/00-pbi/"*-DONE.xml 2>/dev/null | wc -l | tr -d ' ')
+    pbi_total=$(ls "$workdir/docs/backlog/00-pbi/"PBI-*.xml 2>/dev/null | wc -l | tr -d ' ')
+    task_todo=$(ls "$workdir/docs/backlog/01-tasks/"*-TODO.xml 2>/dev/null | wc -l | tr -d ' ')
+    task_done=$(ls "$workdir/docs/backlog/01-tasks/"*-DONE.xml 2>/dev/null | wc -l | tr -d ' ')
+    task_total=$(ls "$workdir/docs/backlog/01-tasks/"TASK-*.xml 2>/dev/null | wc -l | tr -d ' ')
+    # Dernière activité
+    local last_activity
+    last_activity=$(find "$workdir/docs/backlog" -name "*.xml" -type f -exec stat -f "%m %N" {} \; 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2- | xargs basename)
+    # Rapport santé
+    local health="OK"
+    local alerts=()
+    [ "$aklo_config" = "Non configuré" ] && alerts+=("Projet non initialisé Aklo")
+    [ "$pbi_total" -eq 0 ] && alerts+=("Aucun PBI")
+    [ "$task_total" -eq 0 ] && alerts+=("Aucune Task")
+    [ "$pbi_done" -eq 0 ] && alerts+=("Aucun PBI terminé")
+    [ "$task_done" -eq 0 ] && alerts+=("Aucune Task terminée")
+    [ ${#alerts[@]} -gt 0 ] && health="ALERT"
+    # Formatage JSON
+    jq -n \
+      --arg aklo_config "$aklo_config" \
+      --arg last_activity "$last_activity" \
+      --arg health "$health" \
+      --argjson pbi_total "$pbi_total" --argjson pbi_proposed "$pbi_proposed" --argjson pbi_done "$pbi_done" \
+      --argjson task_total "$task_total" --argjson task_todo "$task_todo" --argjson task_done "$task_done" \
+      --argjson alerts "[\"${alerts[@]}\"]" \
+      '{
+        aklo_config: $aklo_config,
+        last_activity: $last_activity,
+        metrics: {
+          pbi: { total: $pbi_total, proposed: $pbi_proposed, done: $pbi_done },
+          task: { total: $task_total, todo: $task_todo, done: $task_done }
+        },
+        health: $health,
+        alerts: $alerts
+      }'
+}
+
 # Routeur de commande principal
 main() {
     local tool_name="$1"
@@ -281,8 +355,11 @@ main() {
         "aklo_execute_shell")
             aklo_execute_shell
             ;;
+        "aklo_status_shell")
+            aklo_status_shell
+            ;;
         "tools/list")
-            jq -n '{ tools: ["safe_shell", "project_info", "aklo_execute_shell"] }'
+            jq -n '{ tools: ["safe_shell", "project_info", "aklo_execute_shell", "aklo_status_shell"] }'
             ;;
         *)
             log_error "Unknown tool: $tool_name"
