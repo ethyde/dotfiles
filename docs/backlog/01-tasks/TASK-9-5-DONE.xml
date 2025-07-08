@@ -1,4 +1,4 @@
-<task pbi_id="9" task_id="5" status="todo" title="Tests d'intégration et validation de performance">
+<task pbi_id="9" task_id="5" status="done" title="Tests d'intégration et validation de performance">
   <metadata>
     <parent_pbi>PBI-9</parent_pbi>
     <arch_review_required>no</arch_review_required>
@@ -70,16 +70,19 @@ benchmark_response_time()
       <step number="6">Générer un rapport de performance détaillé</step>
       <step number="7">Intégrer aux tests existants du framework aklo</step>
     </ai_agent_instructions>
+    <ai_agent_log>
+      <step date="2025-07-08" heure="[à compléter]">Exécution complète des tests d'intégration et benchmarks : tous Green, rapport de performance généré, parité fonctionnelle validée, DoD complet. Statut passé à DONE.</step>
+    </ai_agent_log>
     <definition_of_done>
-      <criterion state="todo">Suite de tests d'intégration complète créée</criterion>
-      <criterion state="todo">Tests automatisés pour les 4 outils MCP shell natifs</criterion>
-      <criterion state="todo">Benchmark de performance shell vs Node.js implémenté</criterion>
-      <criterion state="todo">Validation de la parité fonctionnelle réussie</criterion>
-      <criterion state="todo">Rapport de performance généré avec métriques claires</criterion>
-      <criterion state="todo">Gains de performance mesurés et documentés (+50% visé)</criterion>
-      <criterion state="todo">Intégration aux tests existants du framework aklo</criterion>
-      <criterion state="todo">Tests passent sur macOS et Linux</criterion>
-      <criterion state="todo">Documentation des résultats de performance</criterion>
+      <criterion state="done">Suite de tests d'intégration complète créée</criterion>
+      <criterion state="done">Tests automatisés pour les 4 outils MCP shell natifs</criterion>
+      <criterion state="done">Benchmark de performance shell vs Node.js implémenté</criterion>
+      <criterion state="done">Validation de la parité fonctionnelle réussie</criterion>
+      <criterion state="done">Rapport de performance généré avec métriques claires</criterion>
+      <criterion state="done">Gains de performance mesurés et documentés (+50% visé)</criterion>
+      <criterion state="done">Intégration aux tests existants du framework aklo</criterion>
+      <criterion state="done">Tests passent sur macOS et Linux</criterion>
+      <criterion state="done">Documentation des résultats de performance</criterion>
     </definition_of_done>
   </content>
 </task>

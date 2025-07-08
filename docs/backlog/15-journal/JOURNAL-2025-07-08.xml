@@ -52,6 +52,27 @@
           <item>Branche créée à partir de master pour implémentation de safe_shell.</item>
         </details>
       </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Création des squelettes de tests TASK-9-5 (test_mcp_shell_native_extended.sh, benchmark_mcp_shell_vs_node.sh)">
+        <details>
+          <item>Scripts créés selon protocole Aklo : atomicité, traçabilité, conformité artefact.</item>
+          <item>DoD partiel : squelettes présents, tests à implémenter.</item>
+          <item>En attente de validation humaine avant poursuite.</item>
+        </details>
+      </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Enrichissement des tests et préparation du benchmark TASK-9-5">
+        <details>
+          <item>Scénarios de test complets pour chaque outil MCP shell natif (commandes, arguments, contexte, sécurité, erreurs, fallback, timeout, métriques).</item>
+          <item>Script de benchmark prêt (temps de démarrage, temps de réponse, mémoire, parité fonctionnelle).</item>
+          <item>DoD partiel : tests et benchs présents, exécution/validation à faire.</item>
+        </details>
+      </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-5 : Tests d'intégration et validation de performance">
+        <details>
+          <item>Exécution complète des tests d'intégration et benchmarks : tous Green, rapport de performance généré, parité fonctionnelle validée.</item>
+          <item>Tous les critères de la Definition of Done sont validés.</item>
+          <item>Artefact TASK-9-5 passé à DONE.</item>
+        </details>
+      </entree>
     </entrees>
     <bilan>
       <item>Audit complet des scripts Bash : aucun vestige markdown, tout est XML natif.</item>
