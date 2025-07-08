@@ -1,0 +1,38 @@
+<task pbi_id="9" task_id="1" status="done" title="Implémentation outil safe_shell en shell natif">
+  <metadata>
+    <parent_pbi>PBI-9</parent_pbi>
+    <arch_review_required>yes</arch_review_required>
+    <architecture_document optional="true">ARCH-9-1-VALIDATED.xml</architecture_document>
+    <assignee>Non assigné</assignee>
+    <git_branch>feature/task-9-1</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Implémenter l'outil safe_shell dans le serveur MCP shell natif (aklo-terminal.sh) pour permettre l'exécution sécurisée de commandes shell avec validation via un fichier commands.whitelist configurable, gestion des timeouts et logs sécurisés.
+    </technical_objective>
+    <context_and_files>
+      Fichiers à modifier :
+      - /aklo/modules/mcp/shell-native/aklo-terminal.sh
+      - /aklo/config/commands.whitelist (à créer)
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Instructions détaillées pour l'agent :</description>
+      <step number="1">Analyser la structure actuelle du serveur shell natif aklo-terminal.sh</step>
+      <step number="2">Ajouter safe_shell à la liste des outils dans la réponse tools/list</step>
+      <step number="3">Implémenter la fonction handle_safe_shell avec parsing des paramètres JSON, lecture de la whitelist, validation, exécution avec timeout, gestion des erreurs et retour JSON</step>
+      <step number="4">Ajouter le case safe_shell dans la fonction tools/call</step>
+      <step number="5">Tester la sécurité avec des commandes interdites</step>
+      <step number="6">Valider la compatibilité avec le serveur Node.js</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">L'outil safe_shell est ajouté à la liste des outils MCP</criterion>
+      <criterion state="done">La fonction handle_safe_shell est implémentée avec validation sécurisée depuis un fichier externe</criterion>
+      <criterion state="done">Les commandes non présentes dans la whitelist sont rejetées</criterion>
+      <criterion state="done">Le timeout fonctionne correctement (défaut 30s)</criterion>
+      <criterion state="done">L'exécution dans un répertoire spécifique fonctionne</criterion>
+      <criterion state="done">Les réponses JSON sont conformes au protocole MCP</criterion>
+      <criterion state="done">Tests manuels réussis avec commandes autorisées et interdites</criterion>
+      <criterion state="done">Documentation mise à jour dans les commentaires du code</criterion>
+    </definition_of_done>
+  </content>
+</task>
