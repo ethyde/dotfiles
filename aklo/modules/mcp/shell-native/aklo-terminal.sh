@@ -111,6 +111,90 @@ safe_shell() {
       '{"status": $status, "stdout": $stdout, "stderr": $stderr, "exit_code": $exit_code}'
 }
 
+#==============================================================================
+# Fonction : project_info
+# Description :
+#   Retourne les informations projet (package.json, git, .aklo.conf, artefacts XML)
+#   - Parsing JSON hybride (jq ou fallback natif)
+#   - Extraction des infos package.json (name, version, description)
+#   - Infos git (branche, status, remote)
+#   - Lecture .aklo.conf (si présent)
+#   - Comptage artefacts XML (PBI, TASK) par statut
+#   - Retour JSON structuré conforme MCP
+#
+# Usage :
+#   project_info
+#   (attend un JSON sur stdin avec le champ optionnel workdir)
+#
+# Limitations :
+#   - Fallback natif limité si jq absent
+#   - Ne gère pas les sous-modules git
+#==============================================================================
+project_info() {
+    # Déterminer le chemin du script pour un accès fiable
+    local script_dir
+    script_dir=$(cd "$(dirname "$0")" && pwd)
+    # Lire l'entrée JSON depuis stdin
+    local input
+    input=$(cat)
+    # Parsing workdir (jq ou fallback natif)
+    local workdir
+    if command -v jq >/dev/null 2>&1; then
+        workdir=$(echo "$input" | jq -r '.workdir // "."')
+    else
+        workdir=$(echo "$input" | grep -o '"workdir"[ ]*:[ ]*"[^"]*"' | sed 's/.*: *"\([^"]*\)"/\1/')
+        [ -z "$workdir" ] && workdir="."
+    fi
+    # Extraction package.json
+    local pkg_file="$workdir/package.json"
+    local pkg_name pkg_version pkg_desc
+    if [ -f "$pkg_file" ]; then
+        if command -v jq >/dev/null 2>&1; then
+            pkg_name=$(jq -r '.name' "$pkg_file")
+            pkg_version=$(jq -r '.version' "$pkg_file")
+            pkg_desc=$(jq -r '.description' "$pkg_file")
+        else
+            pkg_name=$(grep '"name"' "$pkg_file" | head -1 | sed 's/.*: *"\([^"]*\)",*/\1/')
+            pkg_version=$(grep '"version"' "$pkg_file" | head -1 | sed 's/.*: *"\([^"]*\)",*/\1/')
+            pkg_desc=$(grep '"description"' "$pkg_file" | head -1 | sed 's/.*: *"\([^"]*\)",*/\1/')
+        fi
+    fi
+    # Infos git
+    local git_branch git_status git_remote
+    if [ -d "$workdir/.git" ]; then
+        git_branch=$(cd "$workdir" && git rev-parse --abbrev-ref HEAD 2>/dev/null)
+        git_status=$(cd "$workdir" && git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+        git_remote=$(cd "$workdir" && git remote get-url origin 2>/dev/null)
+    fi
+    # Lecture .aklo.conf
+    local aklo_conf_file="$workdir/aklo/config/.aklo.conf"
+    local aklo_conf=""
+    [ -f "$aklo_conf_file" ] && aklo_conf=$(cat "$aklo_conf_file")
+    # Comptage artefacts XML (PBI, TASK) par statut
+    local pbi_total pbi_proposed pbi_done task_total task_todo task_done
+    pbi_total=$(find "$workdir/docs/backlog/00-pbi" -name 'PBI-*.xml' 2>/dev/null | wc -l | tr -d ' ')
+    pbi_proposed=$(grep -l '<status>PROPOSED</status>' "$workdir/docs/backlog/00-pbi"/PBI-*.xml 2>/dev/null | wc -l | tr -d ' ')
+    pbi_done=$(grep -l '<status>DONE</status>' "$workdir/docs/backlog/00-pbi"/PBI-*.xml 2>/dev/null | wc -l | tr -d ' ')
+    task_total=$(find "$workdir/docs/backlog/01-tasks" -name 'TASK-*.xml' 2>/dev/null | wc -l | tr -d ' ')
+    task_todo=$(grep -l '<status>TODO</status>' "$workdir/docs/backlog/01-tasks"/TASK-*.xml 2>/dev/null | wc -l | tr -d ' ')
+    task_done=$(grep -l '<status>DONE</status>' "$workdir/docs/backlog/01-tasks"/TASK-*.xml 2>/dev/null | wc -l | tr -d ' ')
+    # Retour JSON structuré
+    jq -n --arg pkg_name "$pkg_name" --arg pkg_version "$pkg_version" --arg pkg_desc "$pkg_desc" \
+          --arg git_branch "$git_branch" --arg git_status "$git_status" --arg git_remote "$git_remote" \
+          --arg aklo_conf "$aklo_conf" \
+          --argjson pbi_total "$pbi_total" --argjson pbi_proposed "$pbi_proposed" --argjson pbi_done "$pbi_done" \
+          --argjson task_total "$task_total" --argjson task_todo "$task_todo" --argjson task_done "$task_done" \
+          '{
+            package: { name: $pkg_name, version: $pkg_version, description: $pkg_desc },
+            git: { branch: $git_branch, status_count: $git_status, remote: $git_remote },
+            aklo_conf: $aklo_conf,
+            artefacts: {
+              pbi: { total: $pbi_total, proposed: $pbi_proposed, done: $pbi_done },
+              task: { total: $task_total, todo: $task_todo, done: $task_done }
+            }
+          }'
+}
+
 # Routeur de commande principal
 main() {
     local tool_name="$1"
@@ -118,8 +202,11 @@ main() {
         "safe_shell")
             safe_shell
             ;;
+        "project_info")
+            project_info
+            ;;
         "tools/list")
-            jq -n '{ tools: ["safe_shell"] }'
+            jq -n '{ tools: ["safe_shell", "project_info"] }'
             ;;
         *)
             log_error "Unknown tool: $tool_name"
