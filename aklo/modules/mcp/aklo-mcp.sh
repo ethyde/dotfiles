@@ -258,6 +258,12 @@ main() {
         "status")
             cmd_status "$@"
             ;;
+        "safe_shell")
+            "$SCRIPT_DIR/shell-native/aklo-terminal.sh" safe_shell
+            ;;
+        "tools/list")
+            "$SCRIPT_DIR/shell-native/aklo-terminal.sh" tools/list
+            ;;
         "help"|"--help"|"-h"|"")
             show_help
             ;;

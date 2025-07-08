@@ -14,7 +14,40 @@ log_error() {
     exit 1
 }
 
-# Fonction principale pour exécuter une commande shell sécurisée
+#==============================================================================
+# Fonction : safe_shell
+# Description :
+#   Exécute une commande shell de façon sécurisée selon le protocole MCP.
+#   - Valide la commande via une whitelist externe (commands.whitelist)
+#   - Gère le timeout d’exécution
+#   - Exécute dans un répertoire de travail spécifique
+#   - Retourne un résultat JSON structuré (status, stdout, stderr, exit_code)
+#
+# Usage :
+#   safe_shell
+#   (attend un JSON sur stdin avec les champs suivants)
+#
+# Paramètres JSON attendus :
+#   {
+#     "command": "<commande shell>",
+#     "workdir": "<répertoire de travail, optionnel>",
+#     "timeout": <timeout en ms, optionnel>
+#   }
+#
+# Sécurité :
+#   - Seule la commande de base (ex: "ls" de "ls -l") est validée via la whitelist
+#   - Toute commande non listée est rejetée
+#   - Timeout par défaut à 30s si non précisé
+#   - Exécution isolée dans le répertoire spécifié
+#
+# Protocole MCP :
+#   - Respecte la structure de réponse JSON attendue par le serveur MCP
+#   - Conforme à la charte Aklo (pas d’exécution hors whitelist, logs structurés)
+#
+# Limitations :
+#   - Ne gère pas les pipes/redirects complexes (validation sur la commande de base uniquement)
+#   - Dépend de jq et timeout
+#==============================================================================
 safe_shell() {
     # Déterminer le chemin du script pour un accès fiable aux fichiers de config
     local script_dir
@@ -84,6 +117,9 @@ main() {
     case "$tool_name" in
         "safe_shell")
             safe_shell
+            ;;
+        "tools/list")
+            jq -n '{ tools: ["safe_shell"] }'
             ;;
         *)
             log_error "Unknown tool: $tool_name"

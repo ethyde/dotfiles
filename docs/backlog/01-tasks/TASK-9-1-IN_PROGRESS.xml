@@ -1,4 +1,4 @@
-<task pbi_id="9" task_id="1" status="in_progress" title="Implémentation outil safe_shell en shell natif">
+<task pbi_id="9" task_id="1" status="done" title="Implémentation outil safe_shell en shell natif">
   <metadata>
     <parent_pbi>PBI-9</parent_pbi>
     <arch_review_required>yes</arch_review_required>
@@ -25,14 +25,14 @@
       <step number="6">Valider la compatibilité avec le serveur Node.js</step>
     </ai_agent_instructions>
     <definition_of_done>
-      <criterion state="todo">L'outil safe_shell est ajouté à la liste des outils MCP</criterion>
-      <criterion state="todo">La fonction handle_safe_shell est implémentée avec validation sécurisée depuis un fichier externe</criterion>
-      <criterion state="todo">Les commandes non présentes dans la whitelist sont rejetées</criterion>
-      <criterion state="todo">Le timeout fonctionne correctement (défaut 30s)</criterion>
-      <criterion state="todo">L'exécution dans un répertoire spécifique fonctionne</criterion>
-      <criterion state="todo">Les réponses JSON sont conformes au protocole MCP</criterion>
-      <criterion state="todo">Tests manuels réussis avec commandes autorisées et interdites</criterion>
-      <criterion state="todo">Documentation mise à jour dans les commentaires du code</criterion>
+      <criterion state="done">L'outil safe_shell est ajouté à la liste des outils MCP</criterion>
+      <criterion state="done">La fonction handle_safe_shell est implémentée avec validation sécurisée depuis un fichier externe</criterion>
+      <criterion state="done">Les commandes non présentes dans la whitelist sont rejetées</criterion>
+      <criterion state="done">Le timeout fonctionne correctement (défaut 30s)</criterion>
+      <criterion state="done">L'exécution dans un répertoire spécifique fonctionne</criterion>
+      <criterion state="done">Les réponses JSON sont conformes au protocole MCP</criterion>
+      <criterion state="done">Tests manuels réussis avec commandes autorisées et interdites</criterion>
+      <criterion state="done">Documentation mise à jour dans les commentaires du code</criterion>
     </definition_of_done>
   </content>
 </task>
