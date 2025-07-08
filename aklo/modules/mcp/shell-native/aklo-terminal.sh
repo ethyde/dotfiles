@@ -195,6 +195,79 @@ project_info() {
           }'
 }
 
+#==============================================================================
+# Fonction : aklo_execute_shell
+# Description :
+#   Exécute une commande Aklo validée selon la liste autorisée, avec gestion du contexte,
+#   parsing avancé des arguments (array JSON), logs sécurisés et retour JSON structuré.
+#
+# Usage :
+#   aklo_execute_shell
+#   (attend un JSON sur stdin avec les champs suivants)
+#   {
+#     "command": "<commande aklo>",
+#     "args": [<array d'arguments>],
+#     "workdir": "<répertoire de travail, optionnel>"
+#   }
+#
+# Sécurité :
+#   - Seules les commandes Aklo autorisées sont exécutées (liste exhaustive)
+#   - Logs structurés et informatifs
+#   - Gestion du contexte (workdir, env)
+#
+# Limitations :
+#   - Ne gère pas les sous-commandes complexes
+#   - Dépend de jq pour le parsing JSON avancé
+#==============================================================================
+aklo_execute_shell() {
+    # Liste complète des commandes Aklo autorisées
+    local ALLOWED_AKLO_COMMANDS=(
+        "status" "get_config" "config" "validate" "mcp" "cache" "monitor"
+        "template" "install-ux" "propose-pbi" "pbi" "plan" "arch" "dev"
+        "debug" "review" "refactor" "hotfix" "optimize" "security" "release"
+        "diagnose" "experiment" "docs" "analyze" "track" "onboard" "deprecate"
+        "kb" "fast" "meta" "scratch" "help"
+    )
+    # Lire l'entrée JSON depuis stdin
+    local input
+    input=$(cat)
+    # Parsing avancé (jq obligatoire pour array)
+    if ! command -v jq >/dev/null 2>&1; then
+        log_error "jq requis pour le parsing avancé des arguments JSON."
+    fi
+    local command args workdir
+    command=$(echo "$input" | jq -r '.command')
+    workdir=$(echo "$input" | jq -r '.workdir // "."')
+    args=$(echo "$input" | jq -c '.args // []')
+    # Validation de la commande
+    local valid=0
+    for allowed in "${ALLOWED_AKLO_COMMANDS[@]}"; do
+        if [ "$command" = "$allowed" ]; then
+            valid=1
+            break
+        fi
+    done
+    if [ $valid -eq 0 ]; then
+        log_error "Commande Aklo '$command' non autorisée."
+    fi
+    # Construction de la ligne de commande
+    local cmd_line=("aklo" "$command")
+    # Ajout des arguments (array JSON)
+    local arg
+    for arg in $(echo "$args" | jq -r '.[]'); do
+        cmd_line+=("$arg")
+    done
+    # Logs sécurisés
+    echo "[aklo_execute_shell] $(date +'%Y-%m-%d %H:%M:%S') CMD: ${cmd_line[*]} (workdir: $workdir)" >&2
+    # Exécution dans le contexte
+    local stdout stderr exit_code
+    stdout=$(cd "$workdir" && "${cmd_line[@]}" 2> >(stderr=$(cat); echo "$stderr" >&2))
+    exit_code=$?
+    # Retour JSON structuré
+    jq -n --arg status "success" --arg stdout "$stdout" --arg stderr "$stderr" --argjson exit_code "$exit_code" \
+      '{"status": $status, "stdout": $stdout, "stderr": $stderr, "exit_code": $exit_code}'
+}
+
 # Routeur de commande principal
 main() {
     local tool_name="$1"
@@ -205,8 +278,11 @@ main() {
         "project_info")
             project_info
             ;;
+        "aklo_execute_shell")
+            aklo_execute_shell
+            ;;
         "tools/list")
-            jq -n '{ tools: ["safe_shell", "project_info"] }'
+            jq -n '{ tools: ["safe_shell", "project_info", "aklo_execute_shell"] }'
             ;;
         *)
             log_error "Unknown tool: $tool_name"

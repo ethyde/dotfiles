@@ -3,6 +3,13 @@
     <responsable>AI_Agent &amp; Human_Developer</responsable>
     <objectif>Fiabiliser la migration des scripts Aklo : audit, refactoring extraction/génération XML, cache, logs, métriques, tests, documentation.</objectif>
     <entrees>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-3 : Extension de aklo_execute_shell (validation avancée)">
+        <details>
+          <item>Tous les critères de la Definition of Done sont validés : validation exhaustive, parsing array JSON, gestion du contexte, logs sécurisés, gestion d’erreurs, documentation.</item>
+          <item>Tests manuels OK, parité Node.js atteinte.</item>
+          <item>Artefact TASK-9-3 passé à DONE.</item>
+        </details>
+      </entree>
       <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-2 : Implémentation de project_info (serveur shell natif)">
         <details>
           <item>Tous les critères de la Definition of Done sont validés : outil exposé, parsing JSON hybride, extraction package.json, infos git, .aklo.conf, métriques artefacts, gestion des erreurs, documentation.</item>
@@ -50,6 +57,13 @@
   </session>
   <session update="evening">
     <entrees>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-3 : Extension de aklo_execute_shell (validation avancée)">
+        <details>
+          <item>Tous les critères de la Definition of Done sont validés : validation exhaustive, parsing array JSON, gestion du contexte, logs sécurisés, gestion d’erreurs, documentation.</item>
+          <item>Tests manuels OK, parité Node.js atteinte.</item>
+          <item>Artefact TASK-9-3 passé à DONE.</item>
+        </details>
+      </entree>
       <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-2 : Implémentation de project_info (serveur shell natif)">
         <details>
           <item>Tous les critères de la Definition of Done sont validés : outil exposé, parsing JSON hybride, extraction package.json, infos git, .aklo.conf, métriques artefacts, gestion des erreurs, documentation.</item>
