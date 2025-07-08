@@ -1,0 +1,25 @@
+<journal_day date="2025-07-08">
+  <session update="morning">
+    <responsable>AI_Agent &amp; Human_Developer</responsable>
+    <objectif>Fiabiliser la migration des scripts Aklo : audit, refactoring extraction/génération XML, cache, logs, métriques, tests, documentation.</objectif>
+    <entrees>
+      <entree heure="09:15" protocole="PLANIFICATION" action="Définition du plan d’action migration scripts Aklo">
+        <details>
+          <item>Audit des scripts restants : identifier ceux utilisant encore du markdown ou des patterns non-XML.</item>
+          <item>Refactoring extraction/génération : adapter tous les scripts pour n’utiliser que le XML natif, centraliser les patterns XML et l’injection dynamique.</item>
+          <item>Cache, logs, métriques : revoir et fiabiliser le système de cache, s’assurer que les logs sont cohérents et exploitables, ajouter ou renforcer les métriques.</item>
+          <item>Tests : adapter ou créer des tests pour couvrir les nouveaux comportements, s’assurer que tous les tests passent (TDD Red → Green → Blue).</item>
+          <item>Documentation et nettoyage : mettre à jour la documentation, supprimer les scripts ou patterns markdown obsolètes.</item>
+        </details>
+      </entree>
+    </entrees>
+    <bilan>
+      <item>Audit complet des scripts Bash : aucun vestige markdown, tout est XML natif.</item>
+      <item>Refactoring extraction/génération : centralisation de l’injection dynamique XML via <code>inject_missing_xml_tags</code>, intégration dans le pipeline, nettoyage des duplications.</item>
+      <item>Cache/logs : centralisation de <code>log_cache_event</code>, suppression des duplications, fiabilisation stricte de la désactivation du cache (guard clause, aucun fichier ni log de cache créé, log <code>DISABLED</code>).</item>
+      <item>Tests : adaptation des tests parser/cache, correction des chemins de sourcing, ajout de la fonction <code>is_valid_artefact_type</code>, diagnostic et correction de la gestion du cache désactivé (TDD Red → Green), logs de debug pour traçabilité.</item>
+      <item>Correction du parser : priorité stricte à la variable d’environnement <code>AKLO_CACHE_ENABLED</code> sur la config, portée stricte des variables, aucun effet de bord, tous les tests Green.</item>
+      <item>Prochaine étape : finaliser la documentation, nettoyer les scripts/tests obsolètes, étendre la couverture si besoin.</item>
+    </bilan>
+  </session>
+</journal_day>
