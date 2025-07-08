@@ -1,0 +1,68 @@
+<task pbi_id="9" task_id="3" status="done" title="Extension outil aklo_execute avec validation avancée">
+  <metadata>
+    <parent_pbi>PBI-9</parent_pbi>
+    <arch_review_required>no</arch_review_required>
+    <architecture_document>ARCH-9-1.xml</architecture_document>
+    <assignee>Non assigné</assignee>
+    <git_branch>feature/task-9-3</git_branch>
+  </metadata>
+  <content>
+    <technical_objective>
+      Étendre l'outil <code>aklo_execute_shell</code> existant pour inclure la validation avancée des commandes aklo, la gestion du contexte de travail et les logs sécurisés, atteignant la parité avec <code>aklo_execute</code> du serveur Node.js.
+      Fichiers à modifier : <file>/aklo/modules/mcp/shell-native/aklo-terminal.sh</file>
+      Résultat attendu :
+      <ul>
+        <li>Validation complète des commandes aklo autorisées</li>
+        <li>Gestion robuste des arguments et du contexte</li>
+        <li>Logs sécurisés et informatifs</li>
+        <li>Parité fonctionnelle avec le serveur Node.js</li>
+      </ul>
+    </technical_objective>
+    <context_and_files>
+      Serveur Node.js de référence : <file>aklo/modules/mcp/terminal/index.js</file>
+      <code language="bash"><![CDATA[
+# Liste complète des commandes aklo valides
+ALLOWED_AKLO_COMMANDS=(
+    "status" "get_config" "config" "validate" "mcp" "cache" "monitor"
+    "template" "install-ux" "propose-pbi" "pbi" "plan" "arch" "dev"
+    "debug" "review" "refactor" "hotfix" "optimize" "security" "release"
+    "diagnose" "experiment" "docs" "analyze" "track" "onboard" "deprecate"
+    "kb" "fast" "meta" "scratch" "help"
+)
+
+validate_aklo_command() {
+    local cmd="$1"
+    for allowed in "${ALLOWED_AKLO_COMMANDS[@]}"; do
+        if [ "$cmd" = "$allowed" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+      ]]></code>
+      Fonction shell à étendre : <file>aklo/modules/mcp/shell-native/aklo-terminal.sh</file>
+    </context_and_files>
+    <ai_agent_instructions>
+      <description>Instructions séquentielles pour l'agent :</description>
+      <step number="1">Analyser la fonction <code>handle_aklo_execute</code> existante dans le serveur shell natif</step>
+      <step number="2">Étendre la validation des commandes avec la liste complète des commandes aklo autorisées</step>
+      <step number="3">Améliorer le parsing des arguments pour supporter les arrays JSON</step>
+      <step number="4">Ajouter la gestion du contexte (workdir, variables d'environnement)</step>
+      <step number="5">Implémenter les logs sécurisés avec informations contextuelles</step>
+      <step number="6">Améliorer la gestion d'erreurs avec messages informatifs</step>
+      <step number="7">Tester la compatibilité avec toutes les commandes aklo principales</step>
+      <step number="8">Valider la parité avec le serveur Node.js</step>
+    </ai_agent_instructions>
+    <definition_of_done>
+      <criterion state="done">La validation des commandes aklo est complète et robuste</criterion>
+      <criterion state="done">Les arguments en array JSON sont correctement parsés</criterion>
+      <criterion state="done">La gestion du contexte de travail (workdir) fonctionne</criterion>
+      <criterion state="done">Les logs sécurisés sont implémentés avec informations utiles</criterion>
+      <criterion state="done">La gestion d'erreurs est améliorée avec messages clairs</criterion>
+      <criterion state="done">Tests manuels réussis avec les commandes aklo principales</criterion>
+      <criterion state="done">Parité fonctionnelle atteinte avec le serveur Node.js</criterion>
+      <criterion state="done">Documentation mise à jour dans les commentaires du code</criterion>
+      <criterion state="done">Aucune régression sur les fonctionnalités existantes</criterion>
+    </definition_of_done>
+  </content>
+</task>
