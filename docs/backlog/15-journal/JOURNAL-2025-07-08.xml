@@ -3,6 +3,13 @@
     <responsable>AI_Agent &amp; Human_Developer</responsable>
     <objectif>Fiabiliser la migration des scripts Aklo : audit, refactoring extraction/génération XML, cache, logs, métriques, tests, documentation.</objectif>
     <entrees>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-1 : Implémentation de safe_shell (serveur shell natif)">
+        <details>
+          <item>Tous les critères de la Definition of Done sont validés : outil exposé, validation whitelist, timeout, workdir, format JSON, tests, documentation.</item>
+          <item>Tests d’intégration : 9/9 réussis.</item>
+          <item>Artefact TASK-9-1 passé à DONE.</item>
+        </details>
+      </entree>
       <entree heure="09:15" protocole="PLANIFICATION" action="Définition du plan d’action migration scripts Aklo">
         <details>
           <item>Audit des scripts restants : identifier ceux utilisant encore du markdown ou des patterns non-XML.</item>
@@ -10,6 +17,18 @@
           <item>Cache, logs, métriques : revoir et fiabiliser le système de cache, s’assurer que les logs sont cohérents et exploitables, ajouter ou renforcer les métriques.</item>
           <item>Tests : adapter ou créer des tests pour couvrir les nouveaux comportements, s’assurer que tous les tests passent (TDD Red → Green → Blue).</item>
           <item>Documentation et nettoyage : mettre à jour la documentation, supprimer les scripts ou patterns markdown obsolètes.</item>
+        </details>
+      </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Rebase de feature/task-9-1 sur master">
+        <details>
+          <item>Synchronisation de la branche de développement avant implémentation de safe_shell.</item>
+          <item>Conflits résolus : [oui/non, détails à compléter]</item>
+          <item>Tests/linter : [OK/KO, à compléter]</item>
+        </details>
+      </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Création de la branche feature/task-9-1">
+        <details>
+          <item>Branche créée à partir de master pour implémentation de safe_shell.</item>
         </details>
       </entree>
     </entrees>
@@ -21,5 +40,28 @@
       <item>Correction du parser : priorité stricte à la variable d’environnement <code>AKLO_CACHE_ENABLED</code> sur la config, portée stricte des variables, aucun effet de bord, tous les tests Green.</item>
       <item>Prochaine étape : finaliser la documentation, nettoyer les scripts/tests obsolètes, étendre la couverture si besoin.</item>
     </bilan>
+  </session>
+  <session update="evening">
+    <entrees>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Clôture de TASK-9-1 : Implémentation de safe_shell (serveur shell natif)">
+        <details>
+          <item>Tous les critères de la Definition of Done sont validés : outil exposé, validation whitelist, timeout, workdir, format JSON, tests, documentation.</item>
+          <item>Tests d’intégration : 9/9 réussis.</item>
+          <item>Artefact TASK-9-1 passé à DONE.</item>
+        </details>
+      </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Rebase de feature/task-9-1 sur master">
+        <details>
+          <item>Synchronisation de la branche de développement avant implémentation de safe_shell.</item>
+          <item>Conflits résolus : [oui/non, détails à compléter]</item>
+          <item>Tests/linter : [OK/KO, à compléter]</item>
+        </details>
+      </entree>
+      <entree heure="[à compléter]" protocole="DEVELOPPEMENT" action="Création de la branche feature/task-9-1">
+        <details>
+          <item>Branche créée à partir de master pour implémentation de safe_shell.</item>
+        </details>
+      </entree>
+    </entrees>
   </session>
 </journal_day>
