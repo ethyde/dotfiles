@@ -23,6 +23,12 @@ done
 script_dir="$(cd -P "$(dirname "$script_path")" >/dev/null 2>&1 && pwd)"
 modules_dir="${script_dir}/../modules"
 
+# Sourcing des modules principaux
+# ...
+source "$(dirname "$0")/../modules/io/extract_functions.sh" 2>/dev/null || true
+source "$(dirname "$0")/../modules/cache/cache_monitoring.sh" 2>/dev/null || true
+# ... existing code ...
+
 #==============================================================================
 # ARCHITECTURE INTELLIGENTE FAIL-SAFE - TASK-13-4
 #==============================================================================
@@ -219,24 +225,26 @@ parse_and_generate_artefact() {
     echo "[CACHE] $event: $details"
   }
   
-  # Construire le chemin du protocole
-  local protocol_file="./aklo/charte/PROTOCOLES/${protocol_name}.xml"
-  if [ ! -f "$protocol_file" ]; then
-    local script_dir="$(dirname "$(realpath "$0")")"
-    protocol_file="${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml"
-  fi
+  # Construction du chemin absolu du protocole (WORKDIR + chemin projet)
+  protocol_file="$WORKDIR/aklo/charte/PROTOCOLES/${protocol_name}.xml"
   if [ ! -f "$protocol_file" ]; then
     echo "❌ Erreur : Protocole $protocol_name non trouvé dans la charte." >&2
-    echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.xml" >&2
-    echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml" >&2
+    echo "   Cherché dans: $protocol_file" >&2
     return 1
   fi
   
   local artefact_structure=""
   local cache_file="/tmp/aklo_cache/protocol_${protocol_name}_${artefact_type}.parsed"
   
+  # Normalisation du type d'artefact en minuscules
+  artefact_type_lc=$(echo "$artefact_type" | tr '[:upper:]' '[:lower:]')
+  if [ -z "$artefact_type_lc" ]; then
+    echo "❌ Erreur : artefact_type_lc vide avant appel à extract_artefact_xml (protocol_name=$protocol_name)" >&2
+    return 1
+  fi
+  
   if [ "$AKLO_CACHE_ENABLED" = "true" ]; then
-    log_cache_event "CHECK" "Vérification cache pour ${protocol_name}/${artefact_type}"
+    log_cache_event "CHECK" "Vérification cache pour ${protocol_name}/${artefact_type_lc}"
     if [ -f "$cache_file" ]; then
       local protocol_mtime
       if protocol_mtime=$(stat -f %m "$protocol_file" 2>/dev/null || stat -c %Y "$protocol_file" 2>/dev/null); then
@@ -245,20 +253,32 @@ parse_and_generate_artefact() {
           if [ "$cache_mtime" -ge "$protocol_mtime" ]; then
             log_cache_event "HIT" "Cache valide trouvé: $cache_file"
             if artefact_structure=$(cat "$cache_file" 2>/dev/null); then
-              log_cache_event "SUCCESS" "Cache lu avec succès"
-              # Mise à jour des métriques de cache (HIT)
-              record_cache_metric "hit"
+              if [ -z "$artefact_structure" ]; then
+                log_cache_event "ERROR" "Cache vide ou corrompu, suppression et extraction fraîche"
+                rm -f "$cache_file"
+                if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type_lc"); then
+                  mkdir -p "/tmp/aklo_cache"
+                  echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
+                  log_cache_event "CACHED" "Structure extraite et mise en cache (après cache vide)"
+                  record_cache_metric "miss"
+                else
+                  log_cache_event "ERROR" "Échec extraction après cache vide"
+                  artefact_structure=""
+                fi
+              else
+                log_cache_event "SUCCESS" "Cache lu avec succès"
+                record_cache_metric "hit"
+              fi
             else
               log_cache_event "ERROR" "Échec lecture cache - fallback vers extraction"
               artefact_structure=""
             fi
           else
             log_cache_event "MISS" "Cache invalide ou inexistant"
-            if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type"); then
+            if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type_lc"); then
               mkdir -p "/tmp/aklo_cache"
               echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
               log_cache_event "CACHED" "Structure extraite et mise en cache"
-              # Mise à jour des métriques de cache (MISS)
               record_cache_metric "miss"
             else
               log_cache_event "ERROR" "Échec extraction avec cache - fallback"
@@ -271,11 +291,10 @@ parse_and_generate_artefact() {
       fi
     else
       log_cache_event "MISS" "Aucun cache trouvé"
-      if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type"); then
+      if artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type_lc"); then
         mkdir -p "/tmp/aklo_cache"
         echo "$artefact_structure" > "$cache_file.tmp" && mv "$cache_file.tmp" "$cache_file"
         log_cache_event "CACHED" "Structure extraite et mise en cache"
-        # Mise à jour des métriques de cache (MISS)
         record_cache_metric "miss"
       else
         log_cache_event "ERROR" "Échec extraction - fallback"
@@ -284,7 +303,9 @@ parse_and_generate_artefact() {
     fi
   else
     log_cache_event "DISABLED" "Cache désactivé par configuration"
-    artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type")
+    echo "[DEBUG aklo] Appel extract_artefact_xml $protocol_file $artefact_type_lc" >&2
+    artefact_structure=$(extract_artefact_xml "$protocol_file" "$artefact_type_lc")
+    echo "[DEBUG aklo] Structure extraite: $artefact_structure" >&2
   fi
   
   if [ -z "$artefact_structure" ]; then
@@ -974,6 +995,14 @@ parse_validation_args() {
 command_init() {
   echo "🔧 Initialisation du projet Aklo..."
 
+  # Appel du script d'installation interactif Aklo (dépendances, jq, Node.js, npm, fast-xml-parser)
+  if [ -f "$(dirname "$0")/../install.sh" ]; then
+    echo "🔍 Vérification et installation des dépendances Aklo..."
+    bash "$(dirname "$0")/../install.sh"
+  else
+    echo "⚠️  Script install.sh non trouvé, installation des dépendances à faire manuellement."
+  fi
+
   CONFIG_FILE=".aklo.conf"
   GITIGNORE_FILE=".gitignore"
   DEFAULT_CONFIG_FILE="${script_dir}/../config/.aklo.conf"
@@ -995,6 +1024,17 @@ command_init() {
     echo "❌ Fichier de configuration par défaut non trouvé: $DEFAULT_CONFIG_FILE"
     exit 1
   fi
+
+  # Création automatique des dossiers d'artefacts principaux
+  echo "📁 Création des dossiers d'artefacts principaux..."
+  source "$CONFIG_FILE" 2>/dev/null || true
+  for dir_var in PBI_DIR TASKS_DIR ARCH_DIR DEBUG_DIR REFACTOR_DIR OPTIM_DIR REVIEWS_DIR HOTFIX_DIR RELEASES_DIR JOURNAL_DIR SCRATCHPAD_DIR; do
+    dir_path="${!dir_var}"
+    if [ -n "$dir_path" ] && [ ! -d "$dir_path" ]; then
+      mkdir -p "$dir_path"
+      echo "  + Créé: $dir_path"
+    fi
+  done
 
   # 2. Gérer .gitignore
   echo "🔒 Configuration de .gitignore..."
