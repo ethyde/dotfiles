@@ -1,0 +1,48 @@
+<architecture>
+  <overview>
+    <title>Architecture hybride pour serveurs MCP shell natifs</title>
+    <description>Ce document décrit l’architecture hybride validée pour les serveurs MCP shell natifs Aklo, incluant la sécurité, le parsing JSON, la gestion des dépendances et la documentation du processus de mise à jour de la whitelist.</description>
+  </overview>
+  <security>
+    <section>safe_shell</section>
+    <details>
+      <item>Whitelist configurable via aklo/config/commands.whitelist</item>
+      <item>Gestion des timeouts pour chaque commande</item>
+      <item>Validation stricte des arguments</item>
+    </details>
+  </security>
+  <json_parsing>
+    <section>project_info</section>
+    <details>
+      <item>Détection automatique de jq</item>
+      <item>Fallback manuel optimisé (sed/awk/grep)</item>
+      <item>Gestion robuste des erreurs de parsing</item>
+    </details>
+  </json_parsing>
+  <installation>
+    <section>Installation et Dépendances</section>
+    <details>
+      <item>Installation de jq via apps.sh (optionnelle, recommandée)</item>
+      <item>Compatibilité multi-systèmes (macOS, Linux)</item>
+    </details>
+  </installation>
+  <jq_installation>
+    <section>Installation de jq</section>
+    <details>
+      <item>jq est installé automatiquement via apps.sh (brew install jq)</item>
+      <item>La présence de jq est vérifiée par un test automatique dans test_mcp_shell_native_extended.sh</item>
+      <item>En cas d'absence, le test échoue (Red), l'installation via apps.sh permet de passer au Green</item>
+    </details>
+  </jq_installation>
+  <whitelist_update>
+    <section>Processus de mise à jour de la whitelist</section>
+    <details>
+      <item>Modifier aklo/config/commands.whitelist (une commande par ligne)</item>
+      <item>Valider la syntaxe (pas d’espaces, pas de doublons)</item>
+      <item>Relancer le serveur MCP pour prise en compte immédiate</item>
+    </details>
+  </whitelist_update>
+  <links>
+    <item>Document d’architecture source : ../../docs/backlog/02-architecture/ARCH-9-1-VALIDATED.xml</item>
+  </links>
+</architecture>
