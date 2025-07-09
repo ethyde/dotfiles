@@ -1,6 +1,11 @@
-# Liste des commandes autorisées pour l'outil safe_shell.
-# Une commande par ligne. Seule la commande de base est vérifiée (ex: "ls" pour "ls -l").
-
+# Fichier aklo/config/commands.whitelist
+# Une commande par ligne
 ls
+cat
+grep
+git
+npm
+node
+cd
+pwd
 echo
-sleep

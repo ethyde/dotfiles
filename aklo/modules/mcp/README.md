@@ -242,6 +242,20 @@ echo '{"method":"tools/list"}' | ./shell-native/aklo-terminal.sh
 python3 -m json.tool config.json
 ```
 
+## 🗃️ Dépendance à jq et fallback natif
+
+Certaines commandes (ex : `project_info`, `safe_shell`) utilisent `jq` pour le parsing JSON rapide et fiable. **jq est recommandé** pour des performances optimales, mais n'est pas strictement obligatoire :
+
+- Si `jq` est absent, le système bascule automatiquement sur un parsing natif Bash (plus lent, mais compatible).
+- Le fallback natif peut être forcé via la variable d'environnement `AKLO_FORCE_NO_JQ=1`.
+- Le script `apps.sh` installe automatiquement `jq` lors de la configuration de l'environnement.
+- Les tests d'intégration valident les deux modes (avec et sans jq).
+
+**Résumé** :
+- jq présent → parsing JSON rapide
+- jq absent ou AKLO_FORCE_NO_JQ=1 → fallback natif Bash
+- Couverture de tests complète sur les deux modes
+
 ## 🏗️ Architecture
 
 ```

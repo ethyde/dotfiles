@@ -2,8 +2,10 @@
 #==============================================================================
 # Aklo Terminal - Serveur de commandes shell sécurisé pour MCP
 #
-# Reçoit des requêtes JSON sur stdin pour exécuter des commandes shell
-# de manière sécurisée et retourne le résultat sur stdout.
+# ⚠️  jq (JSON processor) est recommandé pour le parsing JSON rapide (ex : project_info, safe_shell).
+#    Si jq est absent, un fallback natif Bash est automatiquement utilisé (plus lent, mais compatible).
+#    Le fallback peut être forcé via la variable d'environnement AKLO_FORCE_NO_JQ=1.
+#    Les tests d'intégration valident les deux modes (avec et sans jq).
 #==============================================================================
 
 # Fonction pour logger les erreurs et quitter
