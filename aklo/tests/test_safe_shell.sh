@@ -15,6 +15,17 @@ AKLO_TERMINAL_SCRIPT="$(dirname "$0")/../modules/mcp/shell-native/aklo-terminal.
 
 test_suite "safe_shell: Exécution de commandes autorisées"
 
+setup() {
+  # Ajoute 'sleep' à la whitelist si absent
+  grep -q '^sleep$' ./aklo/config/commands.whitelist || echo 'sleep' >> ./aklo/config/commands.whitelist
+}
+teardown() {
+  # Retire 'sleep' de la whitelist après le test
+  sed -i '' '/^sleep$/d' ./aklo/config/commands.whitelist
+}
+
+setup
+
 # Test 1: Vérifier que 'ls -l' (commande autorisée) s'exécute correctement
 test_safe_shell_ls() {
     local cmd_input='{"command": "ls -l", "timeout": 1000}'
@@ -89,3 +100,4 @@ test_safe_shell_ls
 test_forbidden_command
 test_timeout
 test_summary 
+teardown 

@@ -129,21 +129,23 @@ extract_artefact_xml() {
     local protocol_file="$1"
     local artefact_tag="$2"
     if [ -z "$protocol_file" ] || [ ! -f "$protocol_file" ] || [ -z "$artefact_tag" ]; then
+        echo "[AKLO:WARN] extract_artefact_xml: appel invalide (protocol_file='$protocol_file', tag='$artefact_tag', shell='$SHELL', 0='$0')" >&2
         return 1
     fi
-    # Extraction naïve (compatible bash natif, sans xmlstarlet)
-    # On cherche la première balise <artefact_template> puis la balise demandée
-    awk -v tag="$artefact_tag" '
-        BEGIN { in_template=0; in_block=0; }
-        /<artefact_template>/ { in_template=1 }
-        /<\/'"tag"'>/ { if(in_template && in_block) { print; exit } }
-        in_template && match($0, "<"tag">") { in_block=1 }
-        in_block { print }
-    ' "$protocol_file"
-    # Vérification de la sortie
-    if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+    # Extraction stricte à l'intérieur du bloc <artefact_template>
+    local structure
+    structure=$(awk -v tag="$artefact_tag" '
+        /<artefact_template/ { in_template=1 }
+        /<\/artefact_template>/ { in_template=0 }
+        in_template && match($0, "<"tag"[ >]") { in_block=1 }
+        in_template && in_block { print }
+        in_template && match($0, "</"tag">") && in_block { exit }
+    ' "$protocol_file")
+    if [ -z "$structure" ]; then
+        echo "[AKLO:WARN] extract_artefact_xml: structure vide extraite (protocol_file='$protocol_file', tag='$artefact_tag', shell='$SHELL', head='$(head -n 5 "$protocol_file" | tr -d "\n")')" >&2
         return 1
     fi
+    echo "$structure"
 }
 
 # Injecte dynamiquement les balises XML manquantes dans un bloc artefact

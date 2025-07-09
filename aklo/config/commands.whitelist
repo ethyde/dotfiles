@@ -9,3 +9,4 @@ node
 cd
 pwd
 echo
+sleep # Ajouté pour tests de timeout safe_shell

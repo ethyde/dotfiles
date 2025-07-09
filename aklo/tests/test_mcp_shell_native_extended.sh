@@ -55,14 +55,19 @@ run_test_aklo_status_shell() {
 # 4. Test safe_shell
 run_test_safe_shell() {
   echo_section "Test : safe_shell (sécurité, whitelist, timeout)"
+  # Ajoute 'sleep' à la whitelist pour le test de timeout
+  grep -q '^sleep$' ./aklo/config/commands.whitelist || echo 'sleep' >> ./aklo/config/commands.whitelist
   OUTPUT=$(echo '{"command":"ls"}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell)
   echo "$OUTPUT" | grep -q '"success"' && assert_success 0 "safe_shell : commande autorisée 'ls'"
   OUTPUT_FORBIDDEN=$(echo '{"command":"rm"}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell || true)
   echo "$OUTPUT_FORBIDDEN" | grep -q 'not in the allowed list' && assert_success 0 "safe_shell : commande interdite 'rm' bloquée"
+  # 'sleep' est autorisé dans la whitelist uniquement pour ce test de timeout
   OUTPUT_TIMEOUT=$(echo '{"command":"sleep 5","timeout":1000}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell || true)
   echo "$OUTPUT_TIMEOUT" | grep -q 'timeout' && assert_success 0 "safe_shell : timeout respecté"
   OUTPUT_WD=$(echo '{"command":"ls","workdir":"/tmp"}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell)
   echo "$OUTPUT_WD" | grep -q '"success"' && assert_success 0 "safe_shell : workdir supporté"
+  # Retire 'sleep' de la whitelist après le test
+  sed -i '' '/^sleep$/d' ./aklo/config/commands.whitelist
 }
 
 # 5. Test project_info

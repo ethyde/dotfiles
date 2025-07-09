@@ -113,8 +113,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/mas
 # make zsh default
 chsh -s $(which zsh)
 
+# Installation des dépendances Aklo (native-first + bonus Node.js)
+if [ -f "aklo/install.sh" ]; then
+  echo "🔧 Installation des dépendances Aklo (jq, Node.js, npm, fast-xml-parser, etc.)"
+  bash aklo/install.sh
+else
+  echo "⚠️  aklo/install.sh non trouvé, installation des dépendances Aklo à faire manuellement."
+fi
+
 # Remove outdated versions from the cellar.
-brew cleanup# ... existing code ...
-# Install jq (JSON processor, required/recommended for Aklo project_info, fallback natif Bash si absent)
-brew install jq
-# ... existing code ...
+brew cleanup
