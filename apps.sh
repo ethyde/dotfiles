@@ -114,4 +114,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/mas
 chsh -s $(which zsh)
 
 # Remove outdated versions from the cellar.
-brew cleanup
+brew cleanup# ... existing code ...
+# Install jq (JSON processor, required/recommended for Aklo project_info, fallback natif Bash si absent)
+brew install jq
+# ... existing code ...
