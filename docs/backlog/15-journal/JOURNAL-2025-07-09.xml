@@ -10,4 +10,60 @@
       </entree>
     </entrees>
   </session>
+  <session update="après-midi">
+    <responsable>AI_Agent &amp; Human_Developer</responsable>
+    <objectif>Stabiliser le script `aklo` après des refactorings majeurs (lazy loading, migration XML) et réparer les régressions critiques sur les commandes de base.</objectif>
+    <entrees>
+      <entree heure="17:15" protocole="DIAGNOSTIC" type="Analyse initiale">
+        <action>Analyse des logs de la suite de tests complète (`run_tests.sh --all`).</action>
+        <contexte>Le développeur signale de multiples fonctionnalités "cassées" après l'implémentation du PBI-13 (Lazy Loading).</contexte>
+        <decouverte>
+            <item>Échec critique des commandes fondamentales (`aklo init`, `propose-pbi`).</item>
+            <item>Panne généralisée du système de cache (pas de création de fichiers, métriques KO).</item>
+            <item>Régression majeure de performance sur l'architecture "Lazy Loading".</item>
+        </decouverte>
+      </entree>
+      
+      <entree heure="17:20" protocole="CORRECTION" type="Résolution des chemins absolus">
+        <probleme>Les scripts ne trouvaient pas leurs modules lorsqu'ils étaient appelés via le lien symbolique `~/.local/bin/aklo`.</probleme>
+        <action>Modification du script `aklo/bin/aklo` pour résoudre le chemin réel du script et définir une variable d'environnement fiable `AKLO_PROJECT_ROOT`.</action>
+        <impact>Correction de nombreuses erreurs "No such file or directory" et fiabilisation du chargement des modules.</impact>
+      </entree>
+      
+      <entree heure="17:25" protocole="CORRECTION" type="Résolution de la version de Bash">
+        <probleme>Les scripts utilisaient le Bash système de macOS (v3.x), qui ne supporte pas les tableaux associatifs (`declare -A`), causant des erreurs de syntaxe.</probleme>
+        <action>Remplacement du shebang `#!/bin/bash` par `#!/usr/bin/env bash` dans tous les scripts pour utiliser la version moderne installée via Homebrew.</action>
+        <impact>Élimination des erreurs `declare: -A: invalid option` et garantie de la portabilité.</impact>
+      </entree>
+
+      <entree heure="17:30" protocole="REFACTORING" type="Fiabilisation du chargement des modules">
+        <probleme>La logique de "lazy loading" et les `source` imbriqués créaient des conflits de scope, rendant les fonctions de bas niveau (ex: `generate_cache_filename`) invisibles aux modules qui en dépendaient.</probleme>
+        <action>Abandon de l'architecture "lazy loading" complexe au profit d'un chargement direct et explicite de tous les modules nécessaires au début du script `aklo/bin/aklo`.</action>
+        <impact>Résolution définitive des erreurs `command not found` et stabilisation du contexte d'exécution.</impact>
+      </entree>
+
+      <entree heure="17:35" protocole="OPTIMISATION" type="Correction du cache Regex">
+        <probleme>Le cache des expressions régulières, basé sur des fichiers, était plus lent que l'exécution normale.</probleme>
+        <action>Remplacement du système de fichiers par un tableau associatif en mémoire (`declare -A`) dans `aklo/modules/cache/regex_cache.sh` pour un accès quasi-instantané.</action>
+        <impact>Le cache est maintenant performant et ne dégrade plus la vitesse d'exécution.</impact>
+      </entree>
+
+      <entree heure="17:40" protocole="CORRECTION" type="Fiabilisation du parsing XML">
+        <probleme>La fonction `extract_artefact_xml` était trop fragile et extrayait à la fois le template et l'exemple du protocole, créant des fichiers invalides.</probleme>
+        <action>Remplacement de la logique d'extraction dans `aklo/modules/core/parser.sh` par une commande `awk` robuste qui isole d'abord le bloc &lt;artefact_template&gt; avant d'extraire le tag de l'artefact.</action>
+        <impact>La création des artefacts `PBI` et `TASK` est maintenant fiable et génère un contenu XML correct.</impact>
+      </entree>
+
+      <entree heure="17:45" protocole="CORRECTION" type="Restauration des commandes">
+        <probleme>Les commandes `status` et `init` étaient devenues inconnues suite au refactoring.</probleme>
+        <action>Création d'un module `system_commands.sh` et mise à jour du `command_classifier.sh` (finalement remplacé par le chargement direct) pour restaurer la logique de ces commandes.</action>
+        <impact>Toutes les commandes de base (`new pbi`, `plan`, `status`) sont de nouveau fonctionnelles.</impact>
+      </entree>
+    </entrees>
+    <bilan>
+        <item>Le script `aklo` est stabilisé et fonctionnel pour les commandes de base du workflow (`new pbi`, `plan`, `status`).</item>
+        <item>L'architecture a été simplifiée au profit de la robustesse, en centralisant le chargement des modules.</item>
+        <item>La base est maintenant saine pour réintégrer les autres commandes (`debug`, `refactor`, etc.) en suivant le modèle modulaire établi.</item>
+    </bilan>
+  </session>
 </journal_day>
