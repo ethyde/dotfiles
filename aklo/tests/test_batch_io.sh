@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Tests pour les fonctions d'optimisation I/O par batch
 # TASK-7-2: Test-Driven Development pour optimisations I/O

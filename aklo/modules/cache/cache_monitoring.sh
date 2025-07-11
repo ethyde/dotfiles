@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Fonctions de monitoring et configuration cache (TASK-6-4)
 # Phase GREEN : Implémentation minimale

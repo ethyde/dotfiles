@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Progressive Loading - Architecture Fail-Safe TASK-13-8

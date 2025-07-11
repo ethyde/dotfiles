@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
 
 test_get_next_id() {

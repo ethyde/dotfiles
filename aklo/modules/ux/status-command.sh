@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Amélioration UX : Commande aklo status avancée
 # Tableau de bord complet du projet

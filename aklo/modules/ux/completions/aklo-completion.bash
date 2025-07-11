@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Auto-complétion Bash pour Aklo
 # Installation: source ce fichier dans ~/.bashrc ou ~/.bash_profile

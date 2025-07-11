@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # =============================================================
 #  Aklo MCP Shell Native - Suite de tests d'intégration étendue
 #  Tâche : TASK-9-5 | PBI-9 | Statut : EN COURS

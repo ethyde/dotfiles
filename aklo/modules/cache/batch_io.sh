@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Fonctions d'optimisation I/O par batch
 # TASK-7-2: Implémentation des opérations I/O groupées pour réduire les syscalls

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Module performance_profiles.sh
 # TASK-13-3: Création des profils adaptatifs de performance

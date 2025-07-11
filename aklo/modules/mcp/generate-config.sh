@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Générateur de configuration MCP propre (JSON uniquement)
 # Logique Native-First : Shell principal, Node.js bonus

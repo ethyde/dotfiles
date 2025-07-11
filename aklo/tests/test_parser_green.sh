@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test Suite pour le Parser avec Cache (Green Path) - XML natif

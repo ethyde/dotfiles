@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Source des dépendances
 source "$AKLO_PROJECT_ROOT/modules/core/command_classifier.sh"

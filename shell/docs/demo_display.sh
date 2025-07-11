@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ==============================================================================
 #                    DÉMONSTRATION DES FONCTIONS D'AFFICHAGE

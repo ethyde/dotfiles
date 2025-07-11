@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test Suite pour Monitoring Dashboard - TASK-13-7

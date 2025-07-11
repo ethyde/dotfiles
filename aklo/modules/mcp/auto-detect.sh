@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Auto-détection et logique native-first pour serveurs MCP Aklo
 # Logique : Shell natif (principal) + Node.js (bonus si disponible)

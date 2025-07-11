@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Tests de performance pour les optimisations I/O par batch
 # TASK-7-2: Mesure de l'amélioration des performances

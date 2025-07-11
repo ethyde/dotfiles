@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # AKLO MCP - Script principal universel
 # Point d'entrée unique pour tous les serveurs MCP Aklo

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Script de validation des conventions de configuration Aklo
 # Usage: ./validate-conventions.sh [fichier.conf]

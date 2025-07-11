@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Test du système de fallback intelligent
 # Simule différents environnements pour valider la logique
@@ -40,7 +40,7 @@ echo "---------------------------------------"
     # Créer un faux node qui retourne une version ancienne
     mkdir -p /tmp/fake-node
     cat > /tmp/fake-node/node << 'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 echo "v14.21.3"
 EOF
     chmod +x /tmp/fake-node/node

@@ -262,7 +262,7 @@ dotfiles-hooks disable post_commit
 #### Exemple de hook personnalisé
 ```bash
 # ~/.dotfiles_hooks/pre_commit
-#!/bin/bash
+#!/usr/bin/env bash
 echo "🔍 Vérifications avant commit..."
 
 # Vérifier la syntaxe des fichiers shell

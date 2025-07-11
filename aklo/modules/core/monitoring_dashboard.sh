@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Monitoring Dashboard - Dashboard de monitoring temps réel TASK-13-7

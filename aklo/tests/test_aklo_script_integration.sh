@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test d'Intégration du Script Principal Aklo - TASK-13-4

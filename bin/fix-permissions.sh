@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Script de correction automatique des permissions pour tous les scripts
 # Trouve et rend exécutables tous les scripts .sh, binaires et autres exécutables

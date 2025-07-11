@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Test d'intégration pour l'extraction et la mise en cache (TASK-6-2)
 

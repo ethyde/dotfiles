@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Learning Engine - Apprentissage automatique des commandes TASK-13-1

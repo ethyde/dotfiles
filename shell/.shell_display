@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Fonctions d'affichage sympa pour les dotfiles
 # Améliore les sorties des fonctions shell avec couleurs et émojis

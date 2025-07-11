@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Test de régression pour TASK-6-3
 # Vérifie que toutes les commandes aklo fonctionnent avec le cache.

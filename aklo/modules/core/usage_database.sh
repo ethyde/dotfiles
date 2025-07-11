@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Usage Database - Gestion de la base de données d'apprentissage TASK-13-6

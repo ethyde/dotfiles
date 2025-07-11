@@ -30,7 +30,7 @@ Ce document explique le système de gestion automatique des permissions pour tou
 
 **Types de fichiers détectés :**
 - Scripts `.sh`
-- Scripts avec shebang (`#!/bin/bash`, `#!/usr/bin/env node`, etc.)
+- Scripts avec shebang (`#!/usr/bin/env bash`, `#!/usr/bin/env node`, etc.)
 - Binaires dans les répertoires `bin/`
 - Scripts spécifiques (`install`, `aklo`, `dotbot`)
 

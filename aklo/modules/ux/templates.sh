@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Amélioration UX : Templates pré-remplis pour Aklo
 # Templates intelligents pour PBI et tâches

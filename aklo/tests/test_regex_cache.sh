@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # TESTS UNITAIRES - CACHE REGEX SYSTEM

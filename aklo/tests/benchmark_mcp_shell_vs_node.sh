@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # =============================================================
 #  Aklo MCP Shell Native vs Node.js - Script de benchmark
 #  Tâche : TASK-9-5 | PBI-9 | Statut : EN COURS

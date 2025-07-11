@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ==============================================================================
+# Module Parser avec gestion de cache
+# DÉPENDANCES (gérées par aklo/bin/aklo):
+# - cache/cache_functions.sh
+# - io/extract_functions.sh
+# ==============================================================================
 
 # shellcheck disable=SC2148
 #
@@ -11,11 +17,11 @@
 # Phase GREEN: Implémentation minimale
 
 # Sourcing robuste des fonctions de cache
-if [ -n "$AKLO_PROJECT_ROOT" ]; then
-  source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh"
-else
-  source "$(dirname "$0")/../cache/cache_functions.sh"
-fi
+# if [ -n "$AKLO_PROJECT_ROOT" ]; then
+#   source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh"
+# else
+#   source "$(dirname "$0")/../cache/cache_functions.sh"
+# fi
 
 # Configuration cache par défaut
 AKLO_CACHE_ENABLED="${AKLO_CACHE_ENABLED:-true}"
@@ -169,7 +175,6 @@ parse_and_generate_artefact_cached() {
     log_cache_event "COMPLETE" "Génération artefact terminée: $output_file"
     return 0
 }
-
 # Fonction de compatibilité - remplace la fonction originale
 parse_and_generate_artefact() {
     parse_and_generate_artefact_cached "$@"
