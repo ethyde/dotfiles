@@ -60,7 +60,7 @@ Transformer Aklo en un écosystème de développement **native-first** avec des 
 - ✅ **Cache intelligent** (PBI-6 DONE)
 - ✅ **Optimisations I/O** (PBI-7 DONE)
 - ✅ **Lazy loading** (PBI-13 DONE)
-- 🔄 **Serveurs MCP natifs** (PBI-9)
+- 🔄 **Serveurs MCP natifs** (PBI-9 DONE)
 
 ### **Couche 2 - Expérience Utilisateur**
 - 🔄 **Détection intelligente** (PBI-10)
