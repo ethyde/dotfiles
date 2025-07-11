@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Script de démonstration des commandes améliorées
 # SSH, NVM/Node et Git avec de beaux affichages

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 inquire ()  {
   echo  -n "$1 [y/n]? "

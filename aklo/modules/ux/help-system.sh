@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Amélioration UX : Système d'aide avancé pour Aklo
 # Support de --help et <command> --help

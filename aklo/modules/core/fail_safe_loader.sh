@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Fail Safe Loader - Architecture Fail-Safe TASK-13-8

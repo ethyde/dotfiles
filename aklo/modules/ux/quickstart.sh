@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Amélioration UX : Mode Quick Start pour Aklo
 # Guide interactif pour débutants

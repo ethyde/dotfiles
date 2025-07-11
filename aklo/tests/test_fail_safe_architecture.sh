@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test Suite pour l'Architecture Fail-Safe - TASK-13-8

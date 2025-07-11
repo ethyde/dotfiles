@@ -303,7 +303,7 @@ setup_hooks_directory() {
         
         # Créer des exemples de hooks
         cat > "$DOTFILES_HOOKS_DIR/pre_commit.example" << 'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 # Hook exécuté avant chaque commit
 # Renommez ce fichier en 'pre_commit' et rendez-le exécutable
 
@@ -319,7 +319,7 @@ echo "✅ Vérifications terminées"
 EOF
 
         cat > "$DOTFILES_HOOKS_DIR/post_commit.example" << 'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 # Hook exécuté après chaque commit
 # Renommez ce fichier en 'post_commit' et rendez-le exécutable
 

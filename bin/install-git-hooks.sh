@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Installation des hooks Git pour la gestion automatique des permissions
 #==============================================================================

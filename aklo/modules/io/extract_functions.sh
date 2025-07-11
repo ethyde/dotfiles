@@ -1,11 +1,8 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
+#==============================================================================
 # Fonctions d'extraction et de mise en cache pour aklo
-# TASK-6-2: Fonction de mise en cache des structures protocoles
-# Phase BLUE: Version refactorisée et optimisée
-
-# Source des fonctions de cache (TASK-6-1)
-source "$(dirname "${BASH_SOURCE[0]}")/../cache/cache_functions.sh"
+# Dépendances (chargées par aklo/bin/aklo) : cache/cache_functions.sh
+#==============================================================================
 
 # Fonction de validation avant mise en cache
 # Usage: validate_cache_prerequisites <protocol_file> <artefact_type> <cache_file>

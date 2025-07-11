@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test d'Intégration Learning Engine + Usage Database - TASK-13-6

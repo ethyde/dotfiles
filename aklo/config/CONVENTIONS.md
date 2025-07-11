@@ -157,7 +157,7 @@ grep -E "=\".*\"$" .aklo.conf
 Un script de validation automatique pourrait être créé pour vérifier le respect de ces conventions :
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 # validate-config.sh
 # Valide le respect des conventions dans .aklo.conf
 ```

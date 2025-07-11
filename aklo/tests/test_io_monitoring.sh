@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Test du système de monitoring I/O
 # TASK-7-4: Tests unitaires pour le monitoring des opérations I/O

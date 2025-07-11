@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test d'Intégration - Metrics Engine + Monitoring Dashboard - TASK-13-7

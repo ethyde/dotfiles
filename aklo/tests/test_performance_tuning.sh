@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Test du système de configuration tuning et gestion mémoire
 # TASK-7-5: Tests unitaires pour le tuning de performance et gestion mémoire

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Système de configuration tuning et gestion mémoire
 # TASK-7-5: Configuration adaptative et optimisation selon l'environnement

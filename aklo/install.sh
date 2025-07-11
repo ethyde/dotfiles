@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Script d'installation interactif pour Aklo (native-first + bonus Node.js)
 # Ce script prépare l'environnement Aklo :

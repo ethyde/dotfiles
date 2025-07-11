@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Source des dépendances
 # Pour accéder aux fonctions internes si nécessaire

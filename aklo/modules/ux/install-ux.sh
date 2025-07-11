@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Installation des améliorations UX pour Aklo
 # Script d'installation et de démonstration

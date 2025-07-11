@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Test de Validation TASK-13-4 - Refactoring du script principal

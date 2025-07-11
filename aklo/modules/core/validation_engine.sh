@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #==============================================================================
 # Validation Engine - Moteur de validation pour le lazy loading TASK-13-2

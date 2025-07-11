@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Système de monitoring des opérations I/O
 # TASK-7-4: Monitoring et métriques I/O pour aklo

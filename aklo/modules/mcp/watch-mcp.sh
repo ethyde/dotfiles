@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Script de surveillance et redémarrage automatique des serveurs MCP Aklo
 # Mode développement : redémarre automatiquement quand les fichiers changent

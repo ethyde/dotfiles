@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Test d'intégration pour le module performance_profiles.sh
 # TASK-13-3: Validation du comportement complet des profils adaptatifs

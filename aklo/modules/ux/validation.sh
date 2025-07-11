@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Amélioration UX : Validation des inputs utilisateur pour Aklo
 # Validation robuste et messages d'erreur utiles

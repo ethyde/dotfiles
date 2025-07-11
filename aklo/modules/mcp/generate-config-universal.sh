@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Générateur de configuration MCP universel
 # Support multi-clients : Claude Desktop, Cursor, VS Code, CLI, etc.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Installation et configuration automatique des serveurs MCP Aklo
 # Logique intelligente : Node.js (optimal) → Shell natif (fallback)

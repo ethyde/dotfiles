@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Démonstration multi-clients MCP Aklo
 # Montre comment utiliser les serveurs avec différents clients
@@ -236,7 +236,7 @@ EOF
     echo -e "\n${YELLOW}Scénario 3: CI/CD avec CLI${NC}"
     cat << 'EOF'
 Script CI:
-#!/bin/bash
+#!/usr/bin/env bash
 STATUS=$(echo '{"method":"tools/call","params":{"name":"aklo_status_shell"}}' | \
          ./shell-native/aklo-terminal.sh)
 if [[ "$STATUS" == *"error"* ]]; then

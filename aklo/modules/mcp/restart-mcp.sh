@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Script de redémarrage des serveurs MCP Aklo
 # Utilise ce script après avoir modifié le code des serveurs

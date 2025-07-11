@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #==============================================================================
 # Aklo Terminal - Serveur de commandes shell sécurisé pour MCP
 #
