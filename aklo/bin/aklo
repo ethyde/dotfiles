@@ -1,28 +1,15 @@
 #!/bin/bash
 #==============================================================================
 # The Aklo Protocol - Interface Unifiée
-# v4.0 - Initialisation Robuste
+# v5.0 - Initialisation Robuste et Fiabilisée
 #==============================================================================
 
 # --- 1. Découverte de la Racine du Projet (LA TOUTE PREMIÈRE CHOSE À FAIRE) ---
-find_project_root() {
-    local dir="$PWD"
-    while [ "$dir" != "/" ]; do
-        [ -d "$dir/.git" ] && echo "$dir" && return
-        dir=$(dirname "$dir")
-    done
-}
+# Détermine son propre emplacement de manière robuste, indépendamment du
+# répertoire depuis lequel il est appelé.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export AKLO_PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-AKLO_PROJECT_ROOT=$(find_project_root)
-if [ -z "$AKLO_PROJECT_ROOT" ]; then
-    if [[ -n "$TEST_ENV" ]]; then
-        AKLO_PROJECT_ROOT="$PWD"
-    else
-        echo "ERREUR: Impossible de trouver la racine du projet. Assurez-vous d'être dans un dépôt git." >&2
-        exit 1
-    fi
-fi
-export AKLO_PROJECT_ROOT
 
 # --- 2. Configuration de base du Shell ---
 set -o pipefail
