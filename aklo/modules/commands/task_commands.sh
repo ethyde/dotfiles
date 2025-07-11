@@ -55,10 +55,14 @@ cmd_plan() {
         # Le contexte pour le template XML
         local context_vars="pbi_id=${pbi_id},task_id=${task_num},title=${title}"
 
-        if parse_and_generate_artefact "01-PLANIFICATION" "task" "$output_file" "$context_vars"; then
-            echo "✅ Tâche créée : ${filename}"
+        if [ "$AKLO_DRY_RUN" = true ]; then
+            echo "[DRY-RUN] Créerait la tâche : '$output_file'"
         else
-            echo "❌ La création de la tâche a échoué."
+            if parse_and_generate_artefact "01-PLANIFICATION" "task" "$output_file" "$context_vars"; then
+                echo "✅ Tâche créée : ${filename}"
+            else
+                echo "❌ La création de la tâche a échoué."
+            fi
         fi
     done
 } 

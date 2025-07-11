@@ -20,10 +20,15 @@ create_artefact_pbi() {
     
     local context_vars="id=${next_id},title=${title}"
 
-    if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "$output_file" "$context_vars"; then
-        echo "✅ PBI créé : ${output_file}"
+    # --- Logique conditionnelle pour --dry-run ---
+    if [ "$AKLO_DRY_RUN" = true ]; then
+        echo "[DRY-RUN] Créerait le fichier PBI : '$output_file'"
     else
-        echo "❌ La création du fichier PBI a échoué."
-        return 1
+        if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "$output_file" "$context_vars"; then
+            echo "✅ PBI créé : ${output_file}"
+        else
+            echo "❌ La création du fichier PBI a échoué."
+            return 1
+        fi
     fi
 } 
