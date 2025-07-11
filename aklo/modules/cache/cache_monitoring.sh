@@ -1,66 +1,17 @@
 #!/usr/bin/env bash
+#==============================================================================
+# Fonctions de cache pour le parser générique aklo (V3 - Utilise Core Config)
+#==============================================================================
 
-# Fonctions de monitoring et configuration cache (TASK-6-4)
-# Phase GREEN : Implémentation minimale
-
-# Configuration cache par défaut
-CACHE_ENABLED="${CACHE_ENABLED:-true}"
-CACHE_DIR="${AKLO_CACHE_DIR:-${CACHE_DIR:-/tmp/aklo_cache}}"
-CACHE_MAX_SIZE_MB="${CACHE_MAX_SIZE_MB:-100}"
-CACHE_TTL_DAYS="${CACHE_TTL_DAYS:-7}"
-CACHE_CLEANUP_ON_START="${CACHE_CLEANUP_ON_START:-true}"
-CACHE_DEBUG="${CACHE_DEBUG:-false}"
-
-# Fichier de métriques
-CACHE_METRICS_FILE="${CACHE_DIR}/cache_metrics.json"
-
-# Fonction pour lire la configuration cache depuis .aklo.conf
-get_cache_config() {
-    local config_file=".aklo.conf"
-    
-    # Chercher le fichier de config
-    if [ ! -f "$config_file" ]; then
-        local script_dir="$(dirname "$0")"
-        config_file="${script_dir}/../config/.aklo.conf"
-    fi
-    
-    if [ -f "$config_file" ]; then
-        # Lire la configuration cache (format INI et format simple)
-        if grep -q "^\[cache\]" "$config_file" 2>/dev/null; then
-            # Format INI
-            local in_cache_section=false
-            while IFS= read -r line; do
-                if [[ "$line" =~ ^\[cache\]$ ]]; then
-                    in_cache_section=true
-                elif [[ "$line" =~ ^\[.*\]$ ]]; then
-                    in_cache_section=false
-                elif [ "$in_cache_section" = true ] && [[ "$line" =~ ^[^#]*= ]]; then
-                    local key=$(echo "$line" | cut -d'=' -f1 | tr -d ' ')
-                    local value=$(echo "$line" | cut -d'=' -f2- | tr -d ' ')
-                    
-                    case "$key" in
-                        enabled) CACHE_ENABLED="$value" ;;
-                        cache_dir) CACHE_DIR="$value" ;;
-                        max_size_mb) CACHE_MAX_SIZE_MB="$value" ;;
-                        ttl_days) CACHE_TTL_DAYS="$value" ;;
-                        cleanup_on_start) CACHE_CLEANUP_ON_START="$value" ;;
-                    esac
-                fi
-            done < "$config_file"
-        fi
-        
-        # Format simple (rétrocompatibilité)
-        if grep -q "^CACHE_ENABLED=" "$config_file" 2>/dev/null; then
-            CACHE_ENABLED=$(grep "^CACHE_ENABLED=" "$config_file" | cut -d'=' -f2) 2>/dev/null || true
-        fi
-        if grep -q "^CACHE_DEBUG=" "$config_file" 2>/dev/null; then
-            CACHE_DEBUG=$(grep "^CACHE_DEBUG=" "$config_file" | cut -d'=' -f2) 2>/dev/null || true
-        fi
-    fi
-    # Priorité à la variable d'environnement AKLO_CACHE_DIR
-    CACHE_DIR="${AKLO_CACHE_DIR:-${CACHE_DIR:-/tmp/aklo_cache}}"
-    # Mettre à jour le fichier de métriques
-    CACHE_METRICS_FILE="${CACHE_DIR}/cache_metrics.json"
+# Cette fonction utilise maintenant le module core/config.sh pour la configuration.
+get_cache_config_values() {
+    # Clé globale
+    CACHE_ENABLED=$(get_config "CACHE_ENABLED" "" "true")
+    # Clés dans la section [cache]
+    CACHE_DIR=$(get_config "cache_dir" "cache" "/tmp/aklo_cache")
+    CACHE_MAX_SIZE_MB=$(get_config "max_size_mb" "cache" "100")
+    CACHE_TTL_DAYS=$(get_config "ttl_days" "cache" "7")
+    CACHE_DEBUG=$(get_config "CACHE_DEBUG" "" "false")
 }
 
 # Fonction pour initialiser les métriques
@@ -148,84 +99,91 @@ EOF
 
 # Fonction pour afficher les statistiques cache
 show_cache_status() {
-    get_cache_config
-    
+    # Charge les dernières valeurs de configuration à chaque appel
+    get_cache_config_values
+
     echo "🗂️  STATUT DU CACHE AKLO"
     echo "======================================="
     echo "Configuration:"
     echo "  Activé: $CACHE_ENABLED"
-    echo "  Répertoire: $CACHE_DIR"
+
+    local display_dir="$CACHE_DIR"
+    if [[ "$CACHE_DIR" != /* && -n "$AKLO_PROJECT_ROOT" ]]; then
+        display_dir="${AKLO_PROJECT_ROOT}/${CACHE_DIR}"
+    fi
+    echo "  Répertoire: $display_dir"
+
     echo "  Taille max: ${CACHE_MAX_SIZE_MB}MB"
     echo "  TTL: ${CACHE_TTL_DAYS} jours"
     echo "  Debug: $CACHE_DEBUG"
     echo ""
-    
+
     if [ "$CACHE_ENABLED" != "true" ]; then
         echo "❌ Cache désactivé"
         return 0
     fi
     
-    if [ ! -f "$CACHE_METRICS_FILE" ]; then
+    local metrics_file="${display_dir}/cache_metrics.json"
+    if [ ! -f "$metrics_file" ]; then
         echo "📊 Aucune métrique disponible"
         echo "💡 Utilisez aklo pour générer des artefacts et créer des métriques"
-        return 0
-    fi
-    
-    # Lire les métriques avec extraction robuste
-    local hits=$(grep '"hits":' "$CACHE_METRICS_FILE" | grep -o '[0-9]\+' | head -1)
-    local misses=$(grep '"misses":' "$CACHE_METRICS_FILE" | grep -o '[0-9]\+' | head -1)
-    local total=$(grep '"total_requests":' "$CACHE_METRICS_FILE" | grep -o '[0-9]\+' | head -1)
-    local time_saved=$(grep '"total_time_saved_ms":' "$CACHE_METRICS_FILE" | grep -o '[0-9]\+' | head -1)
-    local cache_size=$(grep '"cache_size_bytes":' "$CACHE_METRICS_FILE" | grep -o '[0-9]\+' | head -1)
-    local files_count=$(grep '"files_count":' "$CACHE_METRICS_FILE" | grep -o '[0-9]\+' | head -1)
-    
-    # Valeurs par défaut si extraction échoue
-    hits=${hits:-0}
-    misses=${misses:-0}
-    total=${total:-0}
-    time_saved=${time_saved:-0}
-    cache_size=${cache_size:-0}
-    files_count=${files_count:-0}
-    local last_updated=$(grep '"last_updated"' "$CACHE_METRICS_FILE" | cut -d'"' -f4 || echo "N/A")
-    
-    # Calculer les ratios
-    local hit_ratio=0
-    local miss_ratio=0
-    if [ $total -gt 0 ]; then
-        hit_ratio=$((hits * 100 / total))
-        miss_ratio=$((misses * 100 / total))
-    fi
-    
-    # Convertir la taille en format lisible
-    local size_display
-    if [ $cache_size -gt 1048576 ]; then
-        size_display="$((cache_size / 1048576))MB"
-    elif [ $cache_size -gt 1024 ]; then
-        size_display="$((cache_size / 1024))KB"
     else
-        size_display="${cache_size}B"
-    fi
-    
-    echo "📊 Statistiques:"
-    echo "  Hits: $hits (${hit_ratio}%)"
-    echo "  Misses: $misses (${miss_ratio}%)"
-    echo "  Total requêtes: $total"
-    echo "  Temps économisé: ${time_saved}ms"
-    echo "  Fichiers en cache: $files_count"
-    echo "  Taille cache: $size_display"
-    echo "  Dernière MAJ: $last_updated"
-    
-    # Afficher les fichiers cache
-    if [ $files_count -gt 0 ]; then
-        echo ""
-        echo "📁 Fichiers en cache:"
-        find "$CACHE_DIR" -name "*.parsed" -exec basename {} \; 2>/dev/null | sort | sed 's/^/  /'
+        # Lire les métriques avec extraction robuste
+        local hits=$(grep '"hits":' "$metrics_file" | grep -o '[0-9]\+' | head -1)
+        local misses=$(grep '"misses":' "$metrics_file" | grep -o '[0-9]\+' | head -1)
+        local total=$(grep '"total_requests":' "$metrics_file" | grep -o '[0-9]\+' | head -1)
+        local time_saved=$(grep '"total_time_saved_ms":' "$metrics_file" | grep -o '[0-9]\+' | head -1)
+        local cache_size=$(grep '"cache_size_bytes":' "$metrics_file" | grep -o '[0-9]\+' | head -1)
+        local files_count=$(grep '"files_count":' "$metrics_file" | grep -o '[0-9]\+' | head -1)
+        
+        # Valeurs par défaut si extraction échoue
+        hits=${hits:-0}
+        misses=${misses:-0}
+        total=${total:-0}
+        time_saved=${time_saved:-0}
+        cache_size=${cache_size:-0}
+        files_count=${files_count:-0}
+        local last_updated=$(grep '"last_updated"' "$metrics_file" | cut -d'"' -f4 || echo "N/A")
+        
+        # Calculer les ratios
+        local hit_ratio=0
+        local miss_ratio=0
+        if [ $total -gt 0 ]; then
+            hit_ratio=$((hits * 100 / total))
+            miss_ratio=$((misses * 100 / total))
+        fi
+        
+        # Convertir la taille en format lisible
+        local size_display
+        if [ $cache_size -gt 1048576 ]; then
+            size_display="$((cache_size / 1048576))MB"
+        elif [ $cache_size -gt 1024 ]; then
+            size_display="$((cache_size / 1024))KB"
+        else
+            size_display="${cache_size}B"
+        fi
+        
+        echo "📊 Statistiques:"
+        echo "  Hits: $hits (${hit_ratio}%)"
+        echo "  Misses: $misses (${miss_ratio}%)"
+        echo "  Total requêtes: $total"
+        echo "  Temps économisé: ${time_saved}ms"
+        echo "  Fichiers en cache: $files_count"
+        echo "  Taille cache: $size_display"
+        echo "  Dernière MAJ: $last_updated"
+        
+        # Afficher les fichiers cache
+        if [ $files_count -gt 0 ]; then
+            echo ""
+            echo "📁 Fichiers en cache:"
+            find "$CACHE_DIR" -name "*.parsed" -exec basename {} \; 2>/dev/null | sort | sed 's/^/  /'
+        fi
     fi
 }
 
 # Fonction pour vider le cache
 clear_cache() {
-    get_cache_config
+    get_cache_config_values
     
     if [ "$CACHE_ENABLED" != "true" ]; then
         echo "❌ Cache désactivé - Rien à vider"
@@ -253,7 +211,7 @@ clear_cache() {
 
 # Fonction pour benchmarker le cache
 benchmark_cache() {
-    get_cache_config
+    get_cache_config_values
     
     echo "🏃 BENCHMARK CACHE AKLO"
     echo "======================================="
@@ -309,7 +267,7 @@ benchmark_cache() {
 
 # Fonction pour nettoyer le cache selon TTL
 cleanup_cache_by_ttl() {
-    get_cache_config
+    get_cache_config_values
     
     [ "$CACHE_ENABLED" != "true" ] && return 0
     [ ! -d "$CACHE_DIR" ] && return 0

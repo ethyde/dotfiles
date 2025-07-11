@@ -1,94 +1,105 @@
-# The Aklo Protocol
+# 🤖 The Aklo Protocol
 
 *« Ce n'est pas ce qui est mort qui peut sommeiller à jamais, et au long des ères étranges la Mort même peut mourir. »*
 
----
+-----
 
 ## 1. Philosophie : Qu'est-ce que "The Aklo Protocol" ?
 
-**The Aklo Protocol** n'est pas un simple outil, c'est un **système de gouvernance** pour le développement de logiciels. Il a pour but d'imposer un cadre de travail rigoureux, traçable et de haute qualité, en s'appuyant sur deux piliers :
+**The Aklo Protocol** est un système de gouvernance pour le développement de logiciels. Il impose un cadre de travail rigoureux et traçable en s'appuyant sur deux piliers :
 
-1.  **La Charte IA (`./charte/`) :** C'est notre "Necronomicon", la source de vérité unique qui définit tous nos processus de travail. Elle est conçue pour être lue et comprise par les humains et les IA.
-2.  **L'outil `aklo` (`./bin/aklo`) :** C'est le "Grand Prêtre", l'exécuteur des rituels décrits dans la Charte. C'est un outil en ligne de commande qui automatise les tâches répétitives pour garantir que les protocoles sont suivis à la lettre, sans erreur. L'outil s'appuie sur une architecture modulaire organisée dans `./modules/` pour la cache, I/O, performance, parsing, MCP et UX.
+1.  **La Charte IA (`./charte/`) :** La source de vérité qui définit tous nos processus de travail.
+2.  **L'outil `aklo` (`./bin/aklo`) :** L'exécuteur des rituels décrits dans la Charte. C'est un outil en ligne de commande qui s'appuie sur une **architecture modulaire et robuste** située dans `./modules/`.
 
-Ce système est intégré à ce dépôt `dotfiles` pour assurer que tout projet que vous entreprenez respecte les mêmes standards élevés de qualité.
+Cette architecture utilise un **chargement intelligent** pour n'activer que les modules strictement nécessaires à chaque commande, garantissant ainsi des performances optimales.
 
-## 2. Installation et Configuration
+## 2\. Installation et Configuration
 
-### 2.1 Installation Système (Une fois par machine)
+L'outil `aklo` est installé via le script `install` à la racine, qui crée un lien symbolique rendant la commande disponible globalement. Pour la configuration, `aklo` utilise le fichier `.aklo.conf` à la racine de votre projet pour surcharger les valeurs par défaut.
 
-L'outil `aklo` est installé en même temps que le reste de vos `dotfiles` via le script `install` à la racine. Celui-ci, grâce à `dotbot`, crée un lien symbolique qui rend la commande `aklo` disponible globalement dans votre terminal.
+**Pour plus de détails :**
 
-**Pour plus de détails sur la configuration PATH :** Voir [PATH-SETUP.md](PATH-SETUP.md)
+  * **Installation :** [`aklo/PATH-SETUP.md`](https://www.google.com/search?q=aklo/PATH-SETUP.md)
+  * **Sécurité et Migration :** [`aklo/MIGRATION-SECURITY.md`](https://www.google.com/search?q=aklo/MIGRATION-SECURITY.md)
+  * **Architecture Modulaire :** [`aklo/MIGRATION-MODULES.md`](https://www.google.com/search?q=aklo/MIGRATION-MODULES.md)
 
-### 2.2 Sécurité et Migration
+## 3. Le Grimoire des Commandes
 
-⚠️ **Important :** Si vous avez des projets existants utilisant Aklo, consultez impérativement le guide de migration pour éviter les problèmes de sécurité Git.
+Toutes les commandes supportent l'option universelle `--dry-run` pour simuler une exécution sans effectuer de modifications.
 
-**Pour migrer des projets existants :** Voir [MIGRATION-SECURITY.md](MIGRATION-SECURITY.md)
-
-**Problèmes de sécurité résolus :**
-- Prévention du commit accidentel des fichiers de configuration Aklo
-- Gestion sécurisée des liens symboliques vers la Charte IA
-- Patterns `.gitignore` optimisés pour tous les artefacts Aklo
-
-## 3. Les Rituels Quotidiens (Commandes `aklo`)
-
-Voici le grimoire complet des commandes disponibles.
-
-### Commandes Système et Diagnostic
+### Workflow Principal
 
 | Commande | Arguments | Description |
-| :--- | :--- | :--- |
-| `aklo status` | `[--brief\|--detailed\|--json]` | **Tableau de bord du projet** avec état des PBI, tâches et configuration. Inclut métriques de performance et monitoring. |
-| `aklo get_config` | `[<clé>] [--all]` | **Affiche la configuration** effective (debugging, scripts, validation). |
-| `aklo config` | `tune\|profile\|diagnose\|validate` | **Configuration de performance.** Auto-tuning, profils d'environnement, diagnostic mémoire. |
-| `aklo validate` | `[path]` | **Validation du projet** (linter, tests, build selon configuration). |
+|:---|:---|:---|
+| `aklo init` | - | **Initialise le projet** (crée `.aklo.conf`, `.gitignore`, etc.). |
+| `aklo new pbi` | `"<titre>"` | Crée un nouvel artefact **Product Backlog Item**. |
+| `aklo plan` | `<PBI_ID>` | **Décompose un PBI** en tâches techniques de manière interactive. |
+| `aklo start-task` | `<TASK_ID>` | **Commence une tâche** : crée la branche Git et met à jour le statut. |
+| `aklo submit-task`| - | **Soumet une tâche** : crée un commit standardisé et pousse la branche. |
+| `aklo merge-task` | `<TASK_ID>` | **Fusionne une tâche** validée et nettoie la branche. |
 
-### Commandes Cache et Performance
-
-| Commande | Arguments | Description |
-| :--- | :--- | :--- |
-| `aklo cache` | `status\|clear\|benchmark\|dashboard` | **Gestion du cache intelligent.** Statistiques, nettoyage, tests de performance, dashboard I/O. |
-| `aklo monitor` | `dashboard\|memory\|performance\|cleanup` | **Monitoring et métriques.** Dashboard I/O temps réel, diagnostic mémoire, vue complète. |
-
-### Commandes de Workflow Principal
+### Cycle de Vie & Publication
 
 | Commande | Arguments | Description |
-| :--- | :--- | :--- |
-| `aklo init` | - | **Initialise le projet.** Crée le lien vers la Charte, crée et pré-remplit le fichier .aklo.conf local, configure .gitignore avec protection sécurisée, et vérifie automatiquement la sécurité Git. **C'est la première et unique étape de configuration d'un projet.** |
-| `aklo propose-pbi` | `"<titre>"` | Crée un nouvel artefact **Product Backlog Item** pour démarrer un travail. |
-| `aklo plan` | `<PBI_ID>` | Lance une session interactive pour **décomposer un PBI** en tâches techniques. |
-| `aklo start-task` | `<TASK_ID>` | Prépare l'environnement pour **commencer le développement** d'une tâche (crée la branche Git, etc.). |
-| `aklo submit-task` | - | **Soumet une tâche terminée** pour revue (commit, push, mise à jour du statut). Détecte la tâche depuis la branche Git. |
-| `aklo merge-task` | `<TASK_ID>` | **Fusionne une tâche validée** dans la branche de développement principale et nettoie la branche de feature. |
+|:---|:---|:---|
+| `aklo release` | `<type>` | Orchestre la **publication d'une nouvelle version** (`major`, `minor`, `patch`). |
+| `aklo hotfix` | `start "<desc>"` | Démarre une **correction critique** en production. |
+| `aklo hotfix` | `publish` | Publie le hotfix terminé. |
 
-### Commandes de Cycle de Vie et d'Urgence
+### Création d'Artefacts Spécialisés
 
 | Commande | Arguments | Description |
-| :--- | :--- | :--- |
-| `aklo release` | `<type>` | Orchestre le processus de **publication d'une nouvelle version**. `type` peut être `major`, `minor`, ou `patch`. |
-| `aklo hotfix` | `"<description>"` | Démarre le processus d'urgence pour une **correction critique** en production depuis le dernier tag. |
-| `aklo hotfix publish`| - | **Publie le hotfix** une fois la correction effectuée (merge, tag de patch, etc.). |
+|:---|:---|:---|
+| `aklo new debug` | `"<titre>"` | Crée un rapport de débogage. |
+| `aklo new refactor` | `"<titre>"` | Crée un plan de refactoring. |
+| `aklo new optimize`| `"<titre>"` | Crée un plan d'optimisation. |
+| `aklo new ...` | | `experiment`, `security`, `docs`, `scratchpad`, `meta`, `kb`... |
 
-### Commandes de Création d'Artefacts Spécialisés
+### Commandes Utilitaires
 
 | Commande | Arguments | Description |
-| :--- | :--- | :--- |
-| `aklo debug` | `"<titre>"` | Crée un rapport de débogage pour diagnostiquer un problème. |
-| `aklo refactor` | `"<description>"` | Planifie une session de refactoring sécurisé. |
-| `aklo optimize` | `"<objectif>"` | Lance une optimisation de performance ciblée. |
-| `aklo experiment` | `"<hypothèse>"` | Démarre une expérimentation A/B ou test d'hypothèse. |
-| `aklo analyze` | `"<sujet>"` | Analyse concurrentielle ou étude de marché. |
-| `aklo deprecate` | `"<fonctionnalité>"` | Planifie la dépréciation d'une fonctionnalité. |
-| `aklo fast` | `"<tâche>"` | Procédure accélérée pour petites modifications. |
-| `aklo scratch` | `"<sujet>"` | Brainstorming et scratchpad temporaire. |
-| `aklo meta` | `"<amélioration>"` | Amélioration du protocole Aklo lui-même. |
-| `aklo track` | `<PBI_ID>` | Plan de tracking et analytics pour une fonctionnalité. |
-| `aklo docs` | `"<sujet>"` | Documentation utilisateur ou développeur. |
-| `aklo security` | `[<périmètre>]` | Audit de sécurité (utilise la date courante si sans argument). |
+|:---|:---|:---|
+| `aklo status` | `[--brief]` | **Tableau de bord** complet de l'état du projet. |
+| `aklo cache` | `<action>` | **Gestion du cache** (`status`, `clear`, `benchmark`). |
+| `aklo config` | `<action>` | **Configuration de la performance** (`diagnose`, `tune`). |
+| `aklo monitor` | `<action>` | **Monitoring I/O et performance** (`dashboard`). |
 
-## 4. Un Cycle de Vie Complet (Exemple de Workflow)
+## 4. Exemple de Workflow Complet avec `--dry-run`
+
+1.  **Planification :**
+
+    ```bash
+    # Simuler la création d'un PBI
+    aklo new pbi "Mon Super PBI" --dry-run
+
+    # Simuler la planification des tâches
+    aklo plan 1 --dry-run 
+    ```
+
+2.  **Développement :**
+
+    ```bash
+    # Simuler le démarrage d'une tâche
+    aklo start-task 1-1 --dry-run
+
+    # Simuler la soumission pour revue
+    aklo submit-task --dry-run
+
+    # Simuler la fusion
+    aklo merge-task 1-1 --dry-run
+    ```
+
+3.  **Monitoring :**
+
+    ```bash
+    # Consulter le statut du cache
+    aklo cache status
+
+    # Lancer le dashboard de monitoring I/O
+    aklo monitor dashboard
+    ```
+
+## 5. Un Cycle de Vie Complet (Exemple de Workflow)
 
 1.  **Initialisation du projet :**
     ```bash
@@ -165,7 +176,7 @@ Voici le grimoire complet des commandes disponibles.
     aklo cache benchmark
     ```
 
-## 5. Configuration (`.aklo.conf`)
+## 6. Configuration (`.aklo.conf`)
 
 L'outil `aklo` est configurable pour s'adapter aux conventions de chaque projet. La configuration est gérée par un système à deux niveaux.
 
@@ -229,11 +240,11 @@ Lorsque vous lancerez `aklo start-task` dans ce projet, il utilisera `main` comm
 
 Ce système est conçu pour être un document vivant. Toute proposition d'amélioration de la Charte ou de l'outil `aklo` lui-même doit suivre le **protocole [META-IMPROVEMENT]**, qui peut être initié via la commande :
 ```bash
-aklo meta "Rendre la commande 'plan' non-interactive"
+aklo new meta "Rendre la commande 'plan' non-interactive"
 ```
 
 **Autres exemples d'amélioration :**
 ```bash
-aklo meta "Ajouter support pour les templates personnalisés"
-aklo meta "Intégration avec les webhooks Git"
+aklo new meta "Ajouter support pour les templates personnalisés"
+aklo new meta "Intégration avec les webhooks Git"
 ```
