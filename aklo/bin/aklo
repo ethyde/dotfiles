@@ -1,68 +1,64 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO - VERSION FINALE STABLE ET MODULAIRE
+# The Aklo Protocol - Charte Automation Tool v3.1 (avec --dry-run)
 #==============================================================================
 
-# --- INITIALISATION SÉCURISÉE DU CHEMIN ---
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-AKLO_PROJECT_ROOT=$(cd "${SCRIPT_DIR}/../.." && pwd)
+# --- Configuration et chemins ---
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || readlink -f "${BASH_SOURCE[0]}")
+AKLO_BIN_DIR=$(dirname "$SCRIPT_PATH")
 export AKLO_PROJECT_ROOT
-export AKLO_CACHE_DIR="${AKLO_PROJECT_ROOT}/aklo/.aklo_cache"
+AKLO_PROJECT_ROOT=$(cd "$AKLO_BIN_DIR/../.." && pwd)
+export AKLO_MODULES_DIR="${AKLO_PROJECT_ROOT}/aklo/modules"
 
-# --- DISPATCHER PRINCIPAL ---
-main() {
-    local command_name="$1"
-    if [ -z "$command_name" ]; then
-        aklo_help; exit 1;
-    fi
+# --- Gestion de l'option universelle --dry-run ---
+export AKLO_DRY_RUN=false
+PROCESSED_ARGS=()
+for arg in "$@"; do
+  if [ "$arg" = "--dry-run" ]; then
+    AKLO_DRY_RUN=true
+  else
+    PROCESSED_ARGS+=("$arg")
+  fi
+done
+# Remplacer les arguments originaux par les arguments traités
+set -- "${PROCESSED_ARGS[@]}"
 
-    # Fast-path pour les commandes ultra-simples
-    case "$command_name" in
-        "version"|"help") "aklo_$command_name" "$@"; exit $?;;
-    esac
+if [ "$AKLO_DRY_RUN" = true ]; then
+  echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
+  echo "------------------------------------------------------------------"
+fi
 
-    # Architecture de chargement modulaire
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/command_classifier.sh"
-    
-    local profile
-    profile=$(classify_command "$command_name")
-    
+# --- Chargement de l'architecture modulaire ---
+source "${AKLO_MODULES_DIR}/core/command_classifier.sh"
+command_name="$1"
+if [ -z "$command_name" ]; then command_name="help"; fi
+profile=$(classify_command "$command_name")
+required_modules_str=$(get_required_modules "$profile")
+if [ -n "$required_modules_str" ]; then
+    for module_rel_path in $required_modules_str; do
+        module_full_path="${AKLO_MODULES_DIR}/${module_rel_path}"
+        if [ -f "$module_full_path" ]; then
+            source "$module_full_path"
+        else
+            echo "Erreur critique : Dépendance de module introuvable : $module_rel_path" >&2
+            exit 1
+        fi
+    done
+else
     if [ "$profile" = "UNKNOWN" ]; then
         echo "Erreur: Commande '$command_name' inconnue." >&2
-        aklo_help >&2
         exit 1
     fi
+fi
 
-    local modules_to_load
-    modules_to_load=$(get_required_modules "$profile")
-
-    if [ -n "$modules_to_load" ]; then
-        IFS=',' read -ra modules_array <<< "$modules_to_load"
-        for module in "${modules_array[@]}"; do
-            local module_path="${AKLO_PROJECT_ROOT}/aklo/modules/${module}"
-            if [ -f "$module_path" ]; then
-                source "$module_path"
-            else
-                echo "Erreur critique : Dépendance de module introuvable : $module" >&2
-                exit 1
-            fi
-        done
-    fi
-    
-    # Exécution de la commande
-    local command_function="cmd_$command_name"
-    if declare -f "$command_function" >/dev/null; then
-        shift 
-        "$command_function" "$@"
+# --- Exécution de la commande ---
+main() {
+    local cmd_func="cmd_$1"
+    shift
+    if declare -f "$cmd_func" >/dev/null; then
+        "$cmd_func" "$@"
     else
-        echo "Erreur: La fonction pour la commande '$command_name' n'a pas été trouvée, même après chargement." >&2
-        exit 1
+        echo "Erreur interne: la fonction pour la commande '$command_name' n'a pas été chargée." >&2
     fi
 }
 
