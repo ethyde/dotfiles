@@ -11,11 +11,11 @@
 # Configuration de base
 set -e
 
-# Variables globales
-LEARNING_DB_FILE="${AKLO_CACHE_DIR:-/tmp}/learning_database.json"
-LEARNING_LOG_FILE="${AKLO_CACHE_DIR:-/tmp}/learning_engine.log"
-LEARNING_STATS_FILE="${AKLO_CACHE_DIR:-/tmp}/learning_stats.json"
-LEARNING_BACKUP_DIR="${AKLO_CACHE_DIR:-/tmp}/learning_backups"
+# Variables globales (chemins centralisés le 2025-07-10)
+LEARNING_DB_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/learning_database.json"
+LEARNING_LOG_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/learning_engine.log"
+LEARNING_STATS_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/learning_stats.json"
+LEARNING_BACKUP_DIR="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/learning_backups"
 
 # Configuration d'apprentissage
 LEARNING_CONFIDENCE_THRESHOLD=75

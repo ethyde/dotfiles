@@ -24,9 +24,9 @@ source "${script_dir}/fail_safe_loader.sh" 2>/dev/null || {
     echo "⚠️  Fail safe loader non disponible - mode dégradé" >&2
 }
 
-# Variables globales
-PROGRESSIVE_LOG_FILE="${AKLO_CACHE_DIR:-/tmp}/progressive_loading.log"
-PROGRESSIVE_METRICS_FILE="${AKLO_CACHE_DIR:-/tmp}/progressive_metrics.json"
+# Variables globales (chemins centralisés le 2025-07-10)
+PROGRESSIVE_LOG_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/progressive_loading.log"
+PROGRESSIVE_METRICS_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/progressive_metrics.json"
 CURRENT_PROFILE="MINIMAL"
 ESCALATION_TRIGGERED=false
 ESCALATION_HISTORY=()

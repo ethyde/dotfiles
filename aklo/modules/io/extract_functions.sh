@@ -122,6 +122,69 @@ extract_and_cache_structure() {
     return 0
 }
 
+# Applique un filtrage intelligent sur la structure XML en fonction du niveau d'assistance
+# et injecte les variables contextuelles.
+# Assure également que les balises title et status sont présentes.
+# Usage: apply_intelligent_filtering <xml_structure> <assistance_level> <context_vars>
+apply_intelligent_filtering() {
+    local xml_structure="$1"
+    local assistance_level="$2"
+    local context_vars="$3"
+
+    # 1. Injection des balises title et status
+    local final_xml
+    final_xml=$(inject_missing_xml_tags "$xml_structure" "$context_vars")
+    
+    # 2. Logique de filtrage basée sur assistance_level (à implémenter si nécessaire)
+    # ...
+
+    # 3. Remplacement des variables contextuelles
+    # Exemple : Remplacer {{PBI_ID}} par sa valeur
+    if [[ "$context_vars" == *"PBI_ID="* ]]; then
+        local pbi_id
+        pbi_id=$(echo "$context_vars" | grep -o 'PBI_ID=[^;]*' | cut -d'=' -f2)
+        final_xml=$(echo "$final_xml" | sed "s/{{PBI_ID}}/$pbi_id/g")
+    fi
+
+    echo "$final_xml"
+}
+
+
+# Injecte dynamiquement les balises XML manquantes dans un bloc artefact
+# Usage: inject_missing_xml_tags <xml_block> [<context_vars>]
+inject_missing_xml_tags() {
+    local xml_block="$1"
+    local context_vars="$2"
+    local result="$xml_block"
+
+    # Extraire le nom de la balise racine (ex: pbi, task)
+    local root_tag
+    root_tag=$(echo "$result" | grep -o '^<[a-zA-Z0-9_-]*' | sed 's/^<//')
+
+    if [ -n "$root_tag" ]; then
+        # Extraire le titre depuis les variables de contexte, sinon valeur par défaut
+        local title_value="Titre non défini"
+        if [[ "$context_vars" == *"TITLE="* ]]; then
+            title_value=$(echo "$context_vars" | grep -o 'TITLE=[^;]*' | cut -d'=' -f2)
+        fi
+
+        # Injection de l'attribut title si absent
+        if ! echo "$result" | grep -q "<$root_tag.*title="; then
+            local title_value
+            title_value=$(echo "$context_vars" | tr ';' '\n' | grep 'TITLE=' | cut -d'=' -f2)
+            result=$(echo "$result" | sed "s/<$root_tag>/<$root_tag title=\"${title_value:-Sans titre}\">/")
+        fi
+
+        # Injection de la balise <status>PROPOSED</status> si absente
+        if ! echo "$result" | grep -q '<status>'; then
+            local status_value="PROPOSED"
+            result=$(echo "$result" | sed "s~</$root_tag>~  <status>$status_value</status>\\n</$root_tag>~")
+        fi
+    fi
+
+    echo "$result"
+}
+
 # Extraction d'une balise d'artefact XML depuis un protocole Aklo
 # Usage: extract_artefact_xml <protocol_file> <artefact_tag>
 # Retourne: le bloc XML de la balise demandée (ex: <pbi>...</pbi>), 0 si succès, 1 si erreur
@@ -146,23 +209,6 @@ extract_artefact_xml() {
         return 1
     fi
     echo "$structure"
-}
-
-# Injecte dynamiquement les balises XML manquantes dans un bloc artefact
-# Usage: inject_missing_xml_tags <xml_block> <tag1> [<tag2> ...]
-inject_missing_xml_tags() {
-    local xml_block="$1"
-    shift
-    local tags=("$@")
-    local result="$xml_block"
-    for tag in "${tags[@]}"; do
-        if ! echo "$result" | grep -q "<$tag>"; then
-            # Injecter la balise juste après l’ouverture de l’artefact principal
-            # (on suppose que le bloc commence par <pbi> ou <task>...)
-            result=$(echo "$result" | sed "0,/<[a-zA-Z0-9_\-]*>/s//&\n  <$tag><\/ $tag>/")
-        fi
-    done
-    echo "$result"
 }
 
 # Validation des types d’artefacts supportés

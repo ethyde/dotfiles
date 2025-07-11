@@ -5,7 +5,7 @@
 
 # Source des fonctions de cache de base
 script_dir="$(dirname "${BASH_SOURCE[0]}")"
-source "${script_dir}/aklo_cache_functions.sh"
+source "${script_dir}/cache_functions.sh"
 
 # Variables globales pour le cache des IDs
 # Utiliser des fichiers temporaires pour persister les métriques entre les appels

@@ -22,7 +22,7 @@ assert_success() { if [ "$1" -ne 0 ]; then echo "[FAIL] $2"; exit 1; else echo "
 # 1. Test existence de la whitelist
 run_test_whitelist_existence() {
   echo_section "Test : existence de aklo/config/commands.whitelist"
-  if [ -f ./aklo/config/commands.whitelist ]; then
+  if [ -f "$(dirname "$0")/../config/commands.whitelist" ]; then
     echo "[OK] commands.whitelist présent"
   else
     echo "[FAIL] commands.whitelist absent"; exit 1
@@ -56,7 +56,7 @@ run_test_aklo_status_shell() {
 run_test_safe_shell() {
   echo_section "Test : safe_shell (sécurité, whitelist, timeout)"
   # Ajoute 'sleep' à la whitelist pour le test de timeout
-  grep -q '^sleep$' ./aklo/config/commands.whitelist || echo 'sleep' >> ./aklo/config/commands.whitelist
+  grep -q '^sleep$' "$(dirname "$0")/../config/commands.whitelist" || echo 'sleep' >> "$(dirname "$0")/../config/commands.whitelist"
   OUTPUT=$(echo '{"command":"ls"}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell)
   echo "$OUTPUT" | grep -q '"success"' && assert_success 0 "safe_shell : commande autorisée 'ls'"
   OUTPUT_FORBIDDEN=$(echo '{"command":"rm"}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell || true)
@@ -67,7 +67,7 @@ run_test_safe_shell() {
   OUTPUT_WD=$(echo '{"command":"ls","workdir":"/tmp"}' | ./aklo/modules/mcp/shell-native/aklo-terminal.sh safe_shell)
   echo "$OUTPUT_WD" | grep -q '"success"' && assert_success 0 "safe_shell : workdir supporté"
   # Retire 'sleep' de la whitelist après le test
-  sed -i '' '/^sleep$/d' ./aklo/config/commands.whitelist
+  sed -i '' '/^sleep$/d' "$(dirname "$0")/../config/commands.whitelist"
 }
 
 # 5. Test project_info

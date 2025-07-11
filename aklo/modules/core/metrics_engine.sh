@@ -9,10 +9,10 @@
 # performance de l'application Aklo.
 #==============================================================================
 
-# Configuration
-METRICS_DB_FILE="${AKLO_CACHE_DIR:-/tmp}/metrics_history.db"
-METRICS_LOG_FILE="${AKLO_LOG_DIR:-/tmp}/metrics_engine.log"
-METRICS_STATS_FILE="${AKLO_CACHE_DIR:-/tmp}/metrics_stats.json"
+# Configuration (centralisée le 2025-07-10)
+METRICS_DB_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/metrics_history.db"
+METRICS_LOG_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/metrics_engine.log"
+METRICS_STATS_FILE="${AKLO_CACHE_DIR:=$PWD/aklo/.aklo_cache}/metrics_stats.json"
 
 # Paramètres de rétention et de performance
 METRICS_RETENTION_DAYS=30

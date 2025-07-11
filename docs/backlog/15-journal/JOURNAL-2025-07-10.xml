@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<journal date="2025-07-10">
+  <entry time="10:00">
+    <summary>Centralisation et portabilité du système de cache Aklo.</summary>
+    <details>
+      <step protocol="REFACTORING">Audit des scripts de cache, métriques et logs pour identifier les chemins de cache dispersés (`./cache`, `./.aklo_cache`, `/tmp`).</step>
+      <step protocol="REFACTORING">Décision de centraliser tous les artefacts de cache (fichiers `.parsed`, métriques, logs) dans un répertoire unique : `aklo/.aklo_cache/`.</step>
+      <step protocol="DEVELOPPEMENT">Refonte des modules `cache_monitoring.sh`, `cache_functions.sh`, `metrics_engine.sh`, `learning_engine.sh` et du script principal `aklo` pour utiliser une variable centralisée `AKLO_CACHE_DIR`.</step>
+      <step protocol="DEVELOPPEMENT">Définition de la variable `AKLO_PROJECT_ROOT` à la racine du script `aklo` pour garantir la construction de chemins absolus portables.</step>
+      <step protocol="REFACTORING">Correction de la configuration `cache_dir` dans `.aklo.conf` pour utiliser un chemin relatif (`aklo/.aklo_cache`) et non plus un chemin absolu, la rendant ainsi portable.</step>
+      <step protocol="DEVELOPPEMENT">Adaptation de la logique de lecture de la configuration pour reconstruire le chemin absolu du cache si le chemin configuré est relatif.</step>
+      <step protocol="DEVELOPPEMENT">Adaptation des scripts de tests (`test_cache_green.sh`) pour utiliser la nouvelle structure de cache.</step>
+      <step protocol="REFACTORING">Migration physique des anciens fichiers de cache et nettoyage des répertoires obsolètes à la racine du projet.</step>
+      <step protocol="REFACTORING">Mise à jour du fichier `.gitignore` pour exclure le nouveau répertoire de cache centralisé.</step>
+    </details>
+    <conclusion>Le système de cache est désormais centralisé, portable et robuste. La structure du projet est plus propre et maintenable.</conclusion>
+  </entry>
+  <entry time="10:05">
+    <summary>Échec du démarrage de session : impossible de trouver la racine du projet.</summary>
+    <details>
+        <step protocol="DIAGNOSTIC-ENV">Activation du protocole de diagnostic suite à l'échec de la commande `aklo get_config PROJECT_WORKDIR`.</step>
+        <step protocol="DIAGNOSTIC-ENV">Erreur identifiée : `ERREUR: Impossible de trouver la racine du projet. Assurez-vous d'être dans un dépôt git ou que AKLO_PROJECT_ROOT est défini.`.</step>
+        <step protocol="DIAGNOSTIC-ENV">L'erreur ne correspond à aucun cas connu dans le catalogue du protocole. Démarrage du diagnostic de base.</step>
+        <step protocol="DIAGNOSTIC-ENV">Analyse du script `aklo/bin/aklo` : la détection de la racine du projet dépend du répertoire `.git`.</step>
+        <step protocol="DIAGNOSTIC-ENV">Exécution de `pwd` : le répertoire de travail est `/Users/eplouvie` (incorrect).</step>
+    </details>
+    <conclusion>Diagnostic terminé. L'erreur est due à un mauvais répertoire d'exécution. La correction consiste à forcer le `workdir` à `/Users/eplouvie/Projets/dotfiles`.</conclusion>
+  </entry>
+  <entry time="10:10">
+      <summary>Début de session</summary>
+      <details>
+          <step protocol="SESSION_FLIGHT_PLAN">Validation du répertoire de travail : /Users/eplouvie/Projets/dotfiles</step>
+          <step protocol="SESSION_FLIGHT_PLAN">Ouverture du journal quotidien.</step>
+      </details>
+      <conclusion>Session initialisée avec succès. Prêt à commencer le travail.</conclusion>
+  </entry>
+</journal> 

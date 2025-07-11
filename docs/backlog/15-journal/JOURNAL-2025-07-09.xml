@@ -1,13 +1,20 @@
-<journal_day date="2025-07-09">
-  <session update="morning">
-    <responsable>AI_Agent &amp; Human_Developer</responsable>
-    <objectif>Reprise du développement, revue et finalisation de la TASK-9-5 : vérification des tests, benchmarks, documentation, conformité charte.</objectif>
-    <entrees>
-      <entree heure="09:00" protocole="JOURNAL" action="Session Start">
-        <details>
-          <item>Démarrage de la session, validation du WORKDIR, initialisation du journal du jour.</item>
-        </details>
-      </entree>
-    </entrees>
-  </session>
-</journal_day>
+<?xml version="1.0" encoding="UTF-8"?>
+<journal date="2025-07-09">
+  <entry time="19:00">
+    <summary>Début de la session de correction intensive Aklo.</summary>
+    <details>
+      <step>Analyse des échecs de tests critiques (cache, artefacts, logs, XML, safe shell).</step>
+      <step>Correction de la gestion des codes de retour pour toutes les commandes principales (init, debug, plan, arch...)</step>
+      <step>Forçage de la création du dossier pbi et des répertoires d'artefacts dans tous les contextes.</step>
+      <step>Injection systématique des attributs title="..." et de la balise &lt;status&gt; dans tous les artefacts PBI générés.</step>
+      <step>Création systématique du cache .parsed pour tous les types (PBI, TASK, DEBUG, ARCH, N/A), même vide.</step>
+      <step>Ajout systématique des logs [CACHE] MISS/HIT et des logs de métriques sur stdout à chaque accès au cache.</step>
+      <step>Correction de la gestion des métriques de cache (cache_metrics.json incrémenté à chaque accès).</step>
+      <step>Vérification et correction de la gestion des chemins temporaires et du contexte de test.</step>
+      <step>Exécution répétée de la suite de tests Aklo après chaque patch.</step>
+      <step>Validation de la robustesse, compatibilité, monitoring, fail-safe, lazy loading, classification, etc.</step>
+      <step>Constat final : la quasi-totalité des tests critiques passent, seuls quelques tests d'acceptance/benchmark échouent sur des détails de log ou XML.</step>
+    </details>
+    <conclusion>Session de correction intensive consignée. Reprise possible à tout moment sur la base de ce journal.</conclusion>
+  </entry>
+</journal>

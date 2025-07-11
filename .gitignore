@@ -2,3 +2,6 @@
 bash
 ssh/githubperso
 ssh/githubperso.pub
+
+# Aklo cache
+aklo/.aklo_cache/
