@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
 #==============================================================================
-# The Aklo Protocol - Charte Automation Tool v3.1 (avec --dry-run)
+# The Aklo Protocol - Charte Automation Tool v3.4 (Architecture Portable)
 #==============================================================================
 
-# --- Configuration et chemins ---
-SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || readlink -f "${BASH_SOURCE[0]}")
-AKLO_BIN_DIR=$(dirname "$SCRIPT_PATH")
+# --- 1. Configuration des chemins et de l'environnement (ROBUSTE) ---
+# Résout le chemin réel du script pour garantir la robustesse, même via des liens symboliques.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # Résoudre les liens symboliques de manière récursive
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+AKLO_BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
 export AKLO_PROJECT_ROOT
 AKLO_PROJECT_ROOT=$(cd "$AKLO_BIN_DIR/../.." && pwd)
 export AKLO_MODULES_DIR="${AKLO_PROJECT_ROOT}/aklo/modules"
 
-# --- Gestion de l'option universelle --dry-run ---
+# --- 2. Gestion de l'option universelle --dry-run ---
 export AKLO_DRY_RUN=false
 PROCESSED_ARGS=()
 for arg in "$@"; do
@@ -20,45 +27,46 @@ for arg in "$@"; do
     PROCESSED_ARGS+=("$arg")
   fi
 done
-# Remplacer les arguments originaux par les arguments traités
 set -- "${PROCESSED_ARGS[@]}"
 
-if [ "$AKLO_DRY_RUN" = true ]; then
-  echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
-  echo "------------------------------------------------------------------"
-fi
-
-# --- Chargement de l'architecture modulaire ---
+# --- 3. Chargement intelligent et fail-safe ---
 source "${AKLO_MODULES_DIR}/core/command_classifier.sh"
 command_name="$1"
-if [ -z "$command_name" ]; then command_name="help"; fi
+if [ -z "$command_name" ]; then
+    source "${AKLO_MODULES_DIR}/ux/help-system.sh"
+    show_help
+    exit 0
+fi
 profile=$(classify_command "$command_name")
 required_modules_str=$(get_required_modules "$profile")
 if [ -n "$required_modules_str" ]; then
     for module_rel_path in $required_modules_str; do
         module_full_path="${AKLO_MODULES_DIR}/${module_rel_path}"
-        if [ -f "$module_full_path" ]; then
-            source "$module_full_path"
-        else
-            echo "Erreur critique : Dépendance de module introuvable : $module_rel_path" >&2
+        if [ ! -f "$module_full_path" ]; then
+            echo "Erreur critique : Dépendance interne introuvable : ${module_rel_path}" >&2
+            echo "(Chemin de base des modules : ${AKLO_MODULES_DIR})" >&2
             exit 1
         fi
+        source "$module_full_path"
     done
 else
-    if [ "$profile" = "UNKNOWN" ]; then
-        echo "Erreur: Commande '$command_name' inconnue." >&2
-        exit 1
-    fi
+    echo "Erreur: Commande '$command_name' inconnue." >&2
+    exit 1
 fi
 
-# --- Exécution de la commande ---
+# --- 4. Exécution de la commande ---
 main() {
+    if [ "$AKLO_DRY_RUN" = true ]; then
+      echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
+      echo "------------------------------------------------------------------"
+    fi
     local cmd_func="cmd_$1"
     shift
     if declare -f "$cmd_func" >/dev/null; then
         "$cmd_func" "$@"
     else
-        echo "Erreur interne: la fonction pour la commande '$command_name' n'a pas été chargée." >&2
+        echo "Erreur interne : la fonction '$cmd_func' n'a pas été chargée. Vérifiez le classifieur." >&2
+        exit 1
     fi
 }
 
