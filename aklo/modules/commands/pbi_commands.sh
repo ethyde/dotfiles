@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO PBI COMMANDS MODULE - FINAL
+# AKLO PBI LOGIC MODULE
 #==============================================================================
 
-cmd_propose-pbi() {
+# Fonction appelée par le dispatcher "new"
+create_artefact_pbi() {
     local title="$1"
-    [ -z "$title" ] && echo "Erreur: Titre manquant." >&2 && return 1
-    
     echo "🎯 Création du PBI: \"$title\""
 
     local pbi_dir="${AKLO_PROJECT_ROOT}/docs/backlog/00-pbi"
@@ -23,9 +22,6 @@ cmd_propose-pbi() {
 
     if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "$output_file" "$context_vars"; then
         echo "✅ PBI créé : ${output_file}"
-        echo "--- Contenu ---"
-        cat "${output_file}"
-        echo "---------------"
     else
         echo "❌ La création du fichier PBI a échoué."
         return 1
