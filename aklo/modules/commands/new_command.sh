@@ -26,7 +26,20 @@ cmd_new() {
     if declare -f "$create_function" >/dev/null; then
         "$create_function" "$title"
     else
-        echo "Erreur: Le type d'artefact '$artefact_type' est inconnu." >&2
+        # --- AMÉLIORATION : Aide contextuelle ---
+        case "$artefact_type" in
+            "release")
+                echo "💡 Pour démarrer une release, la bonne commande est :" >&2
+                echo "   aklo release <major|minor|patch>" >&2
+                ;;
+            "hotfix")
+                echo "💡 Pour démarrer un hotfix, la bonne commande est :" >&2
+                echo "   aklo hotfix start \"<description>\"" >&2
+                ;;
+            *)
+                echo "Erreur: Le type d'artefact '$artefact_type' est inconnu." >&2
+                ;;
+        esac
         return 1
     fi
 } 

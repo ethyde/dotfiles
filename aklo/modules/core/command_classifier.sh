@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO COMMAND CLASSIFIER - VERSION FINALE
+# AKLO COMMAND CLASSIFIER - AVEC HOTFIX
 #==============================================================================
 
+# Définit les profils pour chaque commande.
 declare -A COMMAND_PROFILES
 COMMAND_PROFILES["new"]="CREATE_ARTEFACT"
 COMMAND_PROFILES["plan"]="PLAN_COMMANDS"
@@ -11,14 +12,19 @@ COMMAND_PROFILES["init"]="INIT_COMMAND"
 COMMAND_PROFILES["start-task"]="TASK_LIFECYCLE"
 COMMAND_PROFILES["submit-task"]="TASK_LIFECYCLE"
 COMMAND_PROFILES["merge-task"]="TASK_LIFECYCLE"
+COMMAND_PROFILES["release"]="RELEASE_LIFECYCLE"
+COMMAND_PROFILES["hotfix"]="RELEASE_LIFECYCLE"
 
+# Associe les profils aux modules requis (séparés par des espaces).
 declare -A PROFILE_MODULES
-PROFILE_MODULES["CREATE_ARTEFACT"]="core/parser.sh commands/new_command.sh commands/pbi_commands.sh"
+PROFILE_MODULES["CREATE_ARTEFACT"]="core/parser.sh commands/new_command.sh commands/pbi_commands.sh commands/debug_command.sh commands/refactor_command.sh commands/optimize_command.sh commands/experiment_command.sh commands/security_command.sh commands/docs_command.sh commands/scratchpad_command.sh commands/kb_command.sh commands/meta_command.sh"
 PROFILE_MODULES["PLAN_COMMANDS"]="core/parser.sh commands/task_commands.sh"
 PROFILE_MODULES["SYSTEM_COMMANDS"]="commands/system_commands.sh"
 PROFILE_MODULES["INIT_COMMAND"]="commands/init_command.sh"
 PROFILE_MODULES["TASK_LIFECYCLE"]="core/config.sh commands/start-task_command.sh commands/submit-task_command.sh commands/merge-task_command.sh"
+PROFILE_MODULES["RELEASE_LIFECYCLE"]="core/config.sh commands/release_command.sh commands/hotfix_command.sh"
 
+# Fonction pour classifier une commande.
 classify_command() {
     local command_name="$1"
     local profile="${COMMAND_PROFILES[$command_name]}"
@@ -29,6 +35,7 @@ classify_command() {
     fi
 }
 
+# Fonction pour obtenir la liste des modules.
 get_required_modules() {
     local profile_name="$1"
     echo "${PROFILE_MODULES[$profile_name]}"
