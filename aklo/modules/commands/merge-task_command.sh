@@ -36,36 +36,30 @@ cmd_merge-task() {
     local branch_to_merge="feature/task-${task_id_full}"
     echo "🌿 Préparation de la fusion de '$branch_to_merge' dans '$main_branch'..."
 
-    # 5. Exécuter le processus de fusion
-    git -C "${AKLO_PROJECT_ROOT}" checkout "$main_branch"
-    git -C "${AKLO_PROJECT_ROOT}" pull origin "$main_branch" --rebase
-    git -C "${AKLO_PROJECT_ROOT}" merge --no-ff "$branch_to_merge" -m "Merge branch '$branch_to_merge'
-
-Merge task TASK-${task_id_full} into ${main_branch}."
-    
-    echo "✅ Branche fusionnée avec succès."
-
-    # 6. Pousser la branche principale
-    git -C "${AKLO_PROJECT_ROOT}" push origin "$main_branch"
-
-    # 7. Supprimer la branche de tâche
-    git -C "${AKLO_PROJECT_ROOT}" branch -d "$branch_to_merge"
-    # Supprimer aussi la branche distante
-    git -C "${AKLO_PROJECT_ROOT}" push origin --delete "$branch_to_merge" 2>/dev/null || true
-    echo "🗑️  Branche '$branch_to_merge' nettoyée (localement et sur origin)."
-
-    # 8. Mettre à jour le statut de l'artefact
-    local current_filename=$(basename "$task_file")
-    local base_name=$(echo "$current_filename" | sed -E 's/-(TODO|IN_PROGRESS|DONE|AWAITING_REVIEW|MERGED)\.xml$//')
-    
-    local new_filename="${base_name}-MERGED.xml"
-    local new_filepath="${tasks_dir}/${new_filename}"
-
-    if [ "$task_file" != "$new_filepath" ]; then
-        mv "$task_file" "$new_filepath"
-        echo "✅ Statut de la tâche #$task_id_full mis à jour à MERGED."
+    # --- Logique conditionnelle pour --dry-run ---
+    if [ "$AKLO_DRY_RUN" = true ]; then
+        echo "[DRY-RUN] Exécuterait : git checkout '$main_branch'"
+        echo "[DRY-RUN] Exécuterait : git pull origin '$main_branch' --rebase"
+        echo "[DRY-RUN] Exécuterait : git merge --no-ff '$branch_to_merge' -m \"Merge branch '$branch_to_merge'\n\nMerge task TASK-${task_id_full} into ${main_branch}.\""
+        echo "[DRY-RUN] Exécuterait : git push origin '$main_branch'"
+        echo "[DRY-RUN] Exécuterait : git branch -d '$branch_to_merge'"
+        echo "[DRY-RUN] Exécuterait : git push origin --delete '$branch_to_merge'"
+        echo "[DRY-RUN] Renommerait le fichier de tâche pour le statut MERGED."
+    else
+        git -C "${AKLO_PROJECT_ROOT}" checkout "$main_branch"
+        git -C "${AKLO_PROJECT_ROOT}" pull origin "$main_branch" --rebase
+        git -C "${AKLO_PROJECT_ROOT}" merge --no-ff "$branch_to_merge" -m "Merge branch '$branch_to_merge'\n\nMerge task TASK-${task_id_full} into ${main_branch}."
+        echo "✅ Branche fusionnée avec succès."
+        git -C "${AKLO_PROJECT_ROOT}" push origin "$main_branch"
+        git -C "${AKLO_PROJECT_ROOT}" branch -d "$branch_to_merge"
+        git -C "${AKLO_PROJECT_ROOT}" push origin --delete "$branch_to_merge" 2>/dev/null || true
+        echo "🗑️  Branche '$branch_to_merge' nettoyée (localement et sur origin)."
+        local current_filename=$(basename "$task_file")
+        local base_name=$(echo "$current_filename" | sed -E 's/-(TODO|IN_PROGRESS|DONE|AWAITING_REVIEW|MERGED)\.xml$//')
+        local new_filename="${base_name}-MERGED.xml"
+        local new_filepath="${tasks_dir}/${new_filename}"
+        if [ "$task_file" != "$new_filepath" ]; then mv "$task_file" "$new_filepath"; echo "✅ Statut mis à jour à MERGED."; fi
+        echo "🎉 Tâche #$task_id_full terminée et intégrée !"
     fi
-
-    echo "🎉 Tâche #$task_id_full terminée et intégrée !"
     return 0
 } 
