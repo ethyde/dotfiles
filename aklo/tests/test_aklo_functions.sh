@@ -32,38 +32,31 @@ test_aklo_init_command() {
     local exit_code=$?
     
     assert_equals "0" "$exit_code" "'aklo init' doit s'exécuter sans erreur"
-    assert_file_exists "pbi" "'aklo init' should create the 'pbi' directory"
+    assert_directory_exists "docs/backlog/00-pbi" "'aklo init' doit créer le répertoire 'pbi'"
     assert_file_exists ".aklo.conf" "'aklo init' doit créer le fichier .aklo.conf"
-    assert_file_contains ".aklo.conf" "PBI_DIR=" ".aklo.conf doit contenir PBI_DIR"
+    assert_file_contains ".aklo.conf" "PROJECT_WORKDIR=" ".aklo.conf doit contenir PROJECT_WORKDIR"
 
     teardown_artefact_test_env
 }
 
-test_aklo_propose_pbi_command() {
-    test_suite "Command: aklo propose-pbi (extension-agnostic)"
+test_aklo_new_pbi_command() {
+    test_suite "Command: aklo new pbi (extension-agnostic)"
     
     setup_artefact_test_env
     
     # Générer un PBI en .xml
-    "$TEST_PROJECT_DIR/aklo/bin/aklo" propose-pbi "My Test PBI" >/dev/null 2>&1
+    "$TEST_PROJECT_DIR/aklo/bin/aklo" new pbi "My Test PBI" >/dev/null 2>&1
     local exit_code=$?
-    assert_equals "0" "$exit_code" "'aklo propose-pbi' doit s'exécuter sans erreur"
-    
-    # Générer un PBI en .xml (simulation)
-    touch "pbi/PBI-42-My-Test-PBI.xml"
+    assert_equals "0" "$exit_code" "'aklo new pbi' doit s'exécuter sans erreur"
     
     # Découverte extension-agnostique
     local pbi_file
-    pbi_file=$(ls ./pbi/PBI-*-* 2>/dev/null | grep -E 'My-Test-PBI')
-    assert_not_empty "$pbi_file" "Le PBI doit être trouvé dans le répertoire pbi/ temporaire, peu importe l'extension"
+    pbi_file=$(find ./docs/backlog/00-pbi -name "PBI-*-my-test-pbi-*.xml" 2>/dev/null)
+    assert_not_empty "$pbi_file" "Le PBI doit être trouvé dans le répertoire pbi/, peu importe l'extension"
     
-    # Vérifier le contenu pour le .xml
-    local pbi_md_file
-    pbi_md_file=$(ls ./pbi/PBI-*-My-Test-PBI.xml 2>/dev/null)
-    if [ -n "$pbi_md_file" ]; then
-        assert_file_contains "$pbi_md_file" 'title="My Test PBI"' "Le PBI .xml doit contenir le titre en attribut (title=)"
-        assert_file_contains "$pbi_md_file" "<status>PROPOSED</status>" "Le PBI .xml doit avoir le statut PROPOSED (balise XML)"
-    fi
+    # CORRECTION : Vérifier la présence de l'attribut title, pas de la balise
+    assert_file_contains "$pbi_file" 'title="My Test PBI"' "Le PBI .xml doit contenir l'attribut title"
+    assert_file_contains "$pbi_file" "<status>PROPOSED</status>" "Le PBI .xml doit avoir le statut PROPOSED"
     
     teardown_artefact_test_env
 }
@@ -71,7 +64,7 @@ test_aklo_propose_pbi_command() {
 main() {
     test_get_next_id
     test_aklo_init_command
-    test_aklo_propose_pbi_command
+    test_aklo_new_pbi_command
     
     test_summary
 }

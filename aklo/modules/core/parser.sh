@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO CORE PARSER - MODULE CONSOLIDÉ V6 - FINAL ET ROBUSTE
+# AKLO CORE PARSER - MODULE CONSOLIDÉ V8 - INJECTION TITRE CORRIGÉE
 #==============================================================================
 
 # --- Fonction de calcul d'ID (logique existante, validée) ---
@@ -53,7 +53,7 @@ extract_artefact_xml() {
     ' "$protocol_file"
 }
 
-# --- Fonction Principale du Parser ---
+# --- Fonction Principale du Parser (Corrigée) ---
 parse_and_generate_artefact() {
     local protocol_name="$1"
     local artefact_type="$2"
@@ -70,7 +70,6 @@ parse_and_generate_artefact() {
         return 1
     fi
     
-    # Remplacement des variables contextuelles
     local id_val title_val pbi_id_val task_id_val
     id_val=$(echo "$context_vars" | sed -n 's/.*id=\([^,]*\).*/\1/p')
     title_val=$(echo "$context_vars" | sed -n 's/.*title=\([^,]*\).*/\1/p')
@@ -80,10 +79,15 @@ parse_and_generate_artefact() {
     local title_val_escaped
     title_val_escaped=$(printf '%s\n' "$title_val" | sed 's:[&/\\]:\\&:g')
 
+    # Remplacement des placeholders dans les attributs ET le contenu
+    # CORRECTION : On remplace [title] aussi bien en tant que placeholder simple
+    # qu'en tant que valeur d'attribut.
+    structure=$(echo "$structure" | sed "s/title=\"\[title\]\"/title=\"$title_val_escaped\"/g")
     structure=$(echo "$structure" | sed "s/\[id\]/$id_val/g")
-    structure=$(echo "$structure" | sed "s/\[title\]/$title_val_escaped/g")
+    structure=$(echo "$structure" | sed "s/\[title\]/$title_val_escaped/g") # Pour le contenu de balise <title>
     structure=$(echo "$structure" | sed "s/\[pbi_id\]/$pbi_id_val/g")
     structure=$(echo "$structure" | sed "s/\[task_id\]/$task_id_val/g")
+    structure=$(echo "$structure" | sed "s/\[status\]/PROPOSED/g")
 
     echo "$structure" > "$output_file"
     
