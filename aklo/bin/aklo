@@ -1,36 +1,39 @@
 #!/usr/bin/env bash
 #==============================================================================
-# The Aklo Protocol - Charte Automation Tool v3.0
+# The Aklo Protocol - Charte Automation Tool v3.1 (avec --dry-run)
 #==============================================================================
 
 # --- Configuration et chemins ---
-# Résout le chemin réel du script pour garantir la robustesse, même via des liens symboliques.
-SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || greadlink -f "${BASH_SOURCE[0]}" 2>/dev/null || readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}" 2>/dev/null || readlink -f "${BASH_SOURCE[0]}")
 AKLO_BIN_DIR=$(dirname "$SCRIPT_PATH")
 export AKLO_PROJECT_ROOT
 AKLO_PROJECT_ROOT=$(cd "$AKLO_BIN_DIR/../.." && pwd)
 export AKLO_MODULES_DIR="${AKLO_PROJECT_ROOT}/aklo/modules"
 
-# --- Chargement de l'architecture modulaire ---
-# Cette section est maintenant le cœur intelligent du système.
+# --- Gestion de l'option universelle --dry-run ---
+export AKLO_DRY_RUN=false
+PROCESSED_ARGS=()
+for arg in "$@"; do
+  if [ "$arg" = "--dry-run" ]; then
+    AKLO_DRY_RUN=true
+  else
+    PROCESSED_ARGS+=("$arg")
+  fi
+done
+# Remplacer les arguments originaux par les arguments traités
+set -- "${PROCESSED_ARGS[@]}"
 
-# 1. Charger le classifieur de commandes, qui est essentiel.
-source "${AKLO_MODULES_DIR}/core/command_classifier.sh"
-
-# 2. Détecter la commande depuis les arguments.
-command_name="$1"
-if [ -z "$command_name" ]; then
-    command_name="help" # Comportement par défaut
+if [ "$AKLO_DRY_RUN" = true ]; then
+  echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
+  echo "------------------------------------------------------------------"
 fi
 
-# 3. Classifier la commande pour obtenir le profil de performance.
+# --- Chargement de l'architecture modulaire ---
+source "${AKLO_MODULES_DIR}/core/command_classifier.sh"
+command_name="$1"
+if [ -z "$command_name" ]; then command_name="help"; fi
 profile=$(classify_command "$command_name")
-
-# 4. Obtenir la liste des modules requis pour ce profil.
 required_modules_str=$(get_required_modules "$profile")
-
-# 5. Charger chaque module requis de manière sécurisée.
-#    CORRECTION MAJEURE : Boucle 'for' pour itérer sur la chaîne de modules.
 if [ -n "$required_modules_str" ]; then
     for module_rel_path in $required_modules_str; do
         module_full_path="${AKLO_MODULES_DIR}/${module_rel_path}"
@@ -42,12 +45,8 @@ if [ -n "$required_modules_str" ]; then
         fi
     done
 else
-    # Gérer le cas où la commande est inconnue
     if [ "$profile" = "UNKNOWN" ]; then
         echo "Erreur: Commande '$command_name' inconnue." >&2
-        # Tenter de charger le module d'aide pour fournir une sortie utile.
-        source "${AKLO_MODULES_DIR}/ux/help-system.sh"
-        aklo_help
         exit 1
     fi
 fi
@@ -59,7 +58,6 @@ main() {
     if declare -f "$cmd_func" >/dev/null; then
         "$cmd_func" "$@"
     else
-        # Ce cas devrait être géré par le classifieur maintenant.
         echo "Erreur interne: la fonction pour la commande '$command_name' n'a pas été chargée." >&2
     fi
 }

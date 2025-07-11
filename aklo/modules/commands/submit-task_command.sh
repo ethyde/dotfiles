@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO SUBMIT-TASK COMMAND MODULE
+# AKLO SUBMIT-TASK COMMAND MODULE - VERSION ROBUSTE
 #==============================================================================
 
 #------------------------------------------------------------------------------
@@ -8,11 +8,19 @@
 # Crée un commit standardisé, met à jour le statut de la tâche et pousse la branche.
 #------------------------------------------------------------------------------
 cmd_submit-task() {
-    local tasks_dir="${AKLO_PROJECT_ROOT}/docs/backlog/01-tasks"
+    # 1. Lire la configuration
+    local main_branch
+    main_branch=$(get_config "MAIN_BRANCH_NAME" "master")
 
-    # 1. Détecter la branche Git actuelle
+    # 2. Détecter la branche Git actuelle et appliquer le garde-fou
     local current_branch
     current_branch=$(git -C "${AKLO_PROJECT_ROOT}" symbolic-ref --short HEAD 2>/dev/null)
+
+    if [ "$current_branch" == "$main_branch" ]; then
+        echo "❌ Erreur: 'submit-task' ne peut pas être exécuté sur la branche principale ('$main_branch')." >&2
+        echo "   Cette commande est réservée aux branches de fonctionnalités (ex: feature/task-...). " >&2
+        return 1
+    fi
 
     if [[ ! "$current_branch" =~ ^feature/task-([0-9]+-[0-9]+) ]]; then
         echo "Erreur: Vous n'êtes pas sur une branche de tâche valide (ex: feature/task-PBI_ID-TASK_ID)." >&2
@@ -24,6 +32,7 @@ cmd_submit-task() {
     echo "ℹ️  Tâche détectée depuis la branche : #$task_id_full"
 
     # 2. Trouver le fichier de la tâche
+    local tasks_dir="${AKLO_PROJECT_ROOT}/docs/backlog/01-tasks"
     local task_file
     task_file=$(find "$tasks_dir" -name "TASK-${task_id_full}-*.xml" 2>/dev/null | head -1)
 
