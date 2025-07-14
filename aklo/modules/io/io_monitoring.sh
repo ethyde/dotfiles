@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
+#==============================================================================
+# Système de monitoring des opérations I/O (V2 - Robuste)
+#==============================================================================
 
-# Système de monitoring des opérations I/O
-# TASK-7-4: Monitoring et métriques I/O pour aklo
+# --- CORRECTION ---
+# Au lieu de définir des variables globales, on utilise une fonction de configuration
+# qui s'appuie sur la configuration centrale et des chemins robustes.
+load_monitoring_config() {
+    IO_MONITORING_ENABLED=$(get_config "IO_MONITORING_ENABLED" "monitoring" "true")
+    local default_metrics_dir="${AKLO_PROJECT_ROOT}/.aklo_metrics"
+    IO_METRICS_DIR=$(get_config "IO_METRICS_DIR" "monitoring" "$default_metrics_dir")
+    IO_ALERT_THRESHOLD_MS=$(get_config "IO_ALERT_THRESHOLD_MS" "monitoring" "1000")
+    IO_RETENTION_DAYS=$(get_config "IO_RETENTION_DAYS" "monitoring" "7")
+    IO_DASHBOARD_ENABLED=$(get_config "IO_DASHBOARD_ENABLED" "monitoring" "true")
+}
 
-# Variables globales de configuration
-IO_MONITORING_ENABLED=${IO_MONITORING_ENABLED:-true}
-IO_METRICS_DIR=${IO_METRICS_DIR:-"$HOME/.aklo/metrics"}
-IO_ALERT_THRESHOLD_MS=${IO_ALERT_THRESHOLD_MS:-1000}
-IO_RETENTION_DAYS=${IO_RETENTION_DAYS:-7}
-IO_DASHBOARD_ENABLED=${IO_DASHBOARD_ENABLED:-true}
-
-# Variables de session
-IO_SESSION_ID=""
-IO_SESSION_START=""
-IO_CURRENT_SESSION_FILE=""
-
-# Initialisation du système de monitoring
+# La fonction start_io_monitoring appellera load_monitoring_config
+# et utilisera IO_METRICS_DIR qui est maintenant correctement défini.
 start_io_monitoring() {
-    [[ "$IO_MONITORING_ENABLED" != "true" ]] && return 0
-    
-    # Charger la configuration
     load_monitoring_config
+    [[ "$IO_MONITORING_ENABLED" != "true" ]] && return 0
     
     # Créer les répertoires nécessaires
     mkdir -p "$IO_METRICS_DIR"/{io_operations,cache_stats,performance,benchmarks,alerts}

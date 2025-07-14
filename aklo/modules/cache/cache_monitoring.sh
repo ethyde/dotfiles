@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 #==============================================================================
-# Fonctions de monitoring du cache pour aklo (V3 - Robuste)
+# Fonctions de monitoring du cache pour aklo (V4 - Robuste)
 #==============================================================================
 
-# Cette fonction est un placeholder pour le moment, mais suffisante pour les tests.
+# Cette fonction utilise maintenant le module core/config.sh pour la configuration.
 get_cache_config_values() {
-    CACHE_ENABLED="${CACHE_ENABLED:-true}"
-    CACHE_DIR="${AKLO_CACHE_DIR:-/tmp/aklo_cache}"
-    CACHE_MAX_SIZE_MB="${CACHE_MAX_SIZE_MB:-100}"
-    CACHE_TTL_DAYS="${CACHE_TTL_DAYS:-7}"
-    CACHE_DEBUG="${AKLO_CACHE_DEBUG:-false}"
+    # Clé globale lue via la fonction centralisée
+    CACHE_ENABLED=$(get_config "CACHE_ENABLED" "" "true")
+    # Utilise AKLO_PROJECT_ROOT pour construire un chemin par défaut fiable
+    local default_cache_dir="${AKLO_PROJECT_ROOT}/.aklo_cache"
+    CACHE_DIR=$(get_config "cache_dir" "cache" "$default_cache_dir")
+    CACHE_MAX_SIZE_MB=$(get_config "max_size_mb" "cache" "100")
+    CACHE_TTL_DAYS=$(get_config "ttl_days" "cache" "7")
+    CACHE_DEBUG=$(get_config "CACHE_DEBUG" "" "false")
     CACHE_METRICS_FILE="${CACHE_DIR}/cache_metrics.json"
 }
 
