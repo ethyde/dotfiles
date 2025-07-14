@@ -3,9 +3,6 @@
 # AKLO REFACTOR COMMAND MODULE
 #==============================================================================
 
-#------------------------------------------------------------------------------
-# COMMANDE: new refactor
-#------------------------------------------------------------------------------
 create_artefact_refactor() {
     local title="$1"
     local refactor_dir="${AKLO_PROJECT_ROOT}/docs/backlog/05-refactor"
@@ -18,17 +15,9 @@ create_artefact_refactor() {
     local output_file="${refactor_dir}/${filename}"
     local context_vars="id=${next_id},title=${title}"
 
-    echo "🔨 Création du plan de refactoring : \"$title\""
-
-    if [ "$AKLO_DRY_RUN" = true ]; then
-        echo "[DRY-RUN] Créerait le fichier de refactoring : '$output_file'"
+    if parse_and_generate_artefact "05-REFACTORING" "refactor_report" "$output_file" "$context_vars"; then
+        echo "✅ Plan de refactoring créé : ${output_file}"
     else
-        if parse_and_generate_artefact "05-REFACTORING" "refactor_report" "$output_file" "$context_vars"; then
-            echo "✅ Plan de refactoring créé : ${output_file}"
-        else
-            echo "❌ La création du plan a échoué."
-            return 1
-        fi
+        echo "❌ La création du plan a échoué." >&2; return 1;
     fi
-    return 0
 } 

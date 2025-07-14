@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 #==============================================================================
 # Fonctions d'extraction et de mise en cache pour aklo
-# Dépendances (chargées par aklo/bin/aklo) : cache/cache_functions.sh
 #==============================================================================
+
+# --- AJOUT CRITIQUE ---
+# Assure la disponibilité des fonctions de cache dont ce module dépend.
+source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh"
 
 # Fonction de validation avant mise en cache
 # Usage: validate_cache_prerequisites <protocol_file> <artefact_type> <cache_file>

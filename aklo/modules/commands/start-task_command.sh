@@ -24,39 +24,29 @@ cmd_start-task() {
         return 1
     fi
     
-    local current_filename=$(basename "$task_file")
-    local base_name=$(echo "$current_filename" | sed -E 's/-(TODO|IN_PROGRESS|DONE|MERGED)\.xml$//')
+    local current_filename
+    current_filename=$(basename "$task_file")
+    local base_name
+    base_name=$(echo "$current_filename" | sed -E 's/-(TODO|IN_PROGRESS|DONE|MERGED)\.xml$//')
     local new_filename="${base_name}-IN_PROGRESS.xml"
     local new_filepath="${tasks_dir}/${new_filename}"
 
-    # --- Logique conditionnelle pour --dry-run ---
     if [ "$AKLO_DRY_RUN" = true ]; then
         echo "[DRY-RUN] Renommerait le fichier de tâche en '$new_filename'."
     else
-        if [ "$task_file" != "$new_filepath" ]; then
-            mv "$task_file" "$new_filepath"
-            echo "✅ Statut de la tâche #$task_id_full mis à jour à IN_PROGRESS."
-        else
-            echo "ℹ️  La tâche #$task_id_full est déjà en cours."
-        fi
+        mv "$task_file" "$new_filepath"
+        echo "✅ Statut de la tâche #$task_id_full mis à jour à IN_PROGRESS."
     fi
 
-    # Création de la branche Git (Conditionnel)
     local branch_name="feature/task-${task_id_full}"
     if git -C "${AKLO_PROJECT_ROOT}" rev-parse --verify "$branch_name" >/dev/null 2>&1; then
-        if [ "$AKLO_DRY_RUN" = true ]; then
-             echo "[DRY-RUN] Exécuterait : git checkout '$branch_name'"
-        else
-            echo "ℹ️  La branche '$branch_name' existe déjà. Basculement dessus."
-            git -C "${AKLO_PROJECT_ROOT}" checkout "$branch_name"
-        fi
+        echo "ℹ️  La branche '$branch_name' existe déjà. Basculement dessus."
+        git -C "${AKLO_PROJECT_ROOT}" checkout "$branch_name"
     else
-        if [ "$AKLO_DRY_RUN" = true ]; then
-            echo "[DRY-RUN] Exécuterait : git checkout -b '$branch_name'"
-        else
-            git -C "${AKLO_PROJECT_ROOT}" checkout -b "$branch_name"
-            echo "🌿 Branche '$branch_name' créée et activée."
-        fi
+        local main_branch
+        main_branch=$(get_config "MAIN_BRANCH_NAME" "master")
+        git -C "${AKLO_PROJECT_ROOT}" checkout -b "$branch_name" "$main_branch"
+        echo "🌿 Branche '$branch_name' créée et activée."
     fi
     
     return 0

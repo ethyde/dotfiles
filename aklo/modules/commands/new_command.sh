@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO NEW COMMAND MODULE
+# AKLO NEW COMMAND MODULE (Dispatcher Complet et Robuste)
 # Gère la création de tous les types d'artefacts.
 #==============================================================================
 
@@ -21,20 +21,21 @@ cmd_new() {
         return 1
     fi
 
-    # Aiguillage vers la fonction de création spécifique
+    # --- AIGUILLAGE DYNAMIQUE ---
+    # Construit le nom de la fonction de création spécifique.
+    # Ex: si artefact_type="pbi", create_function="create_artefact_pbi"
     local create_function="create_artefact_$artefact_type"
+
+    # Vérifie si cette fonction existe avant de l'appeler.
     if declare -f "$create_function" >/dev/null; then
+        # Appelle la fonction de création (ex: create_artefact_pbi "My Test PBI")
         "$create_function" "$title"
     else
-        # --- AMÉLIORATION : Aide contextuelle ---
+        # Si la fonction n'existe pas, c'est que le type d'artefact est inconnu.
         case "$artefact_type" in
-            "release")
-                echo "💡 Pour démarrer une release, la bonne commande est :" >&2
-                echo "   aklo release <major|minor|patch>" >&2
-                ;;
-            "hotfix")
-                echo "💡 Pour démarrer un hotfix, la bonne commande est :" >&2
-                echo "   aklo hotfix start \"<description>\"" >&2
+            "release" | "hotfix")
+                echo "💡 Pour démarrer une release ou un hotfix, utilisez directement :" >&2
+                echo "   aklo release <type>  /  aklo hotfix start \"<desc>\"" >&2
                 ;;
             *)
                 echo "Erreur: Le type d'artefact '$artefact_type' est inconnu." >&2

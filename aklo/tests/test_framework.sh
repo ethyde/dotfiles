@@ -393,6 +393,56 @@ assert_function_exists() {
     fi
 }
 
+# Charge l'environnement Aklo complet pour les tests.
+# CETTE VERSION CORRIGE LES PROBLEMES DE CHEMINS.
+setup_aklo_test_env() {
+    # Si la variable n'est pas déjà définie, on la calcule de manière robuste.
+    if [ -z "$AKLO_PROJECT_ROOT" ]; then
+        # 1. Trouve le chemin réel du présent script (test_framework.sh)
+        local framework_real_path
+        framework_real_path=$(realpath "${BASH_SOURCE[0]}")
+        # 2. Le répertoire du framework est le répertoire parent de ce script
+        local test_framework_dir
+        test_framework_dir=$(dirname "$framework_real_path")
+        # 3. La racine du projet Aklo est le répertoire parent du répertoire des tests
+        AKLO_PROJECT_ROOT=$(dirname "$test_framework_dir")
+        # 4. On l'exporte pour qu'elle soit disponible dans tous les sous-scripts
+        export AKLO_PROJECT_ROOT
+    fi
+
+    # Le reste de la fonction charge tous les modules en utilisant ce chemin fiable
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/config.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/parser.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_monitoring.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/regex_cache.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/id_cache.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/batch_io.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/io/io_monitoring.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/performance/performance_tuning.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/system_commands.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/new_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/pbi_commands.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/task_commands.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/start-task_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/submit-task_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/merge-task_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/release_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/hotfix_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/debug_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/refactor_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/optimize_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/security_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/experiment_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/docs_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/scratchpad_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/kb_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/meta_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/cache_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/config_command.sh"
+    source "${AKLO_PROJECT_ROOT}/aklo/modules/commands/monitor_command.sh"
+}
+
 #==============================================================================
 # Fonctions de gestion d'environnement de test pour les artefacts
 #==============================================================================
@@ -406,44 +456,46 @@ setup_artefact_test_env() {
     TEST_PROJECT_DIR=$(mktemp -d "/tmp/aklo_artefact_test.XXXXXX")
     ORIGINAL_PWD=$(pwd)
 
-    # AKLO_PROJECT_ROOT doit être défini par le lanceur de tests (run_tests.sh)
+    # AKLO_PROJECT_ROOT est la racine de notre projet dotfiles, où se trouve le code source de l'outil
     if [ -z "$AKLO_PROJECT_ROOT" ]; then
-        echo "${RED}✗ FATAL: AKLO_PROJECT_ROOT is not set. Please run tests via run_tests.sh.${NC}"
-        exit 1
+        export AKLO_PROJECT_ROOT
+        AKLO_PROJECT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
     fi
 
-    # Copier l'application et ses dépendances depuis la racine du projet
-    mkdir -p "$TEST_PROJECT_DIR/aklo/bin"
-    cp "$AKLO_PROJECT_ROOT/aklo/bin/aklo" "$TEST_PROJECT_DIR/aklo/bin/"
-    cp -r "$AKLO_PROJECT_ROOT/aklo/modules" "$TEST_PROJECT_DIR/aklo/"
-    cp -r "$AKLO_PROJECT_ROOT/aklo/charte" "$TEST_PROJECT_DIR/aklo/"
+    # 1. Copier l'intégralité de l'outil aklo dans l'environnement de test
+    mkdir -p "${TEST_PROJECT_DIR}/aklo"
+    cp -r "${AKLO_PROJECT_ROOT}/aklo/bin" "${TEST_PROJECT_DIR}/aklo/"
+    cp -r "${AKLO_PROJECT_ROOT}/aklo/modules" "${TEST_PROJECT_DIR}/aklo/"
+    cp -r "${AKLO_PROJECT_ROOT}/aklo/charte" "${TEST_PROJECT_DIR}/aklo/"
     
-    # Isoler le test dans le nouveau projet
+    # 2. Se placer dans le répertoire du projet simulé
     cd "$TEST_PROJECT_DIR" || exit 1
     
-    # Créer les répertoires pour les artefacts de test
-    mkdir -p pbi tasks arch debug journal
+    # --- CORRECTION FINALE ---
+    # 3. Créer la structure de répertoires attendue par les commandes Aklo
+    mkdir -p "docs/backlog/00-pbi"
+    mkdir -p "docs/backlog/01-tasks"
+    mkdir -p ".aklo_cache"
     
-    # Créer une configuration .aklo.conf locale et temporaire
+    # 4. Créer un fichier .aklo.conf local au projet de test
+    #    Il n'est plus nécessaire de définir AKLO_PROJECT_ROOT ici, car le script `aklo`
+    #    le déterminera dynamiquement avec `pwd`.
     cat > .aklo.conf << EOF
-PBI_DIR=pbi
-TASKS_DIR=tasks
-ARCH_DIR=arch
-DEBUG_DIR=debug
-JOURNAL_DIR=journal
+PBI_DIR=docs/backlog/00-pbi
+TASKS_DIR=docs/backlog/01-tasks
 CACHE_ENABLED=true
 CACHE_DEBUG=false
-AUTO_BACKUP=true
 EOF
 }
 
-# Nettoie l'environnement de test des artefacts
+# La fonction de nettoyage doit annuler l'export
 teardown_artefact_test_env() {
     if [ -n "$ORIGINAL_PWD" ]; then
         cd "$ORIGINAL_PWD"
     fi
-    # Désactivation temporaire du nettoyage pour debug
-    # if [ -n "$TEST_PROJECT_DIR" ] && [ -d "$TEST_PROJECT_DIR" ]; then
-    #     rm -rf "$TEST_PROJECT_DIR"
-    # fi
+    if [ -n "$TEST_PROJECT_DIR" ] && [ -d "$TEST_PROJECT_DIR" ]; then
+        rm -rf "$TEST_PROJECT_DIR"
+    fi
+    # Nettoie la variable d'environnement
+    unset AKLO_PROJECT_ROOT
 }
