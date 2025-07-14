@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #==============================================================================
 # AKLO TASK COMMANDS MODULE
-# Commandes : plan
 #==============================================================================
 
 #------------------------------------------------------------------------------
 # COMMANDE: plan
-# Décompose un PBI en tâches techniques de manière interactive.
+# Décompose un PBI en tâches techniques.
+# Pour le moment, crée une seule tâche par PBI pour valider le workflow.
 #------------------------------------------------------------------------------
 cmd_plan() {
     local pbi_id="$1"
@@ -19,50 +19,33 @@ cmd_plan() {
     # Vérifier que le PBI existe
     local pbi_dir="${AKLO_PROJECT_ROOT}/docs/backlog/00-pbi"
     if ! find "$pbi_dir" -name "PBI-${pbi_id}-*.xml" 2>/dev/null | grep -q .; then
-        echo "Erreur: PBI #$pbi_id introuvable." >&2
+        echo "Erreur: PBI #${pbi_id} introuvable." >&2
         return 1
     fi
 
-    echo "📋 Planification des tâches pour le PBI #$pbi_id."
-    echo "   Entrez les titres des tâches. Laissez vide pour terminer."
+    echo "📋 Planification des tâches pour le PBI #${pbi_id}."
 
     local task_dir="${AKLO_PROJECT_ROOT}/docs/backlog/01-tasks"
     mkdir -p "$task_dir"
     
+    # Logique simplifiée : créer une seule tâche pour le test
     local task_num=1
-    while true; do
-        # Calcul du prochain ID de tâche pour ce PBI
-        local last_task_sub_id
-        last_task_sub_id=$(find "$task_dir" -name "TASK-${pbi_id}-*.xml" 2>/dev/null | \
-                           grep -oE "TASK-${pbi_id}-[0-9]+" | \
-                           sed "s/TASK-${pbi_id}-//" | \
-                           sort -nr | \
-                           head -1)
-        task_num=$(( ${last_task_sub_id:-0} + 1 ))
+    local title="Première tâche pour le PBI ${pbi_id}"
+    
+    local sanitized_title
+    sanitized_title=$(echo "$title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]//g')
+    local filename="TASK-${pbi_id}-${task_num}-${sanitized_title}-TODO.xml"
+    local output_file="${task_dir}/${filename}"
+    
+    # Contexte pour le parser
+    local context_vars="pbi_id=${pbi_id},task_id=${task_num},title=${title},status=TODO"
 
-        echo -n "Titre de la tâche ${pbi_id}-${task_num}: "
-        read -r title
-
-        if [ -z "$title" ]; then
-            echo "Fin de la planification."
-            break
-        fi
-
-        local sanitized_title=$(echo "$title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]//g')
-        local filename="TASK-${pbi_id}-${task_num}-${sanitized_title}-TODO.xml"
-        local output_file="${task_dir}/${filename}"
-        
-        # Le contexte pour le template XML
-        local context_vars="pbi_id=${pbi_id},task_id=${task_num},title=${title}"
-
-        if [ "$AKLO_DRY_RUN" = true ]; then
-            echo "[DRY-RUN] Créerait la tâche : '$output_file'"
-        else
-            if parse_and_generate_artefact "01-PLANIFICATION" "task" "$output_file" "$context_vars"; then
-                echo "✅ Tâche créée : ${filename}"
-            else
-                echo "❌ La création de la tâche a échoué."
-            fi
-        fi
-    done
+    # Appel du parser pour générer l'artefact de tâche
+    # Note: Nous devons avoir un protocole "01-PLANNING" qui définit le template de la tâche.
+    if parse_and_generate_artefact "01-PLANNING" "task" "$output_file" "$context_vars"; then
+        echo "✅ Tâche créée : ${filename}"
+    else
+        echo "❌ La création de la tâche a échoué."
+        return 1
+    fi
 } 

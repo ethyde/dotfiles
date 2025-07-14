@@ -1,73 +1,88 @@
 #!/usr/bin/env bash
 #==============================================================================
-# The Aklo Protocol - Charte Automation Tool v3.4 (Architecture Portable)
+# AKLO - CHARTE AUTOMATION TOOL (V6 - Dispatcher Complet et Robuste)
 #==============================================================================
 
-# --- 1. Configuration des chemins et de l'environnement (ROBUSTE) ---
-# Résout le chemin réel du script pour garantir la robustesse, même via des liens symboliques.
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # Résoudre les liens symboliques de manière récursive
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-AKLO_BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+set -e
 
+# --- Définition des chemins ---
+AKLO_TOOL_DIR=$(dirname "$(dirname "$(realpath "$0")")")
+export AKLO_TOOL_DIR
+: "${AKLO_PROJECT_ROOT:="$(pwd)"}"
 export AKLO_PROJECT_ROOT
-AKLO_PROJECT_ROOT=$(cd "$AKLO_BIN_DIR/../.." && pwd)
-export AKLO_MODULES_DIR="${AKLO_PROJECT_ROOT}/aklo/modules"
 
-# --- 2. Gestion de l'option universelle --dry-run ---
-export AKLO_DRY_RUN=false
-PROCESSED_ARGS=()
-for arg in "$@"; do
-  if [ "$arg" = "--dry-run" ]; then
-    AKLO_DRY_RUN=true
-  else
-    PROCESSED_ARGS+=("$arg")
-  fi
-done
-set -- "${PROCESSED_ARGS[@]}"
+# --- Chargement direct et explicite de tous les modules ---
+# Core
+source "${AKLO_TOOL_DIR}/modules/core/config.sh"
+source "${AKLO_TOOL_DIR}/modules/core/parser.sh"
 
-# --- 3. Chargement intelligent et fail-safe ---
-source "${AKLO_MODULES_DIR}/core/command_classifier.sh"
-command_name="$1"
-if [ -z "$command_name" ]; then
-    source "${AKLO_MODULES_DIR}/ux/help-system.sh"
-    show_help
-    exit 0
-fi
-profile=$(classify_command "$command_name")
-required_modules_str=$(get_required_modules "$profile")
-if [ -n "$required_modules_str" ]; then
-    for module_rel_path in $required_modules_str; do
-        module_full_path="${AKLO_MODULES_DIR}/${module_rel_path}"
-        if [ ! -f "$module_full_path" ]; then
-            echo "Erreur critique : Dépendance interne introuvable : ${module_rel_path}" >&2
-            echo "(Chemin de base des modules : ${AKLO_MODULES_DIR})" >&2
-            exit 1
-        fi
-        source "$module_full_path"
-    done
-else
-    echo "Erreur: Commande '$command_name' inconnue." >&2
-    exit 1
-fi
+# Cache
+source "${AKLO_TOOL_DIR}/modules/cache/cache_functions.sh"
+source "${AKLO_TOOL_DIR}/modules/cache/cache_monitoring.sh"
+source "${AKLO_TOOL_DIR}/modules/cache/regex_cache.sh"
+source "${AKLO_TOOL_DIR}/modules/cache/id_cache.sh"
+source "${AKLO_TOOL_DIR}/modules/cache/batch_io.sh"
 
-# --- 4. Exécution de la commande ---
+# IO & Performance
+source "${AKLO_TOOL_DIR}/modules/io/io_monitoring.sh"
+source "${AKLO_TOOL_DIR}/modules/performance/performance_tuning.sh"
+
+# Commandes
+source "${AKLO_TOOL_DIR}/modules/commands/system_commands.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/new_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/pbi_commands.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/task_commands.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/start-task_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/submit-task_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/merge-task_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/release_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/hotfix_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/debug_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/refactor_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/optimize_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/security_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/experiment_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/docs_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/scratchpad_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/kb_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/meta_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/cache_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/config_command.sh"
+source "${AKLO_TOOL_DIR}/modules/commands/monitor_command.sh"
+
+# --- Dispatcher principal ---
 main() {
-    if [ "$AKLO_DRY_RUN" = true ]; then
-      echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
-      echo "------------------------------------------------------------------"
+    if [ $# -eq 0 ]; then
+        cmd_status --brief
+        return 0
     fi
-    local cmd_func="cmd_$1"
+
+    AKLO_DRY_RUN=false
+    if [[ " $@ " == *" --dry-run "* ]]; then
+        AKLO_DRY_RUN=true
+    fi
+
+    local command="$1"
     shift
-    if declare -f "$cmd_func" >/dev/null; then
-        "$cmd_func" "$@"
-    else
-        echo "Erreur interne : la fonction '$cmd_func' n'a pas été chargée. Vérifiez le classifieur." >&2
-        exit 1
-    fi
+
+    case "$command" in
+        new)            cmd_new "$@" ;;
+        plan)           cmd_plan "$@" ;;
+        status)         cmd_status "$@" ;;
+        init)           cmd_init "$@" ;;
+        "start-task")   cmd_start-task "$@" ;;
+        "submit-task")  cmd_submit-task "$@" ;;
+        "merge-task")   cmd_merge-task "$@" ;;
+        release)        cmd_release "$@" ;;
+        hotfix)         cmd_hotfix "$@" ;;
+        cache)          cmd_cache "$@" ;;
+        config)         cmd_config "$@" ;;
+        monitor)        cmd_monitor "$@" ;;
+        *)
+            echo "Erreur: Commande '$command' inconnue." >&2
+            exit 1
+            ;;
+    esac
 }
 
 main "$@"

@@ -38,10 +38,11 @@ main() {
     echo "🔍 Découverte et exécution des fichiers de test..."
     
     local test_files
+    # --- CORRECTION : Exclusion explicite du répertoire deprecated ---
     if [ "$run_all" = true ]; then
-        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh')
+        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' ! -path "*/deprecated/*")
     else
-        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' | grep -v -E 'benchmark|performance')
+        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' ! -path "*/deprecated/*" | grep -v -E 'benchmark|performance')
     fi
     
     echo "$test_files" | while read -r test_script; do
