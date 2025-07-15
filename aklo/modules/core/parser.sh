@@ -1,56 +1,40 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO CORE PARSER - MODULE CONSOLIDÉ V10 - SED ATOMIQUE
+# AKLO CORE PARSER - MODULE CENTRALISÉ (V4 - STABLE)
 #==============================================================================
 
-# --- Fonctions get_next_id et extract_artefact_xml (inchangées et validées) ---
 get_next_id() {
-    local artefact_dir="$1"
-    local prefix="$2"
+    local artefact_dir="$1" prefix="$2"
+    if [ ! -d "$artefact_dir" ] && [ "${AKLO_DRY_RUN:-false}" = true ]; then
+        echo "1"; return;
+    fi
     local last_id
-    last_id=$(find "$artefact_dir" -name "${prefix}*.xml" 2>/dev/null | \
-              grep -oE "${prefix}[0-9]+" | \
-              sed "s/${prefix}//" | \
-              sort -nr | \
-              head -1)
-    local next_id=$(( ${last_id:-0} + 1 ))
-    echo "$next_id"
+    last_id=$(find "$artefact_dir" -name "${prefix}*.xml" 2>/dev/null | grep -oE "${prefix}[0-9]+" | sed "s/${prefix}//" | sort -nr | head -1)
+    echo "$(( ${last_id:-0} + 1 ))"
 }
 
 extract_artefact_xml() {
-    local protocol_file="$1"
-    local artefact_tag="$2"
+    local protocol_file="$1" artefact_tag="$2"
     if [ ! -f "$protocol_file" ]; then
-        echo "Erreur: Fichier protocole introuvable à '$protocol_file'" >&2
-        return 1
+        echo "Erreur: Fichier protocole introuvable à '$protocol_file'" >&2; return 1;
     fi
     awk -v tag="$artefact_tag" '
-    BEGIN { in_template=0; in_artefact=0 }
     /<\s*artefact_template/ { in_template=1 }
     /<\s*\/\s*artefact_template/ { in_template=0 }
     in_template {
         if ($0 ~ "<" tag "[ >]") { in_artefact=1 }
         if (in_artefact) { print }
-        if ($0 ~ "</" tag ">") { in_artefact=0 }
-    }
-    ' "$protocol_file"
+        if ($0 ~ "</" tag ">") { exit }
+    }' "$protocol_file"
 }
 
-# --- Fonction Principale du Parser (avec sed atomique) ---
 parse_and_generate_artefact() {
-    local protocol_name="$1"
-    local artefact_type="$2"
-    local output_file="$3"
-    local context_vars="$4"
-
+    local protocol_name="$1" artefact_type="$2" output_file="$3" context_vars="$4"
     local protocol_file="${AKLO_TOOL_DIR}/charte/PROTOCOLES/${protocol_name}.xml"
-
     local structure
     structure=$(extract_artefact_xml "$protocol_file" "$artefact_type")
-
     if [ -z "$structure" ]; then
-        echo "❌ Erreur : Structure d'artefact '$artefact_type' non trouvée dans le protocole '$protocol_name'." >&2
-        return 1
+        echo "❌ Erreur : Structure d'artefact '$artefact_type' non trouvée." >&2; return 1;
     fi
     
     local id_val title_val status_val date_val
@@ -62,18 +46,15 @@ parse_and_generate_artefact() {
     local title_val_escaped
     title_val_escaped=$(printf '%s\n' "$title_val" | sed 's:[&/\\]:\\&:g')
 
-    # --- CORRECTION FINALE : sed atomique avec plusieurs expressions ---
-    # Applique tous les remplacements en une seule passe robuste.
-    echo "$structure" | sed \
-        -e "s/title=\"\[title\]\"/title=\"${title_val_escaped}\"/g" \
-        -e "s/id=\"\[id\]\"/id=\"${id_val}\"/g" \
-        -e "s/>\[status\]</>${status_val}</g" \
-        -e "s/>\[date\]</>${date_val}</g" \
-        -e "s/>TASK-\[id\]-1</>TASK-${id_val}-1</g" \
-        -e "s/>TASK-\[id\]-2</>TASK-${id_val}-2</g" \
-        -e "s/>ARCH-\[id\]-1.xml</>ARCH-${id_val}-1.xml</g" \
-        > "$output_file"
+    local final_content
+    final_content=$(echo "$structure" | sed -e "s/title=\"\[title\]\"/title=\"${title_val_escaped}\"/g" -e "s/id=\"\[id\]\"/id=\"${id_val}\"/g" -e "s/>\[status\]</>${status_val}</g" -e "s/>\[date\]</>${date_val}</g")
+
+    if [ "${AKLO_DRY_RUN:-false}" = true ]; then return 0; fi
     
-    # La vérification finale qui garantit que le fichier n'est pas vide
+    local output_dir
+    output_dir=$(dirname "$output_file")
+    mkdir -p "$output_dir"
+    
+    echo "$final_content" > "$output_file"
     [ -s "$output_file" ]
-} 
+}
