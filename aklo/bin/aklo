@@ -1,68 +1,80 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO - CHARTE AUTOMATION TOOL (V6 - Dispatcher Complet et Robuste)
+# AKLO - CHARTE AUTOMATION TOOL (V4.3 - STABLE FINALE ET COMPLÈTE)
 #==============================================================================
 
-set -e
-
-# --- Définition des chemins ---
-AKLO_TOOL_DIR=$(dirname "$(dirname "$(realpath "$0")")")
-export AKLO_TOOL_DIR
-: "${AKLO_PROJECT_ROOT:="$(pwd)"}"
-export AKLO_PROJECT_ROOT
-
-# --- Chargement de TOUS les modules ---
-source "${AKLO_TOOL_DIR}/modules/core/config.sh"
-source "${AKLO_TOOL_DIR}/modules/core/parser.sh"
-# Cache
-source "${AKLO_TOOL_DIR}/modules/cache/cache_functions.sh"
-source "${AKLO_TOOL_DIR}/modules/cache/cache_monitoring.sh"
-# Commandes
-source "${AKLO_TOOL_DIR}/modules/commands/system_commands.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/new_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/pbi_commands.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/task_commands.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/start-task_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/submit-task_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/merge-task_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/release_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/hotfix_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/debug_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/refactor_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/optimize_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/security_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/experiment_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/docs_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/scratchpad_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/kb_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/meta_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/cache_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/config_command.sh"
-source "${AKLO_TOOL_DIR}/modules/commands/monitor_command.sh"
-
-# --- Dispatcher principal ---
 main() {
-    if [ $# -eq 0 ]; then
-        cmd_status --brief
+    # --- GESTION PRÉCOCE DE L'AIDE ---
+    if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "help" || -z "$1" ]]; then
+        echo "Usage: aklo <command> [options]"
+        echo "Ex: aklo status, aklo new pbi \"Un titre\""
         return 0
     fi
+
+    # --- DÉFINITION FIABLE DU CONTEXTE ---
+    local AKLO_TOOL_REAL_PATH
+    AKLO_TOOL_REAL_PATH=$(realpath "$0")
+    export AKLO_TOOL_DIR
+    AKLO_TOOL_DIR=$(dirname "$(dirname "$AKLO_TOOL_REAL_PATH")")
+    export AKLO_PROJECT_ROOT
+    AKLO_PROJECT_ROOT=$(pwd)
+
+    # --- PARSING DES ARGUMENTS ---
     local command="$1"
     shift
-    case "$command" in
-        new)            cmd_new "$@" ;;
-        plan)           cmd_plan "$@" ;;
-        status)         cmd_status "$@" ;;
-        init)           cmd_init "$@" ;;
-        start-task)     cmd_start-task "$@" ;;
-        submit-task)    cmd_submit-task "$@" ;;
-        merge-task)     cmd_merge-task "$@" ;;
-        release)        cmd_release "$@" ;;
-        hotfix)         cmd_hotfix "$@" ;;
-        cache)          cmd_cache "$@" ;;
-        config)         cmd_config "$@" ;;
-        monitor)        cmd_monitor "$@" ;;
-        *) echo "Erreur: Commande '$command' inconnue." >&2; exit 1 ;;
-    esac
+    export AKLO_DRY_RUN=false
+    local args=()
+    for arg in "$@"; do
+        if [ "$arg" = "--dry-run" ]; then
+            export AKLO_DRY_RUN=true
+        else
+            args+=("$arg")
+        fi
+    done
+    set -- "${args[@]}"
+
+    # --- CHARGEMENT COMPLET DES MODULES ---
+    local MODULES_DIR="${AKLO_TOOL_DIR}/modules"
+    source "${MODULES_DIR}/core/config.sh"
+    source "${MODULES_DIR}/core/parser.sh"
+    source "${MODULES_DIR}/cache/cache_functions.sh"
+    source "${MODULES_DIR}/commands/system_commands.sh"
+    source "${MODULES_DIR}/commands/new_command.sh"
+    source "${MODULES_DIR}/commands/pbi_commands.sh"
+    source "${MODULES_DIR}/commands/task_commands.sh"
+    source "${MODULES_DIR}/commands/start-task_command.sh"
+    source "${MODULES_DIR}/commands/submit-task_command.sh"
+    source "${MODULES_DIR}/commands/merge-task_command.sh"
+    source "${MODULES_DIR}/commands/release_command.sh"
+    source "${MODULES_DIR}/commands/hotfix_command.sh"
+    source "${MODULES_DIR}/commands/debug_command.sh"
+    source "${MODULES_DIR}/commands/refactor_command.sh"
+    source "${MODULES_DIR}/commands/optimize_command.sh"
+    source "${MODULES_DIR}/commands/security_command.sh"
+    source "${MODULES_DIR}/commands/experiment_command.sh"
+    source "${MODULES_DIR}/commands/docs_command.sh"
+    source "${MODULES_DIR}/commands/scratchpad_command.sh"
+    source "${MODULES_DIR}/commands/kb_command.sh"
+    source "${MODULES_DIR}/commands/meta_command.sh"
+    source "${MODULES_DIR}/commands/cache_command.sh"
+    source "${MODULES_DIR}/commands/config_command.sh"
+    source "${MODULES_DIR}/commands/monitor_command.sh"
+
+    # --- INITIALISATION POST-CHARGEMENT ---
+    init_cache_dir
+
+    if [ "$AKLO_DRY_RUN" = true ]; then
+        echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
+    fi
+    
+    # --- DISPATCHER COMPLET ---
+    local cmd_function="cmd_$(echo "$command" | tr '-' '_')"
+    if declare -f "$cmd_function" >/dev/null; then
+        "$cmd_function" "$@"
+    else
+        echo "Erreur: Commande inconnue '$command'" >&2
+        return 1
+    fi
 }
 
 main "$@"
