@@ -11,11 +11,41 @@
 1.  **La Charte IA (`./charte/`) :** La source de vérité qui définit tous nos processus de travail.
 2.  **L'outil `aklo` (`./bin/aklo`) :** L'exécuteur des rituels décrits dans la Charte. C'est un outil en ligne de commande qui s'appuie sur une **architecture modulaire et robuste** située dans `./modules/`.
 
-Cette architecture utilise un **chargement intelligent** pour n'activer que les modules strictement nécessaires à chaque commande, garantissant ainsi des performances optimales.
+L'outil s'appuie sur une architecture modulaire et un chargement adaptatif pour n'activer que les modules nécessaires, garantissant des performances optimales.
 
-## 2\. Installation et Configuration
+## 2. Installation et Configuration
 
-L'outil `aklo` est installé via le script `install` à la racine, qui crée un lien symbolique rendant la commande disponible globalement. Pour la configuration, `aklo` utilise le fichier `.aklo.conf` à la racine de votre projet pour surcharger les valeurs par défaut.
+Pour utiliser Aklo dans un nouveau projet, placez-vous à sa racine et lancez :
+
+```Bash
+aklo init
+```
+Cette commande crée le fichier de configuration .aklo.conf et la structure de répertoires docs/backlog/ nécessaire.
+
+### Configuration (`.aklo.conf`)
+Aklo utilise un fichier .aklo.conf à la racine de votre projet pour surcharger les valeurs par défaut.
+
+### Clés de Configuration Essentielles :
+
+* `PROJECT_WORKDIR` : Définit le chemin absolu vers la racine du projet.
+* `MAIN_BRANCH` : La branche Git principale (ex: `main`, `master`, `develop`).
+* `CACHE_ENABLED` : Active ou désactive les systèmes de cache.
+
+Exemple de fichier `.aklo.conf` :
+```TOML
+# Configuration Git
+MAIN_BRANCH=main
+PROJECT_WORKDIR=/chemin/vers/mon/projet
+
+# Configuration Cache et Performance
+[cache]
+enabled=true
+cache_dir=.aklo/cache
+ttl_days=7
+
+[performance]
+auto_tune_enabled=true
+```
 
 **Pour plus de détails :**
 
