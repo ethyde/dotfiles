@@ -1,45 +1,68 @@
 #!/usr/bin/env bash
 #==============================================================================
-# AKLO COMMAND CLASSIFIER - CORRECTION FINALE DES DÉPENDANCES
+# AKLO COMMAND CLASSIFIER - DOUBLE PROFIL (MÉTIER & TECHNIQUE)
 #==============================================================================
 
-declare -A COMMAND_PROFILES
-COMMAND_PROFILES["new"]="CREATE_ARTEFACT"
-COMMAND_PROFILES["plan"]="PLAN_COMMANDS"
-COMMAND_PROFILES["status"]="SYSTEM_COMMANDS"
-COMMAND_PROFILES["init"]="INIT_COMMAND"
-COMMAND_PROFILES["start-task"]="TASK_LIFECYCLE"
-COMMAND_PROFILES["submit-task"]="TASK_LIFECYCLE"
-COMMAND_PROFILES["merge-task"]="TASK_LIFECYCLE"
-COMMAND_PROFILES["release"]="RELEASE_LIFECYCLE"
-COMMAND_PROFILES["hotfix"]="RELEASE_LIFECYCLE"
-COMMAND_PROFILES["cache"]="CACHE_MGMT"
-COMMAND_PROFILES["config"]="PERF_CONFIG"
-COMMAND_PROFILES["monitor"]="MONITORING"
+# Mapping commande → profil métier
+declare -A COMMAND_TO_PROFILE
+COMMAND_TO_PROFILE["get_config"]="MINIMAL"
+COMMAND_TO_PROFILE["status"]="MINIMAL"
+COMMAND_TO_PROFILE["version"]="MINIMAL"
+COMMAND_TO_PROFILE["help"]="MINIMAL"
+COMMAND_TO_PROFILE["plan"]="NORMAL"
+COMMAND_TO_PROFILE["dev"]="NORMAL"
+COMMAND_TO_PROFILE["debug"]="NORMAL"
+COMMAND_TO_PROFILE["review"]="NORMAL"
+COMMAND_TO_PROFILE["new"]="NORMAL"
+COMMAND_TO_PROFILE["template"]="NORMAL"
+COMMAND_TO_PROFILE["optimize"]="FULL"
+COMMAND_TO_PROFILE["benchmark"]="FULL"
+COMMAND_TO_PROFILE["cache"]="FULL"
+COMMAND_TO_PROFILE["monitor"]="FULL"
+COMMAND_TO_PROFILE["diagnose"]="FULL"
 
+# Mapping profil métier → profil technique
+# (On garde les profils techniques existants)
+declare -A PROFILE_TO_TECHNICAL
+PROFILE_TO_TECHNICAL["MINIMAL"]="SYSTEM_COMMANDS"
+PROFILE_TO_TECHNICAL["NORMAL"]="PLAN_COMMANDS"
+PROFILE_TO_TECHNICAL["FULL"]="CACHE_MGMT"
+
+# Profils techniques → modules (inchangé)
 declare -A PROFILE_MODULES
-# Les modules de création ont aussi besoin de la config pour les chemins.
-PROFILE_MODULES["CREATE_ARTEFACT"]="core/config.sh core/parser.sh commands/new_command.sh commands/pbi_commands.sh commands/debug_command.sh commands/refactor_command.sh commands/optimize_command.sh commands/experiment_command.sh commands/security_command.sh commands/docs_command.sh commands/scratchpad_command.sh commands/kb_command.sh commands/meta_command.sh"
+PROFILE_MODULES["SYSTEM_COMMANDS"]="core/config.sh commands/system_commands.sh"
 PROFILE_MODULES["PLAN_COMMANDS"]="core/config.sh core/parser.sh commands/task_commands.sh"
-PROFILE_MODULES["SYSTEM_COMMANDS"]="core/config.sh commands/system_commands.sh" # Ajout pour la cohérence
-PROFILE_MODULES["INIT_COMMAND"]="commands/init_command.sh"
-PROFILE_MODULES["TASK_LIFECYCLE"]="core/config.sh commands/start-task_command.sh commands/submit-task_command.sh commands/merge-task_command.sh"
-PROFILE_MODULES["RELEASE_LIFECYCLE"]="core/config.sh commands/release_command.sh commands/hotfix_command.sh"
-
-# CORRECTION FINALE : s'assurer que TOUS les profils qui en ont besoin chargent TOUTES leurs dépendances.
 PROFILE_MODULES["CACHE_MGMT"]="core/config.sh commands/cache_command.sh cache/cache_monitoring.sh"
-PROFILE_MODULES["PERF_CONFIG"]="core/config.sh commands/config_command.sh performance/performance_tuning.sh"
-PROFILE_MODULES["MONITORING"]="core/config.sh commands/monitor_command.sh io/io_monitoring.sh performance/performance_tuning.sh"
+# ... (ajouter les autres profils techniques si besoin)
 
-# Fonction pour classifier une commande.
+# Fonction pour classifier une commande (profil métier)
 classify_command() {
     local command_name="$1"
-    local profile="${COMMAND_PROFILES[$command_name]}"
-    echo "${profile:-UNKNOWN}"
+    echo "${COMMAND_TO_PROFILE[$command_name]:-UNKNOWN}"
 }
 
-# Fonction pour obtenir la liste des modules.
+# Fonction pour obtenir le profil technique à partir du profil métier
+get_technical_profile() {
+    local profile="$1"
+    echo "${PROFILE_TO_TECHNICAL[$profile]:-UNKNOWN}"
+}
+
+# Fonction pour obtenir la liste des modules à partir du profil métier
 get_required_modules() {
-    local profile_name="$1"
-    echo "${PROFILE_MODULES[$profile_name]}"
+    local profile="$1"
+    local technical_profile
+    technical_profile=$(get_technical_profile "$profile")
+    echo "${PROFILE_MODULES[$technical_profile]}"
+}
+
+# Fonction pour détecter la commande principale à partir des arguments
+# (premier argument non option)
+detect_command_from_args() {
+    for arg in "$@"; do
+        if [[ ! "$arg" =~ ^- ]]; then
+            echo "$arg"
+            return
+        fi
+    done
+    echo ""
 }
