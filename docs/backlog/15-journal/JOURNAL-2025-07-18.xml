@@ -360,5 +360,93 @@
                 </ul>
             </subsection>
         </section>
+        
+        <section>
+            <title>Documentation MCP et identité visuelle</title>
+            
+            <subsection>
+                <title>Contexte et objectifs</title>
+                <p>
+                    Suite à l'implémentation des 19 types d'artefacts, il était nécessaire de documenter 
+                    complètement toutes ces commandes pour les serveurs MCP et améliorer l'identité visuelle 
+                    du projet Aklo. L'objectif était de s'assurer que toutes les nouvelles commandes 
+                    soient accessibles via MCP et que le projet ait une présentation professionnelle.
+                </p>
+            </subsection>
+            
+            <subsection>
+                <title>Documentation complète des commandes MCP</title>
+                <ul>
+                    <li><strong>Référence complète</strong> : Création de <code>aklo/modules/mcp/COMMANDS-REFERENCE.md</code> avec tous les 19 types d'artefacts</li>
+                    <li><strong>Documentation détaillée</strong> : Chaque commande documentée avec protocole, répertoire, format et exemples</li>
+                    <li><strong>Exemples d'utilisation MCP</strong> : Instructions pour Claude Desktop, Cursor et autres clients</li>
+                    <li><strong>Tests de validation</strong> : Vérification que toutes les commandes fonctionnent via MCP</li>
+                    <li><strong>Mise à jour du README MCP</strong> : Ajout de la référence dans <code>aklo/modules/mcp/README.md</code></li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>Validation des serveurs MCP</title>
+                <ul>
+                    <li><strong>Serveur Terminal</strong> : Vérification que toutes les commandes sont listées dans <code>allowedCommands</code></li>
+                    <li><strong>Tests en direct</strong> : Exécution de commandes via MCP pour validation</li>
+                    <li><strong>Gestion d'erreurs</strong> : Messages informatifs pour types invalides</li>
+                    <li><strong>Compatibilité clients</strong> : Claude Desktop, Cursor, VS Code, Continue Dev, Zed, CLI</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>Amélioration de l'identité visuelle</title>
+                <ul>
+                    <li><strong>Ajout du logo principal</strong> : <code>logo_aklo_protocol.png</code> dans le README principal</li>
+                    <li><strong>Ajout du sceau officiel</strong> : <code>Le_sceau_final.png</code> comme icône du titre</li>
+                    <li><strong>Positionnement centré</strong> : Logo principal affiché de manière professionnelle</li>
+                    <li><strong>Alt text descriptif</strong> : Accessibilité pour tous les utilisateurs</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>Tests effectués via MCP</title>
+                <ul>
+                    <li>✅ <code>aklo new fast "Test fast-track via MCP"</code> - Création réussie</li>
+                    <li>✅ <code>aklo new kb "Test knowledge base via MCP"</code> - Création réussie</li>
+                    <li>✅ <code>aklo new journal "Test via MCP"</code> - Détection journal existant</li>
+                    <li>✅ Test de validation d'erreur avec type invalide - Message informatif</li>
+                    <li>✅ Vérification du statut des serveurs MCP</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>Résultats finaux</title>
+                <ul>
+                    <li><strong>19 types d'artefacts</strong> documentés et accessibles via MCP</li>
+                    <li><strong>100% des protocoles</strong> de la Charte IA couverts</li>
+                    <li><strong>Documentation complète</strong> avec exemples d'utilisation</li>
+                    <li><strong>Identité visuelle professionnelle</strong> avec logo et sceau</li>
+                    <li><strong>Compatibilité universelle</strong> avec tous les clients MCP</li>
+                    <li><strong>Tests validés</strong> pour toutes les fonctionnalités</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>Fichiers créés/modifiés</title>
+                <ul>
+                    <li><code>aklo/modules/mcp/COMMANDS-REFERENCE.md</code> - Référence complète des commandes</li>
+                    <li><code>aklo/modules/mcp/README.md</code> - Mise à jour avec référence</li>
+                    <li><code>aklo/README.md</code> - Ajout du logo et du sceau</li>
+                    <li><code>aklo/charte/ASSETS/</code> - Utilisation des assets visuels</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>Leçons apprises</title>
+                <ul>
+                    <li><strong>Documentation critique</strong> : Les nouvelles fonctionnalités doivent être immédiatement documentées</li>
+                    <li><strong>Tests MCP essentiels</strong> : Validation en direct via les serveurs MCP</li>
+                    <li><strong>Identité visuelle importante</strong> : Le professionnalisme passe aussi par l'apparence</li>
+                    <li><strong>Compatibilité universelle</strong> : Support de tous les clients MCP pour l'adoption</li>
+                </ul>
+            </subsection>
+        </section>
     </content>
 </journal> 
