@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
+source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
 
 test_id_performance() {
     test_suite "ID Performance: extension-agnostic"

@@ -38,16 +38,16 @@ main() {
     echo "🔍 Découverte et exécution des fichiers de test..."
     
     local test_files
-    # --- CORRECTION : Exclusion explicite du répertoire deprecated ---
+    # --- Exclusion des répertoires archive et diagnostic ---
     if [ "$run_all" = true ]; then
-        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' ! -path "*/deprecated/*")
+        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' ! -path "*/archive/*" ! -path "*/diagnostic/*")
     else
-        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' ! -path "*/deprecated/*" | grep -v -E 'benchmark|performance')
+        test_files=$(find "$TEST_DIR" -type f -name 'test_*.sh' ! -path "*/archive/*" ! -path "*/diagnostic/*" | grep -v -E 'benchmark|performance')
     fi
     
     echo "$test_files" | while read -r test_script; do
         # Exclure le framework lui-même et les lignes vides potentielles
-        if [ "$test_script" != "$TEST_DIR/test_framework.sh" ] && [ -n "$test_script" ]; then
+        if [ "$test_script" != "$TEST_DIR/framework/test_framework.sh" ] && [ -n "$test_script" ]; then
             echo -e "\n--- Exécution de $(basename "$test_script") ---"
             # Exécuter chaque script de test avec bash
             bash "$test_script"
@@ -57,7 +57,7 @@ main() {
 }
 
 # Le framework n'est sourcé qu'ici pour que la fonction run_tests soit définie
-source "$(dirname "$0")/test_framework.sh"
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Appel de la fonction main en passant les arguments du script
 main "$@"

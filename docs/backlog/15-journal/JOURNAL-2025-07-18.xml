@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<journal>
+    <metadata>
+        <title>Amélioration du système de cache Aklo avec métriques complètes</title>
+        <date>2025-07-18</date>
+        <author>AI_Agent</author>
+        <status>DONE</status>
+        <tags>cache, métriques, performance, instrumentation</tags>
+    </metadata>
+    
+    <content>
+        <section>
+            <title>Contexte et objectifs</title>
+            <p>
+                Travail sur l'amélioration du système de cache Aklo pour résoudre les problèmes 
+                de redondance de configuration et implémenter un système de métriques complet.
+            </p>
+        </section>
+        
+        <section>
+            <title>Problèmes identifiés</title>
+            <ul>
+                <li>Redondance dans la configuration cache : CACHE_ENABLED (global) + [cache] enabled (section)</li>
+                <li>Commande aklo get_config mentionnée dans le README mais non implémentée</li>
+                <li>Système de métriques incomplet (hits uniquement, pas de misses)</li>
+                <li>Cache désactivé par défaut dans la configuration locale</li>
+                <li>Instrumentation manquante pour collecter les métriques de performance</li>
+            </ul>
+        </section>
+        
+        <section>
+            <title>Solutions implémentées</title>
+            
+            <subsection>
+                <title>1. Nettoyage de la configuration cache</title>
+                <ul>
+                    <li>Suppression de la variable globale CACHE_ENABLED redondante</li>
+                    <li>Utilisation exclusive de [cache] enabled=true dans la section cache</li>
+                    <li>Mise à jour du code pour lire la configuration depuis la section cache</li>
+                    <li>Suppression du fichier .aklo.conf local qui désactivait le cache</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>2. Implémentation de la commande aklo get_config</title>
+                <ul>
+                    <li>Ajout de la sous-commande config get_config avec options --all et clés spécifiques</li>
+                    <li>Création d'un alias top-level aklo get_config pour cohérence avec la documentation</li>
+                    <li>Affichage complet de la configuration : globale, cache, performance, monitoring</li>
+                    <li>Support des clés individuelles avec sections optionnelles</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>3. Amélioration des métriques cache</title>
+                <ul>
+                    <li>Extension du fichier cache_metrics.json pour inclure hits ET misses</li>
+                    <li>Calcul automatique du taux de hit en pourcentage</li>
+                    <li>Affichage détaillé dans aklo cache status : hits, misses, taux de hit</li>
+                    <li>Structure JSON : {"hits": X, "misses": Y}</li>
+                </ul>
+            </subsection>
+            
+            <subsection>
+                <title>4. Instrumentation complète du cache</title>
+                <ul>
+                    <li>Ajout d'appels à record_cache_metric("hit") dans use_cached_structure</li>
+                    <li>Ajout d'appels à record_cache_metric("miss") dans parse_and_generate_artefact_cached</li>
+                    <li>Chargement du parser avec cache (parser_cached.sh) dans le dispatcher principal</li>
+                    <li>Sourcing des modules de cache et monitoring pour l'instrumentation</li>
+                </ul>
+            </subsection>
+        </section>
+        
+        <section>
+            <title>Résultats obtenus</title>
+            <ul>
+                <li>✅ Cache activé et fonctionnel (CACHE_ENABLED: true)</li>
+                <li>✅ Commande aklo get_config opérationnelle avec affichage complet</li>
+                <li>✅ Métriques collectées automatiquement : hits, misses, taux de hit</li>
+                <li>✅ Test de flux validé : MISS → HIT avec 50% de taux de hit</li>
+                <li>✅ Configuration centralisée et cohérente</li>
+            </ul>
+        </section>
+        
+        <section>
+            <title>Fichiers modifiés</title>
+            <ul>
+                <li>aklo/config/.aklo.conf - Suppression de CACHE_ENABLED redondant</li>
+                <li>aklo/modules/commands/config_command.sh - Ajout de cmd_get_config</li>
+                <li>aklo/bin/aklo - Alias get_config et chargement parser_cached.sh</li>
+                <li>aklo/modules/cache/cache_monitoring.sh - Métriques hits/misses</li>
+                <li>aklo/modules/cache/cache_functions.sh - Instrumentation use_cached_structure</li>
+                <li>aklo/modules/parser/parser_cached.sh - Instrumentation HIT/MISS</li>
+            </ul>
+        </section>
+        
+        <section>
+            <title>Prochaines étapes</title>
+            <ul>
+                <li>Implémenter le benchmark réel (remplacer la simulation)</li>
+                <li>Optimiser la validation du cache</li>
+                <li>Analyser les performances réelles du cache</li>
+                <li>Étendre les métriques avec taille du cache, TTL, etc.</li>
+            </ul>
+        </section>
+        
+        <section>
+            <title>Tests effectués</title>
+            <ul>
+                <li>aklo get_config --all - Affichage complet de la configuration</li>
+                <li>aklo cache status - Affichage des métriques hits/misses</li>
+                <li>aklo new pbi "Test" --dry-run - Test de génération avec cache</li>
+                <li>Vérification du flux MISS → HIT avec métriques</li>
+            </ul>
+        </section>
+    </content>
+</journal> 

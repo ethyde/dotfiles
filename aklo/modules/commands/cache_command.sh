@@ -3,6 +3,10 @@
 # AKLO CACHE COMMAND MODULE
 #==============================================================================
 
+# Importer les fonctions de cache
+AKLO_MODULES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$AKLO_MODULES_ROOT/cache/cache_monitoring.sh"
+
 cmd_cache() {
     local action="$1"
     if [ -z "$action" ]; then

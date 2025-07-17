@@ -4,7 +4,7 @@
 # TASK-7-4: Tests unitaires pour le monitoring des opérations I/O
 
 # Import du framework de test
-source "$(dirname "$0")/test_framework.sh"
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Variables de test
 TEST_METRICS_DIR="/tmp/aklo_test_metrics"

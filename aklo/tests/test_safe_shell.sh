@@ -4,7 +4,7 @@
 #==============================================================================
 
 # Source du framework de test
-source "$(dirname "$0")/test_framework.sh"
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Chemin vers le script aklo-terminal.sh
 AKLO_TERMINAL_SCRIPT="$(dirname "$0")/../modules/mcp/shell-native/aklo-terminal.sh"
