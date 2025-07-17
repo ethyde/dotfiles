@@ -12,7 +12,7 @@ cmd_new() {
     if [ -z "$artefact_type" ]; then
         echo "Erreur: Le type d'artefact est manquant." >&2
         echo "Usage: aklo new <type> \"<titre>\"" >&2
-        echo "Types disponibles: pbi, debug, refactor, optimize, etc."
+        echo "Types disponibles: pbi, task, debug, refactor, optimize, security, docs, experiment, scratchpad, meta, journal, review, arch, analysis, onboarding, deprecation, tracking, fast, kb"
         return 1
     fi
 
@@ -39,6 +39,7 @@ cmd_new() {
                 ;;
             *)
                 echo "Erreur: Le type d'artefact '$artefact_type' est inconnu." >&2
+                echo "Types disponibles: pbi, task, debug, refactor, optimize, security, docs, experiment, scratchpad, meta, journal, review, arch, analysis, onboarding, deprecation, tracking, fast, kb" >&2
                 ;;
         esac
         return 1

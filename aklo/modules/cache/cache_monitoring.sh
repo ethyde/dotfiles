@@ -55,15 +55,21 @@ benchmark_cache() {
     echo "🏃 BENCHMARK CACHE AKLO"
     echo "=========================="
     
-    # Utiliser le benchmark existant du cache regex
-    local benchmark_script="$(dirname "$0")/../../tests/test_benchmark_regex_cache.sh"
+    # Utiliser le benchmark principal du cache
+    local benchmark_script="${AKLO_PROJECT_ROOT}/aklo/tests/test_benchmark_cache.sh"
     if [ -f "$benchmark_script" ]; then
         bash "$benchmark_script"
     else
-        echo "⚠️  Script de benchmark non trouvé, utilisation de la simulation"
-        echo "🔴 Test cache miss: 150ms"
-        echo "🟢 Test cache hit: 10ms"
-        echo "✅ Gain: 140ms (93%)"
+        echo "⚠️  Script de benchmark principal non trouvé, utilisation du benchmark regex"
+        local regex_benchmark_script="${AKLO_PROJECT_ROOT}/aklo/tests/test_benchmark_regex_cache.sh"
+        if [ -f "$regex_benchmark_script" ]; then
+            bash "$regex_benchmark_script"
+        else
+            echo "⚠️  Aucun script de benchmark trouvé, utilisation de la simulation"
+            echo "🔴 Test cache miss: 150ms"
+            echo "🟢 Test cache hit: 10ms"
+            echo "✅ Gain: 140ms (93%)"
+        fi
     fi
 }
 

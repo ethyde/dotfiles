@@ -60,6 +60,8 @@ parse_and_generate_artefact_cached() {
     local output_file="$4"          # Chemin du fichier de sortie
     local context_vars="$5"         # Variables contextuelles
     
+
+    
     # Lire la configuration cache
     get_cache_config
     export AKLO_CACHE_ENABLED
@@ -99,6 +101,13 @@ parse_and_generate_artefact_cached() {
         if declare -f inject_missing_xml_tags >/dev/null; then
             artefact_structure=$(inject_missing_xml_tags "$artefact_structure" "title" "status")
         fi
+        
+        # Vérifier le mode DRY-RUN avant d'écrire le fichier
+        if [ "${AKLO_DRY_RUN:-false}" = true ]; then
+            log_cache_event "DRY_RUN" "Mode DRY-RUN activé - fichier non créé: $output_file"
+            return 0
+        fi
+        
         if ! echo "$artefact_structure" > "$output_file"; then
             echo "❌ Erreur : Impossible d'écrire dans $output_file." >&2
             return 1
@@ -176,6 +185,13 @@ parse_and_generate_artefact_cached() {
     if declare -f inject_missing_xml_tags >/dev/null; then
         filtered_content=$(inject_missing_xml_tags "$filtered_content" "title" "status")
     fi
+    
+    # Vérifier le mode DRY-RUN avant d'écrire le fichier
+    if [ "${AKLO_DRY_RUN:-false}" = true ]; then
+        log_cache_event "DRY_RUN" "Mode DRY-RUN activé - fichier non créé: $output_file"
+        return 0
+    fi
+    
     # Écrire le résultat dans le fichier de sortie
     if ! echo "$filtered_content" > "$output_file"; then
         echo "❌ Erreur : Impossible d'écrire dans $output_file." >&2
