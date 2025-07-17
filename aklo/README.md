@@ -1,8 +1,10 @@
-# 🤖 The Aklo Protocol
+# <img src="charte/ASSETS/Le_sceau_final.png" alt="Aklo Seal" width="32" height="32" style="vertical-align: middle;"> The Aklo Protocol
 
 *« Ce n'est pas ce qui est mort qui peut sommeiller à jamais, et au long des ères étranges la Mort même peut mourir. »*
 
------
+<div align="center">
+  <img src="charte/ASSETS/logo_aklo_protocol.png" alt="Aklo Protocol Logo" width="300" height="auto">
+</div>
 
 ## 1. Philosophie : Qu'est-ce que "The Aklo Protocol" ?
 

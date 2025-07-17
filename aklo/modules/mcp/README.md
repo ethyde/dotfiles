@@ -104,6 +104,10 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | ./shell-native/aklo-docu
 | `safe_shell` | Exécution shell sécurisée | `command` |
 | `project_info` | Informations projet complètes | - |
 
+**📋 Commandes Aklo disponibles via `aklo_execute` :**
+- **19 types d'artefacts** : `pbi`, `task`, `debug`, `refactor`, `optimize`, `security`, `docs`, `experiment`, `scratchpad`, `meta`, `journal`, `review`, `arch`, `analysis`, `onboarding`, `deprecation`, `tracking`, `fast`, `kb`
+- **Commandes système** : `status`, `init`, `plan`, `start-task`, `submit-task`, `merge-task`, `release`, `hotfix`, `cache`, `monitor`, `config`
+
 ### Serveur Documentation (`aklo-documentation`)
 
 | Outil | Description | Paramètres |
@@ -115,6 +119,10 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | ./shell-native/aklo-docu
 | `project_documentation_summary` | Génère un résumé de la documentation | `project_path` (requis), `include_artefacts` |
 | `validate_artefact` | Valide un artefact | `artefact_path` (requis), `artefact_type` (requis) |
 | `server_info` | Informations sur le serveur MCP | - |
+
+## 📖 Référence Complète
+
+**📋 [COMMANDS-REFERENCE.md](COMMANDS-REFERENCE.md)** - Référence complète de toutes les commandes Aklo avec exemples d'utilisation via MCP.
 
 ## 🔍 Détection d'Environnement
 
