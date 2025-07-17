@@ -4,7 +4,7 @@
 # Vérifie que toutes les commandes aklo fonctionnent avec le cache.
 # Entièrement refactorisé pour utiliser le framework de test et l'isolation.
 
-source "${AKLO_PROJECT_ROOT}/aklo/tests/test_framework.sh"
+source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
 
 AKLO_EXEC=""
 ORIGINAL_CONFIG=""

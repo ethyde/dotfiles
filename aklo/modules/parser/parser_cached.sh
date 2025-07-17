@@ -17,11 +17,13 @@
 # Phase GREEN: Implémentation minimale
 
 # Sourcing robuste des fonctions de cache
-# if [ -n "$AKLO_PROJECT_ROOT" ]; then
-#   source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh"
-# else
-#   source "$(dirname "$0")/../cache/cache_functions.sh"
-# fi
+if [ -n "$AKLO_PROJECT_ROOT" ]; then
+  source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh"
+  source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_monitoring.sh"
+else
+  source "$(dirname "$0")/../cache/cache_functions.sh"
+  source "$(dirname "$0")/../cache/cache_monitoring.sh"
+fi
 
 # Configuration cache par défaut
 AKLO_CACHE_ENABLED="${AKLO_CACHE_ENABLED:-true}"
@@ -120,17 +122,25 @@ parse_and_generate_artefact_cached() {
         if protocol_mtime=$(get_file_mtime "$protocol_file"); then
             # Vérifier la validité du cache
             if cache_is_valid "$cache_file" "$protocol_mtime"; then
-                # Cache hit - utiliser le cache
-                log_cache_event "HIT" "Cache valide trouvé: $cache_file"
-                if artefact_structure=$(use_cached_structure "$cache_file"); then
-                    log_cache_event "SUCCESS" "Cache lu avec succès"
-                else
-                    log_cache_event "ERROR" "Échec lecture cache - fallback vers extraction"
-                    artefact_structure=""
+                            # Cache hit - utiliser le cache
+            log_cache_event "HIT" "Cache valide trouvé: $cache_file"
+            if artefact_structure=$(use_cached_structure "$cache_file"); then
+                log_cache_event "SUCCESS" "Cache lu avec succès"
+                # Enregistrer le hit dans les métriques
+                if declare -f record_cache_metric >/dev/null; then
+                    record_cache_metric "hit"
                 fi
+            else
+                log_cache_event "ERROR" "Échec lecture cache - fallback vers extraction"
+                artefact_structure=""
+            fi
             else
                 # Cache miss - extraction et mise en cache
                 log_cache_event "MISS" "Cache invalide ou inexistant"
+                # Enregistrer le miss dans les métriques
+                if declare -f record_cache_metric >/dev/null; then
+                    record_cache_metric "miss"
+                fi
                 if artefact_structure=$(extract_and_cache_structure "$protocol_file" "$artefact_type" "$cache_file"); then
                     log_cache_event "CACHED" "Structure extraite et mise en cache"
                 else

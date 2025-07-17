@@ -37,7 +37,10 @@ main() {
     local MODULES_DIR="${AKLO_TOOL_DIR}/modules"
     source "${MODULES_DIR}/core/config.sh"
     source "${MODULES_DIR}/core/parser.sh"
+    source "${MODULES_DIR}/parser/parser_cached.sh"
     source "${MODULES_DIR}/cache/cache_functions.sh"
+    source "${MODULES_DIR}/cache/cache_monitoring.sh"
+    source "${MODULES_DIR}/io/extract_functions.sh"
     source "${MODULES_DIR}/commands/system_commands.sh"
     source "${MODULES_DIR}/commands/new_command.sh"
     source "${MODULES_DIR}/commands/pbi_commands.sh"
@@ -72,9 +75,21 @@ main() {
     if declare -f "$cmd_function" >/dev/null; then
         "$cmd_function" "$@"
     else
+        # Alias pour get_config (top-level)
+        if [ "$command" = "get_config" ]; then
+            cmd_get_config "$@"
+            return $?
+        fi
         echo "Erreur: Commande inconnue '$command'" >&2
         return 1
     fi
+}
+
+# Alias top-level : get_config
+cmd_get_config() {
+    # Délègue à la sous-commande config get_config
+    shift # on retire 'get_config' du tableau d'arguments
+    cmd_config get_config "$@"
 }
 
 main "$@"

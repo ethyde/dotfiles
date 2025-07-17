@@ -4,7 +4,7 @@
 # TASK-7-5: Tests unitaires pour le tuning de performance et gestion mémoire
 
 # Import du framework de test
-source "$(dirname "$0")/test_framework.sh"
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Variables de test
 TEST_CONFIG_DIR="/tmp/aklo_test_config"
