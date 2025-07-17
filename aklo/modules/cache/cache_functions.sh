@@ -25,7 +25,9 @@ generate_cache_filename() {
     # TODO: Tester la génération de nom de fichier cache
     local protocol_name="$1"
     local artefact_type="$2"
-    echo "${AKLO_PROJECT_ROOT}/.aklo_cache/${protocol_name}_${artefact_type}.parsed"
+    local cache_dir
+    cache_dir=$(get_config "cache_dir" "cache" "aklo/.aklo_cache")
+    echo "${AKLO_PROJECT_ROOT}/${cache_dir}/${protocol_name}_${artefact_type}.parsed"
 }
 
 # Vérification de la validité du cache

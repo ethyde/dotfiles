@@ -18,8 +18,8 @@ create_artefact_pbi() {
 
     echo "🎯 Création du PBI: \"$title\""
 
-    # Le PBI est créé dans le répertoire de travail courant (défini par AKLO_PROJECT_ROOT)
-    local pbi_dir="${AKLO_PROJECT_ROOT}/docs/backlog/00-pbi"
+    # Le PBI est créé dans le répertoire configuré
+    local pbi_dir="${AKLO_PROJECT_ROOT}/$(get_config "PBI_DIR" "" "docs/backlog/00-pbi")"
     
     # Création du répertoire s'il n'existe pas
     if ! mkdir -p "$pbi_dir"; then
@@ -42,8 +42,10 @@ create_artefact_pbi() {
     current_date=$(date +%Y-%m-%d)
     local context_vars="id=${next_id},title=${title},status=PROPOSED,date=${current_date}"
 
+
+    
     # Appel du parser pour générer le fichier final
-    if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "$output_file" "$context_vars"; then
+    if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "full" "$output_file" "$context_vars"; then
         echo "✅ PBI créé : ${output_file}"
     else
         echo "❌ La création du fichier PBI a échoué lors de l'appel au parser." >&2

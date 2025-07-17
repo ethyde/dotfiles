@@ -62,6 +62,16 @@ main() {
     source "${MODULES_DIR}/commands/cache_command.sh"
     source "${MODULES_DIR}/commands/config_command.sh"
     source "${MODULES_DIR}/commands/monitor_command.sh"
+    source "${MODULES_DIR}/commands/journal_command.sh"
+    source "${MODULES_DIR}/commands/review_command.sh"
+    source "${MODULES_DIR}/commands/arch_command.sh"
+    source "${MODULES_DIR}/commands/analysis_command.sh"
+    source "${MODULES_DIR}/commands/onboarding_command.sh"
+    source "${MODULES_DIR}/commands/deprecation_command.sh"
+    source "${MODULES_DIR}/commands/tracking_command.sh"
+    source "${MODULES_DIR}/commands/task_new_command.sh"
+    source "${MODULES_DIR}/commands/fast_track_command.sh"
+    source "${MODULES_DIR}/commands/knowledge_base_command.sh"
 
     # --- INITIALISATION POST-CHARGEMENT ---
     init_cache_dir
