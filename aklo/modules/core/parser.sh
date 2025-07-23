@@ -30,7 +30,19 @@ extract_artefact_xml() {
 
 parse_and_generate_artefact() {
     local protocol_name="$1" artefact_type="$2" output_file="$3" context_vars="$4"
-    local protocol_file="${AKLO_TOOL_DIR}/charte/PROTOCOLES/${protocol_name}.xml"
+    
+    # Lire la configuration des protocoles depuis .aklo.conf si disponible
+    if [ -z "$AKLO_PROTOCOLS_PATH" ] && [ -f ".aklo.conf" ]; then
+        AKLO_PROTOCOLS_PATH=$(grep "^AKLO_PROTOCOLS_PATH=" ".aklo.conf" | cut -d'=' -f2 2>/dev/null)
+    fi
+    
+    # Construire le chemin du protocole en priorité depuis la variable d'environnement
+    local protocol_file
+    if [ -n "$AKLO_PROTOCOLS_PATH" ]; then
+        protocol_file="${AKLO_PROTOCOLS_PATH}/${protocol_name}.xml"
+    else
+        protocol_file="${AKLO_TOOL_DIR}/charte/PROTOCOLES/${protocol_name}.xml"
+    fi
     local structure
     structure=$(extract_artefact_xml "$protocol_file" "$artefact_type")
     if [ -z "$structure" ]; then
