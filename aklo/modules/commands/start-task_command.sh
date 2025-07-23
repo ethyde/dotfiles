@@ -7,7 +7,7 @@
 # COMMANDE: start-task
 # Marque une tâche comme "IN_PROGRESS" et crée la branche git associée.
 #------------------------------------------------------------------------------
-cmd_start-task() {
+cmd_start_task() {
     local task_id_full="$1"
     if [ -z "$task_id_full" ]; then
         echo "Erreur: L'ID de la tâche est manquant." >&2

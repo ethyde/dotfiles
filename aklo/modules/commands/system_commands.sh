@@ -13,20 +13,50 @@ cmd_status() {
     echo "========================================"
     
     local config_file="${AKLO_PROJECT_ROOT}/.aklo.conf"
+    local has_config=false
+    local has_artefacts=false
+    
+    # Vérifier la configuration
     if [ -f "$config_file" ]; then
         echo "✅ Projet configuré via .aklo.conf."
+        has_config=true
     else
         echo "⚠️  Aucune configuration Aklo locale trouvée. Pensez à lancer 'aklo init'."
     fi
     
-    local pbi_count
-    pbi_count=$(find "${AKLO_PROJECT_ROOT}/docs/backlog/00-pbi" -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
-    local task_count
-    task_count=$(find "${AKLO_PROJECT_ROOT}/docs/backlog/01-tasks" -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    # Vérifier les artefacts avec détection robuste
+    local pbi_count=0
+    local task_count=0
+    
+    # Compter les PBI
+    if [ -d "${AKLO_PROJECT_ROOT}/docs/backlog/00-pbi" ]; then
+        pbi_count=$(find "${AKLO_PROJECT_ROOT}/docs/backlog/00-pbi" -name "PBI-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    fi
+    
+    # Compter les tâches
+    if [ -d "${AKLO_PROJECT_ROOT}/docs/backlog/01-tasks" ]; then
+        task_count=$(find "${AKLO_PROJECT_ROOT}/docs/backlog/01-tasks" -name "TASK-*.xml" 2>/dev/null | wc -l | tr -d ' ')
+    fi
+    
+    # Détecter si le projet a des artefacts
+    if [ "$pbi_count" -gt 0 ] || [ "$task_count" -gt 0 ]; then
+        has_artefacts=true
+    fi
     
     echo "📊 Artefacts :"
     echo "   - PBI: ${pbi_count}"
     echo "   - Tâches: ${task_count}"
+    
+    # Statut du projet
+    if [ "$has_config" = true ] && [ "$has_artefacts" = true ]; then
+        echo "🎯 Statut: Projet Aklo actif avec artefacts"
+    elif [ "$has_config" = true ]; then
+        echo "🎯 Statut: Projet Aklo initialisé (aucun artefact)"
+    elif [ "$has_artefacts" = true ]; then
+        echo "🎯 Statut: Projet avec artefacts (non initialisé)"
+    else
+        echo "🎯 Statut: Projet non initialisé"
+    fi
 
     if git -C "${AKLO_PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         local branch

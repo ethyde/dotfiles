@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<task id="15-2" title="Corriger le problème de parsing causant la création de fichiers temporaires">
+   <metadata>
+      <status>DONE</status>
+      <pbi_parent>PBI-15</pbi_parent>
+      <assigned_to>Human_Developer</assigned_to>
+      <git_branch>feature/task-15-2</git_branch>
+      <created_date>2025-07-18</created_date>
+      <completed_date>2025-07-18</completed_date>
+      <author>Human_Developer</author>
+   </metadata>
+
+   <content>
+      <objective>
+         Corriger le problème de parsing dans `parser_cached.sh` qui cause la création 
+         de fichiers temporaires à la racine du projet lors de l'exécution des commandes.
+      </objective>
+
+      <context>
+         Le bug a été identifié dans DEBUG-14-1. Lors de l'exécution de `aklo plan &lt;PBI_ID&gt;`, 
+         des fichiers temporaires avec des noms comme `task_id=14,title=...,status=TODO` 
+         sont créés à la racine du projet au lieu d'être traités correctement.
+      </context>
+
+      <instructions>
+         <step>1. Analyser le fichier `aklo/modules/parser/parser_cached.sh`</step>
+         <step>2. Identifier la fonction responsable de la création des fichiers temporaires</step>
+         <step>3. Vérifier les signatures des fonctions de parsing</step>
+         <step>4. Corriger l'incompatibilité de signature identifiée</step>
+         <step>5. Tester avec `aklo plan 15` pour vérifier qu'aucun fichier temporaire n'est créé</step>
+         <step>6. Vérifier que les tâches sont créées dans le bon répertoire</step>
+      </instructions>
+
+      <definition_of_done>
+         <criterion>Aucun fichier temporaire n'est créé à la racine du projet</criterion>
+         <criterion>Les tâches sont créées dans le répertoire `docs/backlog/01-tasks/`</criterion>
+         <criterion>La commande `aklo plan &lt;PBI_ID&gt;` fonctionne correctement</criterion>
+         <criterion>Le problème de signature des fonctions est résolu</criterion>
+      </definition_of_done>
+
+      <files_to_modify>
+         <file>aklo/modules/parser/parser_cached.sh</file>
+         <file>aklo/modules/commands/task_new_command.sh</file>
+      </files_to_modify>
+
+      <related_artefacts>
+         <artefact>DEBUG-14-1: Documentation du bug</artefact>
+         <artefact>PBI-15: Correction des bugs critiques dans les outils Aklo</artefact>
+      </related_artefacts>
+      
+      <results>
+         <summary>✅ Bug corrigé avec succès</summary>
+         <details>
+            <change>Ajout du paramètre manquant "full" dans l'appel à parse_and_generate_artefact</change>
+            <change>Ligne 44 de task_commands.sh : ajout du paramètre assistance_level</change>
+            <test>aklo plan 15 fonctionne sans créer de fichiers temporaires à la racine</test>
+            <test>Les tâches sont créées dans le bon répertoire</test>
+         </details>
+      </results>
+   </content>
+</task> 

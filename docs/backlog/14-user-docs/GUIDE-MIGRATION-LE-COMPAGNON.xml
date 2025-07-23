@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<guide id="migration-le-compagnon" title="Guide de Migration Markdown vers XML - Projet le-compagnon">
+   <metadata>
+      <created_date>2025-07-18</created_date>
+      <author>Human_Developer</author>
+      <target_project>/Users/eplouvie/Projets/le-compagnon</target_project>
+      <scope>Migration manuelle des artefacts Markdown vers XML</scope>
+   </metadata>
+
+   <content>
+      <overview>
+         <description>
+            Ce guide décrit la migration manuelle des artefacts du projet le-compagnon 
+            du format Markdown vers XML. Cette migration est nécessaire pour 
+            bénéficier de la validation automatique et de l'intégration avec les outils Aklo.
+         </description>
+         
+         <artefacts_to_migrate>
+            <artefact type="PBI" count="19" location="docs/backlog/00-pbi/"/>
+            <artefact type="TASK" count="~80" location="docs/backlog/01-tasks/"/>
+            <artefact type="JOURNAL" count="~10" location="docs/backlog/15-journal/"/>
+         </artefacts_to_migrate>
+      </overview>
+
+      <migration_process>
+         <step number="1">
+            <title>Préparation</title>
+            <actions>
+               <action>Créer une branche git : `git checkout -b migration/markdown-to-xml`</action>
+               <action>Faire une sauvegarde : `cp -r docs/backlog docs/backlog.backup`</action>
+            </actions>
+         </step>
+
+         <step number="2">
+            <title>Migration des PBI</title>
+            <actions>
+               <action>Pour chaque fichier `PBI-*.md` :</action>
+               <action>1. Lire le contenu Markdown</action>
+               <action>2. Extraire les métadonnées (titre, statut, date)</action>
+               <action>3. Convertir en format XML selon le protocole PRODUCT_OWNER</action>
+               <action>4. Sauvegarder avec l'extension `.xml`</action>
+            </actions>
+            <template>
+               <markdown_example>
+# PBI-1 : Initialisation et Socle Technique
+
+## 1. Description de la User Story
+_As a Lead Developer, I want a robust project foundation..._
+
+## 2. Critères d'Acceptation
+- [x] Le projet est initialisé comme un projet `npm`...
+               </markdown_example>
+               
+               <xml_template>
+&lt;pbi id="1" title="Initialisation et Socle Technique"&gt;
+   &lt;metadata&gt;
+      &lt;status&gt;DONE&lt;/status&gt;
+      &lt;created_date&gt;2025-01-XX&lt;/created_date&gt;
+      &lt;author&gt;Human_Developer&lt;/author&gt;
+   &lt;/metadata&gt;
+   
+   &lt;content&gt;
+      &lt;user_story&gt;
+         &lt;role&gt;Lead Developer&lt;/role&gt;
+         &lt;action&gt;I want a robust project foundation&lt;/action&gt;
+         &lt;benefit&gt;so that the development process is efficient...&lt;/benefit&gt;
+      &lt;/user_story&gt;
+      
+      &lt;acceptance_criteria&gt;
+         &lt;criterion state="done"&gt;Le projet est initialisé comme un projet npm&lt;/criterion&gt;
+      &lt;/acceptance_criteria&gt;
+   &lt;/content&gt;
+&lt;/pbi&gt;
+               </xml_template>
+            </template>
+         </step>
+
+         <step number="3">
+            <title>Migration des TASK</title>
+            <actions>
+               <action>Pour chaque fichier `TASK-*.md` :</action>
+               <action>1. Extraire les métadonnées (PBI parent, assigné, branche)</action>
+               <action>2. Convertir les sections en format XML</action>
+               <action>3. Préserver la structure des instructions détaillées</action>
+            </actions>
+            <template>
+               <markdown_example>
+# TASK-1-1 : Initialiser le projet Node.js
+
+---
+## DO NOT EDIT THIS SECTION MANUALLY
+**PBI Parent:** [PBI-1](../pbi/PBI-1-PROPOSED.md)
+**Assigné à:** `[Nom du Human_Developer]`
+**Branche Git:** `feature/task-1-1`
+---
+
+## 1. Objectif Technique
+Créer la structure de base du projet...
+               </markdown_example>
+               
+               <xml_template>
+&lt;task id="1-1" title="Initialiser le projet Node.js"&gt;
+   &lt;metadata&gt;
+      &lt;status&gt;DONE&lt;/status&gt;
+      &lt;pbi_parent&gt;PBI-1&lt;/pbi_parent&gt;
+      &lt;assigned_to&gt;Human_Developer&lt;/assigned_to&gt;
+      &lt;git_branch&gt;feature/task-1-1&lt;/git_branch&gt;
+   &lt;/metadata&gt;
+   
+   &lt;content&gt;
+      &lt;objective&gt;Créer la structure de base du projet...&lt;/objective&gt;
+      &lt;context&gt;Il s'agit d'un nouveau projet...&lt;/context&gt;
+      &lt;instructions&gt;
+         &lt;step&gt;1. Exécute la commande `npm init -y`...&lt;/step&gt;
+      &lt;/instructions&gt;
+   &lt;/content&gt;
+&lt;/task&gt;
+               </xml_template>
+            </template>
+         </step>
+
+         <step number="4">
+            <title>Validation</title>
+            <actions>
+               <action>Vérifier que tous les fichiers XML sont valides</action>
+               <action>Tester avec `aklo status` pour s'assurer de la détection</action>
+               <action>Vérifier que les liens entre PBI et TASK sont préservés</action>
+            </actions>
+         </step>
+
+         <step number="5">
+            <title>Finalisation</title>
+            <actions>
+               <action>Supprimer les anciens fichiers `.md`</action>
+               <action>Commiter les changements : `git add . &amp;&amp; git commit -m "Migration Markdown vers XML"`</action>
+               <action>Merger la branche : `git checkout main &amp;&amp; git merge migration/markdown-to-xml`</action>
+            </actions>
+         </step>
+      </migration_process>
+
+      <tools_and_scripts>
+         <script name="validate-xml.sh">
+            <description>Script pour valider la structure XML des artefacts migrés</description>
+            <usage>./validate-xml.sh docs/backlog/</usage>
+         </script>
+         
+         <script name="migration-stats.sh">
+            <description>Script pour générer des statistiques de migration</description>
+            <usage>./migration-stats.sh</usage>
+         </script>
+      </tools_and_scripts>
+
+      <notes>
+         <note>
+            Cette migration est manuelle car elle concerne un seul projet.
+            Pour des projets multiples, envisager des outils automatisés.
+         </note>
+         <note>
+            Préserver l'historique git en gardant les anciens fichiers 
+            dans une branche de sauvegarde.
+         </note>
+         <note>
+            Tester la migration sur un sous-ensemble avant de migrer tout le projet.
+         </note>
+      </notes>
+   </content>
+</guide> 

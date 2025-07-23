@@ -5,7 +5,17 @@
 
 # --- AJOUT CRITIQUE ---
 # Assure la disponibilité des fonctions de cache dont ce module dépend.
-source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh"
+if [ -n "$AKLO_PROJECT_ROOT" ] && [ -f "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh" ]; then
+  source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh"
+elif [ -n "$AKLO_TOOL_DIR" ]; then
+  # Utiliser AKLO_TOOL_DIR si les modules ne sont pas dans AKLO_PROJECT_ROOT
+  source "$AKLO_TOOL_DIR/modules/cache/cache_functions.sh"
+else
+  # Utiliser des chemins relatifs depuis le répertoire du script
+  local script_dir
+  script_dir="$(dirname "$0")"
+  source "${script_dir}/../cache/cache_functions.sh"
+fi
 
 # Fonction de validation avant mise en cache
 # Usage: validate_cache_prerequisites <protocol_file> <artefact_type> <cache_file>

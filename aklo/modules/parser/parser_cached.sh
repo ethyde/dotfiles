@@ -17,12 +17,19 @@
 # Phase GREEN: Implémentation minimale
 
 # Sourcing robuste des fonctions de cache
-if [ -n "$AKLO_PROJECT_ROOT" ]; then
+if [ -n "$AKLO_PROJECT_ROOT" ] && [ -f "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh" ]; then
   source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_functions.sh"
   source "$AKLO_PROJECT_ROOT/aklo/modules/cache/cache_monitoring.sh"
+elif [ -n "$AKLO_TOOL_DIR" ]; then
+  # Utiliser AKLO_TOOL_DIR si les modules ne sont pas dans AKLO_PROJECT_ROOT
+  source "$AKLO_TOOL_DIR/modules/cache/cache_functions.sh"
+  source "$AKLO_TOOL_DIR/modules/cache/cache_monitoring.sh"
 else
-  source "$(dirname "$0")/../cache/cache_functions.sh"
-  source "$(dirname "$0")/../cache/cache_monitoring.sh"
+  # Utiliser des chemins relatifs depuis le répertoire du script
+  local script_dir
+  script_dir="$(dirname "$0")"
+  source "${script_dir}/../cache/cache_functions.sh"
+  source "${script_dir}/../cache/cache_monitoring.sh"
 fi
 
 # Configuration cache par défaut

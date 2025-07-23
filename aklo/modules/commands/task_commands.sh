@@ -41,8 +41,8 @@ cmd_plan() {
     local context_vars="pbi_id=${pbi_id},task_id=${task_num},title=${title},status=TODO"
 
     # Appel du parser pour générer l'artefact de tâche
-    # Note: Nous devons avoir un protocole "01-PLANNING" qui définit le template de la tâche.
-    if parse_and_generate_artefact "01-PLANNING" "task" "$output_file" "$context_vars"; then
+    # Note: Nous utilisons le protocole "01-PLANIFICATION" qui définit le template de la tâche.
+    if parse_and_generate_artefact "01-PLANIFICATION" "task" "full" "$output_file" "$context_vars"; then
         echo "✅ Tâche créée : ${filename}"
     else
         echo "❌ La création de la tâche a échoué."

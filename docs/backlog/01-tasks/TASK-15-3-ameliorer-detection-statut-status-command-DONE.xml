@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<task id="15-3" title="Améliorer la détection de statut dans status-command.sh">
+   <metadata>
+      <status>DONE</status>
+      <pbi_parent>PBI-15</pbi_parent>
+      <assigned_to>Human_Developer</assigned_to>
+      <git_branch>feature/task-15-3</git_branch>
+      <created_date>2025-07-18</created_date>
+      <completed_date>2025-07-18</completed_date>
+      <author>Human_Developer</author>
+   </metadata>
+
+   <content>
+      <objective>
+         Corriger la logique de détection de statut dans `status-command.sh` pour qu'elle 
+         reconnaisse correctement les fichiers créés manuellement et retourne le bon statut du projet.
+      </objective>
+
+      <context>
+         Le bug a été identifié dans DEBUG-14-1. La commande `aklo status` retourne 
+         "Projet non initialisé avec Aklo" malgré la présence de fichiers d'artefacts, 
+         probablement à cause d'une logique de nommage ou d'extension de fichier incorrecte.
+      </context>
+
+      <instructions>
+         <step>1. Analyser le fichier `aklo/modules/ux/status-command.sh`</step>
+         <step>2. Identifier la logique de détection des artefacts</step>
+         <step>3. Vérifier les patterns de recherche de fichiers</step>
+         <step>4. Corriger la logique pour reconnaître les fichiers `.xml`</step>
+         <step>5. Tester avec des fichiers créés manuellement</step>
+         <step>6. Vérifier que `aklo status` retourne le bon statut</step>
+      </instructions>
+
+      <definition_of_done>
+         <criterion>La commande `aklo status` détecte correctement les projets avec des artefacts</criterion>
+         <criterion>Les fichiers créés manuellement sont reconnus</criterion>
+         <criterion>Le statut retourné est cohérent avec les artefacts présents</criterion>
+         <criterion>La logique de détection fonctionne pour tous les types d'artefacts</criterion>
+      </definition_of_done>
+
+      <files_to_modify>
+         <file>aklo/modules/ux/status-command.sh</file>
+      </files_to_modify>
+
+      <related_artefacts>
+         <artefact>DEBUG-14-1: Documentation du bug</artefact>
+         <artefact>PBI-15: Correction des bugs critiques dans les outils Aklo</artefact>
+      </related_artefacts>
+      
+      <results>
+         <summary>✅ Amélioration réalisée avec succès</summary>
+         <details>
+            <change>Amélioration de la détection de statut dans system_commands.sh</change>
+            <change>Ajout de vérifications robustes pour les répertoires d'artefacts</change>
+            <change>Ajout d'un statut détaillé du projet (actif, initialisé, non initialisé)</change>
+            <test>aklo status détecte correctement les projets avec et sans configuration</test>
+            <test>aklo status détecte correctement les projets avec et sans artefacts</test>
+            <note>La commande status fonctionnait déjà, mais l'amélioration la rend plus robuste</note>
+         </details>
+      </results>
+   </content>
+</task> 
