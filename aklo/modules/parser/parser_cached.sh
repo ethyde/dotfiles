@@ -55,6 +55,11 @@ get_cache_config() {
         if [ -z "$AKLO_CACHE_DEBUG" ] && grep -q "^CACHE_DEBUG=" "$config_file" 2>/dev/null; then
             AKLO_CACHE_DEBUG=$(grep "^CACHE_DEBUG=" "$config_file" | cut -d'=' -f2)
         fi
+        
+        # Lire la configuration des protocoles si non déjà définie
+        if [ -z "$AKLO_PROTOCOLS_PATH" ] && grep -q "^AKLO_PROTOCOLS_PATH=" "$config_file" 2>/dev/null; then
+            AKLO_PROTOCOLS_PATH=$(grep "^AKLO_PROTOCOLS_PATH=" "$config_file" | cut -d'=' -f2)
+        fi
     fi
 }
 
@@ -69,13 +74,15 @@ parse_and_generate_artefact_cached() {
     
 
     
-    # Lire la configuration cache
+    # Lire la configuration cache et des protocoles
     get_cache_config
     export AKLO_CACHE_ENABLED
     
     # Construire le chemin du protocole en priorité depuis la variable d'environnement
     local protocol_dir="${AKLO_PROTOCOLS_PATH:-./aklo/charte/PROTOCOLES}"
     local protocol_file="${protocol_dir}/${protocol_name}.xml"
+    
+
     
     # Si pas trouvé, essayer les chemins legacy pour la compatibilité
     if [ ! -f "$protocol_file" ]; then
@@ -89,7 +96,8 @@ parse_and_generate_artefact_cached() {
     
     if [ ! -f "$protocol_file" ]; then
         echo "❌ Erreur : Protocole $protocol_name non trouvé." >&2
-        echo "   Cherché dans: ./aklo/charte/PROTOCOLES/${protocol_name}.xml" >&2
+        echo "   Cherché dans: ${protocol_dir}/${protocol_name}.xml" >&2
+        echo "   Et dans: ./aklo/charte/PROTOCOLES/${protocol_name}.xml" >&2
         echo "   Et dans: ${script_dir}/../charte/PROTOCOLES/${protocol_name}.xml" >&2
         return 1
     fi
