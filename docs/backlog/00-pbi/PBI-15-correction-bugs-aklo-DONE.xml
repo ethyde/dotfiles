@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pbi id="15" title="Correction des bugs critiques dans les outils Aklo">
+   <metadata>
+      <status>DONE</status>
+      <created_date>2025-07-18</created_date>
+      <completed_date>2025-07-18</completed_date>
+      <author>Human_Developer</author>
+      <priority>HIGH</priority>
+   </metadata>
+
+   <content>
+      <user_story>
+         <role>As a Aklo Developer</role>
+         <action>I want the Aklo tools to work correctly for creating and managing tasks</action>
+         <benefit>so that I can efficiently plan PBIs and start tasks without encountering critical bugs</benefit>
+      </user_story>
+
+      <acceptance_criteria>
+         <criterion state="done">The command `aklo plan &lt;PBI_ID&gt;` works correctly and creates tasks from PBI</criterion>
+         <criterion state="done">No temporary files are created at project root during task creation</criterion>
+         <criterion state="done">The command `aklo status` correctly detects and displays project status</criterion>
+         <criterion state="done">All task-related commands work without errors</criterion>
+         <criterion state="done">The workflow `aklo plan` → `aklo start-task` functions properly</criterion>
+      </acceptance_criteria>
+
+      <technical_specifications>
+         <description>
+            Correction des bugs critiques identifiés dans DEBUG-14-1 :
+            
+            1. Bug de nom de protocole : `01-PLANNING` → `01-PLANIFICATION`
+            2. Problème de parsing causant la création de fichiers temporaires à la racine
+            3. Logique de détection de statut défaillante dans `aklo status`
+            
+            Ces corrections permettront d'utiliser correctement le workflow Aklo :
+            - `aklo plan &lt;PBI_ID&gt;` pour créer les tâches à partir d'un PBI
+            - `aklo start-task &lt;PBI_ID-TASK_ID&gt;` pour démarrer une tâche
+         </description>
+         <dependencies>
+            <dependency>DEBUG-14-1: Documentation des bugs</dependency>
+            <dependency>Protocoles Aklo existants (01-PLANIFICATION.xml)</dependency>
+         </dependencies>
+         <risks>
+            <risk>Régression dans d'autres fonctionnalités</risk>
+            <risk>Incompatibilité avec les projets existants</risk>
+         </risks>
+      </technical_specifications>
+
+      <associated_tasks>
+         <task state="done">TASK-15-1: Corriger le nom de protocole dans task_commands.sh</task>
+         <task state="done">TASK-15-2: Corriger le problème de parsing dans parser_cached.sh</task>
+         <task state="done">TASK-15-3: Améliorer la détection de statut dans status-command.sh</task>
+         <task state="done">TASK-15-4: Tester le workflow complet plan → start-task</task>
+      </associated_tasks>
+      
+      <validation_results>
+         <summary>✅ Tous les critères d'acceptation validés</summary>
+         <test_results>
+            <test name="aklo plan command" status="passed">
+               ✅ `aklo plan 15` fonctionne correctement et crée les tâches
+            </test>
+            <test name="no temporary files" status="passed">
+               ✅ Aucun fichier temporaire créé à la racine du projet
+            </test>
+            <test name="aklo status command" status="passed">
+               ✅ `aklo status` détecte et affiche correctement le statut du projet
+            </test>
+            <test name="task commands" status="passed">
+               ✅ Toutes les commandes liées aux tâches fonctionnent sans erreur
+            </test>
+            <test name="workflow plan → start-task" status="passed">
+               ✅ Le workflow `aklo plan` → `aklo start-task` fonctionne correctement
+            </test>
+         </test_results>
+         <notes>
+            <note>⚠️ Petit problème avec la création de branche Git (erreur de configuration mineure)</note>
+            <note>✅ Tous les bugs critiques identifiés dans DEBUG-14-1 sont corrigés</note>
+            <note>🎉 Outils Aklo maintenant stables et fonctionnels</note>
+         </notes>
+      </validation_results>
+   </content>
+</pbi> 

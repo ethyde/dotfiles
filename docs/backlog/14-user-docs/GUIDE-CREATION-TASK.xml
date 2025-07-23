@@ -1,0 +1,397 @@
+<user_doc id="guide-creation-task" title="Guide de Création d'Artefacts TASK" status="PROPOSED">
+   <metadata>
+      <created_date>2025-07-18</created_date>
+      <author>Human_Developer</author>
+      <priority>HIGH</priority>
+      <category>user_guide</category>
+      <version>1.0</version>
+   </metadata>
+
+   <content>
+      <overview>
+         <description>
+            Ce guide explique comment créer des artefacts TASK dans un projet Aklo, en utilisant les bonnes pratiques 
+            et en respectant les protocoles établis.
+         </description>
+         <audience>
+            <target>Développeurs utilisant Aklo</target>
+            <target>Product Owners</target>
+            <target>Chefs de projet</target>
+         </audience>
+      </overview>
+
+      <section title="Problèmes actuels identifiés">
+         <subsection title="Bugs connus (2025-07-18)">
+            <bug>
+               <title>Commande `aklo new task` inexistante</title>
+               <description>
+                  La commande `aklo new task` n'est pas disponible dans l'interface principale.
+                  Le module `task_new_command.sh` existe mais n'est pas intégré.
+               </description>
+            </bug>
+            <bug>
+               <title>Commande `aklo plan &lt;PBI_ID&gt;` défaillante</title>
+               <description>
+                  Cherche le protocole `01-PLANNING.xml` au lieu de `01-PLANIFICATION.xml`.
+                  Erreur : "Protocole 01-PLANNING non trouvé"
+               </description>
+            </bug>
+            <bug>
+               <title>Fichiers de debug créés à la racine</title>
+               <description>
+                  Les commandes de création créent des fichiers temporaires à la racine.
+                  Noms comme `task_id=14,title=...,status=TODO`
+               </description>
+            </bug>
+            <bug>
+               <title>Détection du statut incorrecte</title>
+               <description>
+                  `aklo status` ne détecte pas les fichiers créés manuellement.
+                  Retourne "Projet non initialisé avec Aklo"
+               </description>
+            </bug>
+         </subsection>
+      </section>
+
+      <section title="Méthodes de création actuelles">
+         <subsection title="Méthode 1 : Création manuelle (Recommandée actuellement)">
+            <code_block language="bash">
+# 1. Créer le fichier XML manuellement
+touch docs/backlog/01-tasks/TASK-[PBI_ID]-[TASK_NUM]-[titre-sanitise]-TODO.xml
+
+# 2. Éditer le fichier avec la structure XML appropriée
+            </code_block>
+            
+            <xml_template>
+               <description>Structure XML recommandée :</description>
+               <code>
+&lt;task id="[PBI_ID]-[TASK_NUM]" title="[Titre de la tâche]" status="TODO"&gt;
+   &lt;metadata&gt;
+      &lt;pbi_id&gt;[PBI_ID]&lt;/pbi_id&gt;
+      &lt;created_date&gt;[YYYY-MM-DD]&lt;/created_date&gt;
+      &lt;author&gt;[Auteur]&lt;/author&gt;
+      &lt;priority&gt;[HIGH|MEDIUM|LOW]&lt;/priority&gt;
+      &lt;estimated_hours&gt;[Nombre d'heures]&lt;/estimated_hours&gt;
+   &lt;/metadata&gt;
+
+   &lt;content&gt;
+      &lt;description&gt;
+         [Description détaillée de la tâche]
+      &lt;/description&gt;
+
+      &lt;objectives&gt;
+         &lt;objective&gt;[Objectif 1]&lt;/objective&gt;
+         &lt;objective&gt;[Objectif 2]&lt;/objective&gt;
+      &lt;/objectives&gt;
+
+      &lt;technical_specifications&gt;
+         &lt;input&gt;
+            &lt;item&gt;[Input 1]&lt;/item&gt;
+            &lt;item&gt;[Input 2]&lt;/item&gt;
+         &lt;/input&gt;
+         &lt;output&gt;
+            &lt;item&gt;[Output 1]&lt;/item&gt;
+            &lt;item&gt;[Output 2]&lt;/item&gt;
+         &lt;/output&gt;
+         &lt;requirements&gt;
+            &lt;requirement&gt;[Requirement 1]&lt;/requirement&gt;
+            &lt;requirement&gt;[Requirement 2]&lt;/requirement&gt;
+         &lt;/requirements&gt;
+      &lt;/technical_specifications&gt;
+
+      &lt;definition_of_done&gt;
+         &lt;criterion state="todo"&gt;[Critère 1]&lt;/criterion&gt;
+         &lt;criterion state="todo"&gt;[Critère 2]&lt;/criterion&gt;
+      &lt;/definition_of_done&gt;
+
+      &lt;dependencies&gt;
+         &lt;dependency&gt;[TASK-XXX-Y]&lt;/dependency&gt;
+      &lt;/dependencies&gt;
+
+      &lt;notes&gt;
+         &lt;note&gt;[Note importante]&lt;/note&gt;
+      &lt;/notes&gt;
+   &lt;/content&gt;
+&lt;/task&gt;
+               </code>
+            </xml_template>
+         </subsection>
+
+         <subsection title="Méthode 2 : Utilisation du template">
+            <code_block language="bash">
+# Copier un template existant et l'adapter
+cp docs/backlog/01-tasks/TASK-14-1-analyse-existing-markdown-structure-TODO.xml \
+   docs/backlog/01-tasks/TASK-[PBI_ID]-[TASK_NUM]-[titre]-TODO.xml
+            </code_block>
+         </subsection>
+      </section>
+
+      <section title="Conventions de nommage">
+         <subsection title="Format du nom de fichier">
+            <code>TASK-[PBI_ID]-[TASK_NUM]-[titre-sanitise]-[STATUS].xml</code>
+            
+            <examples>
+               <example>TASK-14-1-analyse-existing-markdown-structure-TODO.xml</example>
+               <example>TASK-14-2-design-xml-schemas-TODO.xml</example>
+               <example>TASK-14-3-develop-pbi-conversion-tool-TODO.xml</example>
+            </examples>
+         </subsection>
+
+         <subsection title="Règles de sanitisation du titre">
+            <rules>
+               <rule>Remplacer les espaces par des tirets</rule>
+               <rule>Convertir en minuscules</rule>
+               <rule>Supprimer les caractères spéciaux</rule>
+               <rule>Limiter à 50 caractères</rule>
+            </rules>
+         </subsection>
+      </section>
+
+      <section title="Bonnes pratiques">
+         <subsection title="Structure et contenu">
+            <practices>
+               <practice>
+                  <title>Description claire</title>
+                  <description>Expliquer le "quoi" et le "pourquoi"</description>
+               </practice>
+               <practice>
+                  <title>Objectifs mesurables</title>
+                  <description>Chaque objectif doit être vérifiable</description>
+               </practice>
+               <practice>
+                  <title>Spécifications techniques</title>
+                  <description>Détailler les inputs, outputs et requirements</description>
+               </practice>
+               <practice>
+                  <title>Definition of Done</title>
+                  <description>Critères binaires et testables</description>
+               </practice>
+               <practice>
+                  <title>Dépendances</title>
+                  <description>Lister toutes les tâches préalables</description>
+               </practice>
+            </practices>
+         </subsection>
+
+         <subsection title="Estimation">
+            <practices>
+               <practice>
+                  <title>Heures estimées</title>
+                  <description>Toujours inclure une estimation réaliste</description>
+               </practice>
+               <practice>
+                  <title>Priorité</title>
+                  <description>HIGH, MEDIUM, ou LOW selon l'impact</description>
+               </practice>
+               <practice>
+                  <title>Complexité</title>
+                  <description>Considérer la difficulté technique</description>
+               </practice>
+            </practices>
+         </subsection>
+
+         <subsection title="Relations">
+            <practices>
+               <practice>
+                  <title>PBI parent</title>
+                  <description>Toujours référencer le PBI parent</description>
+               </practice>
+               <practice>
+                  <title>Dépendances</title>
+                  <description>Lister les tâches qui doivent être terminées en premier</description>
+               </practice>
+               <practice>
+                  <title>Liens</title>
+                  <description>Référencer les documents d'architecture si applicable</description>
+               </practice>
+            </practices>
+         </subsection>
+
+         <subsection title="Statuts">
+            <statuses>
+               <status name="TODO">Tâche à faire</status>
+               <status name="IN_PROGRESS">En cours de développement</status>
+               <status name="AWAITING_REVIEW">En attente de validation</status>
+               <status name="DONE">Terminée et validée</status>
+               <status name="MERGED">Intégrée dans la branche principale</status>
+            </statuses>
+         </subsection>
+      </section>
+
+      <section title="Workflow recommandé">
+         <subsection title="1. Planification">
+            <steps>
+               <step>Analyser le PBI parent</step>
+               <step>Identifier les tâches nécessaires</step>
+               <step>Définir les dépendances</step>
+               <step>Estimer les efforts</step>
+            </steps>
+         </subsection>
+
+         <subsection title="2. Création">
+            <steps>
+               <step>Créer le fichier XML manuellement</step>
+               <step>Remplir toutes les sections</step>
+               <step>Vérifier la cohérence</step>
+            </steps>
+         </subsection>
+
+         <subsection title="3. Validation">
+            <steps>
+               <step>Vérifier la structure XML</step>
+               <step>Valider les dépendances</step>
+               <step>S'assurer que la Definition of Done est complète</step>
+            </steps>
+         </subsection>
+
+         <subsection title="4. Suivi">
+            <steps>
+               <step>Mettre à jour le statut au fur et à mesure</step>
+               <step>Documenter les blocages</step>
+               <step>Mettre à jour les estimations si nécessaire</step>
+            </steps>
+         </subsection>
+      </section>
+
+      <section title="Exemples concrets">
+         <subsection title="Exemple 1 : Tâche d'analyse">
+            <xml_example>
+               <description>Tâche d'analyse de structure Markdown</description>
+               <code>
+&lt;task id="14-1" title="Analyse existing Markdown structure" status="TODO"&gt;
+   &lt;metadata&gt;
+      &lt;pbi_id&gt;14&lt;/pbi_id&gt;
+      &lt;created_date&gt;2025-01-12&lt;/created_date&gt;
+      &lt;author&gt;Human_Developer&lt;/author&gt;
+      &lt;priority&gt;HIGH&lt;/priority&gt;
+      &lt;estimated_hours&gt;4&lt;/estimated_hours&gt;
+   &lt;/metadata&gt;
+
+   &lt;content&gt;
+      &lt;description&gt;
+         Analyse the current Markdown structure of all artefact types (PBI, TASK, ARCH, DEBUG, REVIEW) 
+         to understand the patterns, metadata, and content organization that need to be preserved 
+         during the migration to XML format.
+      &lt;/description&gt;
+
+      &lt;objectives&gt;
+         &lt;objective&gt;Identify common patterns across all artefact types&lt;/objective&gt;
+         &lt;objective&gt;Document metadata fields and their formats&lt;/objective&gt;
+         &lt;objective&gt;Analyze content structure and hierarchy&lt;/objective&gt;
+      &lt;/objectives&gt;
+
+      &lt;definition_of_done&gt;
+         &lt;criterion state="todo"&gt;All artefact types have been analyzed&lt;/criterion&gt;
+         &lt;criterion state="todo"&gt;Common patterns and structures are documented&lt;/criterion&gt;
+         &lt;criterion state="todo"&gt;Metadata fields and their formats are identified&lt;/criterion&gt;
+      &lt;/definition_of_done&gt;
+   &lt;/content&gt;
+&lt;/task&gt;
+               </code>
+            </xml_example>
+         </subsection>
+
+         <subsection title="Exemple 2 : Tâche de développement">
+            <xml_example>
+               <description>Tâche de développement d'outil de conversion</description>
+               <code>
+&lt;task id="14-3" title="Develop PBI conversion tool" status="TODO"&gt;
+   &lt;metadata&gt;
+      &lt;pbi_id&gt;14&lt;/pbi_id&gt;
+      &lt;created_date&gt;2025-01-12&lt;/created_date&gt;
+      &lt;author&gt;Human_Developer&lt;/author&gt;
+      &lt;priority&gt;HIGH&lt;/priority&gt;
+      &lt;estimated_hours&gt;6&lt;/estimated_hours&gt;
+   &lt;/metadata&gt;
+
+   &lt;content&gt;
+      &lt;description&gt;
+         Develop a conversion tool that transforms PBI files from Markdown format to XML format.
+      &lt;/description&gt;
+
+      &lt;dependencies&gt;
+         &lt;dependency&gt;TASK-14-1: Analyse existing Markdown structure&lt;/dependency&gt;
+         &lt;dependency&gt;TASK-14-2: Design XML schemas for each artefact type&lt;/dependency&gt;
+      &lt;/dependencies&gt;
+
+      &lt;definition_of_done&gt;
+         &lt;criterion state="todo"&gt;Tool successfully converts PBI Markdown files to XML&lt;/criterion&gt;
+         &lt;criterion state="todo"&gt;All PBI metadata is correctly extracted and converted&lt;/criterion&gt;
+         &lt;criterion state="todo"&gt;Output XML validates against schema&lt;/criterion&gt;
+      &lt;/definition_of_done&gt;
+   &lt;/content&gt;
+&lt;/task&gt;
+               </code>
+            </xml_example>
+         </subsection>
+      </section>
+
+      <section title="Dépannage">
+         <subsection title="Problèmes courants">
+            <problem>
+               <title>Fichier non détecté par `aklo status`</title>
+               <solutions>
+                  <solution>Vérifier le format du nom de fichier</solution>
+                  <solution>S'assurer que l'extension est `.xml`</solution>
+                  <solution>Vérifier que le fichier est dans le bon répertoire</solution>
+               </solutions>
+            </problem>
+            <problem>
+               <title>Erreurs de validation XML</title>
+               <solutions>
+                  <solution>Vérifier la structure XML</solution>
+                  <solution>S'assurer que tous les tags sont fermés</solution>
+                  <solution>Valider contre le schéma si disponible</solution>
+               </solutions>
+            </problem>
+            <problem>
+               <title>Dépendances manquantes</title>
+               <solutions>
+                  <solution>Vérifier que les tâches référencées existent</solution>
+                  <solution>S'assurer que les PBI parents existent</solution>
+                  <solution>Valider les liens vers les documents d'architecture</solution>
+               </solutions>
+            </problem>
+         </subsection>
+      </section>
+
+      <section title="Prochaines améliorations">
+         <subsection title="Corrections prioritaires">
+            <improvements>
+               <improvement>Intégrer `aklo new task` dans l'interface principale</improvement>
+               <improvement>Corriger `aklo plan` pour utiliser le bon protocole</improvement>
+               <improvement>Éliminer les fichiers de debug à la racine</improvement>
+               <improvement>Améliorer la détection du statut</improvement>
+            </improvements>
+         </subsection>
+
+         <subsection title="Améliorations futures">
+            <improvements>
+               <improvement>Validation automatique des fichiers XML</improvement>
+               <improvement>Templates interactifs pour la création</improvement>
+               <improvement>Génération automatique des dépendances</improvement>
+               <improvement>Intégration avec Git pour le suivi des changements</improvement>
+            </improvements>
+         </subsection>
+      </section>
+
+      <resources>
+         <resource>
+            <title>Protocole PLANIFICATION</title>
+            <path>../aklo/charte/PROTOCOLES/01-PLANIFICATION.xml</path>
+         </resource>
+         <resource>
+            <title>Protocole DEVELOPPEMENT</title>
+            <path>../aklo/charte/PROTOCOLES/03-DEVELOPPEMENT.xml</path>
+         </resource>
+         <resource>
+            <title>Journal du jour</title>
+            <path>../15-journal/JOURNAL-2025-07-18.xml</path>
+         </resource>
+         <resource>
+            <title>PBI-14 Migration Markdown vers XML</title>
+            <path>../00-pbi/PBI-14-migration-des-artefacts-markdown-vers-xml-PROPOSED.xml</path>
+         </resource>
+      </resources>
+   </content>
+</user_doc> 

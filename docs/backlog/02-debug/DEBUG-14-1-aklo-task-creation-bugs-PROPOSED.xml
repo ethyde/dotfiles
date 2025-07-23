@@ -1,0 +1,184 @@
+<debug id="14-1" title="Bugs dans la création d'artefacts TASK" status="PROPOSED">
+   <metadata>
+      <created_date>2025-07-18</created_date>
+      <author>Human_Developer</author>
+      <priority>HIGH</priority>
+      <severity>MEDIUM</severity>
+      <related_pbi>PBI-14</related_pbi>
+   </metadata>
+
+   <content>
+      <description>
+         Plusieurs bugs ont été identifiés dans les outils Aklo lors de la création d'artefacts TASK, 
+         empêchant l'utilisation normale des commandes de création de tâches et causant la création 
+         de fichiers de debug à la racine du projet.
+      </description>
+
+      <symptoms>
+         <symptom>La commande `aklo new task` n'existe pas dans l'interface principale</symptom>
+         <symptom>La commande `aklo plan &lt;PBI_ID&gt;` échoue avec l'erreur "Protocole 01-PLANNING non trouvé"</symptom>
+         <symptom>Des fichiers temporaires sont créés à la racine du projet lors de l'exécution des commandes</symptom>
+         <symptom>La commande `aklo status` ne détecte pas les fichiers créés manuellement</symptom>
+      </symptoms>
+
+      <investigation>
+         <step>
+            <action>Vérification des commandes disponibles</action>
+            <result>La commande `aklo new` liste "task" mais `aklo new task` n'est pas implémentée</result>
+         </step>
+         <step>
+            <action>Analyse du module task_new_command.sh</action>
+            <result>Le module existe mais n'est pas intégré dans l'interface principale</result>
+         </step>
+         <step>
+            <action>Test de la commande `aklo plan 14`</action>
+            <result>Erreur : "Protocole 01-PLANNING non trouvé" - le protocole s'appelle 01-PLANIFICATION.xml</result>
+         </step>
+         <step>
+            <action>Exécution des commandes de création</action>
+            <result>Création de fichiers temporaires à la racine avec des noms comme `task_id=14,title=...,status=TODO`</result>
+         </step>
+         <step>
+            <action>Vérification de la détection du statut</action>
+            <result>La commande `aklo status` retourne "Projet non initialisé avec Aklo" malgré la présence de fichiers</result>
+         </step>
+      </investigation>
+
+      <root_causes>
+         <cause>
+            <title>Intégration manquante de task_new_command.sh</title>
+            <description>
+               Le module `task_new_command.sh` existe mais n'est pas intégré dans le dispatcher principal 
+               des commandes Aklo, empêchant l'utilisation de `aklo new task`.
+            </description>
+            <location>aklo/modules/commands/task_new_command.sh</location>
+         </cause>
+         <cause>
+            <title>Erreur de nom de protocole dans task_commands.sh</title>
+            <description>
+               La fonction `cmd_plan` dans `task_commands.sh` cherche le protocole `01-PLANNING.xml` 
+               au lieu de `01-PLANIFICATION.xml`.
+            </description>
+            <location>aklo/modules/commands/task_commands.sh:25</location>
+         </cause>
+         <cause>
+            <title>Incompatibilité de signature dans les fonctions de parsing</title>
+            <description>
+               Problème similaire à celui corrigé précédemment - incompatibilité entre les signatures 
+               des fonctions de parsing, causant la création de fichiers temporaires à la racine.
+            </description>
+            <location>aklo/modules/parser/parser_cached.sh</location>
+         </cause>
+         <cause>
+            <title>Logique de détection de statut défaillante</title>
+            <description>
+               La commande `aklo status` ne détecte pas correctement les fichiers créés manuellement, 
+               probablement à cause d'une logique de nommage ou d'extension de fichier incorrecte.
+            </description>
+            <location>aklo/modules/ux/status-command.sh</location>
+         </cause>
+      </root_causes>
+
+      <impact>
+         <item>Impossibilité d'utiliser les commandes de création de tâches</item>
+         <item>Pollution de la racine du projet avec des fichiers temporaires</item>
+         <item>Confusion pour les utilisateurs d'Aklo</item>
+         <item>Nécessité de créer les tâches manuellement</item>
+         <item>Détection incorrecte du statut du projet</item>
+      </impact>
+
+      <proposed_solutions>
+         <solution>
+            <title>Intégrer task_new_command.sh dans l'interface principale</title>
+            <description>
+               Ajouter la commande `task` dans le dispatcher principal des commandes Aklo pour 
+               permettre l'utilisation de `aklo new task`.
+            </description>
+            <files_to_modify>
+               <file>aklo/bin/aklo</file>
+               <file>aklo/modules/commands/new_command.sh</file>
+            </files_to_modify>
+         </solution>
+         <solution>
+            <title>Corriger le nom de protocole dans task_commands.sh</title>
+            <description>
+               Changer `01-PLANNING` en `01-PLANIFICATION` dans la fonction `cmd_plan`.
+            </description>
+            <files_to_modify>
+               <file>aklo/modules/commands/task_commands.sh</file>
+            </files_to_modify>
+         </solution>
+         <solution>
+            <title>Corriger l'incompatibilité de signature</title>
+            <description>
+               Vérifier et corriger les signatures des fonctions de parsing pour éviter 
+               la création de fichiers temporaires à la racine.
+            </description>
+            <files_to_modify>
+               <file>aklo/modules/parser/parser_cached.sh</file>
+               <file>aklo/modules/commands/task_new_command.sh</file>
+            </files_to_modify>
+         </solution>
+         <solution>
+            <title>Améliorer la détection du statut</title>
+            <description>
+               Corriger la logique de détection pour reconnaître les fichiers créés manuellement 
+               et retourner le bon statut du projet.
+            </description>
+            <files_to_modify>
+               <file>aklo/modules/ux/status-command.sh</file>
+            </files_to_modify>
+         </solution>
+      </proposed_solutions>
+
+      <testing_plan>
+         <test>
+            <title>Test de la commande aklo new task</title>
+            <steps>
+               <step>Exécuter `aklo new task "Test task"`</step>
+               <step>Vérifier que la tâche est créée dans le bon répertoire</step>
+               <step>Vérifier qu'aucun fichier temporaire n'est créé à la racine</step>
+            </steps>
+         </test>
+         <test>
+            <title>Test de la commande aklo plan</title>
+            <steps>
+               <step>Exécuter `aklo plan 14`</step>
+               <step>Vérifier que les tâches sont créées pour le PBI 14</step>
+               <step>Vérifier qu'aucune erreur de protocole n'est générée</step>
+            </steps>
+         </test>
+         <test>
+            <title>Test de la détection du statut</title>
+            <steps>
+               <step>Créer manuellement une tâche</step>
+               <step>Exécuter `aklo status`</step>
+               <step>Vérifier que le projet est détecté comme initialisé</step>
+               <step>Vérifier que les tâches sont listées</step>
+            </steps>
+         </test>
+      </testing_plan>
+
+      <related_artefacts>
+         <artefact>PBI-14: Migration des artefacts Markdown vers XML</artefact>
+         <artefact>TASK-14-1: Analyse existing Markdown structure</artefact>
+         <artefact>GUIDE-CREATION-TASK.md</artefact>
+         <artefact>JOURNAL-2025-07-18.xml</artefact>
+      </related_artefacts>
+
+      <notes>
+         <note>
+            Ces bugs ont été identifiés lors de la création du PBI-14 et de ses tâches associées.
+            Ils empêchent l'utilisation normale des outils Aklo et doivent être corrigés en priorité.
+         </note>
+         <note>
+            Le problème des fichiers temporaires à la racine est similaire à celui corrigé 
+            précédemment pour les PBI - il s'agit probablement de la même cause racine.
+         </note>
+         <note>
+            La correction de ces bugs permettra d'améliorer l'expérience utilisateur 
+            et de faciliter la création d'artefacts TASK.
+         </note>
+      </notes>
+   </content>
+</debug> 

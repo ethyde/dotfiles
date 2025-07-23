@@ -1,0 +1,75 @@
+<pbi id="14" title="Migration des artefacts Markdown vers XML">
+   <metadata>
+      <status>DEPRECATED</status>
+      <created_date>2025-01-12</created_date>
+      <author>Human_Developer</author>
+      <priority>LOW</priority>
+      <deprecation_reason>Approche trop complexe pour un seul projet. Un guide de migration manuelle est plus approprié.</deprecation_reason>
+   </metadata>
+
+   <content>
+      <user_story>
+         <role>As a Aklo Developer</role>
+         <action>I want to migrate all project artefacts from Markdown to XML format</action>
+         <benefit>so that I can leverage automated validation, better integration with Aklo tools, and improved consistency across all projects</benefit>
+      </user_story>
+
+      <acceptance_criteria>
+         <criterion state="todo">All existing PBI files (.md) are successfully converted to XML format with proper validation</criterion>
+         <criterion state="todo">All existing TASK files (.md) are successfully converted to XML format with proper validation</criterion>
+         <criterion state="todo">All existing ARCH files (.md) are successfully converted to XML format with proper validation</criterion>
+         <criterion state="todo">All existing DEBUG files (.md) are successfully converted to XML format with proper validation</criterion>
+         <criterion state="todo">All existing REVIEW files (.md) are successfully converted to XML format with proper validation</criterion>
+         <criterion state="todo">Conversion tools are developed and tested for each artefact type</criterion>
+         <criterion state="todo">Validation tools ensure XML compliance with Aklo protocols</criterion>
+         <criterion state="todo">Migration process is documented and can be applied to any Aklo project</criterion>
+         <criterion state="todo">Backward compatibility is maintained during the transition period</criterion>
+      </acceptance_criteria>
+
+      <technical_specifications>
+         <description>
+            This migration addresses the limitations of Markdown format for project artefacts:
+            - Lack of formal schema validation
+            - Manual validation prone to errors
+            - Difficulty in automated processing and reporting
+            - Inconsistent structure across projects
+            
+            The migration will use the existing Aklo protocols as the foundation for XML schemas,
+            ensuring consistency with the established Charte IA standards.
+         </description>
+         <dependencies>
+            <dependency>Existing Aklo protocols (Charte IA)</dependency>
+            <dependency>Markdown parsing capabilities</dependency>
+            <dependency>XML validation tools</dependency>
+         </dependencies>
+         <risks>
+            <risk>Data loss during conversion process</risk>
+            <risk>Breaking changes for existing workflows</risk>
+            <risk>Learning curve for users accustomed to Markdown</risk>
+         </risks>
+      </technical_specifications>
+
+      <architecture_documents>
+         <description>
+            Architecture documents will define the XML schemas and conversion strategies for each artefact type.
+         </description>
+         <document href="../../02-architecture/ARCH-14-1.xml">ARCH-14-1: XML Schema Design</document>
+         <document href="../../02-architecture/ARCH-14-2.xml">ARCH-14-2: Conversion Strategy</document>
+      </architecture_documents>
+
+      <associated_tasks>
+         <task state="todo">TASK-14-1: Analyse existing Markdown structure</task>
+         <task state="todo">TASK-14-2: Design XML schemas for each artefact type</task>
+         <task state="todo">TASK-14-3: Develop PBI conversion tool</task>
+         <task state="todo">TASK-14-4: Develop TASK conversion tool</task>
+         <task state="todo">TASK-14-5: Develop ARCH conversion tool</task>
+         <task state="todo">TASK-14-6: Develop DEBUG conversion tool</task>
+         <task state="todo">TASK-14-7: Develop REVIEW conversion tool</task>
+         <task state="todo">TASK-14-8: Create validation tools</task>
+         <task state="todo">TASK-14-9: Implement migration process</task>
+         <task state="todo">TASK-14-10: Test migration on sample projects</task>
+         <task state="todo">TASK-14-11: Document migration process</task>
+         <task state="todo">TASK-14-12: Update Aklo tools for XML support</task>
+      </associated_tasks>
+   </content>
+</pbi>
