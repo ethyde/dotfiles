@@ -7,8 +7,8 @@
 get_cache_config_values() {
     # Configuration via la section cache
     CACHE_ENABLED=$(get_config "enabled" "cache" "true")
-    # Utilise AKLO_PROJECT_ROOT pour construire un chemin par défaut fiable
-    local default_cache_dir="${AKLO_PROJECT_ROOT}/.aklo_cache"
+    # Utilise AKLO_TOOL_DIR pour construire un chemin par défaut fiable (cache centralisé)
+    local default_cache_dir="${AKLO_TOOL_DIR}/.aklo_cache"
     CACHE_DIR=$(get_config "cache_dir" "cache" "$default_cache_dir")
     CACHE_MAX_SIZE_MB=$(get_config "max_size_mb" "cache" "100")
     CACHE_TTL_DAYS=$(get_config "ttl_days" "cache" "7")
