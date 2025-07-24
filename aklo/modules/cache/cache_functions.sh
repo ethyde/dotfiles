@@ -11,7 +11,7 @@ source "$AKLO_MODULES_ROOT/core/config.sh"
 init_cache_dir() {
     # TODO: Tester la création du répertoire de cache
     local cache_dir_path
-    cache_dir_path=$(get_config "cache_dir" "cache" "${AKLO_PROJECT_ROOT}/.aklo_cache")
+    cache_dir_path=$(get_config "cache_dir" "cache" "${AKLO_TOOL_DIR}/.aklo_cache")
     if [ -n "$cache_dir_path" ] && [ ! -d "$cache_dir_path" ]; then
         if [ "${AKLO_DRY_RUN:-false}" = false ]; then
             mkdir -p "$cache_dir_path"
@@ -27,7 +27,8 @@ generate_cache_filename() {
     local artefact_type="$2"
     local cache_dir
     cache_dir=$(get_config "cache_dir" "cache" "aklo/.aklo_cache")
-    echo "${AKLO_PROJECT_ROOT}/${cache_dir}/${protocol_name}_${artefact_type}.parsed"
+    # Utiliser AKLO_TOOL_DIR pour que le cache soit dans les outils Aklo, pas dans le projet utilisateur
+    echo "${AKLO_TOOL_DIR}/${cache_dir}/${protocol_name}_${artefact_type}.parsed"
 }
 
 # Vérification de la validité du cache
