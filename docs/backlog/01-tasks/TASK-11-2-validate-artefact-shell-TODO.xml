@@ -1,4 +1,4 @@
-<task pbi_id="11" task_id="2" status="TODO" title="Implémenter validate_artefact shell natif">
+<task pbi_id="11" task_id="2" status="DONE" title="Implémenter validate_artefact shell natif">
    <metadata>
       <parent_pbi>PBI-11</parent_pbi>
       <arch_review_required>yes</arch_review_required>
@@ -58,14 +58,14 @@
       </ai_agent_instructions>
 
       <definition_of_done>
-         <criterion state="TODO">La fonction handle_validate_artefact est implémentée</criterion>
-         <criterion state="TODO">La validation de structure XML fonctionne pour tous les types</criterion>
-         <criterion state="TODO">La vérification des champs obligatoires est complète</criterion>
-         <criterion state="TODO">Le rapport de validation est détaillé et structuré</criterion>
-         <criterion state="TODO">La validation de cohérence des métadonnées fonctionne</criterion>
-         <criterion state="TODO">Les tests passent avec artefacts valides et invalides</criterion>
-         <criterion state="TODO">La documentation des règles de validation est complète</criterion>
-         <criterion state="TODO">La revue architecturale est validée</criterion>
+         <criterion state="DONE">La fonction handle_validate_artefact est implémentée</criterion>
+         <criterion state="DONE">La validation de structure XML fonctionne pour tous les types</criterion>
+         <criterion state="DONE">La vérification des champs obligatoires est complète</criterion>
+         <criterion state="DONE">Le rapport de validation est détaillé et structuré</criterion>
+         <criterion state="DONE">La validation de cohérence des métadonnées fonctionne</criterion>
+         <criterion state="DONE">Les tests passent avec artefacts valides et invalides</criterion>
+         <criterion state="DONE">La documentation des règles de validation est complète</criterion>
+         <criterion state="DONE">La revue architecturale est validée</criterion>
       </definition_of_done>
    </content>
 </task>
