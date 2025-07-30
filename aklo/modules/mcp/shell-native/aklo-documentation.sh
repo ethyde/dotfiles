@@ -85,6 +85,25 @@ handle_request() {
           },
           "required": ["artefact_path", "artefact_type"]
         }
+      },
+      {
+        "name": "project_documentation_summary",
+        "description": "Generate comprehensive project documentation summary",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "project_path": {
+              "type": "string",
+              "description": "Path to the project directory"
+            },
+            "include_artefacts": {
+              "type": "boolean",
+              "description": "Whether to include detailed artefact counts",
+              "default": true
+            }
+          },
+          "required": ["project_path"]
+        }
       }
     ]
   }
@@ -107,6 +126,9 @@ EOF
                     ;;
                 "validate_artefact")
                     handle_validate_artefact "$request"
+                    ;;
+                "project_documentation_summary")
+                    handle_project_summary "$request"
                     ;;
                 *)
                     echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"Unknown tool"}}'
@@ -494,6 +516,91 @@ validate_artefact_structure() {
     esac
     
     echo "$issues"
+}
+
+handle_project_summary() {
+    local request="$1"
+    
+    # Extraire les paramètres
+    local project_path=$(echo "$request" | grep -o '"project_path":"[^"]*"' | cut -d'"' -f4)
+    local include_artefacts=$(echo "$request" | grep -o '"include_artefacts":[^,}]*' | cut -d':' -f2 | tr -d '"')
+    
+    # Valeur par défaut pour include_artefacts
+    if [ -z "$include_artefacts" ]; then
+        include_artefacts="true"
+    fi
+    
+    # Validation du chemin
+    if [ -z "$project_path" ]; then
+        echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"Missing project_path parameter"}}'
+        return
+    fi
+    
+    if [ ! -d "$project_path" ]; then
+        echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32603,"message":"Project directory not found"}}'
+        return
+    fi
+    
+    # Préparer le résumé
+    local summary="📊 Résumé de la Documentation du Projet\n"
+    summary="${summary}📁 Projet: $project_path\n\n"
+    
+    # Vérifier la configuration Aklo
+    if [ -f "$project_path/.aklo.conf" ]; then
+        summary="${summary}✅ Projet initialisé avec Aklo\n\n"
+    else
+        summary="${summary}❌ Projet non initialisé avec Aklo\n\n"
+    fi
+    
+    # Scanner les artefacts si demandé
+    if [ "$include_artefacts" != "false" ]; then
+        local backlog_path="$project_path/docs/backlog"
+        if [ -d "$backlog_path" ]; then
+            summary="${summary}📋 Artefacts du Projet:\n"
+            
+            # Définir les types d'artefacts à scanner
+            local artefact_types=(
+                "PBI:00-pbi:PBI-*.xml"
+                "Tasks:01-tasks:TASK-*.xml"
+                "Architecture:02-architecture:ARCH-*.xml"
+                "Debug:04-debug:DEBUG-*.xml"
+                "Reviews:07-reviews:REVIEW-*.xml"
+                "Journal:15-journal:JOURNAL-*.xml"
+            )
+            
+            for type_info in "${artefact_types[@]}"; do
+                IFS=':' read -r type_name type_path type_pattern <<< "$type_info"
+                local type_full_path="$backlog_path/$type_path"
+                
+                if [ -d "$type_full_path" ]; then
+                    local count=$(find "$type_full_path" -name "$type_pattern" 2>/dev/null | wc -l)
+                    summary="${summary}   $type_name: $count fichier(s)\n"
+                else
+                    summary="${summary}   $type_name: 0 fichier(s)\n"
+                fi
+            done
+        else
+            summary="${summary}📋 Artefacts: Répertoire docs/backlog/ non trouvé\n"
+        fi
+    fi
+    
+    # Échapper le contenu pour JSON
+    local escaped_summary=$(echo "$summary" | sed 's/"/\\"/g' | tr '\n' '\\' | sed 's/\\/\\n/g')
+    
+    cat << EOF
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "$escaped_summary"
+      }
+    ]
+  }
+}
+EOF
 }
 
 # Boucle principale

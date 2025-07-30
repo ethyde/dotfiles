@@ -1,4 +1,4 @@
-<task pbi_id="11" task_id="3" status="TODO" title="Implémenter project_documentation_summary shell natif">
+<task pbi_id="11" task_id="3" status="DONE" title="Implémenter project_documentation_summary shell natif">
    <metadata>
       <parent_pbi>PBI-11</parent_pbi>
       <arch_review_required>no</arch_review_required>
@@ -58,14 +58,14 @@
       </ai_agent_instructions>
 
       <definition_of_done>
-         <criterion state="TODO">La fonction handle_project_summary est implémentée</criterion>
-         <criterion state="TODO">Le scan complet de docs/backlog/ fonctionne</criterion>
-         <criterion state="TODO">Le comptage par type et statut est précis</criterion>
-         <criterion state="TODO">Les métriques temporelles sont calculées correctement</criterion>
-         <criterion state="TODO">Le rapport JSON est structuré et complet</criterion>
-         <criterion state="TODO">L'option include_artefacts fonctionne</criterion>
-         <criterion state="TODO">Les tests passent avec différents projets</criterion>
-         <criterion state="TODO">La documentation est mise à jour</criterion>
+         <criterion state="DONE">La fonction handle_project_summary est implémentée</criterion>
+         <criterion state="DONE">Le scan complet de docs/backlog/ fonctionne</criterion>
+         <criterion state="DONE">Le comptage par type et statut est précis</criterion>
+         <criterion state="DONE">Les métriques temporelles sont calculées correctement</criterion>
+         <criterion state="DONE">Le rapport JSON est structuré et complet</criterion>
+         <criterion state="DONE">L'option include_artefacts fonctionne</criterion>
+         <criterion state="DONE">Les tests passent avec différents projets</criterion>
+         <criterion state="DONE">La documentation est mise à jour</criterion>
       </definition_of_done>
    </content>
 </task>
