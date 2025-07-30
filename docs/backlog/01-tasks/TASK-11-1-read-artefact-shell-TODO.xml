@@ -1,4 +1,4 @@
-<task pbi_id="11" task_id="1" status="TODO" title="Implémenter read_artefact shell natif">
+<task pbi_id="11" task_id="1" status="DONE" title="Implémenter read_artefact shell natif">
    <metadata>
       <parent_pbi>PBI-11</parent_pbi>
       <arch_review_required>no</arch_review_required>
@@ -54,13 +54,13 @@
       </ai_agent_instructions>
 
       <definition_of_done>
-         <criterion state="TODO">La fonction handle_read_artefact est implémentée dans aklo-documentation.sh</criterion>
-         <criterion state="TODO">L'extraction des métadonnées fonctionne pour tous les types d'artefacts</criterion>
-         <criterion state="TODO">Le parsing des en-têtes XML est fonctionnel</criterion>
-         <criterion state="TODO">La réponse JSON respecte le format MCP attendu</criterion>
-         <criterion state="TODO">La gestion d'erreurs couvre les cas de fichiers inexistants</criterion>
-         <criterion state="TODO">Les tests passent avec différents types d'artefacts</criterion>
-         <criterion state="TODO">La documentation est mise à jour</criterion>
+         <criterion state="DONE">La fonction handle_read_artefact est implémentée dans aklo-documentation.sh</criterion>
+         <criterion state="DONE">L'extraction des métadonnées fonctionne pour tous les types d'artefacts</criterion>
+         <criterion state="DONE">Le parsing des en-têtes XML est fonctionnel</criterion>
+         <criterion state="DONE">La réponse JSON respecte le format MCP attendu</criterion>
+         <criterion state="DONE">La gestion d'erreurs couvre les cas de fichiers inexistants</criterion>
+         <criterion state="DONE">Les tests passent avec différents types d'artefacts</criterion>
+         <criterion state="DONE">La documentation est mise à jour</criterion>
       </definition_of_done>
    </content>
 </task>
