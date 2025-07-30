@@ -8,8 +8,8 @@
 # Tests unitaires pour le système de métriques avancées
 #==============================================================================
 
-# Utilisation de AKLO_PROJECT_ROOT exporté par run_tests.sh
-source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
+# Utilisation du framework de test
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Configuration des tests
 # Créer un répertoire de test temporaire et unique pour cette exécution
@@ -19,7 +19,7 @@ export AKLO_LOG_DIR="${TEST_TEMP_DIR}/logs"
 mkdir -p "${AKLO_CACHE_DIR}" "${AKLO_LOG_DIR}"
 
 # Sourcing du module à tester APRÈS avoir configuré l'environnement
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/metrics_engine.sh"
+source "$(dirname "$0")/../modules/core/metrics_engine.sh"
 
 #==============================================================================
 # Setup & Teardown

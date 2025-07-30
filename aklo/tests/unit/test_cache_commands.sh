@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
+source "$(dirname "$0")/../framework/test_framework.sh"
 
 AKLO_EXEC=""
 
@@ -9,8 +9,8 @@ setup() {
     AKLO_EXEC="${TEST_PROJECT_DIR}/aklo/bin/aklo"
     
     # Charger les modules nécessaires depuis l'installation principale
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_monitoring.sh"
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/cache/cache_functions.sh"
+    source "${TEST_PROJECT_DIR}/aklo/modules/cache/cache_monitoring.sh"
+    source "${TEST_PROJECT_DIR}/aklo/modules/cache/cache_functions.sh"
     export CACHE_DIR="$TEST_PROJECT_DIR/.aklo_cache"
     mkdir -p "$CACHE_DIR"
 }

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #==============================================================================
 # Framework de Tests Unitaires Shell Natif
 # 
@@ -456,17 +456,20 @@ setup_artefact_test_env() {
     TEST_PROJECT_DIR=$(mktemp -d "/tmp/aklo_artefact_test.XXXXXX")
     ORIGINAL_PWD=$(pwd)
 
-    # AKLO_PROJECT_ROOT est la racine de notre projet dotfiles, où se trouve le code source de l'outil
+    # AKLO_PROJECT_ROOT est la racine de notre projet dotfiles
     if [ -z "$AKLO_PROJECT_ROOT" ]; then
         export AKLO_PROJECT_ROOT
-        AKLO_PROJECT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+        AKLO_PROJECT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
     fi
+    
+    # Pour les tests, on veut pointer vers le répertoire aklo spécifiquement
+    export AKLO_TEST_ROOT="${AKLO_PROJECT_ROOT}/aklo"
 
     # 1. Copier l'intégralité de l'outil aklo dans l'environnement de test
     mkdir -p "${TEST_PROJECT_DIR}/aklo"
-    cp -r "${AKLO_PROJECT_ROOT}/aklo/bin" "${TEST_PROJECT_DIR}/aklo/"
-    cp -r "${AKLO_PROJECT_ROOT}/aklo/modules" "${TEST_PROJECT_DIR}/aklo/"
-    cp -r "${AKLO_PROJECT_ROOT}/aklo/charte" "${TEST_PROJECT_DIR}/aklo/"
+    cp -r "${AKLO_TEST_ROOT}/bin" "${TEST_PROJECT_DIR}/aklo/"
+    cp -r "${AKLO_TEST_ROOT}/modules" "${TEST_PROJECT_DIR}/aklo/"
+    cp -r "${AKLO_TEST_ROOT}/charte" "${TEST_PROJECT_DIR}/aklo/"
     
     # 2. Se placer dans le répertoire du projet simulé
     cd "$TEST_PROJECT_DIR" || exit 1
@@ -475,7 +478,7 @@ setup_artefact_test_env() {
     # 3. Créer la structure de répertoires attendue par les commandes Aklo
     mkdir -p "docs/backlog/00-pbi"
     mkdir -p "docs/backlog/01-tasks"
-    mkdir -p ".aklo_cache"
+    mkdir -p "${TEST_PROJECT_DIR}/.aklo_cache"
     
     # 4. Créer un fichier .aklo.conf local au projet de test
     #    Il n'est plus nécessaire de définir AKLO_PROJECT_ROOT ici, car le script `aklo`

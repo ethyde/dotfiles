@@ -8,8 +8,8 @@
 # Tests unitaires pour le dashboard de monitoring
 #==============================================================================
 
-# Utilisation de AKLO_PROJECT_ROOT exporté par run_tests.sh
-source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
+# Utilisation du framework de test
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Configuration des tests
 TEST_TEMP_DIR=$(mktemp -d)
@@ -18,10 +18,10 @@ export AKLO_LOG_DIR="${TEST_TEMP_DIR}/logs"
 mkdir -p "${AKLO_CACHE_DIR}" "${AKLO_LOG_DIR}"
 
 # Sourcing des modules APRÈS avoir configuré l'environnement
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/metrics_engine.sh"
+source "$(dirname "$0")/../modules/core/metrics_engine.sh"
 # Le fichier dashboard.sh est manquant, nous le créons vide pour les tests
-touch "${AKLO_PROJECT_ROOT}/aklo/modules/core/monitoring_dashboard.sh"
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/monitoring_dashboard.sh"
+touch "$(dirname "$0")/../modules/core/monitoring_dashboard.sh"
+source "$(dirname "$0")/../modules/core/monitoring_dashboard.sh"
 
 
 #==============================================================================

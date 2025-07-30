@@ -1,6 +1,10 @@
 test_parser_cache_integration() {
     test_suite "TDD Phase GREEN - Intégration Cache Parser XML natif (TASK-6-3)"
 
+    # Sauvegarder le répertoire original
+    local ORIGINAL_PWD
+    ORIGINAL_PWD=$(pwd)
+
     # Source des fonctions
     local script_dir
     script_dir="$(dirname "$0")"
@@ -11,6 +15,7 @@ test_parser_cache_integration() {
     # Setup
     local test_dir
     test_dir=$(mktemp -d)
+    cd "$test_dir" || exit 1
     export AKLO_CACHE_DIR="$test_dir/cache"
     export AKLO_CACHE_DEBUG=true
     mkdir -p "$AKLO_CACHE_DIR"
@@ -70,6 +75,7 @@ EOF
     assert_file_contains "$output_file_status" "<status>" "Le fichier XML doit contenir la balise <status> injectée dynamiquement (status)"
 
     # Cleanup
+    cd "$ORIGINAL_PWD" || cd /tmp
     rm -rf "$test_dir"
     unset AKLO_CACHE_DIR
     unset AKLO_CACHE_DEBUG

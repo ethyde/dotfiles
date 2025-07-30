@@ -4,13 +4,6 @@
 #==============================================================================
 
 main() {
-    # --- GESTION PRÉCOCE DE L'AIDE ---
-    if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "help" || -z "$1" ]]; then
-        echo "Usage: aklo <command> [options]"
-        echo "Ex: aklo status, aklo new pbi \"Un titre\""
-        return 0
-    fi
-
     # --- DÉFINITION FIABLE DU CONTEXTE ---
     local AKLO_TOOL_REAL_PATH
     AKLO_TOOL_REAL_PATH=$(realpath "$0")
@@ -41,6 +34,7 @@ main() {
     source "${MODULES_DIR}/cache/cache_functions.sh"
     source "${MODULES_DIR}/cache/cache_monitoring.sh"
     source "${MODULES_DIR}/io/extract_functions.sh"
+    source "${MODULES_DIR}/ux/help-system.sh"
     source "${MODULES_DIR}/commands/system_commands.sh"
     source "${MODULES_DIR}/commands/new_command.sh"
     source "${MODULES_DIR}/commands/pbi_commands.sh"
@@ -78,6 +72,12 @@ main() {
 
     if [ "$AKLO_DRY_RUN" = true ]; then
         echo "💧 Mode DRY-RUN activé. Aucune modification ne sera effectuée."
+    fi
+    
+    # --- GESTION DE L'AIDE APRÈS CHARGEMENT DES MODULES ---
+    if [[ "$command" == "--help" || "$command" == "-h" || "$command" == "help" || -z "$command" ]]; then
+        show_help
+        return 0
     fi
     
     # --- DISPATCHER COMPLET ---

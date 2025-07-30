@@ -2,8 +2,10 @@ test_extract_simple() {
     test_suite "Tests simples - Extraction et Cache XML natif"
 
     # Source des fonctions (à adapter si besoin)
-    source "${AKLO_PROJECT_ROOT}/modules/io/extract_functions.sh"
-    source "${AKLO_PROJECT_ROOT}/modules/cache/cache_functions.sh"
+    local script_dir
+    script_dir="$(dirname "$0")"
+    source "${script_dir}/../modules/io/extract_functions.sh"
+    source "${script_dir}/../modules/cache/cache_functions.sh"
 
     # Setup avec nettoyage automatique via trap
     local test_dir

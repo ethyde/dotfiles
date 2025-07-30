@@ -9,6 +9,12 @@ cmd_new() {
     local artefact_type="$1"
     local title="$2"
 
+    # Gestion de l'aide
+    if [ "$artefact_type" = "--help" ] || [ "$artefact_type" = "-h" ]; then
+        show_help_new
+        return 0
+    fi
+
     if [ -z "$artefact_type" ]; then
         echo "Erreur: Le type d'artefact est manquant." >&2
         echo "Usage: aklo new <type> \"<titre>\"" >&2

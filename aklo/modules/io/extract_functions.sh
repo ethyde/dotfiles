@@ -185,3 +185,30 @@ is_valid_artefact_type() {
             return 1 ;;
     esac
 }
+
+# Remplace les placeholders dans le contenu XML par les vraies valeurs
+# Usage: replace_placeholders <xml_content> <context_vars>
+# context_vars format: "key1=value1,key2=value2,..."
+replace_placeholders() {
+    local xml_content="$1"
+    local context_vars="$2"
+    local result="$xml_content"
+    
+    if [ -z "$context_vars" ]; then
+        echo "$result"
+        return 0
+    fi
+    
+    # Parser les variables contextuelles
+    IFS=',' read -ra vars <<< "$context_vars"
+    for var in "${vars[@]}"; do
+        if [[ "$var" =~ ^([^=]+)=(.*)$ ]]; then
+            local key="${BASH_REMATCH[1]}"
+            local value="${BASH_REMATCH[2]}"
+            # Remplacer [key] par value dans le contenu XML
+            result=$(echo "$result" | sed "s/\[$key\]/$value/g")
+        fi
+    done
+    
+    echo "$result"
+}

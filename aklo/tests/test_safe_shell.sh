@@ -17,11 +17,11 @@ test_suite "safe_shell: Exécution de commandes autorisées"
 
 setup() {
   # Ajoute 'sleep' à la whitelist si absent
-  grep -q '^sleep$' ./aklo/config/commands.whitelist || echo 'sleep' >> ./aklo/config/commands.whitelist
+  grep -q '^sleep$' "$(dirname "$0")/../config/commands.whitelist" || echo 'sleep' >> "$(dirname "$0")/../config/commands.whitelist"
 }
 teardown() {
   # Retire 'sleep' de la whitelist après le test
-  sed -i '' '/^sleep$/d' ./aklo/config/commands.whitelist
+  sed -i '' '/^sleep$/d' "$(dirname "$0")/../config/commands.whitelist"
 }
 
 setup

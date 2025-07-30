@@ -15,7 +15,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 AKLO_SCRIPT="${PROJECT_ROOT}/aklo/bin/aklo"
 
 # Chargement du framework de test
-source "${SCRIPT_DIR}/test_framework.sh"
+source "${SCRIPT_DIR}/framework/test_framework.sh"
 
 #==============================================================================
 # Test 1: Suppression du fast-path et chargement systématique

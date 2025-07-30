@@ -10,7 +10,7 @@
 
 # Configuration de base pour les tests
 script_dir="$(dirname "$0")"
-modules_dir="${AKLO_PROJECT_ROOT}/aklo/modules"
+modules_dir="$(dirname "$0")/../../modules"
 
 # Couleurs pour les tests
 RED='\033[0;31m'

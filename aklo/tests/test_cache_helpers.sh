@@ -13,20 +13,23 @@ source "$(dirname "$0")/../modules/cache/cache_functions.sh"
 
 test_generate_cache_filename() {
     test_suite "Helper: generate_cache_filename"
-    export AKLO_PROJECT_ROOT="/tmp/aklo-test-root"
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    export AKLO_PROJECT_ROOT="$temp_dir"
     local result
     result=$(generate_cache_filename "PROTO-TEST" "pbi")
-    local expected="/tmp/aklo-test-root/.aklo_cache/PROTO-TEST_pbi.parsed"
+    local expected="$temp_dir/.aklo_cache/PROTO-TEST_pbi.parsed"
     assert_equals "$expected" "$result" "Le nom de fichier cache généré est correct"
+    rm -rf "$temp_dir"
 }
 
 # Test : cache_is_valid
 
 test_cache_is_valid() {
     test_suite "Helper: cache_is_valid"
-    export AKLO_PROJECT_ROOT="/tmp/aklo-test-root"
     local temp_dir
     temp_dir=$(mktemp -d)
+    export AKLO_PROJECT_ROOT="$temp_dir"
     local cache_file="$temp_dir/test_cache.parsed"
     local mtime_file="${cache_file}.mtime"
     local protocol_mtime="1234567890"
@@ -57,9 +60,9 @@ test_cache_is_valid() {
 test_init_cache_dir() {
     (
         test_suite "Helper: init_cache_dir"
-        export AKLO_PROJECT_ROOT="/tmp/aklo-test-root"
         local temp_dir
         temp_dir=$(mktemp -d)
+        export AKLO_PROJECT_ROOT="$temp_dir"
         local test_cache_dir="$temp_dir/.aklo_cache"
         
         # Cas 1 : répertoire n'existe pas, doit être créé

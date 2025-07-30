@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
+source "$(dirname "$0")/../framework/test_framework.sh"
 
 test_get_next_id() {
     test_suite "Unit Test: get_next_id logic (extension-agnostic)"

@@ -8,8 +8,8 @@
 # Tests d'intégration entre les modules d'apprentissage automatique.
 #==============================================================================
 
-# Utilisation de AKLO_PROJECT_ROOT exporté par run_tests.sh
-source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
+# Utilisation du framework de test
+source "$(dirname "$0")/../framework/test_framework.sh"
 
 # Configuration de l'environnement de test
 TEST_TEMP_DIR=$(mktemp -d)
@@ -20,8 +20,8 @@ export AKLO_DATA_DIR="${TEST_TEMP_DIR}"
 export AKLO_CACHE_DIR="${TEST_TEMP_DIR}"
 
 # Sourcing des modules à tester
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/learning_engine.sh"
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/usage_database.sh"
+source "$(dirname "$0")/../../modules/core/learning_engine.sh"
+source "$(dirname "$0")/../../modules/core/usage_database.sh"
 
 #==============================================================================
 # Définition des Tests

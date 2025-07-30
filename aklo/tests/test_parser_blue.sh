@@ -1,24 +1,16 @@
 #!/usr/bin/env bash
 
-# Source des dépendances
-# Pour accéder aux fonctions internes si nécessaire
+# Source du framework de test
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Variables globales
 TEST_PROJECT_DIR=""
 ORIGINAL_PWD=""
 
 setup() {
-    TEST_PROJECT_DIR=$(mktemp -d "/tmp/aklo_parser_blue_test.XXXXXX")
-    ORIGINAL_PWD=$(pwd)
-    
-    # Isoler le test dans un nouveau projet
-    cd "$TEST_PROJECT_DIR"
-    
-    # Copier l'application
-    mkdir -p aklo/bin
-    cp "$ORIGINAL_PWD/aklo/bin/aklo" aklo/bin/
-    cp -r "$ORIGINAL_PWD/aklo/modules" aklo/
-    cp -r "$ORIGINAL_PWD/aklo/charte" aklo/
+    setup_artefact_test_env
+    TEST_PROJECT_DIR="$TEST_PROJECT_DIR"
+    ORIGINAL_PWD="$ORIGINAL_PWD"
     
     # Créer les répertoires pour les artefacts de test
     mkdir -p pbi tasks arch debug journal
@@ -34,14 +26,12 @@ CACHE_ENABLED=true
 CACHE_DEBUG=true
 EOF
     
-    # Créer le répertoire de cache
-    mkdir -p .aklo_cache
+    # Le répertoire de cache est déjà créé par setup_artefact_test_env
     export AKLO_CACHE_DIR="$TEST_PROJECT_DIR/.aklo_cache"
 }
 
 teardown() {
-    cd "$ORIGINAL_PWD"
-    rm -rf "$TEST_PROJECT_DIR"
+    teardown_artefact_test_env
     unset AKLO_CACHE_DIR
 }
 

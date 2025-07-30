@@ -156,7 +156,7 @@ class AkloTerminalServer {
       'merge-task', 'release', 'hotfix', 'new', 'get_config',
       
       // Commandes système (PHASE 1)
-      'status', 'validate', 'mcp', 'template', 'install-ux',
+      'status', 'validate', 'mcp', 'template', 'install-ux', 'help',
       
       // Commandes développement (PHASE 2)
       'arch', 'dev', 'debug', 'review', 'refactor',
@@ -168,7 +168,10 @@ class AkloTerminalServer {
       'analyze', 'track', 'onboard', 'deprecate', 'kb', 'fast', 'meta'
     ];
     
-    if (!allowedCommands.includes(command)) {
+    // Extraire la commande principale (première partie)
+    const mainCommand = command.split(' ')[0];
+    
+    if (!allowedCommands.includes(mainCommand)) {
       throw new Error(`Commande aklo non autorisée: ${command}`);
     }
     

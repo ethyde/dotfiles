@@ -6,12 +6,17 @@
 test_extract_and_cache_integration() {
     # 1. Préparation
     test_suite "Integration Test: extract_and_cache_structure (XML natif)"
-    source_test_helpers "cache/cache_functions.sh" "io/extract_functions.sh"
+    
+    # Source des modules nécessaires
+    local script_dir
+    script_dir="$(dirname "$0")"
+    source "${script_dir}/../modules/cache/cache_functions.sh"
+    source "${script_dir}/../modules/io/extract_functions.sh"
 
     local temp_dir
     temp_dir=$(mktemp -d)
     # Assurer le nettoyage à la fin du test
-    add_cleanup "rm -rf '$temp_dir'"
+    trap "rm -rf '$temp_dir'" EXIT
 
     # Créer un faux fichier de protocole XML natif
     local protocol_file="$temp_dir/PROTOCOLE-TEST.xml"

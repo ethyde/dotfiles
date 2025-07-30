@@ -8,8 +8,8 @@
 # Tests d'intégration pour le système de métriques complet
 #==============================================================================
 
-# Utilisation de AKLO_PROJECT_ROOT exporté par run_tests.sh
-source "${AKLO_PROJECT_ROOT}/aklo/tests/framework/test_framework.sh"
+# Utilisation du framework de test
+source "$(dirname "$0")/framework/test_framework.sh"
 
 # Configuration des tests
 TEST_TEMP_DIR=$(mktemp -d)
@@ -19,8 +19,8 @@ export METRICS_DB_FILE="${AKLO_CACHE_DIR}/metrics_history.db"
 mkdir -p "${AKLO_CACHE_DIR}" "${AKLO_LOG_DIR}"
 
 # Sourcing des modules APRÈS avoir configuré l'environnement
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/metrics_engine.sh"
-source "${AKLO_PROJECT_ROOT}/aklo/modules/core/monitoring_dashboard.sh"
+source "$(dirname "$0")/../modules/core/metrics_engine.sh"
+source "$(dirname "$0")/../modules/core/monitoring_dashboard.sh"
 
 #==============================================================================
 # Setup & Teardown
@@ -33,8 +33,8 @@ setup_test() {
     mkdir -p "${AKLO_CACHE_DIR}" "${AKLO_LOG_DIR}"
 
     # Sourcing des modules APRÈS avoir configuré l'environnement
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/metrics_engine.sh"
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/monitoring_dashboard.sh"
+    source "$(dirname "$0")/../modules/core/metrics_engine.sh"
+    source "$(dirname "$0")/../modules/core/monitoring_dashboard.sh"
 }
 
 cleanup() {
@@ -152,7 +152,7 @@ test_data_persistence() {
     
     # Simulation d'un redémarrage (nouveau chargement des fonctions)
     unset -f collect_loading_metrics track_performance_metrics
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/metrics_engine.sh"
+    source "$(dirname "$0")/../modules/core/metrics_engine.sh"
     
     # Vérification que les données sont toujours là
     assert_file_contains "$db_file" "persistent_test" "Les données sont toujours présentes après redémarrage"
@@ -169,8 +169,8 @@ test_architecture_compatibility() {
     local db_file="${AKLO_CACHE_DIR}/metrics_history.db"
 
     # Test de compatibilité avec learning_engine
-    if [[ -f "${AKLO_PROJECT_ROOT}/aklo/modules/core/learning_engine.sh" ]]; then
-        source "${AKLO_PROJECT_ROOT}/aklo/modules/core/learning_engine.sh"
+    if [[ -f "$(dirname "$0")/../modules/core/learning_engine.sh" ]]; then
+        source "$(dirname "$0")/../modules/core/learning_engine.sh"
         
         # Test d'interaction
         monitor_learning_efficiency "compatibility_test" "NORMAL" "88" "integration"
@@ -185,7 +185,7 @@ test_architecture_compatibility() {
     mkdir -p "$AKLO_CACHE_DIR"
     
     # Nouveau chargement avec différent cache dir
-    source "${AKLO_PROJECT_ROOT}/aklo/modules/core/metrics_engine.sh"
+    source "$(dirname "$0")/../modules/core/metrics_engine.sh"
     
     # Test que le nouveau répertoire est utilisé
     collect_loading_metrics "compat_test" "MINIMAL" "cli" "$(date +%s.%N)"

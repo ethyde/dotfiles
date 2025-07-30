@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Chargement du framework de test
-source "${SCRIPT_DIR}/test_framework.sh"
+source "${SCRIPT_DIR}/framework/test_framework.sh"
 
 # Variables de test
 AKLO_SCRIPT="${PROJECT_ROOT}/aklo/bin/aklo"
