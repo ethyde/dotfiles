@@ -1,0 +1,82 @@
+<task pbi_id="11" task_id="4" status="TODO" title="Implémenter server_info et améliorer la recherche">
+   <metadata>
+      <parent_pbi>PBI-11</parent_pbi>
+      <arch_review_required>no</arch_review_required>
+      <assignee>AI_Agent</assignee>
+      <git_branch>feature/task-11-4</git_branch>
+   </metadata>
+
+   <content>
+      <technical_objective>
+         Ajouter la fonction `handle_server_info` et améliorer la fonction `handle_search_documentation`
+         dans le serveur MCP shell natif. La fonction server_info doit fournir les informations
+         du serveur (version, démarrage) et la recherche doit supporter les scopes (protocols,
+         artefacts, all) pour atteindre la parité avec le serveur Node.js.
+      </technical_objective>
+
+      <context_and_files>
+         <file>aklo/modules/mcp/shell-native/aklo-documentation.sh</file>
+         <file>aklo/modules/mcp/documentation/index.js</file> (référence)
+         
+         <server_info_requirements>
+         - Informations version du serveur
+         - Timestamp de démarrage
+         - Statut opérationnel
+         - Métriques basiques (nombre d'outils disponibles)
+         </server_info_requirements>
+         
+         <search_improvements>
+         - Support du paramètre scope (protocols|artefacts|all)
+         - Recherche dans métadonnées
+         - Résultats avec contexte
+         - Filtrage par type de document
+         </search_improvements>
+         
+         <code_snippet>
+         # Structure attendue pour handle_server_info
+         handle_server_info() {
+             local request="$1"
+             
+             # Générer informations serveur
+             # Version, timestamp, statut
+             # Retour JSON formaté
+         }
+         
+         # Amélioration de handle_search_documentation
+         handle_search_documentation() {
+             local request="$1"
+             local query=$(echo "$request" | grep -o '"query":"[^"]*"' | cut -d'"' -f4)
+             local scope=$(echo "$request" | grep -o '"scope":"[^"]*"' | cut -d'"' -f4)
+             
+             # Recherche selon scope
+             # Résultats avec contexte
+         }
+         </code_snippet>
+      </context_and_files>
+
+      <ai_agent_instructions>
+         <description>Actions séquentielles pour implémenter server_info et améliorer la recherche :</description>
+         <step number="1">Analyser la fonction server_info du serveur Node.js</step>
+         <step number="2">Créer la fonction handle_server_info avec informations basiques</step>
+         <step number="3">Ajouter la version et le timestamp de démarrage du serveur</step>
+         <step number="4">Implémenter les métriques basiques (nombre d'outils)</step>
+         <step number="5">Améliorer handle_search_documentation pour supporter le paramètre scope</step>
+         <step number="6">Implémenter la recherche dans métadonnées</step>
+         <step number="7">Ajouter les résultats avec contexte</step>
+         <step number="8">Implémenter le filtrage par type de document</step>
+         <step number="9">Tester les nouvelles fonctionnalités</step>
+         <step number="10">Mettre à jour la documentation</step>
+      </ai_agent_instructions>
+
+      <definition_of_done>
+         <criterion state="TODO">La fonction handle_server_info est implémentée</criterion>
+         <criterion state="TODO">Les informations serveur sont complètes (version, timestamp, statut)</criterion>
+         <criterion state="TODO">La recherche supporte le paramètre scope</criterion>
+         <criterion state="TODO">La recherche dans métadonnées fonctionne</criterion>
+         <criterion state="TODO">Les résultats incluent le contexte</step>
+         <criterion state="TODO">Le filtrage par type de document fonctionne</criterion>
+         <criterion state="TODO">Les tests passent pour toutes les nouvelles fonctionnalités</criterion>
+         <criterion state="TODO">La documentation est mise à jour</criterion>
+      </definition_of_done>
+   </content>
+</task>

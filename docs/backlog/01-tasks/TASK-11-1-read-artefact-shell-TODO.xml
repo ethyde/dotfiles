@@ -1,0 +1,66 @@
+<task pbi_id="11" task_id="1" status="TODO" title="Implémenter read_artefact shell natif">
+   <metadata>
+      <parent_pbi>PBI-11</parent_pbi>
+      <arch_review_required>no</arch_review_required>
+      <assignee>AI_Agent</assignee>
+      <git_branch>feature/task-11-1</git_branch>
+   </metadata>
+
+   <content>
+      <technical_objective>
+         Créer la fonction `handle_read_artefact` dans le serveur MCP shell natif aklo-documentation.sh
+         pour permettre la lecture d'artefacts avec extraction des métadonnées et parsing des en-têtes.
+         Cette fonction doit supporter tous les types d'artefacts (PBI, TASK, DEBUG, etc.) et fournir
+         une interface équivalente au serveur Node.js.
+      </technical_objective>
+
+      <context_and_files>
+         <file>aklo/modules/mcp/shell-native/aklo-documentation.sh</file>
+         <file>aklo/modules/mcp/documentation/index.js</file> (référence)
+         
+         <code_snippet>
+         # Structure attendue pour handle_read_artefact
+         handle_read_artefact() {
+             local request="$1"
+             local artefact_path=$(echo "$request" | grep -o '"artefact_path":"[^"]*"' | cut -d'"' -f4)
+             local extract_metadata=$(echo "$request" | grep -o '"extract_metadata":"[^"]*"' | cut -d'"' -f4)
+             
+             # Validation du chemin
+             # Extraction des métadonnées XML
+             # Parsing des en-têtes
+             # Retour JSON formaté
+         }
+         </code_snippet>
+         
+         <artefact_types>
+         - PBI: /docs/backlog/00-pbi/PBI-*.xml
+         - TASK: /docs/backlog/01-tasks/TASK-*.xml  
+         - DEBUG: /docs/backlog/02-debug/DEBUG-*.xml
+         - ARCH: /docs/backlog/02-architecture/ARCH-*.xml
+         - REVIEW: /docs/backlog/03-reviews/REVIEW-*.xml
+         </artefact_types>
+      </context_and_files>
+
+      <ai_agent_instructions>
+         <description>Actions séquentielles pour implémenter read_artefact :</description>
+         <step number="1">Analyser la fonction read_artefact du serveur Node.js pour comprendre l'interface attendue</step>
+         <step number="2">Créer la fonction handle_read_artefact dans aklo-documentation.sh avec parsing JSON basique</step>
+         <step number="3">Implémenter la validation du chemin d'artefact et la détection du type</step>
+         <step number="4">Ajouter l'extraction des métadonnées XML (status, dates, owner, etc.)</step>
+         <step number="5">Implémenter le parsing des en-têtes et la structure de contenu</step>
+         <step number="6">Formater la réponse JSON selon le standard MCP</step>
+         <step number="7">Ajouter la gestion d'erreurs et les cas limites</step>
+         <step number="8">Tester avec différents types d'artefacts</step>
+      </ai_agent_instructions>
+
+      <definition_of_done>
+         <criterion state="TODO">La fonction handle_read_artefact est implémentée dans aklo-documentation.sh</criterion>
+         <criterion state="TODO">L'extraction des métadonnées fonctionne pour tous les types d'artefacts</criterion>
+         <criterion state="TODO">Le parsing des en-têtes XML est fonctionnel</criterion>
+         <criterion state="TODO">La réponse JSON respecte le format MCP attendu</criterion>
+         <criterion state="TODO">La gestion d'erreurs couvre les cas de fichiers inexistants</criterion>
+         <criterion state="TODO">Les tests passent avec différents types d'artefacts</criterion>
+         <criterion state="TODO">La documentation est mise à jour</criterion>
+      </definition_of_done>
+   </content>
+</task>

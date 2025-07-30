@@ -120,6 +120,13 @@ handle_tool_call() {
       <criterion state="todo">Tests complets pour tous les outils</criterion>
       <criterion state="todo">Documentation mise à jour</criterion>
     </acceptance_criteria>
+
+    <associated_tasks>
+      <task>TASK-11-1: Implémenter read_artefact shell natif</task>
+      <task>TASK-11-2: Implémenter validate_artefact shell natif (revue architecturale requise)</task>
+      <task>TASK-11-3: Implémenter project_documentation_summary shell natif</task>
+      <task>TASK-11-4: Implémenter server_info et améliorer la recherche</task>
+    </associated_tasks>
     <dependencies>
       <dependency>Accès aux protocoles Aklo (charte/)</dependency>
       <dependency>Structure projet Aklo standard</dependency>

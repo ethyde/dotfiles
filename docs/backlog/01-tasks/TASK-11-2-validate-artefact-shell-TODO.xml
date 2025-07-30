@@ -1,0 +1,71 @@
+<task pbi_id="11" task_id="2" status="TODO" title="Implémenter validate_artefact shell natif">
+   <metadata>
+      <parent_pbi>PBI-11</parent_pbi>
+      <arch_review_required>yes</arch_review_required>
+      <assignee>AI_Agent</assignee>
+      <git_branch>feature/task-11-2</git_branch>
+   </metadata>
+
+   <content>
+      <technical_objective>
+         Créer la fonction `handle_validate_artefact` dans le serveur MCP shell natif pour valider
+         la structure des artefacts selon les protocoles Aklo. Cette fonction doit vérifier les
+         champs obligatoires, contrôler la cohérence et générer un rapport détaillé de validation.
+         Cette tâche nécessite une revue architecturale car elle implique la validation complexe
+         de structures XML selon des schémas définis.
+      </technical_objective>
+
+      <context_and_files>
+         <file>aklo/modules/mcp/shell-native/aklo-documentation.sh</file>
+         <file>aklo/charte/PROTOCOLES/*.xml</file> (schémas de validation)
+         <file>aklo/modules/mcp/documentation/index.js</file> (référence)
+         
+         <validation_requirements>
+         - Validation structure XML selon protocoles
+         - Vérification champs obligatoires par type d'artefact
+         - Contrôle cohérence métadonnées
+         - Rapport détaillé avec erreurs et warnings
+         - Support validation PBI, TASK, DEBUG, ARCH, REVIEW
+         </validation_requirements>
+         
+         <code_snippet>
+         # Structure attendue pour handle_validate_artefact
+         handle_validate_artefact() {
+             local request="$1"
+             local artefact_path=$(echo "$request" | grep -o '"artefact_path":"[^"]*"' | cut -d'"' -f4)
+             local artefact_type=$(echo "$request" | grep -o '"artefact_type":"[^"]*"' | cut -d'"' -f4)
+             
+             # Charger le protocole de validation correspondant
+             # Valider la structure XML
+             # Vérifier les champs obligatoires
+             # Générer le rapport de validation
+         }
+         </code_snippet>
+      </context_and_files>
+
+      <ai_agent_instructions>
+         <description>Actions séquentielles pour implémenter validate_artefact :</description>
+         <step number="1">Analyser les protocoles Aklo pour identifier les schémas de validation</step>
+         <step number="2">Créer la fonction handle_validate_artefact avec parsing JSON basique</step>
+         <step number="3">Implémenter la détection automatique du type d'artefact</step>
+         <step number="4">Créer les fonctions de validation spécifiques par type (validate_pbi, validate_task, etc.)</step>
+         <step number="5">Implémenter la validation de structure XML avec grep/sed/awk</step>
+         <step number="6">Ajouter la vérification des champs obligatoires selon les protocoles</step>
+         <step number="7">Créer le système de rapport avec erreurs, warnings et succès</step>
+         <step number="8">Implémenter la validation de cohérence des métadonnées</step>
+         <step number="9">Tester avec des artefacts valides et invalides</step>
+         <step number="10">Documenter les règles de validation</step>
+      </ai_agent_instructions>
+
+      <definition_of_done>
+         <criterion state="TODO">La fonction handle_validate_artefact est implémentée</criterion>
+         <criterion state="TODO">La validation de structure XML fonctionne pour tous les types</criterion>
+         <criterion state="TODO">La vérification des champs obligatoires est complète</criterion>
+         <criterion state="TODO">Le rapport de validation est détaillé et structuré</criterion>
+         <criterion state="TODO">La validation de cohérence des métadonnées fonctionne</criterion>
+         <criterion state="TODO">Les tests passent avec artefacts valides et invalides</criterion>
+         <criterion state="TODO">La documentation des règles de validation est complète</criterion>
+         <criterion state="TODO">La revue architecturale est validée</criterion>
+      </definition_of_done>
+   </content>
+</task>

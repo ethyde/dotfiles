@@ -1,0 +1,71 @@
+<task pbi_id="11" task_id="3" status="TODO" title="Implémenter project_documentation_summary shell natif">
+   <metadata>
+      <parent_pbi>PBI-11</parent_pbi>
+      <arch_review_required>no</arch_review_required>
+      <assignee>AI_Agent</assignee>
+      <git_branch>feature/task-11-3</git_branch>
+   </metadata>
+
+   <content>
+      <technical_objective>
+         Créer la fonction `handle_project_summary` dans le serveur MCP shell natif pour générer
+         un résumé complet de la documentation du projet. Cette fonction doit scanner le répertoire
+         docs/backlog/, compter les artefacts par type et statut, calculer des métriques temporelles
+         et générer un rapport structuré en format JSON ou Markdown.
+      </technical_objective>
+
+      <context_and_files>
+         <file>aklo/modules/mcp/shell-native/aklo-documentation.sh</file>
+         <file>aklo/modules/mcp/documentation/index.js</file> (référence)
+         <directory>docs/backlog/</directory> (scan complet)
+         
+         <summary_requirements>
+         - Scan complet du répertoire docs/backlog/
+         - Comptage par type d'artefact (PBI, TASK, DEBUG, etc.)
+         - Comptage par statut (PROPOSED, TODO, DONE, etc.)
+         - Métriques temporelles (création, modification)
+         - Génération rapport structuré JSON/Markdown
+         - Option include_artefacts pour détails
+         </summary_requirements>
+         
+         <code_snippet>
+         # Structure attendue pour handle_project_summary
+         handle_project_summary() {
+             local request="$1"
+             local project_path=$(echo "$request" | grep -o '"project_path":"[^"]*"' | cut -d'"' -f4)
+             local include_artefacts=$(echo "$request" | grep -o '"include_artefacts":"[^"]*"' | cut -d'"' -f4)
+             
+             # Scanner docs/backlog/
+             # Compter par type et statut
+             # Calculer métriques temporelles
+             # Générer rapport structuré
+         }
+         </code_snippet>
+      </context_and_files>
+
+      <ai_agent_instructions>
+         <description>Actions séquentielles pour implémenter project_documentation_summary :</description>
+         <step number="1">Analyser la fonction project_documentation_summary du serveur Node.js</step>
+         <step number="2">Créer la fonction handle_project_summary avec parsing JSON basique</step>
+         <step number="3">Implémenter le scan récursif du répertoire docs/backlog/</step>
+         <step number="4">Créer les fonctions de comptage par type d'artefact</step>
+         <step number="5">Implémenter le comptage par statut avec parsing XML basique</step>
+         <step number="6">Ajouter le calcul des métriques temporelles (dates de création/modification)</step>
+         <step number="7">Créer la génération de rapport structuré en JSON</step>
+         <step number="8">Implémenter l'option include_artefacts pour les détails</step>
+         <step number="9">Ajouter la gestion d'erreurs et les cas limites</step>
+         <step number="10">Tester avec différents projets Aklo</step>
+      </ai_agent_instructions>
+
+      <definition_of_done>
+         <criterion state="TODO">La fonction handle_project_summary est implémentée</criterion>
+         <criterion state="TODO">Le scan complet de docs/backlog/ fonctionne</criterion>
+         <criterion state="TODO">Le comptage par type et statut est précis</criterion>
+         <criterion state="TODO">Les métriques temporelles sont calculées correctement</criterion>
+         <criterion state="TODO">Le rapport JSON est structuré et complet</criterion>
+         <criterion state="TODO">L'option include_artefacts fonctionne</criterion>
+         <criterion state="TODO">Les tests passent avec différents projets</criterion>
+         <criterion state="TODO">La documentation est mise à jour</criterion>
+      </definition_of_done>
+   </content>
+</task>
