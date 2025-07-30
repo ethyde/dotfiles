@@ -1,0 +1,32 @@
+            <task pbi_id="[pbi_id]" task_id="16" status="todo" title="Test final task">
+               <metadata>
+                  <parent_pbi>PBI-[pbi_id]</parent_pbi>
+                  <arch_review_required>[yes|no]</arch_review_required>
+                  <architecture_document optional="true">ARCH-[pbi_id]-1.xml</architecture_document>
+                  <assignee>[assignee]</assignee>
+                  <git_branch>feature/task-[pbi_id]-16</git_branch>
+               </metadata>
+               <content>
+                  <technical_objective>
+                     Clear, unambiguous description of the work to be done, files to modify/create,
+                     and expected result.
+                  </technical_objective>
+                  <context_and_files>
+                     Crucial section for the AI. Contains code snippets, file paths, data
+                     structures, and any information needed to accomplish the task.
+                  </context_and_files>
+                  <ai_agent_instructions>
+                     <description>Sequential and precise list of actions for the agent to execute.
+                        Each step should be small and verifiable.</description>
+                     <step number="1">Instruction 1...</step>
+                     <step number="2">Instruction 2...</step>
+                  </ai_agent_instructions>
+                  <definition_of_done>
+                     <criterion state="todo">The code is implemented according to instructions.</criterion>
+                     <criterion state="todo">The code follows the project's coding standards.</criterion>
+                     <criterion state="todo">Unit tests are written and pass successfully.</criterion>
+                     <criterion state="todo">Documentation (docstring) is complete.</criterion>
+                     <criterion state="todo">The code has been reviewed and approved.</criterion>
+                  </definition_of_done>
+               </content>
+            </task>

@@ -45,7 +45,7 @@ create_artefact_pbi() {
 
     
     # Appel du parser pour générer le fichier final
-    if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "full" "$output_file" "$context_vars"; then
+    if parse_and_generate_artefact "00-PRODUCT-OWNER" "pbi" "$output_file" "$context_vars"; then
         echo "✅ PBI créé : ${output_file}"
     else
         echo "❌ La création du fichier PBI a échoué lors de l'appel au parser." >&2

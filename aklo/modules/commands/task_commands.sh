@@ -42,7 +42,7 @@ cmd_plan() {
 
     # Appel du parser pour générer l'artefact de tâche
     # Note: Nous utilisons le protocole "01-PLANIFICATION" qui définit le template de la tâche.
-    if parse_and_generate_artefact "01-PLANIFICATION" "task" "full" "$output_file" "$context_vars"; then
+    if parse_and_generate_artefact "01-PLANIFICATION" "task" "$output_file" "$context_vars"; then
         echo "✅ Tâche créée : ${filename}"
     else
         echo "❌ La création de la tâche a échoué."

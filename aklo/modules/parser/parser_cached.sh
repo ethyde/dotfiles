@@ -201,6 +201,11 @@ parse_and_generate_artefact_cached() {
         filtered_content=$(inject_missing_xml_tags "$filtered_content" "title" "status")
     fi
     
+    # Remplacement des placeholders par les vraies valeurs
+    if declare -f replace_placeholders >/dev/null; then
+        filtered_content=$(replace_placeholders "$filtered_content" "$context_vars")
+    fi
+    
     # Vérifier le mode DRY-RUN avant d'écrire le fichier
     if [ "${AKLO_DRY_RUN:-false}" = true ]; then
         log_cache_event "DRY_RUN" "Mode DRY-RUN activé - fichier non créé: $output_file"
@@ -218,5 +223,11 @@ parse_and_generate_artefact_cached() {
 }
 # Fonction de compatibilité - remplace la fonction originale
 parse_and_generate_artefact() {
-    parse_and_generate_artefact_cached "$@"
+    local protocol_name="$1"
+    local artefact_type="$2"
+    local output_file="$3"
+    local context_vars="$4"
+    
+    # Appeler la fonction cached avec le niveau d'assistance par défaut "full"
+    parse_and_generate_artefact_cached "$protocol_name" "$artefact_type" "full" "$output_file" "$context_vars"
 }
