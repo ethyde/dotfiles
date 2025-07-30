@@ -1,4 +1,4 @@
-<task pbi_id="11" task_id="4" status="AWAITING_REVIEW" title="Implémenter server_info et améliorer la recherche">
+<task pbi_id="11" task_id="4" status="DONE" title="Implémenter server_info et améliorer la recherche">
    <metadata>
       <parent_pbi>PBI-11</parent_pbi>
       <arch_review_required>no</arch_review_required>
