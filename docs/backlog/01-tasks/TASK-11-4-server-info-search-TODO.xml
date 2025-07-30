@@ -1,4 +1,4 @@
-<task pbi_id="11" task_id="4" status="TODO" title="Implémenter server_info et améliorer la recherche">
+<task pbi_id="11" task_id="4" status="AWAITING_REVIEW" title="Implémenter server_info et améliorer la recherche">
    <metadata>
       <parent_pbi>PBI-11</parent_pbi>
       <arch_review_required>no</arch_review_required>
@@ -69,14 +69,14 @@
       </ai_agent_instructions>
 
       <definition_of_done>
-         <criterion state="TODO">La fonction handle_server_info est implémentée</criterion>
-         <criterion state="TODO">Les informations serveur sont complètes (version, timestamp, statut)</criterion>
-         <criterion state="TODO">La recherche supporte le paramètre scope</criterion>
-         <criterion state="TODO">La recherche dans métadonnées fonctionne</criterion>
-         <criterion state="TODO">Les résultats incluent le contexte</step>
-         <criterion state="TODO">Le filtrage par type de document fonctionne</criterion>
-         <criterion state="TODO">Les tests passent pour toutes les nouvelles fonctionnalités</criterion>
-         <criterion state="TODO">La documentation est mise à jour</criterion>
+         <criterion state="DONE">La fonction handle_server_info est implémentée</criterion>
+         <criterion state="DONE">Les informations serveur sont complètes (version, timestamp, statut)</criterion>
+         <criterion state="DONE">La recherche supporte le paramètre scope</criterion>
+         <criterion state="DONE">La recherche dans métadonnées fonctionne</criterion>
+         <criterion state="DONE">Les résultats incluent le contexte</criterion>
+         <criterion state="DONE">Le filtrage par type de document fonctionne</criterion>
+         <criterion state="DONE">Les tests passent pour toutes les nouvelles fonctionnalités</criterion>
+         <criterion state="DONE">La documentation est mise à jour</criterion>
       </definition_of_done>
    </content>
 </task>

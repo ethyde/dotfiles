@@ -104,6 +104,14 @@ handle_request() {
           },
           "required": ["project_path"]
         }
+      },
+      {
+        "name": "server_info",
+        "description": "Get server information and status",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
       }
     ]
   }
@@ -129,6 +137,9 @@ EOF
                     ;;
                 "project_documentation_summary")
                     handle_project_summary "$request"
+                    ;;
+                "server_info")
+                    handle_server_info "$request"
                     ;;
                 *)
                     echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"Unknown tool"}}'
@@ -229,40 +240,118 @@ EOF
 handle_search_documentation() {
     local request="$1"
     
-    # Extraire les mots-clés
+    # Extraire les paramètres
     local keywords=$(echo "$request" | grep -o '"keywords":"[^"]*"' | cut -d'"' -f4)
+    local scope=$(echo "$request" | grep -o '"scope":"[^"]*"' | cut -d'"' -f4)
+    
+    # Valeur par défaut pour scope
+    if [ -z "$scope" ]; then
+        scope="all"
+    fi
     
     if [ -z "$keywords" ]; then
         echo '{"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"Missing keywords"}}'
         return
     fi
     
-    local search_results="🔍 Recherche: '$keywords'\\n\\n"
+    local search_results="🔍 Recherche: '$keywords' (scope: $scope)\\n\\n"
     local found_results=false
     
-    # Rechercher dans tous les fichiers de documentation
-    if [ -d "$CHARTE_DIR" ]; then
-        # Recherche dans les protocoles
-        for doc_file in "$CHARTE_DIR"/*.xml "$CHARTE_DIR/PROTOCOLES"/*.xml; do
-            if [ -f "$doc_file" ]; then
-                # Recherche insensible à la casse
-                local matches=$(grep -i "$keywords" "$doc_file" 2>/dev/null | head -3)
-                if [ -n "$matches" ]; then
-                    found_results=true
-                    local filename=$(basename "$doc_file")
-                    search_results="${search_results}📄 $filename:\\n"
-                    
-                    # Ajouter les correspondances (limitées pour éviter la surcharge)
-                    echo "$matches" | while IFS= read -r line; do
-                        # Échapper pour JSON et limiter la longueur
-                        local escaped_line=$(echo "$line" | sed 's/"/\\"/g' | cut -c1-100)
-                        search_results="${search_results}  → $escaped_line\\n"
+    # Rechercher selon le scope
+    case "$scope" in
+        "protocols")
+            # Recherche uniquement dans les protocoles
+            local charte_dir="$(pwd)/aklo/charte"
+            if [ -d "$charte_dir/PROTOCOLES" ]; then
+                for doc_file in "$charte_dir/PROTOCOLES"/*.xml; do
+                    if [ -f "$doc_file" ]; then
+                        local matches=$(grep -i "$keywords" "$doc_file" 2>/dev/null | head -3)
+                        if [ -n "$matches" ]; then
+                            found_results=true
+                            local filename=$(basename "$doc_file")
+                            search_results="${search_results}📄 Protocole: $filename\\n"
+                            
+                            echo "$matches" | while IFS= read -r line; do
+                                local escaped_line=$(echo "$line" | sed 's/"/\\"/g' | cut -c1-100)
+                                search_results="${search_results}  → $escaped_line\\n"
+                            done
+                            search_results="${search_results}\\n"
+                        fi
+                    fi
+                done
+            fi
+            ;;
+        "artefacts")
+            # Recherche dans les artefacts du projet
+            local project_root=$(pwd)
+            local backlog_path="$project_root/docs/backlog"
+            if [ -d "$backlog_path" ]; then
+                for artefact_file in $(find "$backlog_path" -name "*.xml" 2>/dev/null); do
+                    if [ -f "$artefact_file" ]; then
+                        local matches=$(grep -i "$keywords" "$artefact_file" 2>/dev/null | head -2)
+                        if [ -n "$matches" ]; then
+                            found_results=true
+                            local filename=$(basename "$artefact_file")
+                            local relative_path=$(echo "$artefact_file" | sed "s|$project_root/||")
+                            search_results="${search_results}📄 Artefact: $relative_path\\n"
+                            
+                            echo "$matches" | while IFS= read -r line; do
+                                local escaped_line=$(echo "$line" | sed 's/"/\\"/g' | cut -c1-100)
+                                search_results="${search_results}  → $escaped_line\\n"
+                            done
+                            search_results="${search_results}\\n"
+                        fi
+                    fi
+                done
+            fi
+            ;;
+        "all"|*)
+            # Recherche dans tous les fichiers de documentation
+            local charte_dir="$(pwd)/aklo/charte"
+            if [ -d "$charte_dir" ]; then
+                # Recherche dans les protocoles
+                for doc_file in "$charte_dir"/*.xml "$charte_dir/PROTOCOLES"/*.xml; do
+                    if [ -f "$doc_file" ]; then
+                        local matches=$(grep -i "$keywords" "$doc_file" 2>/dev/null | head -3)
+                        if [ -n "$matches" ]; then
+                            found_results=true
+                            local filename=$(basename "$doc_file")
+                            search_results="${search_results}📄 $filename:\\n"
+                            
+                            echo "$matches" | while IFS= read -r line; do
+                                local escaped_line=$(echo "$line" | sed 's/"/\\"/g' | cut -c1-100)
+                                search_results="${search_results}  → $escaped_line\\n"
+                            done
+                            search_results="${search_results}\\n"
+                        fi
+                    fi
+                done
+                
+                # Recherche dans les artefacts si disponible
+                local project_root=$(pwd)
+                local backlog_path="$project_root/docs/backlog"
+                if [ -d "$backlog_path" ]; then
+                    for artefact_file in $(find "$backlog_path" -name "*.xml" 2>/dev/null | head -5); do
+                        if [ -f "$artefact_file" ]; then
+                            local matches=$(grep -i "$keywords" "$artefact_file" 2>/dev/null | head -1)
+                            if [ -n "$matches" ]; then
+                                found_results=true
+                                local filename=$(basename "$artefact_file")
+                                local relative_path=$(echo "$artefact_file" | sed "s|$project_root/||")
+                                search_results="${search_results}📄 Artefact: $relative_path\\n"
+                                
+                                echo "$matches" | while IFS= read -r line; do
+                                    local escaped_line=$(echo "$line" | sed 's/"/\\"/g' | cut -c1-100)
+                                    search_results="${search_results}  → $escaped_line\\n"
+                                done
+                                search_results="${search_results}\\n"
+                            fi
+                        fi
                     done
-                    search_results="${search_results}\\n"
                 fi
             fi
-        done
-    fi
+            ;;
+    esac
     
     if [ "$found_results" = false ]; then
         search_results="${search_results}❌ Aucun résultat trouvé pour '$keywords'\\n"
@@ -596,6 +685,59 @@ handle_project_summary() {
       {
         "type": "text",
         "text": "$escaped_summary"
+      }
+    ]
+  }
+}
+EOF
+}
+
+handle_server_info() {
+    local request="$1"
+    
+    # Obtenir les informations du serveur
+    local server_version="1.0.0"
+    local start_time=$(date '+%Y-%m-%d %H:%M:%S')
+    local current_time=$(date '+%Y-%m-%d %H:%M:%S')
+    local pid=$$
+    local current_dir=$(pwd)
+    local tools_count=7  # Nombre d'outils disponibles
+    
+    # Calculer l'uptime (simulation basique - toujours 0 car nouveau processus)
+    local uptime="0m 0s"
+    
+    # Obtenir des informations système
+    local system_info=$(uname -s)
+    local shell_info=$(echo $SHELL)
+    
+    # Préparer le résultat
+    local result="🤖 Serveur MCP Documentation Aklo\n\n"
+    result="${result}📦 Version: $server_version\n"
+    result="${result}🕐 Démarré: $start_time\n"
+    result="${result}⏱️  Uptime: $uptime\n"
+    result="${result}🔧 PID: $pid\n"
+    result="${result}📁 Répertoire: $current_dir\n"
+    result="${result}🛠️  Outils disponibles: $tools_count\n"
+    result="${result}💻 Système: $system_info\n"
+    result="${result}🐚 Shell: $shell_info\n\n"
+    
+    result="${result}💡 Pour redémarrer après modification:\n"
+    result="${result}   cd aklo/modules/mcp/shell-native && ./aklo-documentation.sh\n\n"
+    result="${result}🔍 Mode développement:\n"
+    result="${result}   Utilisez directement le script shell natif\n"
+    
+    # Échapper le contenu pour JSON
+    local escaped_result=$(echo "$result" | sed 's/"/\\"/g' | tr '\n' '\\' | sed 's/\\/\\n/g')
+    
+    cat << EOF
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "$escaped_result"
       }
     ]
   }
